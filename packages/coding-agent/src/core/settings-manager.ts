@@ -122,6 +122,32 @@ export interface CodemodeSettings {
 	inlineBudget?: number;
 }
 
+/** Settings of the `laya/auto` router (adaptive execution intelligence). See docs/laya.md. */
+export interface LayaSettings {
+	/** Laya System One server. Default: `LAYA_BASE_URL` or `http://127.0.0.1:8000/v1`. */
+	baseUrl?: string;
+	/** Cost profile. Default: `balanced`. */
+	policy?: "economy" | "balanced" | "quality" | "critical";
+	/** Concrete models per capability tier as `provider/model`, in preference order. */
+	models?: Partial<Record<"fast" | "balanced" | "strong" | "frontier", string[]>>;
+	/** Relative quota still available per provider, 0..1. Default: 1 for every provider. */
+	quota?: Record<string, number>;
+	/** Laya answers below this confidence raise the tier by one. Default: 0.5. */
+	minConfidence?: number;
+	/** Failed tool calls in one turn before escalating to the next tier; 0 disables. Default: 3. */
+	escalateAfterFailures?: number;
+	/** `advise` names unneeded tools in the plan; `enforce` also deactivates them. Default: `advise`. */
+	toolRouting?: "advise" | "enforce";
+	/** Start the local Laya server when laya/auto needs it and offer to install it on first use. Default: true. */
+	autostart?: boolean;
+	/** Python 3.10 to 3.13 used to create the Laya environment. Default: the first of python3, python, py found. */
+	python?: string;
+	/** Write routing telemetry to the agent directory. Default: true. */
+	telemetry?: boolean;
+	/** Classifier request timeout in milliseconds before falling back to keyword rules. Default: 5000. */
+	timeoutMs?: number;
+}
+
 export type DefaultProjectTrust = "ask" | "always" | "never";
 /** true hides all startup output, "header" keeps only the startup header. */
 export type QuietStartup = boolean | "header";
@@ -168,7 +194,7 @@ export interface Settings {
 	shellCommandPrefix?: string; // Prefix prepended to every bash command (e.g., "shopt -s expand_aliases" for alias support)
 	npmCommand?: string[]; // Command used for npm package lookup/install operations, argv-style (e.g., ["mise", "exec", "node@20", "--", "npm"])
 	collapseChangelog?: boolean; // Show condensed changelog after update (use /changelog for full)
-	enableInstallTelemetry?: boolean; // default: true - anonymous version/update ping after changelog-detected updates
+	enableInstallTelemetry?: boolean; // default: true - send provider attribution headers (e.g. OpenRouter app attribution)
 	enableAnalytics?: boolean; // default: false - opt-in analytics data sharing
 	trackingId?: string; // analytics tracking identifier, generated when analytics is enabled
 	deviceId?: string; // stable UUID of this installation, created when a login first needs it; global setting only
@@ -192,6 +218,7 @@ export interface Settings {
 	markdown?: MarkdownSettings;
 	warnings?: WarningSettings;
 	codemode?: CodemodeSettings;
+	laya?: LayaSettings;
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)
 	httpProxy?: string; // Proxy URL applied as HTTP_PROXY and HTTPS_PROXY for Relay-managed HTTP clients
 	httpIdleTimeoutMs?: number; // HTTP header/body idle timeout in milliseconds; 0 disables it

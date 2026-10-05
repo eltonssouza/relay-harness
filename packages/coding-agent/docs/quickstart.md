@@ -6,19 +6,16 @@ For native Windows setup, read [Windows Setup](windows.md). For Android, read [T
 
 ## 1. Install Relay
 
-On macOS or Linux, you can use the installer:
+Relay is installed from source. It requires Node.js 22.19 or newer:
 
 ```bash
-curl -fsSL https://pi.dev/install.sh | sh
+git clone https://github.com/eltonssouza/relay-harness.git
+cd relay-harness
+npm install --ignore-scripts
+npm run build
 ```
 
-The installer pins all dependencies and updates Relay with `relay update`. Alternatively, install Relay from npm, which does not pin transitive dependencies. This requires Node.js 22.19 or newer:
-
-```bash
-npm install -g --ignore-scripts @relay-harness/coding-agent
-```
-
-Relay does not require dependency lifecycle scripts for a normal npm installation.
+Relay does not require dependency lifecycle scripts. To update Relay, pull the latest changes in the checkout and run `npm install --ignore-scripts` and `npm run build` again. `relay update` updates installed packages and model catalogs, not Relay itself.
 
 With Nix on macOS or Linux, install the latest release from Relay's flake. Nix builds Relay from source:
 
@@ -26,13 +23,16 @@ With Nix on macOS or Linux, install the latest release from Relay's flake. Nix b
 nix profile add github:eltonssouza/relay-harness/stable
 ```
 
-Older Nix versions use `nix profile install` instead. Update with `nix profile upgrade relay`; `relay update` cannot update a Nix installation. To pin a release, use a tag such as `github:eltonssouza/relay-harness/v1.0.0`.
+Older Nix versions use `nix profile install` instead. Update with `nix profile upgrade relay`. To pin a release, use a tag such as `github:eltonssouza/relay-harness/v1.0.0`.
 
-Verify the installation:
+Verify the installation from the checkout:
 
 ```bash
-relay --version
+./relay-test.sh --version      # Linux and macOS
+./relay-test.ps1 --version     # Windows PowerShell
 ```
+
+The examples below use `relay` for this command.
 
 ## 2. Start Relay
 
@@ -115,17 +115,7 @@ Start with the least powerful mechanism that meets your need:
 
 ## Uninstall Relay
 
-If you installed Relay with npm, run:
-
-```bash
-npm uninstall -g @relay-harness/coding-agent
-```
-
-If you used the installer, run it again and choose **Uninstall Relay**:
-
-```bash
-curl -fsSL https://pi.dev/install.sh | sh
-```
+If you built Relay from source, delete the checkout.
 
 If you installed Relay with Nix, run:
 

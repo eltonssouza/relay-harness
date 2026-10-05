@@ -560,8 +560,8 @@ export class SettingsSelectorComponent extends Container {
 			},
 			{
 				id: "install-telemetry",
-				label: "Install telemetry",
-				description: "Send an anonymous version/update ping after changelog-detected updates",
+				label: "Provider attribution",
+				description: "Send app attribution headers to supported providers (e.g. OpenRouter)",
 				currentValue: config.enableInstallTelemetry ? "true" : "false",
 				values: ["true", "false"],
 			},

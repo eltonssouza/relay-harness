@@ -1,6 +1,5 @@
 import * as path from "node:path";
 import type { Container, EditorComponent, TUI } from "@relay-harness/tui";
-import { getAuthCredential } from "../../cli/auth-command.ts";
 import type { AgentSession } from "../../core/agent-session.ts";
 import {
 	BUG_REPORT_CUSTOM_ENTRY_TYPE,
@@ -11,10 +10,8 @@ import {
 	collectBugReportMetadata,
 	writeBugReportArchive,
 } from "../../core/bug-report.ts";
-import { uploadBugReport } from "../../core/bug-report-upload.ts";
 import { clearCrashLog, readCrashLog } from "../../core/crash-log.ts";
 import type { KeybindingsManager } from "../../core/keybindings.ts";
-import { getRadiusGatewayUrl, RADIUS_PROVIDER_ID } from "../../core/radius.ts";
 import { serializeSessionBranch } from "../../core/session-export.ts";
 import { BorderedLoader } from "./components/bordered-loader.ts";
 import { ExtensionEditorComponent } from "./components/extension-editor.ts";
@@ -36,28 +33,22 @@ interface BugReportOptions {
 	hint?: string;
 	includeSession: boolean;
 	includeSummary: boolean;
-	delivery: "upload" | "zip";
 }
 
 type Overlay = Container & { dispose?: () => void };
 
 const DISCLAIMER =
-	"This report goes to the Relay developers (Earendil) and is not shared publicly. It includes your relay version, operating system, the current model and provider configuration (without API keys), loaded extensions, settings, and provider error diagnostics from this session.";
+	"The report is written to a zip archive in the current directory for you to review and share. It includes your relay version, operating system, the current model and provider configuration (without API keys), loaded extensions, settings, and provider error diagnostics from this session.";
 const TRANSCRIPT_NOTE =
 	"The transcript contains your messages, model output, tool calls and their results, including file contents and command output read during this session.";
 
-/** Run the `/bug` flow: consent, optional summary, then upload or export. */
+/** Run the `/bug` flow: consent, optional summary, then zip export. */
 export async function reportBug(context: BugReportContext, initialHint?: string): Promise<void> {
 	const options = await promptForOptions(context, initialHint);
 	if (!options) {
 		context.showStatus("Bug report cancelled");
 		return;
 	}
-	if (options.delivery === "upload" && process.env.RELAY_OFFLINE) {
-		context.showError("Uploading bug reports requires online mode. Use Export as Zip instead.");
-		return;
-	}
-
 	let summary: string | undefined;
 	if (options.includeSummary) {
 		const loader = showLoader(
@@ -87,20 +78,6 @@ export async function reportBug(context: BugReportContext, initialHint?: string)
 		return;
 	}
 
-	if (options.delivery === "upload") {
-		const failure = await upload(context, bundle);
-		if (failure === undefined) return;
-		const fallback = await choose(
-			context,
-			"Upload failed",
-			["Export as Zip", "Cancel"],
-			`${failure}\n\nExport the report as a zip archive instead?`,
-		);
-		if (fallback !== "Export as Zip") {
-			context.showStatus("Bug report cancelled");
-			return;
-		}
-	}
 	await exportZip(context, bundle);
 }
 
@@ -131,18 +108,17 @@ async function promptForOptions(
 		includeSummary = summary !== "No";
 	}
 	const description = hint.trim();
-	const delivery = await choose(
+	const confirmation = await choose(
 		context,
 		"Bug report",
-		["Upload Report", "Export as Zip", "Cancel"],
-		`Description: ${description || "none"}\nTranscript: ${includeSession ? "included" : "not included"}\nSummary: ${includeSummary ? `written by ${context.session.model?.name ?? "the current model"}` : "none"}\n\nUpload sends the report to ${new URL(getRadiusGatewayUrl()).host}. Export writes a zip archive to the current directory instead.`,
+		["Export as Zip", "Cancel"],
+		`Description: ${description || "none"}\nTranscript: ${includeSession ? "included" : "not included"}\nSummary: ${includeSummary ? `written by ${context.session.model?.name ?? "the current model"}` : "none"}\n\nExport writes a zip archive to the current directory.`,
 	);
-	if (!delivery || delivery === "Cancel") return undefined;
+	if (confirmation !== "Export as Zip") return undefined;
 	return {
 		hint: description || undefined,
 		includeSession,
 		includeSummary,
-		delivery: delivery === "Upload Report" ? "upload" : "zip",
 	};
 }
 
@@ -174,30 +150,6 @@ function buildBundle(session: AgentSession, options: BugReportOptions, summary: 
 	};
 }
 
-async function upload(context: BugReportContext, bundle: BugReportBundle): Promise<string | undefined> {
-	const loader = showLoader(context, "Uploading bug report...");
-	try {
-		const provider = context.session.modelRuntime.getProvider(RADIUS_PROVIDER_ID);
-		const token = provider
-			? getAuthCredential(
-					await context.session.modelRuntime.getAuth(RADIUS_PROVIDER_ID, { minOAuthValidityMs: 5 * 60_000 }),
-				)
-			: undefined;
-		const result = await uploadBugReport(bundle, { token, signal: loader.signal });
-		restoreEditor(context, loader);
-		recordInSession(context.session, bundle, { delivery: "upload" });
-		context.showStatus(`Bug report uploaded. Report ID: ${result.id}`);
-		return undefined;
-	} catch (error: unknown) {
-		restoreEditor(context, loader);
-		if (loader.signal.aborted) {
-			context.showStatus("Bug report cancelled");
-			return undefined;
-		}
-		return errorMessage(error);
-	}
-}
-
 async function exportZip(context: BugReportContext, bundle: BugReportBundle): Promise<void> {
 	const archivePath = path.join(process.cwd(), bugReportArchiveFileName(bundle.metadata.id));
 	try {
@@ -206,22 +158,19 @@ async function exportZip(context: BugReportContext, bundle: BugReportBundle): Pr
 		context.showError(`Failed to write bug report: ${errorMessage(error)}`);
 		return;
 	}
-	recordInSession(context.session, bundle, { delivery: "zip", path: archivePath });
+	recordInSession(context.session, bundle, archivePath);
 	context.showStatus(`Bug report exported to: ${archivePath}\nReport ID: ${bundle.metadata.id}`);
 }
 
-function recordInSession(
-	session: AgentSession,
-	bundle: BugReportBundle,
-	delivery: Pick<BugReportSessionEntryData, "delivery" | "path">,
-): void {
+function recordInSession(session: AgentSession, bundle: BugReportBundle, archivePath: string): void {
 	session.sessionManager.appendCustomEntry(BUG_REPORT_CUSTOM_ENTRY_TYPE, {
 		id: bundle.metadata.id,
 		createdAt: bundle.metadata.createdAt,
 		hint: bundle.metadata.hint,
 		sessionIncluded: bundle.metadata.session.included,
 		summaryIncluded: bundle.metadata.session.summaryIncluded,
-		...delivery,
+		delivery: "zip",
+		path: archivePath,
 	} satisfies BugReportSessionEntryData);
 	if (bundle.diagnostics.crashes.length > 0) clearCrashLog();
 }

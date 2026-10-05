@@ -1,9 +1,4 @@
 <p align="center">
-  <a href="https://pi.dev">
-    <img alt="Relay logo" src="https://pi.dev/logo-auto.svg" width="128">
-  </a>
-</p>
-<p align="center">
   <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
   <a href="https://www.npmjs.com/package/@relay-harness/coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@relay-harness/coding-agent?style=flat-square&logo=npm&logoColor=white" /></a>
 </p>
@@ -22,25 +17,16 @@ Use Relay [interactively](docs/usage.md), automate it in [print or JSON mode](do
 
 ## Getting started
 
-Install the command-line interface:
+Relay is installed from source and requires Node.js 22.19 or newer:
 
 ```bash
-curl -fsSL https://pi.dev/install.sh | sh
+git clone https://github.com/eltonssouza/relay-harness.git
+cd relay-harness
+npm install --ignore-scripts
+npm run build
 ```
 
-On Windows:
-
-```shell
-powershell -c "irm https://pi.dev/install.ps1 | iex"
-```
-
-The installer pins all dependencies and updates Relay with `relay update`. Alternatively, install directly with npm, which does not pin transitive dependencies:
-
-```bash
-npm install -g --ignore-scripts @relay-harness/coding-agent
-```
-
-Relay requires Node.js 22.19 or newer. The macOS, Linux, and Windows installers can install it if needed. Relay does not require dependency lifecycle scripts for a normal npm installation.
+Relay does not require dependency lifecycle scripts. To update Relay, pull the checkout and build again. `relay update` updates installed packages and model catalogs, not Relay itself.
 
 On macOS and Linux, Nix users can install the latest release with `nix profile add github:eltonssouza/relay-harness/stable`. See the [quickstart](docs/quickstart.md#1-install-relay) for updating and pinning releases.
 

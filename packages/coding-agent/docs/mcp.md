@@ -159,18 +159,6 @@ Relay registers as `relay`. Some servers only accept registrations from known cl
 
 The name is only sent when Relay registers a client. To register again under a new name, sign out first.
 
-Some authorization servers allow clients by their Client ID Metadata Document URL instead of registering them. Set `clientRegistration` to `cimd` to identify as Relay's document on pi.dev instead of registering:
-
-```json
-{
-  "mcpServers": {
-    "example": { "url": "https://mcp.example.com/mcp", "oauth": { "clientRegistration": "cimd" } }
-  }
-}
-```
-
-The client ID is `https://pi.dev/oauth/client.json` with the redirect URI `http://127.0.0.1:<port>/callback`. If the authorization server does not send the `iss` parameter in authorization responses (RFC 9207), Relay uses a document and redirect path specific to the MCP server instead: `https://pi.dev/oauth/<id>/client.json` with `http://127.0.0.1:<port>/callback/<id>`. The authorization server must advertise Client ID Metadata Document support and public clients, or sign-in fails. `cimd` cannot be combined with `clientId` or `clientName`, and a `callbackUrl` must use `localhost` or `127.0.0.1` with the path `/callback`.
-
 Relay finds the authorization server through the server's protected resource metadata (RFC 9728) and checks that the authorization server's metadata names the expected issuer (RFC 8414). Some servers advertise the wrong authorization server or none, so sign-in opens a page that does not exist. Set `authServerMetadataUrl` to the metadata document of the right authorization server:
 
 ```json
@@ -199,7 +187,7 @@ Each server tool is registered as `mcp__<server>__<tool>`. The server's `exposur
 
 `codemode-deferred` is accepted as an alias for `codemode`.
 
-Servers with `codemode` or `deferred` tools are listed in the `mcp_servers` section of the system prompt, with how their tools are reached and one line from the configured `description` or, once connected, from the server instructions. Relay updates the section when a prompt starts, after waiting for servers with `direct` tools. When it changed, for example because a server connected and its summary became available, Relay appends the new section to the conversation instead of changing tool declarations, so earlier messages stay cached. `describeNamespace()` and the `namespace` option of `searchTools()` accept `mcp__dev-radius`, `mcp__dev_radius`, `dev-radius`, or `dev_radius`.
+Servers with `codemode` or `deferred` tools are listed in the `mcp_servers` section of the system prompt, with how their tools are reached and one line from the configured `description` or, once connected, from the server instructions. Relay updates the section when a prompt starts, after waiting for servers with `direct` tools. When it changed, for example because a server connected and its summary became available, Relay appends the new section to the conversation instead of changing tool declarations, so earlier messages stay cached. `describeNamespace()` and the `namespace` option of `searchTools()` accept `mcp__dev-tools`, `mcp__dev_tools`, `dev-tools`, or `dev_tools`.
 
 Relay activates `codemode` when a server with `codemode` exposure connects. It activates `tool_search` for a server with `deferred` exposure. To make the model see a tool without searching, give it `direct` exposure with `toolExposure`.
 

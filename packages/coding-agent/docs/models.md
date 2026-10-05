@@ -12,7 +12,7 @@ For a built-in provider, start with `/login`, then choose a model with `/model`.
 | An OpenAI-, Anthropic-, or Google-compatible endpoint | Add it to `models.json` |
 | A provider with a custom protocol or authentication flow | Build or install a provider extension |
 
-Browse the [model catalog](https://pi.dev/models) for current providers, model IDs, capabilities, context limits, and pricing. Relay starts with its bundled catalog and can overlay newer catalog data from pi.dev. Cached catalog data remains available offline; run `relay update --models` to force a refresh.
+Relay's built-in model catalog comes from the model data bundled with each build ([`packages/ai/src/providers/data/`](https://github.com/eltonssouza/relay-harness/tree/main/packages/ai/src/providers/data)). Run `relay --list-models` to list the providers and model IDs available to you. Providers that discover models dynamically refresh their lists over the network and cache them for offline use; run `relay update --models` to force a refresh.
 
 ## Authenticate
 

@@ -96,6 +96,24 @@ See [Compaction Reference](compaction.md) for trigger, summarization, and valida
 
 Changes apply to sessions created afterwards. See [Harness Core](harness-core.md).
 
+### Laya router
+
+Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
+
+| Setting | Type | Default | Description |
+|---|---|---|---|
+| `laya.baseUrl` | string | `LAYA_BASE_URL` or `http://127.0.0.1:8000/v1` | Laya System One server. |
+| `laya.autostart` | boolean | `true` | Offer to install the trained Laya on first use and start the local server when a request needs it. |
+| `laya.python` | string | First of `python3`, `python`, `py` | Python 3.10 to 3.13 used to create the Laya environment. |
+| `laya.policy` | string | `balanced` | Cost profile: `economy`, `balanced`, `quality` or `critical`. `--laya-policy` and `/laya policy` override it. |
+| `laya.models` | object | See [laya.md](laya.md#model-registry) | Models per tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order. A tier you set replaces that tier's default list. |
+| `laya.quota` | object | `1` per provider | Share of each provider's quota still available, 0 to 1, e.g. `{ "openai-codex": 0.25 }`. |
+| `laya.minConfidence` | number | `0.5` | Laya answers below this confidence raise the tier by one. |
+| `laya.escalateAfterFailures` | number | `3` | Failed tool calls in one turn before moving to the next tier. `0` disables. |
+| `laya.toolRouting` | string | `advise` | `advise` names unneeded tools in the plan; `enforce` also deactivates them for the request. |
+| `laya.telemetry` | boolean | `true` | Record each routed request in `~/.relay/agent/laya/telemetry.jsonl`. |
+| `laya.timeoutMs` | number | `5000` | Classifier timeout before keyword rules answer instead. |
+
 ### Branch summaries
 
 | Setting | Type | Default | Description |
@@ -182,6 +200,6 @@ The built-in extensions are named `builtin:mcp`, `builtin:llama.cpp`, `builtin:c
 | Setting | Type | Default | Description |
 |---|---|---|---|
 | `collapseChangelog` | boolean | `false` | Show a condensed changelog after an update. |
-| `enableInstallTelemetry` | boolean | `true` | Enable anonymous install/update reporting and selected provider attribution headers. Does not control update checks. |
+| `enableInstallTelemetry` | boolean | `true` | Enable selected provider attribution headers (for example OpenRouter app attribution). Does not control update checks. |
 | `enableAnalytics` | boolean | `false` | Opt in to analytics data sharing. Currently used only by the experimental first-run setup. |
 | `warnings.anthropicExtraUsage` | boolean | `true` | Warn when Anthropic subscription authentication may use paid extra usage. |
