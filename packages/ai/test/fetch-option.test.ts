@@ -100,7 +100,7 @@ describe("fetch stream option", () => {
 		expect(globalThis.fetch).toBe(fallback);
 	});
 
-	it("uses fetch for Mistral, Codex SSE, and relay-messages HTTP requests", async () => {
+	it("uses fetch for Mistral, Codex SSE, and pi-messages HTTP requests", async () => {
 		const { custom, fallback } = mockFetches();
 		await streamMistral(createModel("mistral-conversations"), context, {
 			apiKey: "test-key",
@@ -112,7 +112,7 @@ describe("fetch stream option", () => {
 			transport: "sse",
 			maxRetries: 0,
 		}).result();
-		await streamRelayMessages(createModel("relay-messages"), context, {
+		await streamRelayMessages(createModel("pi-messages"), context, {
 			apiKey: "test-key",
 			fetch: custom,
 		}).result();

@@ -43,7 +43,7 @@ function getDefaultAttributionHeaders(
 
 	if (isOpenRouterModel(model)) {
 		return {
-			"HTTP-Referer": "https://pi.dev",
+			"HTTP-Referer": "https://github.com/eltonssouza/relay-harness",
 			"X-OpenRouter-Title": "relay",
 			"X-OpenRouter-Categories": "cli-agent",
 		};
@@ -73,7 +73,7 @@ function getSessionHeaders(model: Model<Api>, sessionId: string | undefined): Re
 	) {
 		return undefined;
 	}
-	return { "x-opencode-session": sessionId, "x-opencode-client": "relay" };
+	return { "x-opencode-session": sessionId, "x-opencode-client": "pi" };
 }
 
 export function mergeProviderAttributionHeaders(

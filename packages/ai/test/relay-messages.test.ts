@@ -66,12 +66,12 @@ async function startServer(options: ResponderOptions): Promise<{ baseUrl: string
 	return { baseUrl: `http://127.0.0.1:${address.port}/v1`, requests };
 }
 
-function createModel(baseUrl: string): Model<"relay-messages"> {
+function createModel(baseUrl: string): Model<"pi-messages"> {
 	return {
 		id: "auto",
-		name: "Radius Auto",
-		api: "relay-messages",
-		provider: "radius",
+		name: "Gateway Auto",
+		api: "pi-messages",
+		provider: "custom-gateway",
 		baseUrl,
 		reasoning: false,
 		input: ["text"],
@@ -94,7 +94,7 @@ const usage = {
 	cost: { input: 0.1, output: 0.2, cacheRead: 0, cacheWrite: 0, total: 0.3 },
 };
 
-describe("relay-messages", () => {
+describe("pi-messages", () => {
 	it("streams text and tool calls and resolves the terminal message", async () => {
 		const { baseUrl, requests } = await startServer({
 			events: [
@@ -145,7 +145,7 @@ describe("relay-messages", () => {
 		expect(message.responseId).toBe("resp_1");
 		expect(message.providerThinkingLevel).toBe("high");
 		expect(message.model).toBe("auto");
-		expect(message.provider).toBe("radius");
+		expect(message.provider).toBe("custom-gateway");
 		expect(message.content).toEqual([
 			{ type: "text", text: "Hello", textSignature: undefined },
 			{ type: "toolCall", id: "call_1", name: "read", arguments: { path: "a.txt" } },
@@ -274,11 +274,11 @@ describe("relay-messages", () => {
 describe("relay-messages api registration", () => {
 	it("is registered as a builtin api provider", async () => {
 		const { getApiProvider } = await import("../src/compat.ts");
-		expect(getApiProvider("relay-messages")).toBeDefined();
+		expect(getApiProvider("pi-messages")).toBeDefined();
 	});
 
 	it("is a known api usable on models", () => {
-		const api: Api = "relay-messages";
-		expect(api).toBe("relay-messages");
+		const api: Api = "pi-messages";
+		expect(api).toBe("pi-messages");
 	});
 });

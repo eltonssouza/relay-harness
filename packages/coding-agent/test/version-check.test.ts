@@ -35,24 +35,24 @@ describe("version checks", () => {
 	});
 
 	it("returns only newer versions", async () => {
-		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.3" }));
+		const fetchMock = vi.fn(async () => Response.json({ tag_name: "v1.2.3" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(checkForNewRelayVersion("1.2.3")).resolves.toBeUndefined();
 		await expect(checkForNewRelayVersion("1.2.2")).resolves.toEqual({ version: "1.2.3" });
 	});
 
-	it("uses the pi.dev version check api with a relay user agent", async () => {
-		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.4" }));
+	it("uses the GitHub releases api with a relay user agent", async () => {
+		const fetchMock = vi.fn(async () => Response.json({ tag_name: "v1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(getLatestRelayVersion("1.2.3")).resolves.toBe("1.2.4");
 		expect(fetchMock).toHaveBeenCalledWith(
-			"https://pi.dev/api/latest-version",
+			"https://api.github.com/repos/eltonssouza/relay-harness/releases/latest",
 			expect.objectContaining({
 				headers: expect.objectContaining({
 					"User-Agent": expect.stringMatching(/^relay\/1\.2\.3 /),
-					accept: "application/json",
+					accept: "application/vnd.github+json",
 				}),
 			}),
 		);
@@ -63,7 +63,7 @@ describe("version checks", () => {
 			.fn()
 			.mockRejectedValueOnce(new Error("fetch failed"))
 			.mockRejectedValueOnce(new Error("fetch failed"))
-			.mockResolvedValueOnce(Response.json({ version: "1.2.4" }));
+			.mockResolvedValueOnce(Response.json({ tag_name: "v1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(getLatestRelayRelease("1.2.3", { retry: true })).resolves.toEqual({ version: "1.2.4" });
@@ -89,26 +89,34 @@ describe("version checks", () => {
 		expect(formatVersionCheckError(error)).toBe("fetch failed (ETIMEDOUT, ENETUNREACH)");
 	});
 
-	it("returns the active package metadata from the version check api", async () => {
-		const fetchMock = vi.fn(async () =>
-			Response.json({
-				packageName: "@new-scope/pi",
-				version: "1.2.4",
-			}),
+	it("strips the leading v from the release tag", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => Response.json({ tag_name: "1.2.4" })),
 		);
-		vi.stubGlobal("fetch", fetchMock);
-
-		await expect(getLatestRelayRelease("1.2.3")).resolves.toEqual({
-			packageName: "@new-scope/pi",
-			version: "1.2.4",
-		});
+		await expect(getLatestRelayRelease("1.2.3")).resolves.toEqual({ version: "1.2.4" });
 	});
 
-	it("returns update notes from the version check api", async () => {
-		const fetchMock = vi.fn(async () => Response.json({ note: " **Read this** ", version: "1.2.4" }));
+	it("returns undefined when the repository has no releases", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => Response.json({ message: "Not Found" }, { status: 404 })),
+		);
+		await expect(getLatestRelayRelease("1.2.3")).resolves.toBeUndefined();
+		await expect(checkForNewRelayVersion("1.2.2")).resolves.toBeUndefined();
+	});
+
+	it("returns undefined for release data without a semver tag", async () => {
+		const fetchMock = vi
+			.fn()
+			.mockResolvedValueOnce(Response.json({ name: "no tag" }))
+			.mockResolvedValueOnce(Response.json({ tag_name: "nightly" }))
+			.mockResolvedValueOnce(Response.json(null));
 		vi.stubGlobal("fetch", fetchMock);
 
-		await expect(getLatestRelayRelease("1.2.3")).resolves.toEqual({ note: "**Read this**", version: "1.2.4" });
+		await expect(getLatestRelayRelease("1.2.3")).resolves.toBeUndefined();
+		await expect(getLatestRelayRelease("1.2.3")).resolves.toBeUndefined();
+		await expect(getLatestRelayRelease("1.2.3")).resolves.toBeUndefined();
 	});
 
 	it("skips automatic api calls when version checks are disabled", async () => {
@@ -122,7 +130,7 @@ describe("version checks", () => {
 
 	it("allows direct api calls when automatic version checks are disabled", async () => {
 		process.env.RELAY_SKIP_VERSION_CHECK = "1";
-		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.4" }));
+		const fetchMock = vi.fn(async () => Response.json({ tag_name: "v1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(getLatestRelayVersion("1.2.3")).resolves.toBe("1.2.4");

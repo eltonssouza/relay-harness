@@ -15,6 +15,7 @@ import {
 import { theme } from "../theme/theme.ts";
 import { ARMIN_HEIGHT, ARMIN_WIDTH, isArminPixel } from "./armin.ts";
 import { formatKeyText } from "./keybinding-hints.ts";
+import { RELAY_LOGO_COLORS, RELAY_LOGO_PIXELS, RELAY_LOGO_WIDTH } from "./relay-logo.ts";
 
 /**
  * Fullscreen 3D easter eggs: the relay logo (header logo click) and Armin (/arminsayshi). Both are bitmaps built from
@@ -25,7 +26,7 @@ import { formatKeyText } from "./keybinding-hints.ts";
  * Armin grows out of a speck at the center; the dust spreads out from the center.
  *
  * The blocks are ray cast per braille dot. A braille cell holds 2x4 roughly square dots, so one pixel of a
- * half-block bitmap is exactly 2x2 dots, and the header logo (4x2 cells) is 8x8 dots when it lifts off.
+ * half-block bitmap is exactly 2x2 dots, and the header logo (8x2 cells) is 16x8 dots when it lifts off.
  */
 
 type Rgb = readonly [number, number, number];
@@ -129,15 +130,14 @@ function createModel(
 	};
 }
 
-const CORAL: Rgb = [228, 138, 122];
-const BLUE: Rgb = [79, 142, 179];
-const YELLOW: Rgb = [234, 182, 93];
-const RELAY_LOGO_PIXELS = ["ccc.", "b.c.", "bb.y", "b..y"];
-const RELAY_LOGO_COLORS: Record<string, Rgb> = { c: CORAL, b: BLUE, y: YELLOW };
+function relayLogoPixel(column: number, row: number): Rgb | undefined {
+	const color = RELAY_LOGO_COLORS[RELAY_LOGO_PIXELS[row]![column]!];
+	return color && [color.r, color.g, color.b];
+}
 
 function relayLogoModel(origin: { column: number; row: number }): Model {
-	return createModel(4, 4, (column, row) => RELAY_LOGO_COLORS[RELAY_LOGO_PIXELS[row]![column]!], {
-		cameraDistance: 10,
+	return createModel(RELAY_LOGO_WIDTH, RELAY_LOGO_PIXELS.length, relayLogoPixel, {
+		cameraDistance: 16,
 		widthShare: 0.35,
 		puzzleMoves: (random) => (random < 0.4 ? 2 : 1),
 		origin,

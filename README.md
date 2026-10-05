@@ -45,7 +45,7 @@ Inside Relay, run `/login` to connect a subscription or API key, then give it a 
 nix run github:eltonssouza/relay-harness
 ```
 
-Use `nix build .` or `nix run .` to build or run your checkout. Nix builds are offline, so bundled model data comes from the revision pinned in `nix/model-catalog.json`. Refresh the pin with `npm run update:model-catalog-pin`.
+Use `nix build .` or `nix run .` to build or run your checkout. Nix builds are offline and run `npm run build:offline`, so the bundled model data is the generated data committed in `packages/ai/src/providers/data/`. A flake only sees committed files, so commit refreshed model data before building with Nix.
 
 ## What you can do with it
 
@@ -90,6 +90,8 @@ npm run build:offline          # Build with existing model data
 npm run check                  # Lint, format, and type check
 ./test.sh                      # Run tests that need no API keys
 ```
+
+Generated model data in `packages/ai/src/providers/data/` is committed so offline and Nix builds work. `npm run build` regenerates it from the provider catalogs; commit the result when it changes.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution rules and [AGENTS.md](AGENTS.md) for project conventions, which apply to humans and agents alike.
 

@@ -16,7 +16,7 @@ const BRAILLE_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", 
 function getBaseTitle(relay: ExtensionAPI): string {
 	const cwd = path.basename(process.cwd());
 	const session = relay.getSessionName();
-	return session ? `π - ${session} - ${cwd}` : `π - ${cwd}`;
+	return session ? `relay - ${session} - ${cwd}` : `relay - ${cwd}`;
 }
 
 export default function (relay: ExtensionAPI) {

@@ -82,11 +82,10 @@ These variables are read by Relay itself:
 | `RELAY_CODING_AGENT_SESSION_DIR` | Override session storage; overridden by `--session-dir` |
 | `RELAY_PACKAGE_DIR` | Override the package directory, useful for Nix/Guix store paths |
 | `RELAY_OFFLINE` | Disable automatic network activity, including model catalog refreshes |
-| `RELAY_SKIP_VERSION_CHECK` | Disable the `pi.dev` latest-version request |
-| `RELAY_TELEMETRY` | Override install/update telemetry and provider attribution headers: `1`/`true`/`yes` or `0`/`false`/`no` |
+| `RELAY_SKIP_VERSION_CHECK` | Disable the GitHub latest-release check |
+| `RELAY_TELEMETRY` | Override provider attribution headers: `1`/`true`/`yes` or `0`/`false`/`no` |
 | `RELAY_CACHE_RETENTION` | Set to `long` for extended provider prompt caching where supported |
-| `RELAY_SHARE_VIEWER_URL` | Override the base URL used by `/share` |
-| `RELAY_RADIUS_GATEWAY` | Override the Radius gateway origin used by `/bug` uploads and Radius relay connections |
+| `RELAY_SHARE_VIEWER_URL` | Base URL of a session viewer for `/share` links; without it, `/share` prints only the gist URL |
 | `RELAY_HARDWARE_CURSOR` | Set to `1` to show the hardware cursor; see [Terminal setup](terminal-setup.md) |
 | `RELAY_HYPERLINKS` | Override OSC 8 hyperlink detection with `1`, `0`, or `auto` |
 | `RELAY_IMAGE_PROTOCOL` | Override inline image detection with `kitty`, `iterm2`, `none`, or `auto` |

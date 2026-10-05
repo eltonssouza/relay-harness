@@ -254,26 +254,21 @@ See [Relay Packages](packages.md) for source formats, filtering, installation, a
 
 Add `--local` or `-l` to `install`, `remove`, `uninstall`, or `config` to use project settings instead of global settings.
 
-### Update Relay or packages
+### Update packages
 
-Running `relay update` without a target updates Relay itself.
+Running `relay update` without a target updates all installed packages.
 
 | Task | Command |
 |---|---|
-| Update Relay | `relay update` |
-| Update all installed packages | `relay update --extensions` |
+| Update all installed packages | `relay update` |
 | Update one installed package | `relay update <source>` |
 | Refresh model catalogs | `relay update --models` |
-| Update Relay and all installed packages | `relay update --all` |
 
-Add `--force` to reinstall Relay when the selected update includes Relay.
-
-`relay update` cannot update Relay when another package manager provides it, such as Nix. Update Relay with that package manager, for example `nix profile upgrade relay`. Package and model catalog updates still work.
+`relay update` never updates Relay itself. Relay is installed from source: pull the checkout, then run `npm install --ignore-scripts` and `npm run build`. With Nix, use `nix profile upgrade relay`.
 
 ### Aliases and command options
 
 - `relay uninstall <source>` is an alias for `relay remove <source>`.
-- `relay update --self`, `relay update self`, and `relay update relay` are aliases for `relay update`.
 - `relay update --extension <source>` is an alias for `relay update <source>`.
 - `-a`, `--approve` trusts project-local files for one command. `-na`, `--no-approve` ignores trust-gated project-local files.
 - Append `-h` or `--help` to a command for its exact usage and option constraints.

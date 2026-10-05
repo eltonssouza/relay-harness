@@ -1,7 +1,6 @@
 {
   autoPatchelfHook,
   fd,
-  fetchurl,
   importNpmLock,
   lib,
   libxcb,
@@ -17,17 +16,9 @@
 let
   nodejs = nodejs_22;
   packageJson = lib.importJSON (source + "/packages/coding-agent/package.json");
-  # Lockfile root used by the pi.dev installer. It pins the coding agent's
-  # runtime dependency tree and is kept in sync with package-lock.json by
-  # `npm run check`.
+  # Lockfile root that pins the coding agent's runtime dependency tree. It is
+  # kept in sync with package-lock.json by `npm run check`.
   installLock = source + "/packages/coding-agent/install-lock";
-  modelCatalogPin = lib.importJSON ./model-catalog.json;
-  modelCatalog = fetchurl {
-    name = "relay-model-catalog.json";
-    # The typed catalog is the representation whose bytes the revision hashes.
-    url = "https://pi.dev/api/models/revisions/${modelCatalogPin.revision}?types=chat,image,classifier";
-    sha256 = lib.removePrefix "sha256-" modelCatalogPin.revision;
-  };
 
   workspacePackages = stdenv.mkDerivation {
     pname = "relay-workspace-packages";
@@ -44,7 +35,8 @@ let
 
     buildPhase = ''
       runHook preBuild
-      node packages/ai/scripts/hydrate-model-catalog.ts ${modelCatalog}
+      # Nix builds have no network access. Model data comes from the committed
+      # packages/ai/src/providers/data directory.
       npm run build:offline
       runHook postBuild
     '';
@@ -163,7 +155,7 @@ stdenv.mkDerivation {
 
   meta = {
     description = packageJson.description;
-    homepage = "https://pi.dev";
+    homepage = "https://github.com/eltonssouza/relay-harness";
     license = lib.licenses.mit;
     mainProgram = "relay";
     platforms = [

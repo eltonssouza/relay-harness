@@ -179,32 +179,18 @@ describe("MCP config", () => {
 						url: "https://a.example/mcp",
 						oauth: { authServerMetadataUrl: "http://idp.example/m" },
 					},
-					// #10302
-					cimd: {
-						url: "https://a.example/mcp",
-						oauth: { clientRegistration: "cimd", callbackUrl: "http://localhost/callback" },
-					},
-					badRegistration: { url: "https://a.example/mcp", oauth: { clientRegistration: "auto" } },
-					cimdClient: { url: "https://a.example/mcp", oauth: { clientRegistration: "cimd", clientId: "x" } },
-					cimdPath: {
-						url: "https://a.example/mcp",
-						oauth: { clientRegistration: "cimd", callbackUrl: "http://127.0.0.1/cb" },
-					},
 				},
 			},
 			{},
 		);
 		const { servers, errors } = loadMcpConfig({ ...paths, projectTrusted: false });
-		expect(servers.map((server) => server.name)).toEqual(["ok", "ipv6", "same", "named", "metadata", "cimd"]);
+		expect(servers.map((server) => server.name)).toEqual(["ok", "ipv6", "same", "named", "metadata"]);
 		expect(errors).toEqual([
 			expect.stringContaining('server "remote": oauth.callbackUrl must be an http URI on localhost'),
 			expect.stringContaining('server "both": oauth.callbackUrl and oauth.callbackPort name different ports'),
 			expect.stringContaining('server "scope": oauth.scope must be a string'),
 			expect.stringContaining('server "unnamed": oauth.clientName must be a non-empty string'),
 			expect.stringContaining('server "plainMetadata": oauth.authServerMetadataUrl must be an https URL'),
-			expect.stringContaining('server "badRegistration": oauth.clientRegistration must be "dcr" or "cimd"'),
-			expect.stringContaining('server "cimdClient": oauth.clientRegistration "cimd" cannot be combined'),
-			expect.stringContaining('server "cimdPath": oauth.clientRegistration "cimd" requires oauth.callbackUrl'),
 		]);
 	});
 
@@ -240,26 +226,26 @@ describe("MCP config", () => {
 		const paths = setup(
 			{
 				mcpServers: {
-					radius: { url: "https://radius.example/mcp", auth: { provider: "radius" } },
-					local: { url: "http://localhost:8788/mcp", auth: { provider: "radius-dev" } },
-					plain: { url: "http://radius.example/mcp", auth: { provider: "radius" } },
-					empty: { url: "https://radius.example/mcp", auth: { provider: "" } },
+					gateway: { url: "https://gateway.example/mcp", auth: { provider: "gateway" } },
+					local: { url: "http://localhost:8788/mcp", auth: { provider: "gateway-dev" } },
+					plain: { url: "http://gateway.example/mcp", auth: { provider: "gateway" } },
+					empty: { url: "https://gateway.example/mcp", auth: { provider: "" } },
 				},
 			},
-			{ mcpServers: { radius: { url: "https://evil.example/mcp", auth: { provider: "radius" } } } },
+			{ mcpServers: { gateway: { url: "https://evil.example/mcp", auth: { provider: "gateway" } } } },
 		);
 		const { servers, errors } = loadMcpConfig({ ...paths, projectTrusted: true });
 		// The project entry cannot replace the global one: it would send the credential to its own URL.
 		expect(servers.map((server) => [server.name, server.scope, "url" in server.config && server.config.url])).toEqual(
 			[
-				["radius", "global", "https://radius.example/mcp"],
+				["gateway", "global", "https://gateway.example/mcp"],
 				["local", "global", "http://localhost:8788/mcp"],
 			],
 		);
 		expect(errors).toEqual([
 			expect.stringContaining('server "plain": auth requires an https URL'),
 			expect.stringContaining('server "empty": auth.provider must be a provider name'),
-			expect.stringContaining('server "radius": auth is only allowed in the global mcp.json'),
+			expect.stringContaining('server "gateway": auth is only allowed in the global mcp.json'),
 		]);
 	});
 });
@@ -629,20 +615,20 @@ for await (const line of createInterface({ input: process.stdin })) {
 		const { port } = server.address() as AddressInfo;
 		const connection = new McpServerConnection({
 			entry: {
-				name: "radius",
-				config: { url: `http://127.0.0.1:${port}/mcp`, auth: { provider: "radius" } },
+				name: "gateway",
+				config: { url: `http://127.0.0.1:${port}/mcp`, auth: { provider: "gateway" } },
 				source: "test",
 			},
 			cwd: process.cwd(),
 			createTransport: createDefaultTransport,
 			credentials: new McpOAuthCredentialStore(new InMemoryAuthStorageBackend()),
-			providerToken: async (provider) => (provider === "radius" ? "tok" : undefined),
+			providerToken: async (provider) => (provider === "gateway" ? "tok" : undefined),
 			onTools: () => {},
 		});
 		try {
 			expect(connection.oauthUrl).toBeUndefined();
 			await expect(connection.getClient()).rejects.toThrow(
-				'MCP server "radius" requires sign-in. Run /login radius to sign in.',
+				'MCP server "gateway" requires sign-in. Run /login gateway to sign in.',
 			);
 			expect(connection.state).toBe("needs-auth");
 			expect(authorizations).toEqual(["Bearer tok"]);

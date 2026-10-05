@@ -256,14 +256,14 @@ describe("constrained tool sampling", () => {
 		});
 	});
 
-	// earendil-works/radius#115: a gateway forwards another model's history as a foreign provider.
+	// A gateway forwards another model's history as a foreign provider.
 	it("drops foreign item ids when replaying grammar calls as custom Responses items", () => {
 		const context = normalizeContext({
 			messages: [
 				{
 					role: "assistant",
-					api: "relay-messages",
-					provider: "radius",
+					api: "pi-messages",
+					provider: "custom-gateway",
 					model: "gpt-other",
 					content: [{ type: "toolCall", id: "call_1|ctc_1", name: "sample_tool", arguments: { payload: "abc" } }],
 					usage: makeUsage(),
