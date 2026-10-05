@@ -96,6 +96,22 @@ See [Compaction Reference](compaction.md) for trigger, summarization, and valida
 
 Changes apply to sessions created afterwards. See [Harness Core](harness-core.md).
 
+### Laya router
+
+Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
+
+| Setting | Type | Default | Description |
+|---|---|---|---|
+| `laya.baseUrl` | string | `LAYA_BASE_URL` or `http://127.0.0.1:8000/v1` | Laya System One server. |
+| `laya.policy` | string | `balanced` | Cost profile: `economy`, `balanced`, `quality` or `critical`. `--laya-policy` and `/laya policy` override it. |
+| `laya.models` | object | See [laya.md](laya.md#model-registry) | Models per tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order. A tier you set replaces that tier's default list. |
+| `laya.quota` | object | `1` per provider | Share of each provider's quota still available, 0 to 1, e.g. `{ "openai-codex": 0.25 }`. |
+| `laya.minConfidence` | number | `0.5` | Laya answers below this confidence raise the tier by one. |
+| `laya.escalateAfterFailures` | number | `3` | Failed tool calls in one turn before moving to the next tier. `0` disables. |
+| `laya.toolRouting` | string | `advise` | `advise` names unneeded tools in the plan; `enforce` also deactivates them for the request. |
+| `laya.telemetry` | boolean | `true` | Record each routed request in `~/.relay/agent/laya/telemetry.jsonl`. |
+| `laya.timeoutMs` | number | `5000` | Classifier timeout before keyword rules answer instead. |
+
 ### Branch summaries
 
 | Setting | Type | Default | Description |
