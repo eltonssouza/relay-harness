@@ -1,3 +1,8 @@
+
+<p align="center">
+  <img src="assets/relay-model.svg" alt="Relay Harness">
+</p>
+
 # Relay
 
 Relay is a terminal coding agent and the harness around it. The agent reads files, runs commands, edits code, and works through multi-step tasks with any model: a hosted provider, a subscription, or a local endpoint.
@@ -8,12 +13,12 @@ The harness is the part that stays the same when the model changes. Four rules r
 
 Coding agents fail in predictable ways. They ignore a constraint you stated three messages ago, edit files when you only asked a question, report "done" when the tests failed, and drown in stale tool output. Relay's harness core targets these failures directly:
 
-| Pillar | Problem | What Relay does |
-|---|---|---|
-| Alignment | The agent forgets constraints, treats questions as permission to edit, runs destructive commands. | Keeps your standing rules as state and restates them on every request. Asks before destructive or external commands. Blocks the first edit in a turn where you only asked a question. |
-| Evidence | The agent claims success without a passing check. | Records what changed and which checks passed. A completion claim without a passing check after the last change gets one verification request. Checks with masked exit codes (`\| tail`, `\|\| true`) do not count. Large changes and files are flagged. |
-| Context | Old tool results describe states that no longer exist. | Sends recent results verbatim, replaces old large ones with one-line stubs, and restates a compact progress digest. |
-| Skills | Skill structure changes how the agent uses it, and nobody measures it. | Treats `SKILL.md` as a router, measures which resources lead to actions, and audits skill structure. |
+| Pillar    | Problem                                                                                           | What Relay does                                                                                                                                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Alignment | The agent forgets constraints, treats questions as permission to edit, runs destructive commands. | Keeps your standing rules as state and restates them on every request. Asks before destructive or external commands. Blocks the first edit in a turn where you only asked a question.                                                                    |
+| Evidence  | The agent claims success without a passing check.                                                 | Records what changed and which checks passed. A completion claim without a passing check after the last change gets one verification request. Checks with masked exit codes (`\| tail`, `\|\| true`) do not count. Large changes and files are flagged. |
+| Context   | Old tool results describe states that no longer exist.                                            | Sends recent results verbatim, replaces old large ones with one-line stubs, and restates a compact progress digest.                                                                                                                                      |
+| Skills    | Skill structure changes how the agent uses it, and nobody measures it.                            | Treats`SKILL.md` as a router, measures which resources lead to actions, and audits skill structure.                                                                                                                                                    |
 
 Inspect the state with `/harness` and tune it through the `harnessCore` settings. See [Harness Core](packages/coding-agent/docs/harness-core.md).
 
@@ -61,19 +66,19 @@ Start with the [documentation index](packages/coding-agent/docs/index.md) or the
 
 This monorepo holds the Relay CLI and the libraries it is built from.
 
-| Package | Description |
-|---------|-------------|
-| **[@relay-harness/coding-agent](packages/coding-agent)** | The `relay` command: interactive coding agent, harness core, sessions, extensions |
-| **[@relay-harness/agent-core](packages/agent)** | Agent runtime with tool calling, state management, and the model-independent harness |
-| **[@relay-harness/ai](packages/ai)** | Unified multi-provider LLM API with model discovery |
-| **[@relay-harness/tui](packages/tui)** | Terminal UI library with differential rendering |
-| **[@relay-harness/durable](packages/durable)** | Durable conversation, task, and document runtime |
-| **[@relay-harness/mcp](packages/mcp)** | Standalone Model Context Protocol client |
-| **[@relay-harness/codemode](packages/codemode)** | Sandboxed JavaScript execution where the only capability is calling injected tools |
-| **[@relay-harness/telemetry](packages/telemetry)** | Vendor-neutral telemetry contracts and typed schemas |
-| **[@relay-harness/protocol](packages/protocol)**, **[client](packages/client)**, **[server](packages/server)** | Experimental remote sessions over framed CBOR |
-| **[@relay-harness/evals](packages/evals)** | Evaluation harness for the coding agent |
-| **[@earendil-works/chord](packages/chord)** | Application-composition runtime for services, replicated state, RPC, and plugins |
+| Package                                                                                                                       | Description                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **[@relay-harness/coding-agent](packages/coding-agent)**                                                                 | The`relay` command: interactive coding agent, harness core, sessions, extensions   |
+| **[@relay-harness/agent-core](packages/agent)**                                                                          | Agent runtime with tool calling, state management, and the model-independent harness |
+| **[@relay-harness/ai](packages/ai)**                                                                                     | Unified multi-provider LLM API with model discovery                                  |
+| **[@relay-harness/tui](packages/tui)**                                                                                   | Terminal UI library with differential rendering                                      |
+| **[@relay-harness/durable](packages/durable)**                                                                           | Durable conversation, task, and document runtime                                     |
+| **[@relay-harness/mcp](packages/mcp)**                                                                                   | Standalone Model Context Protocol client                                             |
+| **[@relay-harness/codemode](packages/codemode)**                                                                         | Sandboxed JavaScript execution where the only capability is calling injected tools   |
+| **[@relay-harness/telemetry](packages/telemetry)**                                                                       | Vendor-neutral telemetry contracts and typed schemas                                 |
+| **[@relay-harness/protocol](packages/protocol)**, **[client](packages/client)**, **[server](packages/server)** | Experimental remote sessions over framed CBOR                                        |
+| **[@relay-harness/evals](packages/evals)**                                                                               | Evaluation harness for the coding agent                                              |
+| **[@earendil-works/chord](packages/chord)**                                                                              | Application-composition runtime for services, replicated state, RPC, and plugins     |
 
 ## Permissions and containerization
 
