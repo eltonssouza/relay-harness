@@ -9,7 +9,6 @@
  * Steps:
  * 1. Check for uncommitted changes
  * 2. Verify every public workspace package is registered on npm
- *    and refresh the Nix model catalog pin if it is stale
  * 3. Bump version via npm run version:xxx or set an explicit version
  * 4. Update CHANGELOG.md files: [Unreleased] -> [version] - date
  * 5. Regenerate release artifacts
@@ -17,7 +16,7 @@
  * 7. Commit and tag the release
  * 8. Add new [Unreleased] section to changelogs
  * 9. Commit next-cycle changelog updates
- * 10. Push main and the tag to trigger CI publication and verified pi.dev announcement
+ * 10. Push main and the tag
  */
 
 import { execSync, spawnSync } from "node:child_process";
@@ -225,13 +224,6 @@ console.log("  Working directory clean\n");
 // 2. Verify npm package registration before modifying the worktree.
 assertPackagesAreRegisteredWithNpm();
 
-// Release tags are immutable, so the tagged Nix pin must already build the
-// release. Refresh it before the version bump, while pi.dev still knows the
-// current version, so it lands in the release commit.
-console.log("Refreshing the Nix model catalog pin if stale...");
-run("node scripts/update-model-catalog-pin.mjs --if-stale");
-console.log();
-
 // 3. Bump or set version
 const version = bumpOrSetVersion(RELEASE_TARGET);
 console.log(`  New version: ${version}\n`);
@@ -289,4 +281,4 @@ run("git push origin main");
 run(`git push origin v${version}`);
 console.log();
 
-console.log(`=== Prepared release v${version}; CI publication and pi.dev announcement start after the tag push ===`);
+console.log(`=== Prepared release v${version} ===`);

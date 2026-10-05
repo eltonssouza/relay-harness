@@ -85,4 +85,49 @@ describe("shareSession", () => {
 		expect(uploads).toEqual(["A", "B"]);
 		expect(errors).toEqual([]);
 	});
+
+	it("reports only the gist URL when no share viewer is configured", async () => {
+		const originalViewerUrl = process.env.RELAY_SHARE_VIEWER_URL;
+		delete process.env.RELAY_SHARE_VIEWER_URL;
+		childProcessMocks.spawn.mockImplementation(() => {
+			const child = Object.assign(new EventEmitter(), {
+				stdout: new PassThrough(),
+				stderr: new PassThrough(),
+				kill: vi.fn(),
+			});
+			queueMicrotask(() => {
+				child.stdout.end("https://gist.github.com/test/abc123\n");
+				child.stderr.end();
+				child.emit("close", 0);
+			});
+			return child;
+		});
+
+		const statuses: string[] = [];
+		const errors: string[] = [];
+		try {
+			await shareSession({
+				session: {
+					exportToHtml: async (filePath: string) => writeFileSync(filePath, "session"),
+				},
+				ui: { setFocus() {}, requestRender() {} },
+				editorContainer: { clear() {}, addChild() {} },
+				editor: {},
+				showStatus(message: string) {
+					statuses.push(message);
+				},
+				showError(message: string) {
+					errors.push(message);
+				},
+			} as never);
+		} finally {
+			if (originalViewerUrl !== undefined) process.env.RELAY_SHARE_VIEWER_URL = originalViewerUrl;
+		}
+
+		expect(errors).toEqual([]);
+		expect(statuses).toHaveLength(1);
+		expect(statuses[0]).toContain("Gist: ");
+		expect(statuses[0]).toContain("https://gist.github.com/test/abc123");
+		expect(statuses[0]).not.toContain("Share URL");
+	});
 });

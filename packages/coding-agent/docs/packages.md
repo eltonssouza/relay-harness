@@ -14,7 +14,7 @@ relay install git:github.com/example/relay-tools@v1
 relay install ./local-package
 ```
 
-`relay list` shows configured packages. Use `relay remove <source>` to remove one and `relay update --extensions` to reconcile package installations. See [Command Line](cli.md#package-commands) for every package command and option.
+`relay list` shows configured packages. Use `relay remove <source>` to remove one and `relay update` to reconcile package installations. See [Command Line](cli.md#package-commands) for every package command and option.
 
 Personal installs are written to `~/.relay/agent/settings.json`. Add `--local` or `-l` to write the package declaration to `.relay/settings.json`. Relay reads declarations from that file only after project trust is granted.
 
@@ -71,7 +71,7 @@ Use an explicit manifest when resources live elsewhere or need filtering:
 
 Paths are relative to the package root. Arrays accept glob patterns and exclusions. List dot-prefixed or symlinked resource roots directly when traversal through a glob would not discover them.
 
-The `relay-package` keyword makes an npm package eligible for discovery in the [Relay package gallery](https://pi.dev/packages). Optional `relay.image` and `relay.video` fields add gallery previews.
+Add the `relay-package` keyword so the package is easy to find on npm.
 
 ## Declare dependencies
 

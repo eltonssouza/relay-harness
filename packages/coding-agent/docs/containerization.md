@@ -41,7 +41,11 @@ FROM node:24-bookworm-slim
 RUN apt-get update \
   && apt-get install -y --no-install-recommends bash ca-certificates git ripgrep \
   && rm -rf /var/lib/apt/lists/*
-RUN npm install -g --ignore-scripts @relay-harness/coding-agent
+RUN git clone --depth 1 https://github.com/eltonssouza/relay-harness.git /opt/relay \
+  && cd /opt/relay \
+  && npm ci --ignore-scripts \
+  && npm run build:offline \
+  && npm link -w packages/coding-agent
 
 WORKDIR /workspace
 ENTRYPOINT ["relay"]

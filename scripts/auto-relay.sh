@@ -3,8 +3,7 @@ set -euo pipefail
 
 # Developer wrapper that runs relay from this checkout's latest `npm run build`.
 # Development invocations use RELAY_EXPERIMENTAL=1 by default. Pass --stable to use
-# the next relay executable on PATH; `relay update` also uses stable so self-update
-# works.
+# the next relay executable on PATH.
 #
 # From the repository root, install with:
 #   mkdir -p "$HOME/.local/bin"
@@ -52,10 +51,6 @@ for arg in "$@"; do
 		args+=("$arg")
 	fi
 done
-
-if [[ "${args[0]:-}" == "update" ]]; then
-	use_stable=true
-fi
 
 if [[ "$use_stable" == true ]]; then
 	if ! stable_relay="$(find_stable_relay)"; then

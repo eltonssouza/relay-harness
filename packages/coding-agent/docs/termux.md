@@ -22,10 +22,14 @@ Install Termux from [GitHub or F-Droid](https://github.com/termux/termux-app#ins
    pkg install nodejs git
    ```
 
-3. Install Relay:
+3. Build Relay from source and link the `relay` command:
 
    ```bash
-   npm install -g --ignore-scripts @relay-harness/coding-agent
+   git clone https://github.com/eltonssouza/relay-harness.git ~/relay
+   cd ~/relay
+   npm ci --ignore-scripts
+   npm run build:offline
+   npm link -w packages/coding-agent
    ```
 
 4. Verify the installation:

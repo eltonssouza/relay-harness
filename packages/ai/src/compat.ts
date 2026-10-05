@@ -187,7 +187,7 @@ const BUILTIN_APIS: [Api, ProviderStreams][] = [
 	["google-vertex", googleVertexApi()],
 	["mistral-conversations", mistralConversationsApi()],
 	["bedrock-converse-stream", bedrockConverseStreamApi()],
-	["relay-messages", relayMessagesApi()],
+	["pi-messages", relayMessagesApi()],
 ];
 
 const builtinApiProviderInstances = new Map<Api, ReturnType<typeof getApiProvider>>();

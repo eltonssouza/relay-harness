@@ -24,7 +24,7 @@ export type KnownApi =
 	| "bedrock-converse-stream"
 	| "google-generative-ai"
 	| "google-vertex"
-	| "relay-messages";
+	| "pi-messages";
 
 export type Api = KnownApi | (string & {});
 
@@ -45,7 +45,6 @@ export type KnownProvider =
 	| "openai"
 	| "azure-openai-responses"
 	| "openai-codex"
-	| "radius"
 	| "typesafe"
 	| "nvidia"
 	| "deepseek"
@@ -266,7 +265,7 @@ export interface ApiOptionsMap {
 	"google-vertex": GoogleVertexOptions;
 	"mistral-conversations": MistralOptions;
 	"bedrock-converse-stream": BedrockOptions;
-	"relay-messages": RelayMessagesOptions;
+	"pi-messages": RelayMessagesOptions;
 }
 
 /**

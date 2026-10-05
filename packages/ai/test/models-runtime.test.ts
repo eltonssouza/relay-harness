@@ -777,7 +777,7 @@ describe("Models runtime", () => {
 		expect(await credentials.read("p1")).toEqual({ type: "api_key", key: "first" });
 	});
 
-	// Radius bug report 01a10855-43d8-7447-a710-2acf5ee0b2ee: refresh_token_invalidated after a cancelled refresh.
+	// Bug report 01a10855-43d8-7447-a710-2acf5ee0b2ee: refresh_token_invalidated after a cancelled refresh.
 	it("persists an OAuth refresh that started before the request was cancelled", async () => {
 		const credentials = new InMemoryCredentialStore();
 		await credentials.modify("p1", async () => ({

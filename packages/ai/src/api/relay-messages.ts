@@ -4,9 +4,8 @@
  * Streams relay's own message protocol directly to a backend: the request is a
  * single POST of `{ model, context, options }` to `<baseUrl>/messages`, the
  * response is an SSE stream of serialized assistant-message events plus a
- * terminal `done`/`error` event. This is the wire protocol spoken by the
- * Radius gateway, but any backend implementing it can be used, e.g. via a
- * models.json custom provider with `"api": "relay-messages"`.
+ * terminal `done`/`error` event. Any backend implementing it can be used, e.g.
+ * via a models.json custom provider with `"api": "pi-messages"`.
  */
 
 import type {
@@ -135,7 +134,7 @@ function formatRelayMessagesResponseError(
 }
 
 function createRelayMessagesResponseError(
-	model: Model<"relay-messages">,
+	model: Model<"pi-messages">,
 	url: URL,
 	response: Response,
 	body: string,
@@ -177,7 +176,7 @@ function appendRewriteDiagnostic(message: AssistantMessage, rewrite: RelayMessag
 	});
 }
 
-function createEventConverter(model: Model<"relay-messages">) {
+function createEventConverter(model: Model<"pi-messages">) {
 	const partial: AssistantMessage = {
 		role: "assistant",
 		content: [],
@@ -320,7 +319,7 @@ function parseRelayMessagesEvent(raw: string): RelayMessagesEvent | undefined {
 	return data && data !== "[DONE]" ? (JSON.parse(data) as RelayMessagesEvent) : undefined;
 }
 
-function createErrorEvent(model: Model<"relay-messages">, error: unknown, aborted: boolean): AssistantMessageEvent {
+function createErrorEvent(model: Model<"pi-messages">, error: unknown, aborted: boolean): AssistantMessageEvent {
 	const reason = aborted ? "aborted" : "error";
 	const assistantMessage: AssistantMessage = {
 		role: "assistant",
@@ -352,8 +351,8 @@ function resolveCacheRetention(cacheRetention?: CacheRetention, env?: ProviderEn
 	return getProviderEnvValue("RELAY_CACHE_RETENTION", env) === "long" ? "long" : undefined;
 }
 
-export const stream: StreamFunction<"relay-messages", RelayMessagesOptions> = (
-	model: Model<"relay-messages">,
+export const stream: StreamFunction<"pi-messages", RelayMessagesOptions> = (
+	model: Model<"pi-messages">,
 	context: TranscriptContext,
 	options?: RelayMessagesOptions,
 ): AssistantMessageEventStream => {
@@ -429,8 +428,8 @@ export const stream: StreamFunction<"relay-messages", RelayMessagesOptions> = (
 	return eventStream;
 };
 
-export const streamSimple: StreamFunction<"relay-messages", SimpleStreamOptions> = (
-	model: Model<"relay-messages">,
+export const streamSimple: StreamFunction<"pi-messages", SimpleStreamOptions> = (
+	model: Model<"pi-messages">,
 	context: TranscriptContext,
 	options?: SimpleStreamOptions,
 ): AssistantMessageEventStream => {
