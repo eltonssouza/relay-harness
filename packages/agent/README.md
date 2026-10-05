@@ -507,6 +507,31 @@ Return `terminate: true` from `execute()`, a blocked `beforeToolCall`, or `after
 
 `@earendil-works/pi-mcp` connects to MCP servers and `@earendil-works/pi-codemode` runs model-written JavaScript that calls tools. [examples/mcp-codemode](examples/mcp-codemode) wraps both as `AgentTool`s: one tool per MCP tool, and a `codemode` tool whose scripts call the agent's tools through `runToolCall()`, so `beforeToolCall` and `afterToolCall` apply to those calls too.
 
+## Harness Core
+
+`HarnessCore` adds four model-independent rules on top of the loop's hooks. It wraps existing `beforeToolCall`, `transformContext`, and `finishTurn` hooks instead of replacing them, and makes no extra model calls.
+
+```typescript
+import { Agent, HarnessCore } from "@earendil-works/pi-agent-core";
+
+const agent = new Agent({ streamFn });
+const harness = new HarnessCore({
+	alignment: { authorize: async (request) => askUser(request.effect.command) },
+	skills: { skills: () => [{ name: "pdf", baseDir: "/skills/pdf", filePath: "/skills/pdf/SKILL.md" }] },
+	onEvent: (event) => log(event),
+});
+const uninstall = harness.install(agent);
+```
+
+| Pillar | Class | Behavior |
+|---|---|---|
+| Alignment | `AlignmentPolicy`, `ConstraintLedger` | Records developer constraints and restates them on every request; blocks destructive and external effects until authorized; blocks the first edit in a question-only turn; records developer corrections and restates the latest one; `promptGuidelines()` returns pair-programming rules for the system prompt. |
+| Evidence | `EvidenceLedger` | Compares completion claims with recorded changes and checks; steers one verification request when a claim lacks evidence. |
+| Context | `ContextWindowPolicy` | Keeps recent tool results verbatim, elides older large ones in cache-friendly batches, and restates a progress digest. |
+| Skills | `SkillUsageTracker`, `auditSkill` | Measures skill resource fanout, effective uptake, and phases; audits skill structure for progressive disclosure. |
+
+Tool effects come from `classifyToolCall()`, which knows common tool names (`read`, `edit`, `write`, `bash`, ...) and classifies shell commands. Pass `classifyEffect` for other tools. Each pillar can be disabled with `false` and used on its own without an `Agent`. See the [coding agent's Harness Core reference](../coding-agent/docs/harness-core.md) for the rules in detail.
+
 ## Proxy Usage
 
 For browser apps that proxy through a backend:

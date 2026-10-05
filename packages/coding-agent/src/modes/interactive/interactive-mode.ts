@@ -3240,6 +3240,11 @@ export class InteractiveMode {
 				this.editor.setText("");
 				return;
 			}
+			if (text === "/harness") {
+				this.handleHarnessCommand();
+				this.editor.setText("");
+				return;
+			}
 			if (text === "/changelog") {
 				this.handleChangelogCommand();
 				this.editor.setText("");
@@ -6729,6 +6734,21 @@ export class InteractiveMode {
 			return info;
 		};
 
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(new ThemedText(renderInfo, 1, 0));
+		this.ui.requestRender();
+	}
+
+	private handleHarnessCommand(): void {
+		const sections = this.session.harnessCore.describe(this.session.resourceLoader.getSkills().skills);
+		const renderInfo = (): string => {
+			let info = `${theme.bold("Harness Core")}\n`;
+			for (const section of sections) {
+				info += `\n${theme.bold(section.title)}\n`;
+				for (const line of section.lines) info += `${theme.fg("dim", "-")} ${line}\n`;
+			}
+			return info.trimEnd();
+		};
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new ThemedText(renderInfo, 1, 0));
 		this.ui.requestRender();

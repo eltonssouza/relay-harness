@@ -113,6 +113,7 @@ import {
 	wrapRegisteredTools,
 } from "./extensions/index.ts";
 import { emitSessionShutdownEvent } from "./extensions/runner.ts";
+import { CodingHarnessCore } from "./harness-core.ts";
 import { type BashExecutionMessage, type CustomMessage, convertToLlm } from "./messages.ts";
 import { ModelRegistry } from "./model-registry.ts";
 import type { ModelRuntime } from "./model-runtime.ts";
@@ -443,6 +444,7 @@ export class AgentSession {
 	private _extensionErrorUnsubscriber?: () => void;
 
 	private _modelRuntime: ModelRuntime;
+	private _harnessCore!: CodingHarnessCore;
 	private _cacheWarmer?: Pick<CacheWarmer, "cancel" | "status" | "onAgentSettled" | "onModeChanged" | "onWarmed">;
 
 	// Tool registry for extension getTools/setTools
@@ -489,6 +491,14 @@ export class AgentSession {
 		this._installAgentBoundaryHooks();
 		this._installHiddenDeclarationsProjection();
 		this._installAgentForcedPromptProjection();
+		// Installed last so the pillars wrap every session and extension hook.
+		this._harnessCore = new CodingHarnessCore({
+			agent: this.agent,
+			settingsManager: this.settingsManager,
+			sessionManager: this.sessionManager,
+			getSkills: () => this._resourceLoader.getSkills().skills,
+			getUI: () => ({ ui: this._extensionUIContext, mode: this._extensionMode }),
+		});
 
 		this._buildRuntime({
 			activeToolNames: this._initialActiveToolNames,
@@ -499,6 +509,11 @@ export class AgentSession {
 
 	get modelRuntime(): ModelRuntime {
 		return this._modelRuntime;
+	}
+
+	/** The harness pillars installed on this session: alignment, evidence, context, and skills. */
+	get harnessCore(): CodingHarnessCore {
+		return this._harnessCore;
 	}
 
 	private async _getRequiredRequestAuth(
@@ -1375,6 +1390,7 @@ export class AgentSession {
 			"This extension ctx is stale after session replacement or reload. Do not use a captured pi or command ctx after ctx.newSession(), ctx.fork(), ctx.switchSession(), or ctx.reload(). For newSession, fork, and switchSession, move post-replacement work into withSession and use the ctx passed to withSession. For reload, do not use the old ctx after await ctx.reload().",
 		);
 		this._disconnectFromAgent();
+		this._harnessCore.dispose();
 		this._eventListeners = [];
 		if (this._cacheWarmer) {
 			this._cacheWarmer.onWarmed = undefined;
@@ -1673,6 +1689,7 @@ export class AgentSession {
 			selectedTools: validToolNames,
 			toolSnippets,
 			toolGuidelines: Object.fromEntries(this._toolPromptGuidelines),
+			promptGuidelines: this._harnessCore.promptGuidelines(),
 		});
 	}
 

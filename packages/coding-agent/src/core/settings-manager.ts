@@ -32,6 +32,18 @@ export interface CompactionSettings {
 	modelOverrides?: Record<string, CompactionModelOverride>; // exact "provider/modelId" keys
 }
 
+/** The four harness pillars. Each defaults to enabled; changes apply to sessions created afterwards. */
+export interface HarnessCoreSettings {
+	alignment?: boolean; // default: true - developer constraints, authorization gate, question scope guard
+	authorizationGate?: boolean; // default: true - require authorization for destructive and external commands
+	scopeGuard?: boolean; // default: true - block the first edit in a question-only turn
+	evidence?: boolean; // default: true - verification request when completion is claimed without evidence
+	context?: boolean; // default: true - recent tool window, batched elision, progress digest
+	contextKeepRecent?: number; // default: 6 - tool results always sent verbatim
+	contextBatchSize?: number; // default: 6 - aged-out large results per elision batch
+	skills?: boolean; // default: true - skill resource uptake telemetry
+}
+
 export interface BranchSummarySettings {
 	reserveTokens?: number; // default: 16384 (tokens reserved for prompt + LLM response)
 	skipPrompt?: boolean; // default: false - when true, skips "Summarize branch?" prompt and defaults to no summary
@@ -141,6 +153,7 @@ export interface Settings {
 	followUpMode?: "all" | "one-at-a-time";
 	theme?: string;
 	compaction?: CompactionSettings;
+	harnessCore?: HarnessCoreSettings;
 	branchSummary?: BranchSummarySettings;
 	retry?: RetrySettings;
 	hideThinkingBlock?: boolean;
@@ -913,6 +926,20 @@ export class SettingsManager {
 
 	getCompactionEnabled(): boolean {
 		return this.settings.compaction?.enabled ?? true;
+	}
+
+	getHarnessCoreSettings(): Required<HarnessCoreSettings> {
+		const settings = this.settings.harnessCore;
+		return {
+			alignment: settings?.alignment ?? true,
+			authorizationGate: settings?.authorizationGate ?? true,
+			scopeGuard: settings?.scopeGuard ?? true,
+			evidence: settings?.evidence ?? true,
+			context: settings?.context ?? true,
+			contextKeepRecent: settings?.contextKeepRecent ?? 6,
+			contextBatchSize: settings?.contextBatchSize ?? 6,
+			skills: settings?.skills ?? true,
+		};
 	}
 
 	setCompactionEnabled(enabled: boolean): void {
