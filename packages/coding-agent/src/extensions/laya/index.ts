@@ -16,6 +16,7 @@ import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types
 import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
 import { assessmentFromAnswers, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
+import { LAYA_MODEL_MANIFEST } from "./model-manifest.ts";
 import {
 	applyPolicy,
 	type Candidate,
@@ -34,7 +35,9 @@ import {
 } from "./policy.ts";
 import { CAPABILITY_TIERS, type CapabilityTier, LAYA_QUESTIONS, layaDecisionsFile } from "./questions.ts";
 import { renderPlanMessage, selectSkills, unneededTools } from "./routers.ts";
+import { layaPaths, setupLayaRuntime } from "./runtime.ts";
 import { generateSeed } from "./seed.ts";
+import { isLocalUrl, LayaServer } from "./server.ts";
 import {
 	datasetFromTelemetry,
 	HARNESS_MESSAGE,
@@ -141,7 +144,15 @@ function failuresThisTurn(messages: readonly Message[]): { count: number; eviden
 
 export default function layaExtension(relay: ExtensionAPI): void {
 	const quota = new QuotaManager();
-	const store = new TelemetryStore(join(getAgentDir(), "laya", "telemetry.jsonl"));
+	const layaHome = join(getAgentDir(), "laya");
+	const store = new TelemetryStore(join(layaHome, "telemetry.jsonl"));
+	const server = new LayaServer({
+		paths: layaPaths(layaHome, LAYA_MODEL_MANIFEST),
+		manifest: LAYA_MODEL_MANIFEST,
+		baseUrl: () => settings.baseUrl ?? process.env.LAYA_BASE_URL ?? DEFAULT_LAYA_BASE_URL,
+	});
+	let setupOffered = false;
+	let setupRunning: Promise<void> | undefined;
 	let history = new PerformanceHistory();
 	let settings: LayaSettings = {};
 	let profileOverride: PolicyProfile | undefined;
@@ -177,6 +188,9 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	async function assess(request: string, ctx: ExtensionContext, signal?: AbortSignal): Promise<TaskAssessment> {
 		const classifier = ctx.modelRegistry.findOfType("classifier", LAYA_PROVIDER_ID, LAYA_CLASSIFIER_ID);
 		if (!classifier || Date.now() < layaUnavailableUntil) return heuristicAssessment(request);
+		// Starts the local server when the runtime is installed; a failed start falls through to the
+		// classifier call, which fails fast and lands on the keyword rules.
+		if (settings.autostart !== false) await server.ensureRunning(signal);
 		const result = await ctx.modelRegistry.classify(
 			classifier,
 			{ state: { request: truncateRequest(request) }, questions: LAYA_QUESTIONS },
@@ -378,6 +392,29 @@ export default function layaExtension(relay: ExtensionAPI): void {
 		route,
 	});
 
+	/** Installs the Python environment and downloads the trained model. Concurrent calls share one run. */
+	function setupRuntime(ctx: ExtensionContext): Promise<void> {
+		setupRunning ??= (async () => {
+			try {
+				await setupLayaRuntime({
+					exec: (command, args, options) => relay.exec(command, args, options),
+					home: layaHome,
+					manifest: LAYA_MODEL_MANIFEST,
+					python: settings.python,
+					signal: ctx.signal,
+					report: (message) => ctx.ui.setStatus("laya-setup", `laya setup: ${message}`),
+				});
+				ctx.ui.notify("Laya is installed. Starting the server on the next request.");
+			} catch (error) {
+				ctx.ui.notify(`Laya setup failed: ${error instanceof Error ? error.message : String(error)}`, "error");
+			} finally {
+				ctx.ui.setStatus("laya-setup", undefined);
+				setupRunning = undefined;
+			}
+		})();
+		return setupRunning;
+	}
+
 	relay.on("session_start", () => {
 		refreshSettings();
 		history = settings.telemetry === false ? new PerformanceHistory() : historyFromTelemetry(store.read());
@@ -400,6 +437,22 @@ export default function layaExtension(relay: ExtensionAPI): void {
 			toolBaseline = undefined;
 		}
 		if (!isSelected(ctx)) return;
+		// First use: offer to install the trained Laya once per session. Without it, keyword rules route.
+		if (
+			settings.autostart !== false &&
+			!setupOffered &&
+			ctx.hasUI &&
+			server.status() !== "ready" &&
+			isLocalUrl(settings.baseUrl ?? process.env.LAYA_BASE_URL ?? DEFAULT_LAYA_BASE_URL) &&
+			!(await server.isUp())
+		) {
+			setupOffered = true;
+			const accepted = await ctx.ui.confirm(
+				"Install Laya?",
+				"laya/auto routes with a trained Laya model. This downloads about 680 MB of model and a Python environment (a few GB, including torch) into ~/.relay/agent/laya. Until then, keyword rules route requests.",
+			);
+			if (accepted) await setupRuntime(ctx);
+		}
 		const assessment = await assess(event.prompt, ctx, ctx.signal);
 		pending = { request: event.prompt, assessment };
 		const policy = applyPolicy(assessment, event.prompt, {
@@ -423,6 +476,10 @@ export default function layaExtension(relay: ExtensionAPI): void {
 				details: { assessment, policy, skills, deactivated },
 			},
 		};
+	});
+
+	relay.on("session_shutdown", () => {
+		server.stop();
 	});
 
 	relay.on("agent_start", () => {
@@ -484,7 +541,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	relay.registerCommand("laya", {
 		description: "Laya execution router: status, policy, decisions, seed, export",
 		getArgumentCompletions: (prefix) =>
-			["status", "policy ", "decisions", "seed", "export"]
+			["status", "setup", "start", "stop", "policy ", "decisions", "seed", "export"]
 				.filter((item) => item.startsWith(prefix))
 				.map((item) => ({ value: item, label: item.trim() })),
 		handler: async (args, ctx) => {
@@ -527,10 +584,29 @@ export default function layaExtension(relay: ExtensionAPI): void {
 					ctx.ui.notify(`Exported ${rows.length} evidence-labeled exercises to ${path}`);
 					return;
 				}
+				case "setup": {
+					await setupRuntime(ctx);
+					return;
+				}
+				case "start": {
+					ctx.ui.notify(
+						(await server.ensureRunning(ctx.signal))
+							? "Laya server is running"
+							: "Laya server did not start (see /laya status)",
+						"info",
+					);
+					return;
+				}
+				case "stop": {
+					server.stop();
+					ctx.ui.notify("Stopped the Laya server this session started");
+					return;
+				}
 				case "status": {
 					const providers = new Set(candidates(ctx).map((candidate) => candidate.provider));
 					const lines = [
 						`Profile: ${profile()}${isSelected(ctx) ? "" : " (select laya/auto to route with Laya)"}`,
+						`Laya runtime: ${server.status()}${server.status() === "ready" ? "" : " (run /laya setup)"}; server ${(await server.isUp()) ? "answering" : "not answering"}`,
 						`Laya server: ${lastClassifierError ? `unavailable, using keyword rules (${lastClassifierError})` : "ok or not yet asked"}`,
 						`Models with credentials: ${
 							candidates(ctx)
@@ -560,7 +636,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 				}
 				default:
 					ctx.ui.notify(
-						"Usage: /laya [status|policy <profile>|decisions [path]|seed [count] [path]|export [path]]",
+						"Usage: /laya [status|setup|start|stop|policy <profile>|decisions [path]|seed [count] [path]|export [path]]",
 						"warning",
 					);
 			}

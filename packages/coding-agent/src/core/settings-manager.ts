@@ -138,6 +138,10 @@ export interface LayaSettings {
 	escalateAfterFailures?: number;
 	/** `advise` names unneeded tools in the plan; `enforce` also deactivates them. Default: `advise`. */
 	toolRouting?: "advise" | "enforce";
+	/** Start the local Laya server when laya/auto needs it and offer to install it on first use. Default: true. */
+	autostart?: boolean;
+	/** Python 3.10 to 3.13 used to create the Laya environment. Default: the first of python3, python, py found. */
+	python?: string;
 	/** Write routing telemetry to the agent directory. Default: true. */
 	telemetry?: boolean;
 	/** Classifier request timeout in milliseconds before falling back to keyword rules. Default: 5000. */
