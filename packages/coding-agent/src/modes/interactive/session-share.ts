@@ -6,7 +6,6 @@ import * as path from "node:path";
 import { type Container, type EditorComponent, hyperlink, type TUI } from "@relay-harness/tui";
 import { getShareViewerUrl } from "../../config.ts";
 import type { AgentSession } from "../../core/agent-session.ts";
-import { exportSessionToJsonl } from "../../core/session-export.ts";
 import { BorderedLoader } from "./components/bordered-loader.ts";
 import { theme } from "./theme/theme.ts";
 
@@ -42,13 +41,6 @@ export function createShareTrailingEntries(
 			},
 		},
 	];
-}
-
-/** Export the current branch with presentation metadata for the session viewer. */
-export function exportSessionForShare(filePath: string, session: AgentSession): void {
-	exportSessionToJsonl(session.sessionManager, filePath, (parentId, timestamp) =>
-		createShareTrailingEntries(session, parentId, timestamp),
-	);
 }
 
 /** Share the current session as a private gist. */
