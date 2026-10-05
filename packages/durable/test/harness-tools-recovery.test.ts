@@ -9,7 +9,7 @@ import {
 	fauxToolCall,
 	type ToolResultMessage,
 	Type,
-} from "@earendil-works/pi-ai";
+} from "@relay-harness/ai";
 import {
 	defineTool,
 	type EntryRecord,
@@ -20,7 +20,7 @@ import {
 	type ToolRegistration,
 	ToolResultEntry,
 	ToolTask,
-} from "@earendil-works/pi-durable";
+} from "@relay-harness/durable";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ExecutionEnv } from "../src/env/index.ts";
 import { NodeExecutionEnv } from "../src/env/node.ts";
@@ -39,7 +39,7 @@ afterEach(async () => {
 });
 
 async function sqlitePath(): Promise<string> {
-	const directory = await mkdtemp(join(tmpdir(), "pi-durable-tools-"));
+	const directory = await mkdtemp(join(tmpdir(), "relay-durable-tools-"));
 	directories.add(directory);
 	return join(directory, "session.sqlite");
 }
@@ -277,11 +277,11 @@ describe("tool recovery", () => {
 		expect((await (await opened.harness.submission(id, context))!.wait(context)).status).toBe("done");
 		expect(observed).toBe(2);
 		expect((await allEntries(opened.root)).map((entry) => entry.kind)).toEqual([
-			"pi.user",
-			"pi.system",
-			"pi.assistant",
-			"pi.tool-result",
-			"pi.assistant",
+			"relay.user",
+			"relay.system",
+			"relay.assistant",
+			"relay.tool-result",
+			"relay.assistant",
 		]);
 		await opened.harness.close(context);
 	});
@@ -330,7 +330,7 @@ describe("tool recovery", () => {
 		expect(results(await allEntries(opened.root))).toEqual([]);
 		expect(requests).toEqual(["Tool result unavailable: history ends before this call completed."]);
 		const tasks = await opened.harness.commit((tx) => tx.scanTasks({ conversationId: opened.root.id }, 20), context);
-		const faulted = tasks.items.find((task) => task.kind === "pi.tool")!;
+		const faulted = tasks.items.find((task) => task.kind === "relay.tool")!;
 		expect(faulted.state).toMatchObject({ status: "terminal", outcome: { status: "faulted" } });
 		await opened.harness.close(context);
 	});

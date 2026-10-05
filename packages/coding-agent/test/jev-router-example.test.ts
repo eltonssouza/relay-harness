@@ -1,4 +1,4 @@
-import type { AgentTool } from "@earendil-works/pi-agent-core";
+import type { AgentTool } from "@relay-harness/agent-core";
 import {
 	type AssistantMessage,
 	type ClassifierModel,
@@ -6,7 +6,7 @@ import {
 	fauxAssistantMessage,
 	fauxProvider,
 	fauxToolCall,
-} from "@earendil-works/pi-ai";
+} from "@relay-harness/ai";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import jevRouter from "../examples/extensions/jev-router.ts";
@@ -81,9 +81,9 @@ describe("jev-router example", () => {
 			// verification turn, and its routing is not what these tests characterize.
 			settings: { harnessCore: { evidence: false } },
 			extensionFactories: [
-				(pi) => {
-					pi.registerProvider(codex.provider);
-					pi.registerProvider(typesafe);
+				(relay) => {
+					relay.registerProvider(codex.provider);
+					relay.registerProvider(typesafe);
 				},
 				jevRouter,
 			],

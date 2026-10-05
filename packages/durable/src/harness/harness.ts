@@ -210,7 +210,7 @@ class HarnessImpl<Tool extends ToolRegistration> extends SessionImpl implements 
 		};
 	}
 
-	/** Resolve a conversation's committed `pi.agent` against `snapshot`, or the current one, and the current settings. */
+	/** Resolve a conversation's committed `relay.agent` against `snapshot`, or the current one, and the current settings. */
 	async resolveAgent(
 		id: ConversationId,
 		snapshot: RegistrySnapshot<Tool> | undefined,
@@ -281,7 +281,7 @@ class HarnessImpl<Tool extends ToolRegistration> extends SessionImpl implements 
 		return this.#tasks.waitForIdle(undefined, context);
 	}
 
-	/** Sum every conversation's committed `pi.usage`. Each document is read at its own point; totals only grow. */
+	/** Sum every conversation's committed `relay.usage`. Each document is read at its own point; totals only grow. */
 	async usage(context: Context): Promise<UsageState> {
 		const conversations = await this.readOnLine(() =>
 			scanAll((cursor) => this.#storage.scanConversations({}, SCAN_PAGE_SIZE, cursor, context)),
@@ -349,8 +349,8 @@ class HarnessImpl<Tool extends ToolRegistration> extends SessionImpl implements 
 	}
 
 	/**
-	 * The built-in creation hook, in every commit that creates or forks a conversation: empty `pi.live`, `pi.inbox`, and
-	 * `pi.usage`, a fresh `pi.provider`, the conversation's `pi.agent` (see `createAgent()`), then
+	 * The built-in creation hook, in every commit that creates or forks a conversation: empty `relay.live`, `relay.inbox`, and
+	 * `relay.usage`, a fresh `relay.provider`, the conversation's `relay.agent` (see `createAgent()`), then
 	 * `HarnessOptions.conversationCreated`.
 	 */
 	protected override async conversationCreated(tx: Transaction, record: ConversationRecord): Promise<void> {

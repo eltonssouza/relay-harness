@@ -40,7 +40,7 @@ import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import {
   type ConversationId, defineDoc, defineDocFamily, type DocumentObserver,
   type Harness, type Session, type TaskId, type TaskRuntime,
-} from "@earendil-works/pi-durable";
+} from "@relay-harness/durable";
 ```
 
 A `Harness` is a `Session`, so every function below also takes an open Harness.
@@ -340,10 +340,10 @@ illustrative path mapping is:
 
 ```text
 document ["s", ["generation", "message"], value]
- -> view ["s", ["docs", "pi.live", "generation", "message"], value]
+ -> view ["s", ["docs", "relay.live", "generation", "message"], value]
 ```
 
-`pi.live` is specified in `spec.md` section 8.2.
+`relay.live` is specified in `spec.md` section 8.2.
 The mount publishes one batch per complete Session commit: entry/head changes and
 changed mounted documents together, without a tracker or semantic projection.
 Third-party documents are **not automatically mounted**; use their own Chord

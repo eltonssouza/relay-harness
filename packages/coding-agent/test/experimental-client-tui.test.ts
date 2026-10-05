@@ -13,8 +13,8 @@ import {
 	FACET_BUNDLE_ARTIFACT_FORMAT_VERSION,
 	type FacetBundleArtifact,
 } from "@earendil-works/chord/node";
-import { fauxAssistantMessage } from "@earendil-works/pi-ai";
-import { ProcessTerminal, TuiMainScreen } from "@earendil-works/pi-tui";
+import { fauxAssistantMessage } from "@relay-harness/ai";
+import { ProcessTerminal, TuiMainScreen } from "@relay-harness/tui";
 import { beforeAll, describe, expect, test, vi } from "vitest";
 import { type ClientTuiServer, ExperimentalClientTui } from "../src/experimental/client-tui.ts";
 import { createPresentationFacetData } from "../src/experimental/plugins/bundled.ts";
@@ -122,7 +122,7 @@ describe("experimental client TUI", () => {
 			const transcriptState = await durable.conversation.viewState(BACKGROUND_CONTEXT);
 
 			const reloadSource =
-				'"use strict";\nconst { defineFacet, defineService } = require("@earendil-works/chord");\nconst Models = defineService("pi.models");\nmodule.exports = { __esModule: true, default: defineFacet({ id: "test-tui-facet", setup(env) { env.use(Models); } }) };\n';
+				'"use strict";\nconst { defineFacet, defineService } = require("@earendil-works/chord");\nconst Models = defineService("relay.models");\nmodule.exports = { __esModule: true, default: defineFacet({ id: "test-tui-facet", setup(env) { env.use(Models); } }) };\n';
 			const reloadArtifact: FacetBundleArtifact = {
 				format: FACET_BUNDLE_ARTIFACT_FORMAT,
 				formatVersion: FACET_BUNDLE_ARTIFACT_FORMAT_VERSION,

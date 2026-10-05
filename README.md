@@ -1,164 +1,122 @@
-<p align="center">
-  <a href="https://pi.dev">
-    <img alt="pi logo" src="https://pi.dev/logo-auto.svg" width="128">
-  </a>
-</p>
-<p align="center">
-  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
-  <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@earendil-works/pi-coding-agent?style=flat-square" /></a>
-</p>
+# Relay
 
-> New issues and PRs from new contributors are auto-closed by default. Maintainers review auto-closed issues daily. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Relay is a terminal coding agent and the harness around it. The agent reads files, runs commands, edits code, and works through multi-step tasks with any model: a hosted provider, a subscription, or a local endpoint.
 
-# Pi
+The harness is the part that stays the same when the model changes. Four rules run on every request, whatever model is behind it, and they need no extra model call. Relay is minimal by design: it ships strong defaults and leaves sub-agents, plan mode, and similar features to extensions you write or install.
 
-Pi is a minimal, extensible agent harness that you can make your own.
+## Why a harness
 
-Adapt Pi to your workflows, not the other way around. Customize Pi with [extensions](packages/coding-agent/docs/extensions.md), [skills](packages/coding-agent/docs/skills.md), [prompt templates](packages/coding-agent/docs/prompt-templates.md), and [themes](packages/coding-agent/docs/themes.md). Bundle them as [Pi packages](packages/coding-agent/docs/packages.md) and share via npm or git.
+Coding agents fail in predictable ways. They ignore a constraint you stated three messages ago, edit files when you only asked a question, report "done" when the tests failed, and drown in stale tool output. Relay's harness core targets these failures directly:
 
-Pi ships with powerful defaults but skips features like sub-agents and plan mode. Ask Pi to build what you want, or install a package that does it your way.
+| Pillar | Problem | What Relay does |
+|---|---|---|
+| Alignment | The agent forgets constraints, treats questions as permission to edit, runs destructive commands. | Keeps your standing rules as state and restates them on every request. Asks before destructive or external commands. Blocks the first edit in a turn where you only asked a question. |
+| Evidence | The agent claims success without a passing check. | Records what changed and which checks passed. A completion claim without a passing check after the last change gets one verification request. Checks with masked exit codes (`\| tail`, `\|\| true`) do not count. Large changes and files are flagged. |
+| Context | Old tool results describe states that no longer exist. | Sends recent results verbatim, replaces old large ones with one-line stubs, and restates a compact progress digest. |
+| Skills | Skill structure changes how the agent uses it, and nobody measures it. | Treats `SKILL.md` as a router, measures which resources lead to actions, and audits skill structure. |
 
-Use Pi [interactively](packages/coding-agent/docs/usage.md), automate it in [print or JSON mode](packages/coding-agent/docs/cli.md), control it over [RPC](packages/coding-agent/docs/rpc.md), or build apps with the [Pi TypeScript SDK](packages/coding-agent/docs/sdk.md). See [OpenClaw](https://github.com/OpenClaw/OpenClaw) for a real-world integration.
+Inspect the state with `/harness` and tune it through the `harnessCore` settings. See [Harness Core](packages/coding-agent/docs/harness-core.md).
 
 ## Getting started
 
-Install the command-line interface:
+Relay requires Node.js 22.19 or newer. Build it from source:
 
 ```bash
-curl -fsSL https://pi.dev/install.sh | sh
+git clone https://github.com/eltonssouza/relay-harness.git
+cd relay-harness
+npm install --ignore-scripts
+npm run build
 ```
 
-On Windows:
-
-```shell
-powershell -c "irm https://pi.dev/install.ps1 | iex"
-```
-
-The installer pins all dependencies and updates Pi with `pi update`. Alternatively, install directly with npm, which does not pin transitive dependencies:
+Run it from the sources in any directory:
 
 ```bash
-npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+./relay-test.sh      # Linux and macOS
+./relay-test.ps1     # Windows PowerShell
 ```
 
-Pi requires Node.js 22.19 or newer. The macOS, Linux, and Windows installers can install it if needed. Pi does not require dependency lifecycle scripts for a normal npm installation.
+Inside Relay, run `/login` to connect a subscription or API key, then give it a task. Relay stores its configuration in `~/.relay/agent` and project resources in `.relay/`.
 
-Start Pi in the directory where you want it to work:
+`npm run build` refreshes model data from the network first. Use `npm run build:offline` to rebuild from existing model data.
+
+### Nix
 
 ```bash
-cd /path/to/project
-pi
+nix run github:eltonssouza/relay-harness
 ```
 
-For a built-in AI provider, run `/login` inside Pi to connect a subscription or API key. Then give Pi a task.
+Use `nix build .` or `nix run .` to build or run your checkout. Nix builds are offline, so bundled model data comes from the revision pinned in `nix/model-catalog.json`. Refresh the pin with `npm run update:model-catalog-pin`.
 
-See the [documentation](https://pi.dev/docs/latest) for full setup and usage instructions, or [visit pi.dev](https://pi.dev) for demos.
+## What you can do with it
 
-## Run with Nix
+- Work [interactively](packages/coding-agent/docs/usage.md) in the terminal, branch and resume [sessions](packages/coding-agent/docs/sessions.md).
+- Script it with [print and JSON modes](packages/coding-agent/docs/cli.md), or control a separate process over [RPC](packages/coding-agent/docs/rpc.md).
+- Embed it in an application with the [TypeScript SDK](packages/coding-agent/docs/sdk.md).
+- Extend it with [extensions](packages/coding-agent/docs/extensions.md), [skills](packages/coding-agent/docs/skills.md), [prompt templates](packages/coding-agent/docs/prompt-templates.md), [themes](packages/coding-agent/docs/themes.md), and [MCP servers](packages/coding-agent/docs/mcp.md). Share them as [Relay packages](packages/coding-agent/docs/packages.md) through npm or git.
+- Connect any model through [providers](packages/coding-agent/docs/providers.md), [custom providers](packages/coding-agent/docs/custom-provider.md), or a local [llama.cpp](packages/coding-agent/docs/llama-cpp.md) server.
 
-```bash
-nix run github:earendil-works/pi/stable
-```
-
-`stable` points at the latest release. Install it with `nix profile add github:earendil-works/pi/stable` and update with `nix profile upgrade pi`. Use a release tag such as `github:earendil-works/pi/v1.0.0` to pin a version, or `github:earendil-works/pi` for unreleased changes on `main`. Nix builds Pi from source.
-
-Supports ARM64 and x86-64 on Linux and macOS. Use `nix build .` or `nix run .` to build or run your checkout.
-
-Nix builds are offline, so the bundled model data comes from a pi.dev model catalog revision pinned in `nix/model-catalog.json`. At runtime, Pi still overlays newer catalog data from pi.dev as usual. The Nix workflow replaces the pin on `main` when it no longer matches the checkout, for example after a provider is added or gains a new model type. To refresh it by hand:
-
-```bash
-npm run update:model-catalog-pin
-```
+Start with the [documentation index](packages/coding-agent/docs/index.md) or the [quickstart](packages/coding-agent/docs/quickstart.md).
 
 ## Packages
 
-This monorepo contains the Pi CLI and its supporting libraries.
+This monorepo holds the Relay CLI and the libraries it is built from.
 
 | Package | Description |
 |---------|-------------|
-| **[@earendil-works/chord](packages/chord)** | Standalone application-composition runtime for services, replicated state, RPC, and plugins |
-| **[@earendil-works/pi-telemetry](packages/telemetry)** | Vendor-neutral telemetry contracts, reference adapter, conformance tests, and typed schemas |
-| **[@earendil-works/pi-ai](packages/ai)** | Unified multi-provider LLM API (OpenAI, Anthropic, Google, etc.) |
-| **[@earendil-works/pi-durable](packages/durable)** | Durable conversation, task, and document runtime |
-| **[@earendil-works/pi-agent-core](packages/agent)** | Agent runtime with tool calling and state management |
-| **[@earendil-works/pi-coding-agent](packages/coding-agent)** | Interactive coding agent CLI |
-| **[@earendil-works/pi-tui](packages/tui)** | Terminal UI library with differential rendering |
+| **[@relay-harness/coding-agent](packages/coding-agent)** | The `relay` command: interactive coding agent, harness core, sessions, extensions |
+| **[@relay-harness/agent-core](packages/agent)** | Agent runtime with tool calling, state management, and the model-independent harness |
+| **[@relay-harness/ai](packages/ai)** | Unified multi-provider LLM API with model discovery |
+| **[@relay-harness/tui](packages/tui)** | Terminal UI library with differential rendering |
+| **[@relay-harness/durable](packages/durable)** | Durable conversation, task, and document runtime |
+| **[@relay-harness/mcp](packages/mcp)** | Standalone Model Context Protocol client |
+| **[@relay-harness/codemode](packages/codemode)** | Sandboxed JavaScript execution where the only capability is calling injected tools |
+| **[@relay-harness/telemetry](packages/telemetry)** | Vendor-neutral telemetry contracts and typed schemas |
+| **[@relay-harness/protocol](packages/protocol)**, **[client](packages/client)**, **[server](packages/server)** | Experimental remote sessions over framed CBOR |
+| **[@relay-harness/evals](packages/evals)** | Evaluation harness for the coding agent |
+| **[@earendil-works/chord](packages/chord)** | Application-composition runtime for services, replicated state, RPC, and plugins |
 
-For Slack/chat automation and workflows see [earendil-works/pi-chat](https://github.com/earendil-works/pi-chat).
+## Permissions and containerization
 
-## Permissions & Containerization
+Relay has no sandbox for filesystem, process, network, or credential access. It runs with the permissions of the user who started it. The harness asks before destructive or external commands, but that is a safeguard against mistakes, not a security boundary.
 
-Pi does not include a built-in permission system for restricting filesystem, process, network, or credential access. By default, it runs with the permissions of the user and process that launched it.
-
-If you need stronger boundaries, containerize or sandbox Pi. See [packages/coding-agent/docs/containerization.md](packages/coding-agent/docs/containerization.md) for three patterns:
-
-- **Gondolin extension**: keep `pi` and provider auth on the host while routing built-in tools and `!` commands into a local Linux micro-VM.
-- **Plain Docker**: run the whole `pi` process in a local container for simple isolation.
-- **OpenShell**: run the whole `pi` process in a policy-controlled sandbox.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines and [AGENTS.md](AGENTS.md) for project-specific rules (for both humans and agents).  Longer term plans for Pi can also be found in [RFCs](https://rfc.earendil.com/keyword/pi/).
+For stronger isolation, see [containerization](packages/coding-agent/docs/containerization.md): a Gondolin micro-VM extension, plain Docker, or an OpenShell sandbox. Review [Security](packages/coding-agent/docs/security.md) before using untrusted repositories, extensions, or unattended automation.
 
 ## Development
 
 ```bash
-npm install --ignore-scripts  # Install all dependencies without running lifecycle scripts
-npm run build         # Refresh model data, then build all packages
-npm run build:offline # Rebuild using existing model data without network access
-npm run check         # Lint, format, and type check
-./test.sh            # Run tests (skips LLM-dependent tests without API keys)
-./pi-test.sh         # Run pi from sources (can be run from any directory)
+npm install --ignore-scripts   # Install dependencies without lifecycle scripts
+npm run build                  # Refresh model data, then build all packages
+npm run build:offline          # Build with existing model data
+npm run check                  # Lint, format, and type check
+./test.sh                      # Run tests that need no API keys
 ```
 
-## Building standalone binaries from release source
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution rules and [AGENTS.md](AGENTS.md) for project conventions, which apply to humans and agents alike.
 
-GitHub releases include a versioned source archive covered by the release's `SHA256SUMS` file. Extract it and run the same build script used for the official standalone binaries:
+### Standalone binaries
+
+A release source archive builds the same standalone binaries as the official release:
 
 ```bash
 VERSION="<release-version>"
-tar -xzf "pi-${VERSION}-source.tar.gz"
-cd "pi-${VERSION}"
+tar -xzf "relay-${VERSION}-source.tar.gz"
+cd "relay-${VERSION}"
 ./scripts/build-binaries.sh --offline-model-data --platform linux-x64 --out "$PWD/out"
 ```
 
-The archive includes release model data and native prebuilds. `--offline-model-data` uses that model data without refreshing provider catalogs. The script installs dependencies and builds the executable with its runtime assets; pass `--skip-install` if dependencies are already provided.
+`--offline-model-data` uses the model data in the archive without refreshing provider catalogs. Pass `--skip-install` if dependencies are already installed.
 
 ## Supply-chain hardening
 
-We treat npm dependency changes as reviewed code changes.
+Dependency changes are reviewed as code.
 
-- Direct external dependencies are pinned to exact versions. Internal workspace packages remain version-ranged.
-- `.npmrc` sets `save-exact=true` and `min-release-age=2` to avoid same-day dependency releases during npm resolution.
-- `package-lock.json` is the dependency ground truth. Pre-commit blocks accidental lockfile commits unless `PI_ALLOW_LOCKFILE_CHANGE=1` is set.
-- `npm run check` verifies pinned direct deps, native TypeScript import compatibility, and the generated coding-agent install lock.
-- The pi.dev installer installs from `packages/coding-agent/install-lock/`, generated from the root lockfile, to pin transitive deps. The npm package does not pin transitive deps.
-- Release smoke tests use `npm run release:local` to build, pack, and create isolated npm and Bun installs outside the repo before tagging a release.
-- Local release installs, documented npm installs, and `pi update --self` use `--ignore-scripts` where supported.
-- CI installs with `npm ci --ignore-scripts`, and a scheduled GitHub workflow runs `npm audit --omit=dev` plus `npm audit signatures --omit=dev`.
-- Install lock generation has an explicit allowlist for dependency lifecycle scripts; new lifecycle-script deps fail checks until reviewed.
-
-## Share your OSS coding agent sessions
-
-If you use Pi or other coding agents for open source work, please share your sessions.
-
-Public OSS session data helps improve coding agents with real-world tasks, tool use, failures, and fixes instead of toy benchmarks.
-
-For the full explanation, see [this post on X](https://x.com/badlogicgames/status/2037811643774652911).
-
-To publish sessions, use [`badlogic/pi-share-hf`](https://github.com/badlogic/pi-share-hf). Read its README.md for setup instructions. All you need is a Hugging Face account, the Hugging Face CLI, and `pi-share-hf`.
-
-You can also watch [this video](https://x.com/badlogicgames/status/2041151967695634619), where I show how I publish my `pi-mono` sessions.
-
-I regularly publish my own `pi-mono` work sessions here:
-
-- [badlogicgames/pi-mono on Hugging Face](https://huggingface.co/datasets/badlogicgames/pi-mono)
+- Direct external dependencies are pinned to exact versions. Workspace packages use version ranges.
+- `.npmrc` sets `save-exact=true` and `min-release-age=2` to avoid same-day releases.
+- `package-lock.json` is the ground truth. Pre-commit blocks lockfile commits unless `RELAY_ALLOW_LOCKFILE_CHANGE=1`.
+- `npm run check` verifies pinned dependencies, native TypeScript import compatibility, and the generated install lock in `packages/coding-agent/install-lock/`.
+- Installs use `--ignore-scripts`, and CI runs `npm ci --ignore-scripts` plus a scheduled `npm audit` and signature check.
+- The install lock has an explicit allowlist for lifecycle scripts. New ones fail the checks until reviewed.
 
 ## License
 
 MIT
-
-<p align="center">
-  <a href="https://pi.dev">pi.dev</a> domain graciously donated by
-  <br /><br />
-  <a href="https://exe.dev"><img src="packages/coding-agent/docs/images/exy.png" alt="Exy mascot" width="48" /><br />exe.dev</a>
-</p>

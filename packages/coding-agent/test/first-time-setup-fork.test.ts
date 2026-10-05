@@ -7,29 +7,29 @@ vi.mock("../src/config.ts", async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...(actual as Record<string, unknown>),
-		PACKAGE_NAME: "@example/pi-coding-agent",
+		PACKAGE_NAME: "@example/relay-coding-agent",
 	};
 });
 
 import { shouldRunFirstTimeSetup } from "../src/cli/startup-ui.ts";
 
 describe("shouldRunFirstTimeSetup in forked distributions", () => {
-	const originalPiExperimental = process.env.PI_EXPERIMENTAL;
+	const originalRelayExperimental = process.env.RELAY_EXPERIMENTAL;
 	let tempDir: string;
 	let settingsPath: string;
 
 	beforeEach(() => {
-		tempDir = mkdtempSync(join(tmpdir(), "pi-first-time-setup-fork-"));
+		tempDir = mkdtempSync(join(tmpdir(), "relay-first-time-setup-fork-"));
 		settingsPath = join(tempDir, "settings.json");
-		process.env.PI_EXPERIMENTAL = "1";
+		process.env.RELAY_EXPERIMENTAL = "1";
 	});
 
 	afterEach(() => {
 		rmSync(tempDir, { recursive: true, force: true });
-		if (originalPiExperimental === undefined) {
-			delete process.env.PI_EXPERIMENTAL;
+		if (originalRelayExperimental === undefined) {
+			delete process.env.RELAY_EXPERIMENTAL;
 		} else {
-			process.env.PI_EXPERIMENTAL = originalPiExperimental;
+			process.env.RELAY_EXPERIMENTAL = originalRelayExperimental;
 		}
 	});
 

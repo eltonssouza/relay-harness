@@ -303,16 +303,16 @@ export function createEnvConformance(options: EnvConformanceOptions): readonly E
 		}),
 
 		watchCase("watch keeps watching a path whose parent is renamed and recreated", async (env) => {
-			getOrThrow(await env.writeFile("proj/.pi/skills/x.md", "x", context));
-			await watching(env, [{ path: "proj/.pi/skills", recursive: true }], async ({ expectChange }) => {
-				await expectChange("proj/.pi/skills", async () => {
-					getOrThrow(await env.renameFile("proj/.pi", "proj/old", context));
+			getOrThrow(await env.writeFile("proj/.relay/skills/x.md", "x", context));
+			await watching(env, [{ path: "proj/.relay/skills", recursive: true }], async ({ expectChange }) => {
+				await expectChange("proj/.relay/skills", async () => {
+					getOrThrow(await env.renameFile("proj/.relay", "proj/old", context));
 				});
-				await expectChange("proj/.pi/skills/y.md", async () => {
-					getOrThrow(await env.writeFile("proj/.pi/skills/y.md", "y", context));
+				await expectChange("proj/.relay/skills/y.md", async () => {
+					getOrThrow(await env.writeFile("proj/.relay/skills/y.md", "y", context));
 				});
-				await expectChange("proj/.pi/skills/y.md", async () => {
-					getOrThrow(await env.writeFile("proj/.pi/skills/y.md", "yy", context));
+				await expectChange("proj/.relay/skills/y.md", async () => {
+					getOrThrow(await env.writeFile("proj/.relay/skills/y.md", "yy", context));
 				});
 			});
 		}),
@@ -387,7 +387,7 @@ export function createEnvConformance(options: EnvConformanceOptions): readonly E
 
 		createCase("argv exec reports missing programs and empty argv as spawn errors", async (env) => {
 			assert.strictEqual(
-				errorCode(await env.exec(["pi-durable-conformance-missing-program"], undefined, context)),
+				errorCode(await env.exec(["relay-durable-conformance-missing-program"], undefined, context)),
 				"spawn_error",
 			);
 			assert.strictEqual(errorCode(await env.exec([], undefined, context)), "spawn_error");

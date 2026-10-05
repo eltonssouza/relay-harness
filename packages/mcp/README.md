@@ -1,13 +1,13 @@
-# @earendil-works/pi-mcp
+# @relay-harness/mcp
 
-A small, standalone Model Context Protocol client. It does not depend on the official MCP SDK or other pi packages.
+A small, standalone Model Context Protocol client. It does not depend on the official MCP SDK or other relay packages.
 
 The package provides a transport-neutral client core, stdio and Streamable HTTP transports, and an in-memory testing transport.
 
 ## Usage
 
 ```typescript
-import { McpClient, StdioTransport } from "@earendil-works/pi-mcp";
+import { McpClient, StdioTransport } from "@relay-harness/mcp";
 
 const transport = new StdioTransport({
 	command: "npx",
@@ -29,13 +29,13 @@ For a remote server, use `new StreamableHttpTransport({ url, headers })`. Fetch 
 
 ### Tools for an LLM
 
-`toLlmContent(result)` converts a `CallToolResult` to text and image content for a model, in the shape of `@earendil-works/pi-ai`'s `TextContent` and `ImageContent`. Text and images pass through, embedded text and image resources are unwrapped, and audio, resource links, and binary resources become short text placeholders. A result without content blocks but with `structuredContent` becomes its JSON.
+`toLlmContent(result)` converts a `CallToolResult` to text and image content for a model, in the shape of `@relay-harness/ai`'s `TextContent` and `ImageContent`. Text and images pass through, embedded text and image resources are unwrapped, and audio, resource links, and binary resources become short text placeholders. A result without content blocks but with `structuredContent` becomes its JSON.
 
-Wrapping an MCP tool as a `pi-agent-core` `AgentTool`:
+Wrapping an MCP tool as a `relay-agent-core` `AgentTool`:
 
 ```typescript
-import type { AgentTool } from "@earendil-works/pi-agent-core";
-import { toLlmContent } from "@earendil-works/pi-mcp";
+import type { AgentTool } from "@relay-harness/agent-core";
+import { toLlmContent } from "@relay-harness/mcp";
 import { Type } from "typebox";
 
 const tools: AgentTool[] = (await client.listTools()).map((tool) => ({
@@ -53,21 +53,21 @@ const tools: AgentTool[] = (await client.listTools()).map((tool) => ({
 }));
 ```
 
-The [mcp-codemode example](https://github.com/earendil-works/pi/tree/main/packages/agent/examples/mcp-codemode) also forwards progress, passes `structuredContent` through, and lets `@earendil-works/pi-codemode` scripts call the tools.
+The [mcp-codemode example](https://github.com/eltonssouza/relay-harness/tree/main/packages/agent/examples/mcp-codemode) also forwards progress, passes `structuredContent` through, and lets `@relay-harness/codemode` scripts call the tools.
 
 ### OAuth
 
-`@earendil-works/pi-mcp/oauth` provides the MCP OAuth client subset without depending on the official SDK:
+`@relay-harness/mcp/oauth` provides the MCP OAuth client subset without depending on the official SDK:
 
 ```typescript
-import { McpClient, StreamableHttpTransport } from "@earendil-works/pi-mcp";
+import { McpClient, StreamableHttpTransport } from "@relay-harness/mcp";
 import {
 	adaptOAuthProvider,
 	authorizeMcp,
 	McpOAuthAuthorizationRequiredError,
 	McpOAuthProvider,
 	OAuthCallbackServer,
-} from "@earendil-works/pi-mcp/oauth";
+} from "@relay-harness/mcp/oauth";
 
 const serverUrl = "https://mcp.example.com/mcp";
 const callback = await OAuthCallbackServer.listen();
@@ -133,4 +133,4 @@ Batch JSON-RPC messages, legacy HTTP+SSE, servers, sampling, and tasks are outsi
 
 ## Testing
 
-`@earendil-works/pi-mcp/testing` exports `createInMemoryTransportPair()` for client and adapter tests.
+`@relay-harness/mcp/testing` exports `createInMemoryTransportPair()` for client and adapter tests.

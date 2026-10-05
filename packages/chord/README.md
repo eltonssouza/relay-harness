@@ -3,7 +3,7 @@
 Chord is an application-composition runtime for systems assembled from
 plugins/extensions. It provides facets, services, replicated state, and a
 pluggable remote-service boundary. It is developed as a standalone package in
-the Pi monorepo, but it is not a Pi package: it does not depend on any other Pi
+the Relay monorepo, but it is not a Relay package: it does not depend on any other Relay
 workspace package and can be used by unrelated applications.
 
 ## What Chord is for

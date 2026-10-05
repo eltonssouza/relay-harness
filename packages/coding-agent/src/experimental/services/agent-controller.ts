@@ -54,4 +54,4 @@ export interface AgentController {
 	waitForPrompt(operationId: string, context: Context): Promise<AgentPromptResult>;
 }
 
-export const AgentController = defineService<AgentController>("pi.agent-controller");
+export const AgentController = defineService<AgentController>("relay.agent-controller");

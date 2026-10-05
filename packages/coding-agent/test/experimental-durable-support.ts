@@ -1,6 +1,6 @@
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import { createModels, type FauxProviderHandle, type FauxResponseStep, fauxProvider } from "@earendil-works/pi-ai";
-import { type Conversation, createRegistry, Harness, MemoryStorage } from "@earendil-works/pi-durable";
+import { createModels, type FauxProviderHandle, type FauxResponseStep, fauxProvider } from "@relay-harness/ai";
+import { type Conversation, createRegistry, Harness, MemoryStorage } from "@relay-harness/durable";
 
 export interface FauxConversation {
 	readonly faux: FauxProviderHandle;

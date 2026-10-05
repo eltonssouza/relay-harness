@@ -1,7 +1,7 @@
 {
-	"name": "@earendil-works/pi-server",
+	"name": "@relay-harness/server",
 	"version": "1.0.2",
-	"description": "experimental server package for pi",
+	"description": "experimental server package for relay",
 	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -33,7 +33,7 @@
 		"prepublishOnly": "npm run clean && npm run build"
 	},
 	"keywords": [
-		"pi",
+		"relay",
 		"server"
 	],
 	"author": "Earendil Works",
@@ -48,7 +48,7 @@
 	},
 	"dependencies": {
 		"@earendil-works/chord": "^1.0.2",
-		"@earendil-works/pi-protocol": "^1.0.2"
+		"@relay-harness/protocol": "^1.0.2"
 	},
 	"devDependencies": {
 		"shx": "0.4.0",

@@ -1,7 +1,7 @@
 /**
- * Adapts MCP tools to pi tool definitions.
+ * Adapts MCP tools to relay tool definitions.
  *
- * Results map onto pi's model-facing content (text and images). Text over 20KB keeps its start and
+ * Results map onto relay's model-facing content (text and images). Text over 20KB keeps its start and
  * end with the middle cut out, like Codex does, and the full text is saved to a temp file the model
  * can read. Binary resources other than images are saved to temp files too, and resource links name
  * the `read_mcp_resource` tool. Codemode scripts receive the whole `CallToolResult` without `_meta`
@@ -11,16 +11,16 @@
  */
 
 import { createHash } from "node:crypto";
-import type { AgentToolResult } from "@earendil-works/pi-agent-core";
-import type { ImageContent, JsonValue, TextContent } from "@earendil-works/pi-ai";
+import type { AgentToolResult } from "@relay-harness/agent-core";
+import type { ImageContent, JsonValue, TextContent } from "@relay-harness/ai";
 import {
 	type CallToolResult,
 	type ContentBlock,
 	type McpRequestOptions,
 	type Tool as McpTool,
 	toLlmContent,
-} from "@earendil-works/pi-mcp";
-import { Container, Spacer, Text } from "@earendil-works/pi-tui";
+} from "@relay-harness/mcp";
+import { Container, Spacer, Text } from "@relay-harness/tui";
 import type { TSchema } from "typebox";
 import type {
 	ToolAnnotations,
@@ -67,7 +67,7 @@ export interface McpToolDetails {
 export type McpOutputSaver = (data: string | Uint8Array, extension: string) => Promise<string>;
 
 export function saveToTempFile(data: string | Uint8Array, extension: string): Promise<string> {
-	return writeOutputFile("pi-mcp", extension, data);
+	return writeOutputFile("relay-mcp", extension, data);
 }
 
 export interface McpToolCaller {

@@ -18,7 +18,7 @@ describe("createGitWorkspaceProbe", () => {
 	});
 
 	function repo(): string {
-		const dir = mkdtempSync(join(tmpdir(), "pi-probe-"));
+		const dir = mkdtempSync(join(tmpdir(), "relay-probe-"));
 		dirs.push(dir);
 		git(dir, "init", "-q");
 		writeFileSync(join(dir, "a.ts"), "one\ntwo\nthree\n");
@@ -46,7 +46,7 @@ describe("createGitWorkspaceProbe", () => {
 	});
 
 	it("reports an unknown change size outside a repository", async () => {
-		const dir = mkdtempSync(join(tmpdir(), "pi-probe-"));
+		const dir = mkdtempSync(join(tmpdir(), "relay-probe-"));
 		dirs.push(dir);
 		expect(await createGitWorkspaceProbe(dir).changedLines()).toBeUndefined();
 	});

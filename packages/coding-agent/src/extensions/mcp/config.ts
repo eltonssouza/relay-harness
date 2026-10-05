@@ -2,7 +2,7 @@
  * MCP server configuration.
  *
  * Servers are read from `mcp.json` in the agent directory and, for trusted projects, from
- * `<project>/.pi/mcp.json`. Both use the `mcpServers` shape shared by other MCP clients, so
+ * `<project>/.relay/mcp.json`. Both use the `mcpServers` shape shared by other MCP clients, so
  * existing configurations can be copied over. Project entries replace global entries with the
  * same name.
  *
@@ -55,7 +55,7 @@ export interface McpServerEntry {
 	source: string;
 	/**
 	 * The global or the project `mcp.json`, or `extension` for servers registered with
-	 * `pi.registerMcpServer()`. Changes to extension servers are not saved.
+	 * `relay.registerMcpServer()`. Changes to extension servers are not saved.
 	 */
 	scope?: "global" | "project" | "extension";
 	/** Project `mcp.json` with an override of this global server's `enabled`, `exposure`, or `toolExposure`. */

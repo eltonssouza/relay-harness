@@ -1,10 +1,10 @@
 # Quickstart
 
-Pi runs in your terminal and works with files on your machine. To use it, you need access to a model through a supported provider. This can be a subscription, an API key, or a local model.
+Relay runs in your terminal and works with files on your machine. To use it, you need access to a model through a supported provider. This can be a subscription, an API key, or a local model.
 
 For native Windows setup, read [Windows Setup](windows.md). For Android, read [Termux Setup](termux.md).
 
-## 1. Install Pi
+## 1. Install Relay
 
 On macOS or Linux, you can use the installer:
 
@@ -12,48 +12,48 @@ On macOS or Linux, you can use the installer:
 curl -fsSL https://pi.dev/install.sh | sh
 ```
 
-The installer pins all dependencies and updates Pi with `pi update`. Alternatively, install Pi from npm, which does not pin transitive dependencies. This requires Node.js 22.19 or newer:
+The installer pins all dependencies and updates Relay with `relay update`. Alternatively, install Relay from npm, which does not pin transitive dependencies. This requires Node.js 22.19 or newer:
 
 ```bash
-npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+npm install -g --ignore-scripts @relay-harness/coding-agent
 ```
 
-Pi does not require dependency lifecycle scripts for a normal npm installation.
+Relay does not require dependency lifecycle scripts for a normal npm installation.
 
-With Nix on macOS or Linux, install the latest release from Pi's flake. Nix builds Pi from source:
+With Nix on macOS or Linux, install the latest release from Relay's flake. Nix builds Relay from source:
 
 ```bash
-nix profile add github:earendil-works/pi/stable
+nix profile add github:eltonssouza/relay-harness/stable
 ```
 
-Older Nix versions use `nix profile install` instead. Update with `nix profile upgrade pi`; `pi update` cannot update a Nix installation. To pin a release, use a tag such as `github:earendil-works/pi/v1.0.0`.
+Older Nix versions use `nix profile install` instead. Update with `nix profile upgrade relay`; `relay update` cannot update a Nix installation. To pin a release, use a tag such as `github:eltonssouza/relay-harness/v1.0.0`.
 
 Verify the installation:
 
 ```bash
-pi --version
+relay --version
 ```
 
-## 2. Start Pi
+## 2. Start Relay
 
-Change to the folder you want Pi to work with, then start it:
+Change to the folder you want Relay to work with, then start it:
 
 ```bash
 cd /path/to/folder
-pi
+relay
 ```
 
-The working folder helps Pi discover relevant files, instructions, and configuration. Pi also uses it to group saved sessions.
+The working folder helps Relay discover relevant files, instructions, and configuration. Relay also uses it to group saved sessions.
 
-<p align="center"><img src="images/interactive-mode.png" alt="Pi running in a terminal with a conversation, input editor, and status footer" width="750"></p>
+<p align="center"><img src="images/interactive-mode.png" alt="Relay running in a terminal with a conversation, input editor, and status footer" width="750"></p>
 
-The interface shows your conversation, an editor for prompts and commands, and a footer with the current folder, model, and session status. See [Use Pi in the terminal](usage.md) to learn how to add files, run commands, direct ongoing work, and manage results.
+The interface shows your conversation, an editor for prompts and commands, and a footer with the current folder, model, and session status. See [Use Relay in the terminal](usage.md) to learn how to add files, run commands, direct ongoing work, and manage results.
 
 ## 3. Choose a model
 
-A **model** generates Pi's responses. A **provider** is the service or account Pi uses to access that model.
+A **model** generates Relay's responses. A **provider** is the service or account Relay uses to access that model.
 
-In Pi, run:
+In Relay, run:
 
 ```text
 /login
@@ -63,9 +63,9 @@ Choose a provider, then follow the prompts to use a subscription or store an API
 
 See [Choose a model and provider](models.md) for supported providers, environment-variable authentication, local models, and custom endpoints.
 
-## 4. Give Pi a task
+## 4. Give Relay a task
 
-Pi shows each file read, search, command, and edit it performs. It does not ask before every tool call.
+Relay shows each file read, search, command, and edit it performs. It does not ask before every tool call.
 
 Enter a task that matches your work, for example:
 
@@ -81,56 +81,56 @@ Explain how this repository is structured and how to run its checks.
 Compare @previous.csv with @current.csv and summarize the important changes.
 ```
 
-Type `@` in the editor to search for a file instead of entering its full path. When Pi finishes, review its response and any changed files. Use version control or backups for important work. For untrusted or unattended work, use a container or another sandbox. See [Security](security.md).
+Type `@` in the editor to search for a file instead of entering its full path. When Relay finishes, review its response and any changed files. Use version control or backups for important work. For untrusted or unattended work, use a container or another sandbox. See [Security](security.md).
 
 ## Continue later
 
-Pi saves sessions automatically. Exit Pi, then resume the most recent session for the same working folder with:
+Relay saves sessions automatically. Exit Relay, then resume the most recent session for the same working folder with:
 
 ```bash
-pi --continue
+relay --continue
 ```
 
 Use `/resume` to choose another saved session. See [Continue or branch a session](sessions.md) for session naming, branching, compaction, export, and sharing.
 
 ## Next steps
 
-- [Use Pi interactively](usage.md) to learn input, commands, shortcuts, and queued messages.
-- [Add instructions](configuration.md#context-files) that Pi should follow whenever it works in a folder.
+- [Use Relay interactively](usage.md) to learn input, commands, shortcuts, and queued messages.
+- [Add instructions](configuration.md#context-files) that Relay should follow whenever it works in a folder.
 - [Choose a model and provider](models.md).
 
-### Choose how to customize Pi
+### Choose how to customize Relay
 
 Start with the least powerful mechanism that meets your need:
 
 | Need | Start with |
 |---|---|
-| Give Pi persistent instructions for a folder | [`AGENTS.md`](configuration.md#context-files) |
+| Give Relay persistent instructions for a folder | [`AGENTS.md`](configuration.md#context-files) |
 | Reuse a prompt from the `/` menu | [Prompt template](prompt-templates.md) |
 | Add task-specific instructions and supporting files | [Skill](skills.md) |
 | Add executable tools, commands, or event handlers | [Extension](extensions.md) |
 | Build a custom terminal component | [Terminal UI](tui.md) |
 | Connect an unsupported model service | [Custom provider](custom-provider.md) |
-| Install or distribute several resources | [Pi package](packages.md) |
+| Install or distribute several resources | [Relay package](packages.md) |
 
-## Uninstall Pi
+## Uninstall Relay
 
-If you installed Pi with npm, run:
+If you installed Relay with npm, run:
 
 ```bash
-npm uninstall -g @earendil-works/pi-coding-agent
+npm uninstall -g @relay-harness/coding-agent
 ```
 
-If you used the installer, run it again and choose **Uninstall Pi**:
+If you used the installer, run it again and choose **Uninstall Relay**:
 
 ```bash
 curl -fsSL https://pi.dev/install.sh | sh
 ```
 
-If you installed Pi with Nix, run:
+If you installed Relay with Nix, run:
 
 ```bash
-nix profile remove pi
+nix profile remove relay
 ```
 
-None of these methods removes configuration, credentials, sessions, or installed Pi packages from `~/.pi/agent/`.
+None of these methods removes configuration, credentials, sessions, or installed Relay packages from `~/.relay/agent/`.

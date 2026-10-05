@@ -6,9 +6,9 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import { Type } from "@earendil-works/pi-ai";
-import { createModels } from "@earendil-works/pi-ai/models";
-import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@earendil-works/pi-ai/providers/faux";
+import { Type } from "@relay-harness/ai";
+import { createModels } from "@relay-harness/ai/models";
+import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@relay-harness/ai/providers/faux";
 import { NodeExecutionEnv } from "../../src/env/node.ts";
 import {
 	createRegistry,
@@ -63,7 +63,7 @@ const leavePlanMode = { extensions: null, tools: null };
 
 // ─── Host setup ─────────────────────────────────────────────────────────────
 
-const directory = await mkdtemp(join(tmpdir(), "pi-durable-plan-"));
+const directory = await mkdtemp(join(tmpdir(), "relay-durable-plan-"));
 await writeFile(join(directory, "server.ts"), "app.listen(3000);\n");
 
 const faux = fauxProvider();

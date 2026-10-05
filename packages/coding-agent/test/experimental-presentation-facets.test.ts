@@ -40,7 +40,7 @@ describe("server-selected presentation facets", () => {
 	});
 
 	test("restores plugin package selections for later server generations", async () => {
-		const directory = await mkdtemp("/tmp/pi-presentation-profile-");
+		const directory = await mkdtemp("/tmp/relay-presentation-profile-");
 		directories.add(directory);
 		const serverId = randomUUID();
 		const packagePaths = [join(directory, "first-plugin"), join(directory, "second-plugin")];
@@ -51,10 +51,10 @@ describe("server-selected presentation facets", () => {
 	});
 
 	test("builds conventional plugin entries into the server-owned plugin cache", async () => {
-		const directory = await mkdtemp("/tmp/pi-presentation-package-");
+		const directory = await mkdtemp("/tmp/relay-presentation-package-");
 		directories.add(directory);
 		const serverId = randomUUID();
-		const packagePath = join(directory, "pi-example-plugin");
+		const packagePath = join(directory, "relay-example-plugin");
 		await mkdir(join(packagePath, "src"), { recursive: true });
 		await writeFile(
 			join(packagePath, "package.json"),
@@ -63,21 +63,21 @@ describe("server-selected presentation facets", () => {
 				version: "1.0.0",
 				peerDependencies: {
 					"@earendil-works/chord": "^0.84.4",
-					"@earendil-works/pi-coding-agent": "^0.84.4",
+					"@relay-harness/coding-agent": "^0.84.4",
 				},
 			})}\n`,
 		);
 		const sourcePath = join(packagePath, "src", "tui.ts");
 		await writeFile(
 			sourcePath,
-			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@earendil-works/pi-coding-agent/experimental/plugin"; export default defineFacet({ id: "built-a", setup(env) { env.use(SlashCommands); } });\n',
+			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-a", setup(env) { env.use(SlashCommands); } });\n',
 		);
 		const plugin = createServerPluginPackage(directory, serverId, packagePath);
 
 		const first = await plugin.build();
 		expect(first).toHaveLength(1);
 		expect(plugin.manifestPath).toMatch(
-			new RegExp(`/plugin-builds/${serverId}/pi-example-plugin-[a-f0-9]{12}/chord-facets\\.json$`, "u"),
+			new RegExp(`/plugin-builds/${serverId}/relay-example-plugin-[a-f0-9]{12}/chord-facets\\.json$`, "u"),
 		);
 		expect(first[0]?.plugin).toEqual({ id: "@earendil-works/test-plugin", version: "1.0.0" });
 		const firstLoaded = await createPresentationFacetLoaders(createPresentationFacetData(first))[0]!.load();
@@ -86,7 +86,7 @@ describe("server-selected presentation facets", () => {
 
 		await writeFile(
 			sourcePath,
-			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@earendil-works/pi-coding-agent/experimental/plugin"; export default defineFacet({ id: "built-b", setup(env) { env.use(SlashCommands); } });\n',
+			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-b", setup(env) { env.use(SlashCommands); } });\n',
 		);
 		const second = await plugin.build();
 		expect(second[0]?.source).not.toBe(first[0]?.source);
@@ -137,7 +137,7 @@ describe("server-selected presentation facets", () => {
 
 		await writeFile(
 			sourcePath,
-			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@earendil-works/pi-coding-agent/experimental/plugin"; export default defineFacet({ id: "built-c", setup(env) { env.use(SlashCommands); } });\n',
+			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-c", setup(env) { env.use(SlashCommands); } });\n',
 		);
 		const services = runtime.servers[0]!.server.open({
 			services: [PresentationPlugins],
@@ -156,18 +156,18 @@ describe("server-selected presentation facets", () => {
 	});
 
 	test("builds the example plugin package without a package-owned build script", async () => {
-		const directory = await mkdtemp("/tmp/pi-example-plugin-");
+		const directory = await mkdtemp("/tmp/relay-example-plugin-");
 		directories.add(directory);
 		const serverId = randomUUID();
-		const packagePath = fileURLToPath(new URL("../examples/plugins/pi-example-plugin", import.meta.url));
+		const packagePath = fileURLToPath(new URL("../examples/plugins/relay-example-plugin", import.meta.url));
 		const plugin = createServerPluginPackage(directory, serverId, packagePath);
 
 		const artifacts = await plugin.build();
 		const manifest = await readFacetBundleManifest(plugin.manifestPath);
-		expect(manifest.plugin).toEqual({ id: "@earendil-works/pi-example-plugin", version: "1.0.0" });
+		expect(manifest.plugin).toEqual({ id: "@relay-harness/example-plugin", version: "1.0.0" });
 		expect(Object.keys(manifest.entries)).toEqual(["session", "tui"]);
 		const loaded = await createPresentationFacetLoaders(createPresentationFacetData(artifacts))[0]!.load();
-		expect(loaded.facets.map(({ id }) => id)).toEqual(["@earendil-works/pi-example-plugin/tui"]);
+		expect(loaded.facets.map(({ id }) => id)).toEqual(["@relay-harness/example-plugin/tui"]);
 		await loaded.dispose();
 	});
 });

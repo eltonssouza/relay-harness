@@ -1,8 +1,8 @@
 import { basename } from "node:path";
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import { Client, ServerError } from "@earendil-works/pi-client";
-import { createUnixTransportFactory, discoverUnixServers, type UnixServerRoute } from "@earendil-works/pi-client/unix";
-import { isServerId, type ServerId } from "@earendil-works/pi-protocol";
+import { Client, ServerError } from "@relay-harness/client";
+import { createUnixTransportFactory, discoverUnixServers, type UnixServerRoute } from "@relay-harness/client/unix";
+import { isServerId, type ServerId } from "@relay-harness/protocol";
 import type { ClientCommand } from "../cli/experimental/commands/client.ts";
 import { RadiusRelayAuthResolver } from "./radius-auth.ts";
 import { createRadiusClientTransportFactory, RadiusClientReconnect } from "./radius-relay.ts";
@@ -45,7 +45,7 @@ export interface ClientRuntime {
 }
 
 export interface OpenClientRuntimeOptions {
-	/** Directory searched when --connect is omitted. Defaults to PI_SERVER_DIR or ~/.pi/server. */
+	/** Directory searched when --connect is omitted. Defaults to RELAY_SERVER_DIR or ~/.relay/server. */
 	readonly directory?: string;
 }
 

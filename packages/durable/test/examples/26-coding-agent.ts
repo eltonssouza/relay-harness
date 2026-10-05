@@ -6,9 +6,9 @@ import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import type { ToolResultMessage } from "@earendil-works/pi-ai";
-import { createModels } from "@earendil-works/pi-ai/models";
-import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@earendil-works/pi-ai/providers/faux";
+import type { ToolResultMessage } from "@relay-harness/ai";
+import { createModels } from "@relay-harness/ai/models";
+import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@relay-harness/ai/providers/faux";
 import { NodeExecutionEnv } from "../../src/env/node.ts";
 import {
 	createRegistry,
@@ -22,7 +22,7 @@ import {
 import { CodingTools } from "../../src/tools/index.ts";
 
 const context = BACKGROUND_CONTEXT;
-const workspace = await mkdtemp(join(tmpdir(), "pi-durable-agent-"));
+const workspace = await mkdtemp(join(tmpdir(), "relay-durable-agent-"));
 await mkdir(join(workspace, "app"));
 
 // The app's own prompt, next to the coding tools.

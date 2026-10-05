@@ -1,11 +1,5 @@
 import type { Op } from "@earendil-works/chord/delta";
-import {
-	defineDoc,
-	defineDocFamily,
-	type EntryId,
-	type JsonObject,
-	type StorageWrite,
-} from "@earendil-works/pi-durable";
+import { defineDoc, defineDocFamily, type EntryId, type JsonObject, type StorageWrite } from "@relay-harness/durable";
 import { describe, expect, it } from "vitest";
 import { context, createConversation, documentChanges, flush, openTestSession } from "./session-support.ts";
 

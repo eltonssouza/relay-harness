@@ -23,14 +23,14 @@ let
   installLock = source + "/packages/coding-agent/install-lock";
   modelCatalogPin = lib.importJSON ./model-catalog.json;
   modelCatalog = fetchurl {
-    name = "pi-model-catalog.json";
+    name = "relay-model-catalog.json";
     # The typed catalog is the representation whose bytes the revision hashes.
     url = "https://pi.dev/api/models/revisions/${modelCatalogPin.revision}?types=chat,image,classifier";
     sha256 = lib.removePrefix "sha256-" modelCatalogPin.revision;
   };
 
   workspacePackages = stdenv.mkDerivation {
-    pname = "pi-workspace-packages";
+    pname = "relay-workspace-packages";
     inherit (packageJson) version;
     src = source;
 
@@ -81,18 +81,18 @@ let
     # them with the packages built from this checkout.
     packageSourceOverrides = {
       "node_modules/@earendil-works/chord" = workspacePackages + "/chord.tgz";
-      "node_modules/@earendil-works/pi-agent-core" = workspacePackages + "/agent.tgz";
-      "node_modules/@earendil-works/pi-ai" = workspacePackages + "/ai.tgz";
-      "node_modules/@earendil-works/pi-codemode" = workspacePackages + "/codemode.tgz";
-      "node_modules/@earendil-works/pi-coding-agent" = workspacePackages + "/coding-agent.tgz";
-      "node_modules/@earendil-works/pi-mcp" = workspacePackages + "/mcp.tgz";
-      "node_modules/@earendil-works/pi-telemetry" = workspacePackages + "/telemetry.tgz";
-      "node_modules/@earendil-works/pi-tui" = workspacePackages + "/tui.tgz";
+      "node_modules/@relay-harness/agent-core" = workspacePackages + "/agent.tgz";
+      "node_modules/@relay-harness/ai" = workspacePackages + "/ai.tgz";
+      "node_modules/@relay-harness/codemode" = workspacePackages + "/codemode.tgz";
+      "node_modules/@relay-harness/coding-agent" = workspacePackages + "/coding-agent.tgz";
+      "node_modules/@relay-harness/mcp" = workspacePackages + "/mcp.tgz";
+      "node_modules/@relay-harness/telemetry" = workspacePackages + "/telemetry.tgz";
+      "node_modules/@relay-harness/tui" = workspacePackages + "/tui.tgz";
     };
   };
 in
 stdenv.mkDerivation {
-  pname = "pi";
+  pname = "relay";
   inherit (packageJson) version;
   src = installLock;
   inherit npmDeps;
@@ -117,11 +117,11 @@ stdenv.mkDerivation {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p "$out/lib/pi" "$out/bin"
-    cp -R . "$out/lib/pi"
+    mkdir -p "$out/lib/relay" "$out/bin"
+    cp -R . "$out/lib/relay"
 
-    makeWrapper ${nodejs}/bin/node "$out/bin/pi" \
-      --add-flags "$out/lib/pi/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js" \
+    makeWrapper ${nodejs}/bin/node "$out/bin/relay" \
+      --add-flags "$out/lib/relay/node_modules/@relay-harness/coding-agent/dist/bundle/cli.js" \
       --prefix PATH : ${
         lib.makeBinPath (
           [
@@ -142,22 +142,22 @@ stdenv.mkDerivation {
   doInstallCheck = true;
   installCheckPhase = ''
     runHook preInstallCheck
-    test "$("$out/bin/pi" --version)" = "${packageJson.version}"
+    test "$("$out/bin/relay" --version)" = "${packageJson.version}"
     ${nodejs}/bin/node -e \
-      "require('$out/lib/pi/node_modules/esbuild').transformSync('const value: number = 1', { loader: 'ts' })"
+      "require('$out/lib/relay/node_modules/esbuild').transformSync('const value: number = 1', { loader: 'ts' })"
     # Load host-platform TUI helpers directly so missing native dependencies
     # fail the build rather than silently disabling clipboard support.
     ${nodejs}/bin/node -e \
       "const fs = require('node:fs');
        const path = require('node:path');
-       const dir = '$out/lib/pi/node_modules/@earendil-works/pi-tui/native/' + process.platform + '/prebuilds/' + process.platform + '-' + process.arch;
+       const dir = '$out/lib/relay/node_modules/@relay-harness/tui/native/' + process.platform + '/prebuilds/' + process.platform + '-' + process.arch;
        if (fs.existsSync(dir)) {
          for (const file of fs.readdirSync(dir)) {
            if (file.endsWith('.node')) require(path.join(dir, file));
          }
        }"
     ${nodejs}/bin/node -e \
-      "require('$out/lib/pi/node_modules/@silvia-odwyer/photon-node')"
+      "require('$out/lib/relay/node_modules/@silvia-odwyer/photon-node')"
     runHook postInstallCheck
   '';
 
@@ -165,7 +165,7 @@ stdenv.mkDerivation {
     description = packageJson.description;
     homepage = "https://pi.dev";
     license = lib.licenses.mit;
-    mainProgram = "pi";
+    mainProgram = "relay";
     platforms = [
       "aarch64-darwin"
       "aarch64-linux"

@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createModels } from "@earendil-works/pi-ai";
+import { createModels } from "@relay-harness/ai";
 import {
 	AgentDoc,
 	type Conversation,
@@ -19,7 +19,7 @@ import {
 	MemoryStorage,
 	ProviderDoc,
 	ROOT_CONVERSATION_ID,
-} from "@earendil-works/pi-durable";
+} from "@relay-harness/durable";
 import { afterEach, describe, expect, it } from "vitest";
 import { openNodeSqliteStorage } from "../src/storage/sqlite/node.ts";
 import { addTool, openHarness, tool, user } from "./harness-support.ts";
@@ -29,7 +29,7 @@ const directories = new Set<string>();
 const UUID_V7 = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 
 async function sqlitePath(): Promise<string> {
-	const directory = await mkdtemp(join(tmpdir(), "pi-durable-harness-"));
+	const directory = await mkdtemp(join(tmpdir(), "relay-durable-harness-"));
 	directories.add(directory);
 	return join(directory, "session.sqlite");
 }

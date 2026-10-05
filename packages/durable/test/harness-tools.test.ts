@@ -11,7 +11,7 @@ import {
 	type SystemMessage,
 	type ToolResultMessage,
 	Type,
-} from "@earendil-works/pi-ai";
+} from "@relay-harness/ai";
 import {
 	AgentDoc,
 	type Conversation,
@@ -30,7 +30,7 @@ import {
 	type ToolRegistration,
 	ToolResultEntry,
 	ToolTask,
-} from "@earendil-works/pi-durable";
+} from "@relay-harness/durable";
 import { describe, expect, it } from "vitest";
 import { NodeExecutionEnv } from "../src/env/node.ts";
 import { createBashTool, createEditTool, createReadTool } from "../src/tools/index.ts";
@@ -90,11 +90,11 @@ describe("tool round", () => {
 		const { harness, root, entries, status } = await run(setup, [calls(["echo", { text: "hi" }, "c1"]), DONE]);
 		expect(status).toBe("done");
 		expect(entries.map((entry) => entry.kind)).toEqual([
-			"pi.user",
-			"pi.system",
-			"pi.assistant",
-			"pi.tool-result",
-			"pi.assistant",
+			"relay.user",
+			"relay.system",
+			"relay.assistant",
+			"relay.tool-result",
+			"relay.assistant",
 		]);
 		const system = entries[1]!.model![0] as SystemMessage;
 		expect(system.toolsAdded).toEqual([
@@ -131,7 +131,7 @@ describe("tool round", () => {
 			diagnostics: [{ severity: "error", code: "tool_unavailable", message: "Tool ghost is not available" }],
 		});
 		const tasks = await harness.commit((tx) => tx.scanTasks({ conversationId: root.id }, 20), context);
-		expect(tasks.items.filter((task) => task.kind === "pi.tool")).toHaveLength(1);
+		expect(tasks.items.filter((task) => task.kind === "relay.tool")).toHaveLength(1);
 		await harness.close(context);
 	});
 
@@ -156,7 +156,7 @@ describe("tool round", () => {
 		expect(seen).toEqual([]);
 		expect(resultText(results(result.entries)[0]!)).toBe("<harness>\n[error] Tool echo is not available\n</harness>");
 		// The next preparation removes it.
-		const systems = result.entries.filter((entry) => entry.kind === "pi.system");
+		const systems = result.entries.filter((entry) => entry.kind === "relay.system");
 		expect((systems.at(-1)!.model![0] as SystemMessage).toolsRemoved).toEqual([{ name: "echo" }]);
 		await result.harness.close(context);
 	});
@@ -171,7 +171,7 @@ describe("tool round", () => {
 		const second = await (await first.root.submit({ type: "input", content: "again" }, context)).wait(context);
 		expect(second.status).toBe("done");
 		let entries = await allEntries(first.root);
-		const removal = entries.filter((entry) => entry.kind === "pi.system").at(-1)!.model![0] as SystemMessage;
+		const removal = entries.filter((entry) => entry.kind === "relay.system").at(-1)!.model![0] as SystemMessage;
 		expect(removal.toolsRemoved).toEqual([{ name: "echo" }]);
 		expect(results(entries)[0]).toMatchObject({ isError: true });
 		// The stored agent is not rewritten; the tool is only not resolved.
@@ -181,7 +181,7 @@ describe("tool round", () => {
 		setup.faux.setResponses([DONE]);
 		await (await first.root.submit({ type: "input", content: "back" }, context)).wait(context);
 		entries = await allEntries(first.root);
-		const addition = entries.filter((entry) => entry.kind === "pi.system").at(-1)!.model![0] as SystemMessage;
+		const addition = entries.filter((entry) => entry.kind === "relay.system").at(-1)!.model![0] as SystemMessage;
 		expect(addition.toolsAdded?.map((declared) => declared.name)).toEqual(["echo"]);
 		await first.harness.close(context);
 	});
@@ -283,9 +283,9 @@ describe("tool round", () => {
 		);
 		const result = await run(perTool, [calls(["a", {}, "c1"], ["b", {}, "c2"]), DONE]);
 		const tasks = await result.harness.commit((tx) => tx.scanTasks({ conversationId: result.root.id }, 20), context);
-		const tools = tasks.items.filter((task) => task.kind === "pi.tool").sort((a, b) => a.id - b.id);
+		const tools = tasks.items.filter((task) => task.kind === "relay.tool").sort((a, b) => a.id - b.id);
 		// The generation owns both tools and creates the second only after the first ended.
-		const [generation] = tasks.items.filter((task) => task.kind === "pi.generation");
+		const [generation] = tasks.items.filter((task) => task.kind === "relay.generation");
 		expect(tools.map((task) => task.owner)).toEqual([generation!.id, generation!.id]);
 		expect(events).toEqual(["a", "b"]);
 		await result.harness.close(context);
@@ -442,7 +442,7 @@ describe("tool results", () => {
 		expect(byId.get("ok")).toEqual([false, ""]);
 		expect(byId.get("invalid")![0]).toBe(true);
 		expect(byId.get("invalid")![1]).toContain("Validation failed");
-		// pi-ai coerces a number to a string before the first validation.
+		// relay-ai coerces a number to a string before the first validation.
 		expect(byId.get("coerced")).toEqual([false, ""]);
 		expect(seen).toEqual(expect.arrayContaining([{ text: "1!" }, { text: "x!" }]));
 		expect(seen).toHaveLength(2);
@@ -590,14 +590,14 @@ describe("tool results", () => {
 			await root.configure({ tools: [stop, grow] }, context);
 		});
 		expect(first.status).toBe("done");
-		expect(first.entries.at(-1)!.kind).toBe("pi.tool-result");
+		expect(first.entries.at(-1)!.kind).toBe("relay.tool-result");
 		const settled = await first.harness.commit((tx) => tx.scanTasks({ conversationId: first.root.id }, 20), context);
 		expect(settled.items.every((task) => task.state.status === "terminal")).toBe(true);
 
 		setup.faux.setResponses([calls(["stop", {}, "c1"], ["grow", {}, "c2"]), DONE]);
 		const second = await (await first.root.submit({ type: "input", content: "again" }, context)).wait(context);
 		expect(second.status).toBe("done");
-		expect((await allEntries(first.root)).at(-1)!.kind).toBe("pi.assistant");
+		expect((await allEntries(first.root)).at(-1)!.kind).toBe("relay.assistant");
 		// addTools appends to the stored tool array, skipping names it already holds.
 		expect((await first.harness.snapshot(AgentDoc, first.root.id, context))?.tools).toEqual([
 			"stop",
@@ -633,7 +633,12 @@ describe("generation hooks", () => {
 		expect(status).toBe("done");
 		expect(requests[0]!.slice(-2)).toEqual(["user:go", "user:injected"]);
 		expect(responses).toEqual(["answer 1", "answer 2"]);
-		expect(entries.map((entry) => entry.kind)).toEqual(["pi.user", "pi.assistant", "pi.user", "pi.assistant"]);
+		expect(entries.map((entry) => entry.kind)).toEqual([
+			"relay.user",
+			"relay.assistant",
+			"relay.user",
+			"relay.assistant",
+		]);
 		// The injected message was used for the request only.
 		expect(entries.some((entry) => textOf(entry.model?.[0]) === "injected")).toBe(false);
 		await harness.close(context);
@@ -657,7 +662,7 @@ describe("generation hooks", () => {
 			harness = opened;
 		});
 		expect(statusAtSecondRequest).toBe("placed");
-		const answers = result.entries.filter((entry) => entry.kind === "pi.assistant");
+		const answers = result.entries.filter((entry) => entry.kind === "relay.assistant");
 		expect(await (await harness.submission(input!, context))!.status(context)).toMatchObject({
 			status: "done",
 			answer: answers[1]!.id,
@@ -705,7 +710,7 @@ describe("generation hooks", () => {
 			fauxAssistantMessage([fauxText("c")]),
 		]);
 		// The first continuation skips the second handler; on the next answer the second handler's continuation wins.
-		const users = entries.filter((entry) => entry.kind === "pi.user").map((entry) => textOf(entry.model![0]));
+		const users = entries.filter((entry) => entry.kind === "relay.user").map((entry) => textOf(entry.model![0]));
 		expect(users).toEqual(["go", "first", "second"]);
 		expect(called.filter((name) => name === "second onYield")).toHaveLength(2);
 		expect(called.filter((name) => name === "next observer")).toHaveLength(3);
@@ -811,7 +816,7 @@ describe("tool execution api", () => {
 
 describe("coding tools", () => {
 	it("answers a failing command with its retained tail and diagnostics in order", async () => {
-		const directory = mkdtempSync(join(tmpdir(), "pi-durable-coding-"));
+		const directory = mkdtempSync(join(tmpdir(), "relay-durable-coding-"));
 		try {
 			const setup = chatSetup();
 			addTool(setup.registry, createBashTool());
@@ -841,7 +846,7 @@ describe("coding tools", () => {
 	});
 
 	it("reads, edits, and runs a command in one run, then answers", async () => {
-		const directory = mkdtempSync(join(tmpdir(), "pi-durable-coding-"));
+		const directory = mkdtempSync(join(tmpdir(), "relay-durable-coding-"));
 		try {
 			writeFileSync(join(directory, "notes.txt"), "hello world\n");
 			const setup = chatSetup();
@@ -864,7 +869,7 @@ describe("coding tools", () => {
 				["edit", false, "Successfully replaced 1 block(s) in notes.txt."],
 				["bash", false, "hello durable\n"],
 			]);
-			expect(entries.at(-1)!.kind).toBe("pi.assistant");
+			expect(entries.at(-1)!.kind).toBe("relay.assistant");
 			expect(readFileSync(join(directory, "notes.txt"), "utf8")).toBe("hello durable\n");
 			await harness.close(context);
 		} finally {

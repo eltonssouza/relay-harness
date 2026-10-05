@@ -53,7 +53,7 @@ describe("NodeExecutionEnv spill backpressure", () => {
 	it.skipIf(process.platform === "win32")(
 		"keeps inherited stdio open past the exit grace period while a spill write is pending",
 		async () => {
-			const root = join(tmpdir(), `pi-durable-env-spill-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+			const root = join(tmpdir(), `relay-durable-env-spill-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 			mkdirSync(root, { recursive: true });
 			tempDirs.push(root);
 			const env = new NodeExecutionEnv({ cwd: root });

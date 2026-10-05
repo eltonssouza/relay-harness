@@ -9,7 +9,7 @@ import {
 	type RpcTarget,
 	type ServerMessage,
 	ServerMessageDecoder,
-} from "@earendil-works/pi-protocol";
+} from "@relay-harness/protocol";
 import { Deferred } from "./host.ts";
 
 interface MessageWaiter {
@@ -63,7 +63,7 @@ export class ProtocolTestClient {
 	attach(serverId: string, sessionId: string): Promise<ResponseEnvelope> {
 		return this.requestService(
 			{ serverId },
-			{ serviceId: "pi.session-management", member: "attach", args: [sessionId] },
+			{ serviceId: "relay.session-management", member: "attach", args: [sessionId] },
 		);
 	}
 

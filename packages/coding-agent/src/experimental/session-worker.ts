@@ -12,8 +12,8 @@ import {
 	type ServiceProviderUpdate,
 } from "@earendil-works/chord";
 import { BACKGROUND_CONTEXT, TODO_CONTEXT, withCancel } from "@earendil-works/chord/context";
-import { Harness, ROOT_CONVERSATION_ID, type TaskGraph } from "@earendil-works/pi-durable";
-import { openNodeSqliteStorage } from "@earendil-works/pi-durable/storage/sqlite/node";
+import { Harness, ROOT_CONVERSATION_ID, type TaskGraph } from "@relay-harness/durable";
+import { openNodeSqliteStorage } from "@relay-harness/durable/storage/sqlite/node";
 import lockfile from "proper-lockfile";
 import Type, { type Static } from "typebox";
 import { Check } from "typebox/value";
@@ -61,10 +61,10 @@ const RemoteServiceErrorCodeSchema = Type.Unsafe<RemoteServiceErrorCode>(
 	Type.String({ pattern: `^(?:${REMOTE_SERVICE_ERROR_CODES.join("|")})$` }),
 );
 
-export const SESSION_WORKER_CONTROL_ADDRESS_ENV = "PI_SESSION_WORKER_CONTROL_ADDRESS";
-export const SESSION_WORKER_CONTROL_TOKEN_ENV = "PI_SESSION_WORKER_CONTROL_TOKEN";
-export const SESSION_WORKER_SESSION_KEY_ENV = "PI_SESSION_WORKER_SESSION_KEY_BASE64";
-export const SESSION_WORKER_PEER_ID_ENV = "PI_SESSION_WORKER_PEER_ID";
+export const SESSION_WORKER_CONTROL_ADDRESS_ENV = "RELAY_SESSION_WORKER_CONTROL_ADDRESS";
+export const SESSION_WORKER_CONTROL_TOKEN_ENV = "RELAY_SESSION_WORKER_CONTROL_TOKEN";
+export const SESSION_WORKER_SESSION_KEY_ENV = "RELAY_SESSION_WORKER_SESSION_KEY_BASE64";
+export const SESSION_WORKER_PEER_ID_ENV = "RELAY_SESSION_WORKER_PEER_ID";
 
 export const SessionWorkerMetadataSchema = StrictObject({
 	id: Type.String({ minLength: 1 }),
