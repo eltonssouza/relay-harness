@@ -177,6 +177,10 @@
           "path": "laya.md"
         },
         {
+          "title": "Requirements Intake",
+          "path": "intake.md"
+        },
+        {
           "title": "JSON Event Stream",
           "path": "json.md"
         },
