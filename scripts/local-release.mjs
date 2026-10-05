@@ -8,17 +8,17 @@ import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentCo
 
 const packages = [
 	{ directory: "packages/chord", name: "@earendil-works/chord" },
-	{ directory: "packages/telemetry", name: "@earendil-works/pi-telemetry" },
-	{ directory: "packages/codemode", name: "@earendil-works/pi-codemode" },
-	{ directory: "packages/mcp", name: "@earendil-works/pi-mcp" },
-	{ directory: "packages/ai", name: "@earendil-works/pi-ai" },
-	{ directory: "packages/durable", name: "@earendil-works/pi-durable" },
-	{ directory: "packages/tui", name: "@earendil-works/pi-tui" },
-	{ directory: "packages/agent", name: "@earendil-works/pi-agent-core" },
-	{ directory: "packages/protocol", name: "@earendil-works/pi-protocol" },
-	{ directory: "packages/client", name: "@earendil-works/pi-client" },
-	{ directory: "packages/server", name: "@earendil-works/pi-server" },
-	{ directory: "packages/coding-agent", name: "@earendil-works/pi-coding-agent" },
+	{ directory: "packages/telemetry", name: "@relay-harness/telemetry" },
+	{ directory: "packages/codemode", name: "@relay-harness/codemode" },
+	{ directory: "packages/mcp", name: "@relay-harness/mcp" },
+	{ directory: "packages/ai", name: "@relay-harness/ai" },
+	{ directory: "packages/durable", name: "@relay-harness/durable" },
+	{ directory: "packages/tui", name: "@relay-harness/tui" },
+	{ directory: "packages/agent", name: "@relay-harness/agent-core" },
+	{ directory: "packages/protocol", name: "@relay-harness/protocol" },
+	{ directory: "packages/client", name: "@relay-harness/client" },
+	{ directory: "packages/server", name: "@relay-harness/server" },
+	{ directory: "packages/coding-agent", name: "@relay-harness/coding-agent" },
 ];
 
 function printUsage() {
@@ -120,7 +120,7 @@ function isInsidePath(child, parent) {
 
 function prepareOutputDirectory(options, repoRoot) {
 	if (!options.outDir) {
-		return mkdtempSync(join(tmpdir(), "pi-local-release-"));
+		return mkdtempSync(join(tmpdir(), "relay-local-release-"));
 	}
 
 	const outDir = resolve(options.outDir);
@@ -163,31 +163,31 @@ function buildBunBinaryRelease(targetDirectory, archiveDirectory) {
 	]);
 	rmSync(targetDirectory, { force: true, recursive: true });
 	cpSync(join(binaryBuildDirectory, platform), targetDirectory, { recursive: true });
-	const archiveName = platform.startsWith("windows-") ? `pi-${platform}.zip` : `pi-${platform}.tar.gz`;
+	const archiveName = platform.startsWith("windows-") ? `relay-${platform}.zip` : `relay-${platform}.tar.gz`;
 	cpSync(join(binaryBuildDirectory, archiveName), join(archiveDirectory, archiveName));
 	return platform;
 }
 
-function createPiShim(installDirectory) {
+function createRelayShim(installDirectory) {
 	const binDirectory = join(installDirectory, "node_modules", ".bin");
 	if (process.platform === "win32") {
-		if (existsSync(join(binDirectory, "pi.cmd"))) {
-			writeFileSync(join(installDirectory, "pi.cmd"), '@ECHO off\r\n"%~dp0node_modules\\.bin\\pi.cmd" %*\r\n');
-			writeFileSync(join(installDirectory, "pi.ps1"), '& "$PSScriptRoot/node_modules/.bin/pi.ps1" @args\n');
+		if (existsSync(join(binDirectory, "relay.cmd"))) {
+			writeFileSync(join(installDirectory, "relay.cmd"), '@ECHO off\r\n"%~dp0node_modules\\.bin\\relay.cmd" %*\r\n');
+			writeFileSync(join(installDirectory, "relay.ps1"), '& "$PSScriptRoot/node_modules/.bin/relay.ps1" @args\n');
 			return;
 		}
-		writeFileSync(join(installDirectory, "pi.cmd"), '@ECHO off\r\n"%~dp0node_modules\\.bin\\pi.exe" %*\r\n');
-		writeFileSync(join(installDirectory, "pi.ps1"), '& "$PSScriptRoot/node_modules/.bin/pi.exe" @args\n');
+		writeFileSync(join(installDirectory, "relay.cmd"), '@ECHO off\r\n"%~dp0node_modules\\.bin\\relay.exe" %*\r\n');
+		writeFileSync(join(installDirectory, "relay.ps1"), '& "$PSScriptRoot/node_modules/.bin/relay.exe" @args\n');
 		return;
 	}
-	symlinkSync(join("node_modules", ".bin", "pi"), join(installDirectory, "pi"));
+	symlinkSync(join("node_modules", ".bin", "relay"), join(installDirectory, "relay"));
 }
 
 const options = parseArgs();
 const repoRoot = process.cwd();
 const rootPackageJson = readPackageJson(repoRoot);
 
-if (rootPackageJson.name !== "pi-monorepo") {
+if (rootPackageJson.name !== "relay-monorepo") {
 	throw new Error("Run this script from the repository root");
 }
 
@@ -223,7 +223,7 @@ if (!options.skipInstall) {
 
 	installCodingAgentConsumer(nodeInstallDirectory, tarballs);
 	smokeTestCodingAgentConsumer(nodeInstallDirectory);
-	createPiShim(nodeInstallDirectory);
+	createRelayShim(nodeInstallDirectory);
 
 	if (!options.skipBunInstall) {
 		if (!commandExists("bun")) {
@@ -231,7 +231,7 @@ if (!options.skipInstall) {
 		}
 		installCodingAgentConsumer(bunInstallDirectory, tarballs, "bun");
 		smokeTestCodingAgentConsumer(bunInstallDirectory, "bun");
-		createPiShim(bunInstallDirectory);
+		createRelayShim(bunInstallDirectory);
 	}
 }
 
@@ -245,19 +245,19 @@ for (const tarball of tarballs.values()) {
 if (!options.skipInstall) {
 	console.log("\nLocal Bun binary release:");
 	console.log(`  ${binaryDirectory}`);
-	console.log(`  ${join(outDir, `pi-${binaryPlatform}.${String(binaryPlatform).startsWith("windows-") ? "zip" : "tar.gz"}`)}`);
+	console.log(`  ${join(outDir, `relay-${binaryPlatform}.${String(binaryPlatform).startsWith("windows-") ? "zip" : "tar.gz"}`)}`);
 	console.log("\nRun the local Bun binary release from outside the repository:");
-	console.log(`  ${join(binaryDirectory, String(binaryPlatform).startsWith("windows-") ? "pi.exe" : "pi")} --help`);
+	console.log(`  ${join(binaryDirectory, String(binaryPlatform).startsWith("windows-") ? "relay.exe" : "relay")} --help`);
 
 	console.log("\nIsolated npm install:");
 	console.log(`  ${nodeInstallDirectory}`);
 	console.log("\nRun the locally packed npm CLI from outside the repository:");
-	console.log(`  ${join(nodeInstallDirectory, process.platform === "win32" ? "pi.cmd" : "pi")} --help`);
+	console.log(`  ${join(nodeInstallDirectory, process.platform === "win32" ? "relay.cmd" : "relay")} --help`);
 
 	if (!options.skipBunInstall) {
 		console.log("\nIsolated Bun package install:");
 		console.log(`  ${bunInstallDirectory}`);
 		console.log("\nRun the locally packed Bun package CLI from outside the repository:");
-		console.log(`  ${join(bunInstallDirectory, process.platform === "win32" ? "pi.cmd" : "pi")} --help`);
+		console.log(`  ${join(bunInstallDirectory, process.platform === "win32" ? "relay.cmd" : "relay")} --help`);
 	}
 }

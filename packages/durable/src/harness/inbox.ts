@@ -14,7 +14,7 @@ export type InboxItem =
 export type InboxState = { items: InboxItem[] };
 
 export const InboxDoc = defineDoc<InboxState>({
-	kind: "pi.inbox",
+	kind: "relay.inbox",
 	version: 1,
 	scope: "conversation",
 	history: "latest",

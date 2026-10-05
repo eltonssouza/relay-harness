@@ -19,10 +19,10 @@ describe("normalizeChangelogLinks", () => {
 
 		expect(normalizeChangelogLinks(markdown, entry)).toBe(
 			[
-				"[Project Trust](https://github.com/earendil-works/pi/blob/v0.79.0/packages/coding-agent/README.md#project-trust)",
-				"[Extensions](https://github.com/earendil-works/pi/blob/v0.79.0/packages/coding-agent/docs/extensions.md#project_trust)",
-				"[Examples](https://github.com/earendil-works/pi/tree/v0.79.0/packages/coding-agent/examples/extensions/)",
-				"[Root README](https://github.com/earendil-works/pi/blob/v0.79.0/README.md#supply-chain-hardening)",
+				"[Project Trust](https://github.com/eltonssouza/relay-harness/blob/v0.79.0/packages/coding-agent/README.md#project-trust)",
+				"[Extensions](https://github.com/eltonssouza/relay-harness/blob/v0.79.0/packages/coding-agent/docs/extensions.md#project_trust)",
+				"[Examples](https://github.com/eltonssouza/relay-harness/tree/v0.79.0/packages/coding-agent/examples/extensions/)",
+				"[Root README](https://github.com/eltonssouza/relay-harness/blob/v0.79.0/README.md#supply-chain-hardening)",
 			].join("\n"),
 		);
 	});
@@ -40,7 +40,7 @@ describe("normalizeChangelogLinks", () => {
 			[
 				"[#5167](https://github.com/earendil-works/pi/pull/5167)",
 				"[#4163](https://github.com/earendil-works/pi/issues/4163)",
-				"[Agent README](https://github.com/earendil-works/pi/blob/v0.79.0/packages/agent/README.md)",
+				"[Agent README](https://github.com/eltonssouza/relay-harness/blob/v0.79.0/packages/agent/README.md)",
 				"[External](https://example.com/docs)",
 				"[Local anchor](#settings)",
 			].join("\n"),

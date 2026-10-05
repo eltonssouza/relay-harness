@@ -12,7 +12,7 @@ import {
 	type StorageBenchmarkScale,
 	seedStorageBenchmark,
 	storageBenchmarkPrimaryRecordCount,
-} from "@earendil-works/pi-durable/testing";
+} from "@relay-harness/durable/testing";
 import { openNodeJsonlStorage } from "../src/storage/jsonl/node.ts";
 import { MemoryStorage } from "../src/storage/memory.ts";
 import { openNodeSqliteStorage } from "../src/storage/sqlite/node.ts";
@@ -124,7 +124,7 @@ async function runWorker(backend: StorageBenchmarkBackend, scale: StorageBenchma
 	if (backend === "memory") {
 		storage = new MemoryStorage();
 	} else {
-		directory = await mkdtemp(join(tmpdir(), `pi-durable-${backend}-memory-`));
+		directory = await mkdtemp(join(tmpdir(), `relay-durable-${backend}-memory-`));
 		path = join(directory, backend === "sqlite" ? "storage.sqlite" : "storage");
 		storage =
 			backend === "sqlite"

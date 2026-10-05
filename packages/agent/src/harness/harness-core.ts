@@ -15,7 +15,7 @@
  * | Skills      | events             | resource uptake, fanout, and phase telemetry per run       |
  */
 
-import type { AssistantMessage } from "@earendil-works/pi-ai";
+import type { AssistantMessage } from "@relay-harness/ai";
 import type { Agent } from "../agent.ts";
 import type { AgentEvent, AgentMessage, AgentToolCall, BeforeToolCallResult } from "../types.ts";
 import {

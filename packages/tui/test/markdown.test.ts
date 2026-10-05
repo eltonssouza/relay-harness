@@ -839,8 +839,8 @@ after`,
 \[
 A=
 \begin{pmatrix}
-\pi & 0\\
-0 & \frac{1}{\pi}
+\relay & 0\\
+0 & \frac{1}{\relay}
 \end{pmatrix}.
 \]`,
 				0,

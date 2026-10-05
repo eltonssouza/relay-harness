@@ -1,4 +1,4 @@
-import { piMessagesApi } from "../api/pi-messages.lazy.ts";
+import { relayMessagesApi } from "../api/relay-messages.lazy.ts";
 import { envApiKeyAuth, lazyOAuth } from "../auth/helpers.ts";
 import { loadRadiusOAuth } from "../auth/oauth/load.ts";
 import type { Provider } from "../models.ts";
@@ -19,16 +19,16 @@ export interface RadiusProviderOptions {
 }
 
 /** Radius gateway provider with a persisted, dynamically refreshed catalog. */
-export function radiusProvider(options: RadiusProviderOptions = {}): Provider<"pi-messages"> {
+export function radiusProvider(options: RadiusProviderOptions = {}): Provider<"relay-messages"> {
 	const id = options.id ?? "radius";
 	const name = options.name ?? "Radius";
 	const gateway = normalizeRadiusGatewayUrl(options.gateway ?? DEFAULT_RADIUS_GATEWAY);
-	const baselineModels: Model<"pi-messages">[] =
+	const baselineModels: Model<"relay-messages">[] =
 		gateway === normalizeRadiusGatewayUrl(DEFAULT_RADIUS_GATEWAY)
 			? Object.values(RADIUS_MODELS).map((model) => ({ ...model, provider: id }))
 			: [];
 	let dynamicModels = getRadiusModels(id, undefined);
-	const streams = piMessagesApi();
+	const streams = relayMessagesApi();
 
 	return {
 		id,

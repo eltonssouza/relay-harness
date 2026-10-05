@@ -13,7 +13,7 @@ export type ClientResult =
 	| { readonly kind: "prompted"; readonly serverId: string; readonly sessionId: string; readonly text: string };
 
 export interface RunClientOptions {
-	/** Directory searched when --connect is omitted. Defaults to PI_SERVER_DIR or ~/.pi/server. */
+	/** Directory searched when --connect is omitted. Defaults to RELAY_SERVER_DIR or ~/.relay/server. */
 	readonly directory?: string;
 }
 

@@ -10,7 +10,7 @@ export default defineConfig({
 	resolve: {
 		conditions: ["source"],
 		alias: {
-			"@earendil-works/pi-protocol": fileURLToPath(new URL("../protocol/src/index.ts", import.meta.url)),
+			"@relay-harness/protocol": fileURLToPath(new URL("../protocol/src/index.ts", import.meta.url)),
 		},
 	},
 	ssr: { resolve: { conditions: ["source"] } },

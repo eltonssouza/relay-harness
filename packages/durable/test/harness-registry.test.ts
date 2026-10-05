@@ -1,4 +1,4 @@
-import { Type } from "@earendil-works/pi-ai";
+import { Type } from "@relay-harness/ai";
 import {
 	type AgentState,
 	CompactionTask,
@@ -14,7 +14,7 @@ import {
 	ToolTask,
 	wrapSection,
 	wrapTool,
-} from "@earendil-works/pi-durable";
+} from "@relay-harness/durable";
 import { describe, expect, it } from "vitest";
 import { agentHooks, resolveAgent, resolveSettings } from "../src/harness/agent.ts";
 import { context } from "./session-support.ts";
@@ -113,7 +113,7 @@ describe("registry", () => {
 			[defineExtension({ name: "x", sections: [section("a", () => "1"), section("a", () => "2")] }), "two sections"],
 			[defineExtension({ name: "x", sections: [section("Bad Key", () => "")] }), "must match"],
 			[defineExtension({ name: "x", sections: [section("instructions", () => "")] }), "reserved"],
-			[defineExtension({ name: "x", tasks: [task("pi.generation")] }), "already installed"],
+			[defineExtension({ name: "x", tasks: [task("relay.generation")] }), "already installed"],
 			[defineExtension({ name: "x", tasks: [task("app.index")] }), "already installed"],
 		] as const;
 		for (const [extension, message] of invalid) expect(() => registry.install(extension)).toThrow(message);
@@ -276,9 +276,9 @@ describe("agent resolution", () => {
 			defineExtension<AppTool>({ name: "a", hooks: [hook(ToolTask, first), hook(GenerationTask, onYield)] }),
 		);
 		local.install(defineExtension<AppTool>({ name: "b", hooks: [hook(ToolTask, second)] }));
-		expect(agentHooks(resolve(undefined, local.snapshot()), "pi.tool")).toEqual([first, second]);
-		expect(agentHooks(resolve({ extensions: ["b", "a"] }, local.snapshot()), "pi.tool")).toEqual([second, first]);
-		expect(agentHooks(resolve({ extensions: ["b"] }, local.snapshot()), "pi.generation")).toEqual([]);
+		expect(agentHooks(resolve(undefined, local.snapshot()), "relay.tool")).toEqual([first, second]);
+		expect(agentHooks(resolve({ extensions: ["b", "a"] }, local.snapshot()), "relay.tool")).toEqual([second, first]);
+		expect(agentHooks(resolve({ extensions: ["b"] }, local.snapshot()), "relay.generation")).toEqual([]);
 
 		const defaults = resolve(undefined, local.snapshot());
 		expect(defaults.model).toBeUndefined();

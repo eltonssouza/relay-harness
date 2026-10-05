@@ -22,7 +22,7 @@
  * batches the prefix is byte-identical, so the cache keeps hitting.
  */
 
-import type { ToolResultMessage } from "@earendil-works/pi-ai";
+import type { ToolResultMessage } from "@relay-harness/ai";
 import type { AgentMessage, AgentToolCall } from "../types.ts";
 import { classifyToolCall, isMutation, type ToolEffectClassifier } from "./effects.ts";
 import { clip } from "./text.ts";

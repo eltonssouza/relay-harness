@@ -2,9 +2,9 @@
 // Run from packages/durable:
 //   node --conditions=source --experimental-strip-types test/examples/11-extension-state.ts
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import { Type } from "@earendil-works/pi-ai";
-import { createModels } from "@earendil-works/pi-ai/models";
-import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@earendil-works/pi-ai/providers/faux";
+import { Type } from "@relay-harness/ai";
+import { createModels } from "@relay-harness/ai/models";
+import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@relay-harness/ai/providers/faux";
 import {
 	createRegistry,
 	defineDoc,

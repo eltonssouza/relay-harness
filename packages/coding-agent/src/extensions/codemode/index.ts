@@ -19,24 +19,24 @@ export interface CodemodeExtensionOptions {
 	models?: boolean;
 }
 
-function readMode(pi: ExtensionAPI): CodemodeMode {
-	return pi.getSettings().codemode?.mode === "only" ? "only" : "on";
+function readMode(relay: ExtensionAPI): CodemodeMode {
+	return relay.getSettings().codemode?.mode === "only" ? "only" : "on";
 }
 
-function readInlineBudget(pi: ExtensionAPI): number | undefined {
-	const budget = pi.getSettings().codemode?.inlineBudget;
+function readInlineBudget(relay: ExtensionAPI): number | undefined {
+	const budget = relay.getSettings().codemode?.inlineBudget;
 	return typeof budget === "number" && Number.isFinite(budget) && budget >= 0 ? budget : undefined;
 }
 
 export function createCodemodeExtension(options: CodemodeExtensionOptions = {}): ExtensionFactory {
-	return (pi) => {
-		pi.registerTool({
+	return (relay) => {
+		relay.registerTool({
 			...createCodemodeToolDefinition({
-				appendEntry: (customType, data) => pi.appendEntry(customType, data),
+				appendEntry: (customType, data) => relay.appendEntry(customType, data),
 				models: options.models ?? true,
-				getToolNamespace: (name) => pi.getAllTools().find((tool) => tool.name === name)?.namespace,
-				getMode: () => options.mode ?? readMode(pi),
-				getInlineBudget: () => options.inlineBudget ?? readInlineBudget(pi),
+				getToolNamespace: (name) => relay.getAllTools().find((tool) => tool.name === name)?.namespace,
+				getMode: () => options.mode ?? readMode(relay),
+				getInlineBudget: () => options.inlineBudget ?? readInlineBudget(relay),
 			}),
 			defaultActive: false,
 		});

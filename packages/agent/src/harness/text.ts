@@ -1,4 +1,4 @@
-import { contentText } from "@earendil-works/pi-ai";
+import { contentText } from "@relay-harness/ai";
 import type { AgentMessage } from "../types.ts";
 
 /** Prefix of user-role messages the harness writes itself, so it does not observe its own output. */
