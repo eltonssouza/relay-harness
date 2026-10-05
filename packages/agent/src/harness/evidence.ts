@@ -281,13 +281,20 @@ export class EvidenceLedger {
 	}
 }
 
-/** The verification request sent to the agent for a flagged report. */
-export function formatVerificationRequest(report: CompletionReport): string {
+/**
+ * The verification request sent to the agent for a flagged report. `verifyCommands` are the
+ * project's declared checks, named so the agent runs those instead of guessing.
+ */
+export function formatVerificationRequest(report: CompletionReport, verifyCommands: readonly string[] = []): string {
 	const changed = report.changedPaths.slice(0, 8).join(", ");
+	const how =
+		verifyCommands.length > 0
+			? `run the project's verification (${verifyCommands.map((command) => `\`${command}\``).join(", ")}) without piping its output, and report the actual result.`
+			: "run the project's verification for the changed code (tests, type check, or build) without piping its output, and report the actual result.";
 	return [
 		`[harness:evidence] Completion check: your last message reports the work as finished, but the harness has no evidence for it: ${report.detail}.`,
 		changed ? `Changed in this request: ${changed}${report.changedPaths.length > 8 ? ", ..." : ""}.` : "",
-		"Before reporting completion, run the project's verification for the changed code (tests, type check, or build) and report the actual result.",
+		`Before reporting completion, ${how}`,
 		"If verification is not possible, say exactly what was not verified and why. Do not restate success without evidence.",
 	]
 		.filter(Boolean)

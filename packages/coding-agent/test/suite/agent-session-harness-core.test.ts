@@ -65,6 +65,24 @@ describe("AgentSession harness core", () => {
 		expect(harness.session.harnessCore.core.evidence?.latestReport()?.status).toBe("verified");
 	});
 
+	it("counts only declared verification commands and names them in the verification request", async () => {
+		const { harness, calls } = await create({ settings: { harnessCore: { verifyCommands: ["npm run check"] } } });
+		harness.setResponses([
+			fauxAssistantMessage(fauxToolCall("edit", { path: "src/a.ts" }), { stopReason: "toolUse" }),
+			// A type check alone is not the project's verification.
+			fauxAssistantMessage(fauxToolCall("bash", { command: "npx tsc --noEmit" }), { stopReason: "toolUse" }),
+			fauxAssistantMessage("Done, it compiles."),
+			fauxAssistantMessage(fauxToolCall("bash", { command: "npm run check" }), { stopReason: "toolUse" }),
+			fauxAssistantMessage("Done; npm run check passes."),
+		]);
+
+		await harness.session.prompt("Fix the bug in src/a.ts");
+
+		expect(calls).toEqual(["edit:src/a.ts", "bash:npx tsc --noEmit", "bash:npm run check"]);
+		expect(getUserTexts(harness)[1]).toContain("run the project's verification (`npm run check`)");
+		expect(harness.session.harnessCore.core.evidence?.latestReport()?.status).toBe("verified");
+	});
+
 	it("does not gate when the evidence pillar is disabled", async () => {
 		const { harness } = await create({ settings: { harnessCore: { evidence: false } } });
 		harness.setResponses([

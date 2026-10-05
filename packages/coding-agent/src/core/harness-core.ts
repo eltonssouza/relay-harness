@@ -18,6 +18,7 @@ import type { ExtensionMode, ExtensionUIContext } from "./extensions/index.ts";
 import type { SessionManager } from "./session-manager.ts";
 import type { SettingsManager } from "./settings-manager.ts";
 import type { Skill } from "./skills.ts";
+import { createGitWorkspaceProbe } from "./workspace-probe.ts";
 
 /** Session entry type that persists developer constraints and corrections across resumes and compaction. */
 export const HARNESS_CONSTRAINTS_ENTRY = "harness-core:constraints";
@@ -63,6 +64,8 @@ export interface CodingHarnessCoreOptions {
 	agent: Agent;
 	settingsManager: SettingsManager;
 	sessionManager: SessionManager;
+	/** Workspace root, for measuring changes. */
+	cwd: string;
 	getSkills: () => readonly Skill[];
 	/** Interactive UI, when the session has one. */
 	getUI: () => { ui?: ExtensionUIContext; mode: ExtensionMode };
@@ -107,6 +110,15 @@ export class CodingHarnessCore {
 								.map((skill) => ({ name: skill.name, baseDir: skill.baseDir, filePath: skill.filePath })),
 					}
 				: false,
+			slices:
+				settings.evidence && (settings.maxChangedLines > 0 || settings.maxFileLines > 0)
+					? {
+							probe: createGitWorkspaceProbe(options.cwd),
+							maxChangedLines: settings.maxChangedLines,
+							maxFileLines: settings.maxFileLines,
+						}
+					: false,
+			verifyCommands: settings.verifyCommands,
 			onEvent: (event) => this.handleEvent(event, getUI),
 		});
 
@@ -148,6 +160,16 @@ export class CodingHarnessCore {
 	/** Recent tool calls the alignment policy blocked, newest last. */
 	getBlockedCalls(): ReadonlyArray<{ toolName: string; reason: string }> {
 		return this.blocked;
+	}
+
+	private describeSlices(): string[] {
+		const slices = this.core.slices;
+		if (!slices) return ["slice signals: disabled"];
+		const status = slices.status();
+		return [
+			`changed in this request: about ${status.changedLines} lines in ${status.changedFiles} files`,
+			...[...status.oversizedFiles].map(([path, lines]) => `over the file-size guideline: ${path} (${lines} lines)`),
+		];
 	}
 
 	/** Plain-text status of every pillar, as sections of lines, for `/harness`. */
@@ -198,6 +220,10 @@ export class CodingHarnessCore {
 							]
 						: []),
 					...(pending ? [`changed since last passing check: ${pending.join(", ")}`] : []),
+					this.core.verifyCommands.length > 0
+						? `verification commands: ${this.core.verifyCommands.join(", ")}`
+						: "verification commands: not declared (common test, build, and lint commands count)",
+					...this.describeSlices(),
 				],
 			});
 		} else {

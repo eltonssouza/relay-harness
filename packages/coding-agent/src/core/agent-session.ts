@@ -496,6 +496,7 @@ export class AgentSession {
 			agent: this.agent,
 			settingsManager: this.settingsManager,
 			sessionManager: this.sessionManager,
+			cwd: this._cwd,
 			getSkills: () => this._resourceLoader.getSkills().skills,
 			getUI: () => ({ ui: this._extensionUIContext, mode: this._extensionMode }),
 		});

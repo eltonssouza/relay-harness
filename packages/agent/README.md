@@ -526,7 +526,7 @@ const uninstall = harness.install(agent);
 | Pillar | Class | Behavior |
 |---|---|---|
 | Alignment | `AlignmentPolicy`, `ConstraintLedger` | Records developer constraints and restates them on every request; blocks destructive and external effects until authorized; blocks the first edit in a question-only turn; records developer corrections and restates the latest one; `promptGuidelines()` returns pair-programming rules for the system prompt. |
-| Evidence | `EvidenceLedger` | Compares completion claims with recorded changes and checks; steers one verification request when a claim lacks evidence. |
+| Evidence | `EvidenceLedger`, `SliceDiscipline` | Compares completion claims with recorded changes and checks; steers one verification request when a claim lacks evidence. With `verifyCommands`, only the project's declared checks count. With a `WorkspaceProbe`, flags requests that change too many lines and files that grow too large. |
 | Context | `ContextWindowPolicy` | Keeps recent tool results verbatim, elides older large ones in cache-friendly batches, and restates a progress digest. |
 | Skills | `SkillUsageTracker`, `auditSkill` | Measures skill resource fanout, effective uptake, and phases; audits skill structure for progressive disclosure. |
 

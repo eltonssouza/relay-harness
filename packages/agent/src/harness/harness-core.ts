@@ -10,6 +10,7 @@
  * | Alignment   | `beforeToolCall`   | gate destructive/external effects, guard question turns    |
  * | Alignment   | `transformContext` | restate developer constraints next to the latest message   |
  * | Evidence    | `finishTurn`       | send a verification request when a claim lacks evidence    |
+ * | Evidence    | events, `transformContext` | flag oversized changes and files (needs a probe)   |
  * | Context     | `transformContext` | recent tool window, batched elision, progress digest       |
  * | Skills      | events             | resource uptake, fanout, and phase telemetry per run       |
  */
@@ -38,6 +39,7 @@ import {
 	formatVerificationRequest,
 } from "./evidence.ts";
 import { type SkillUsageReport, SkillUsageTracker, type SkillUsageTrackerOptions } from "./skills.ts";
+import { SliceDiscipline, type SliceDisciplineOptions } from "./slices.ts";
 import { isDeveloperMessage, messageText } from "./text.ts";
 
 export type HarnessCoreEvent =
@@ -54,6 +56,13 @@ export interface HarnessCoreOptions {
 	context?: Omit<ContextPolicyOptions, "classifyEffect"> | false;
 	/** Skill telemetry needs to know the skills, so it is off unless configured. */
 	skills?: SkillUsageTrackerOptions | false;
+	/** Change-size and file-growth signals need a workspace probe, so they are off unless configured. */
+	slices?: SliceDisciplineOptions | false;
+	/**
+	 * The project's verification commands, such as `npm run check`. When set, only commands that
+	 * run one of them count as evidence; otherwise common test, build, and lint commands do.
+	 */
+	verifyCommands?: readonly string[];
 	/** Classification for tools the default name-based rules do not know. */
 	classifyEffect?: ToolEffectClassifier;
 	/** Observer for pillar decisions, for UI, logs, and telemetry. Must not throw. */
@@ -66,6 +75,8 @@ export class HarnessCore {
 	readonly evidence?: EvidenceLedger;
 	readonly context?: ContextWindowPolicy;
 	readonly skills?: SkillUsageTracker;
+	readonly slices?: SliceDiscipline;
+	readonly verifyCommands: readonly string[];
 	private readonly classifyEffect?: ToolEffectClassifier;
 	private readonly onEvent?: (event: HarnessCoreEvent) => void;
 	private lastElidedResults = 0;
@@ -73,6 +84,8 @@ export class HarnessCore {
 	constructor(options: HarnessCoreOptions = {}) {
 		this.classifyEffect = options.classifyEffect;
 		this.onEvent = options.onEvent;
+		this.verifyCommands = (options.verifyCommands ?? []).filter((command) => command.trim().length > 0);
+		if (options.slices) this.slices = new SliceDiscipline(options.slices);
 		if (options.alignment !== false) this.alignment = new AlignmentPolicy(options.alignment);
 		if (options.evidence !== false) this.evidence = new EvidenceLedger(options.evidence);
 		if (options.context !== false) {
@@ -82,12 +95,13 @@ export class HarnessCore {
 	}
 
 	classify(toolCall: AgentToolCall): ToolEffect {
-		return classifyToolCall(toolCall, this.classifyEffect);
+		return classifyToolCall(toolCall, this.classifyEffect, this.verifyCommands);
 	}
 
-	/** A developer request starts: reset per-request evidence and skill telemetry. */
+	/** A developer request starts: reset per-request evidence, slices, and skill telemetry. */
 	beginRequest(text: string): void {
 		this.evidence?.beginRequest(requestsAction(text));
+		this.slices?.beginRequest();
 		this.skills?.beginRun();
 	}
 
@@ -159,7 +173,7 @@ export class HarnessCore {
 			report,
 			verificationRequest: {
 				role: "user",
-				content: [{ type: "text", text: formatVerificationRequest(report) }],
+				content: [{ type: "text", text: formatVerificationRequest(report, this.verifyCommands) }],
 				timestamp: Date.now(),
 			},
 		};
@@ -179,6 +193,8 @@ export class HarnessCore {
 				`Changed since the last passing check: ${shown}${pending.length > 8 ? ", ..." : ""}. Verify before reporting completion.`,
 			);
 		}
+		const slices = this.slices?.render();
+		if (slices) sections.push(slices);
 		const progress = this.context?.renderProgress();
 		if (progress) sections.push(progress);
 		if (sections.length === 0) return undefined;
@@ -198,7 +214,8 @@ export class HarnessCore {
 		// A resumed conversation already contains the agent's work.
 		let agentHasResponded = agent.state.messages.some((message) => message.role === "assistant");
 
-		const unsubscribe = agent.subscribe((event: AgentEvent) => {
+		// The agent awaits listeners, so workspace measurements finish before the loop moves on.
+		const unsubscribe = agent.subscribe(async (event: AgentEvent) => {
 			switch (event.type) {
 				case "agent_start":
 					// The run's own prompt message follows `agent_start`; continuations and retries have none.
@@ -215,21 +232,38 @@ export class HarnessCore {
 						agentHasResponded = true;
 					}
 					break;
-				case "tool_execution_start":
-					toolCalls.set(event.toolCallId, {
+				case "tool_execution_start": {
+					const toolCall: AgentToolCall = {
 						type: "toolCall",
 						id: event.toolCallId,
 						name: event.toolName,
 						arguments: event.args ?? {},
-					});
+					};
+					toolCalls.set(event.toolCallId, toolCall);
+					const effect = this.classify(toolCall);
+					if (effect.kind !== "read") {
+						await this.slices?.beforeChange(toolCall.id, effect.kind === "write" ? effect.paths : []);
+					}
 					break;
+				}
 				case "tool_execution_end": {
 					const toolCall = toolCalls.get(event.toolCallId);
 					toolCalls.delete(event.toolCallId);
-					if (toolCall) this.recordToolOutcome(toolCall, event.isError);
+					if (!toolCall) break;
+					this.recordToolOutcome(toolCall, event.isError);
+					const effect = this.classify(toolCall);
+					if (effect.kind !== "read") {
+						await this.slices?.afterChange(
+							toolCall.id,
+							effect.kind === "write" ? effect.paths : [],
+							event.isError,
+						);
+					}
 					break;
 				}
 				case "agent_end": {
+					// No workspace measurement outlives the run that started it.
+					await this.slices?.refresh();
 					const report = this.skills?.report();
 					if (report && report.events.length > 0) this.onEvent?.({ type: "skill_usage", report });
 					break;
@@ -245,6 +279,7 @@ export class HarnessCore {
 
 		agent.transformContext = async (messages, signal) => {
 			const transformed = previousTransformContext ? await previousTransformContext(messages, signal) : messages;
+			await this.slices?.refresh();
 			return this.transformContext(transformed);
 		};
 

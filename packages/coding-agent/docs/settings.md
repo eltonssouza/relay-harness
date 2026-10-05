@@ -90,6 +90,9 @@ See [Compaction Reference](compaction.md) for trigger, summarization, and valida
 | `harnessCore.contextKeepRecent` | number | `6` | Tool results always sent verbatim. |
 | `harnessCore.contextBatchSize` | number | `6` | Aged-out large results elided together, to keep the prompt cache stable. |
 | `harnessCore.skills` | boolean | `true` | Measure skill resource usage for `/harness`. |
+| `harnessCore.verifyCommands` | string[] | `[]` | The project's verification commands, such as `["npm run check", "./test.sh"]`. When set, only commands that run one of them count as evidence. |
+| `harnessCore.maxChangedLines` | number | `500` | Changed lines per request before the agent is asked to verify and report the slice. `0` disables. Needs a git repository. |
+| `harnessCore.maxFileLines` | number | `1000` | Lines per file before an edit that crosses it, or grows the file by 200 lines or more, is flagged. `0` disables. |
 
 Changes apply to sessions created afterwards. See [Harness Core](harness-core.md).
 
