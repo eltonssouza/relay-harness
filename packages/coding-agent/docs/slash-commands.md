@@ -24,6 +24,7 @@ Extensions, prompt templates, and skills can add commands. The command menu in P
 | `/resume` | Switch to another saved session |
 | `/name [name]` | Set the session display name, or show the current name when omitted |
 | `/session` | Show current session information and statistics |
+| `/harness` | Show the [harness core](harness-core.md): constraints, pending approvals, evidence, context savings, and skill usage |
 | `/tree` | Navigate the session tree |
 | `/fork` | Create a new session from an earlier user message |
 | `/clone` | Duplicate the current session at its current position |

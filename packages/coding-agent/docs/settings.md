@@ -78,6 +78,21 @@ Compaction token values must be non-negative safe integers. Each value resolves 
 
 See [Compaction Reference](compaction.md) for trigger, summarization, and validation behavior.
 
+### Harness core
+
+| Setting | Type | Default | Description |
+|---|---|---|---|
+| `harnessCore.alignment` | boolean | `true` | Record developer constraints and restate them on every request; enables the two settings below. |
+| `harnessCore.authorizationGate` | boolean | `true` | Require authorization for destructive and external commands. |
+| `harnessCore.scopeGuard` | boolean | `true` | Block the first file edit in a turn where the developer only asked a question. |
+| `harnessCore.evidence` | boolean | `true` | Send one verification request when the agent claims completion without a passing check. |
+| `harnessCore.context` | boolean | `true` | Elide old large tool results from requests and restate a progress digest. |
+| `harnessCore.contextKeepRecent` | number | `6` | Tool results always sent verbatim. |
+| `harnessCore.contextBatchSize` | number | `6` | Aged-out large results elided together, to keep the prompt cache stable. |
+| `harnessCore.skills` | boolean | `true` | Measure skill resource usage for `/harness`. |
+
+Changes apply to sessions created afterwards. See [Harness Core](harness-core.md).
+
 ### Branch summaries
 
 | Setting | Type | Default | Description |

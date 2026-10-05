@@ -22,11 +22,17 @@ subagent/
 │   ├── scout.md         # Fast recon, returns compressed context
 │   ├── planner.md       # Creates implementation plans
 │   ├── reviewer.md      # Code review
+│   ├── security-auditor.md  # Full security audit (loads the security-audit skill)
+│   ├── verifier.md      # Runs the real checks against the acceptance criteria
 │   └── worker.md        # General-purpose (full capabilities)
-└── prompts/             # Workflow presets (prompt templates)
-    ├── implement.md     # scout -> planner -> worker
-    ├── scout-and-plan.md    # scout -> planner (no implementation)
-    └── implement-and-review.md  # worker -> reviewer -> worker
+├── prompts/             # Workflow presets (prompt templates)
+│   ├── implement.md     # scout -> planner -> worker
+│   ├── scout-and-plan.md    # scout -> planner (no implementation)
+│   ├── implement-and-review.md  # worker -> reviewer -> worker
+│   └── implement-and-verify.md  # worker -> verifier -> worker
+└── skills/
+    ├── delegate/SKILL.md    # When to delegate, which agent and model, how to brief and merge
+    └── security-audit/      # Audit procedure; categories and report rules load on demand
 ```
 
 ## Installation
@@ -49,6 +55,12 @@ done
 mkdir -p ~/.pi/agent/prompts
 for f in packages/coding-agent/examples/extensions/subagent/prompts/*.md; do
   ln -sf "$(pwd)/$f" ~/.pi/agent/prompts/$(basename "$f")
+done
+
+# Symlink the skills
+mkdir -p ~/.pi/agent/skills
+for d in packages/coding-agent/examples/extensions/subagent/skills/*/; do
+  ln -sfn "$(pwd)/${d%/}" ~/.pi/agent/skills/$(basename "$d")
 done
 ```
 
@@ -152,6 +164,8 @@ Project agents override user agents with the same name when `agentScope: "both"`
 | `scout` | Fast codebase recon | Haiku | read, grep, find, ls, bash |
 | `planner` | Implementation plans | Sonnet | read, grep, find, ls |
 | `reviewer` | Code review | Sonnet | read, grep, find, ls, bash |
+| `security-auditor` | Security audit with report, JSON, and issues | Sonnet | read, grep, find, ls, bash, write |
+| `verifier` | Checks completion claims by running tests and checks | Sonnet | read, grep, find, ls, bash |
 | `worker` | General-purpose | Sonnet | (all default) |
 
 ## Workflow Prompts
@@ -161,6 +175,11 @@ Project agents override user agents with the same name when `agentScope: "both"`
 | `/implement <query>` | scout → planner → worker |
 | `/scout-and-plan <query>` | scout → planner |
 | `/implement-and-review <query>` | worker → reviewer → worker |
+| `/implement-and-verify <query>` | worker → verifier → worker |
+
+The `security-auditor` agent follows the `security-audit` skill: rules of engagement, attack-surface mapping, fourteen categories traced from source to sink, evidence and severity rules, and the report deliverables. Install the skills (see Installation) before using it.
+
+The `delegate` skill tells the main agent when delegation pays off, which agent and model to pick, what each brief must contain, and how to merge results.
 
 ## Error Handling
 

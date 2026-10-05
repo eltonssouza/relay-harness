@@ -77,6 +77,9 @@ describe("jev-router example", () => {
 		});
 		const harness = await createHarness({
 			tools,
+			// These scenarios end edits with an unverified "done"; the evidence pillar would add a
+			// verification turn, and its routing is not what these tests characterize.
+			settings: { harnessCore: { evidence: false } },
 			extensionFactories: [
 				(pi) => {
 					pi.registerProvider(codex.provider);

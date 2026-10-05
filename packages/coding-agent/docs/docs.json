@@ -169,6 +169,10 @@
           "path": "compaction.md"
         },
         {
+          "title": "Harness Core",
+          "path": "harness-core.md"
+        },
+        {
           "title": "JSON Event Stream",
           "path": "json.md"
         },
