@@ -187,7 +187,7 @@ const options = parseArgs();
 const repoRoot = process.cwd();
 const rootPackageJson = readPackageJson(repoRoot);
 
-if (rootPackageJson.name !== "pi-monorepo") {
+if (rootPackageJson.name !== "relay-monorepo") {
 	throw new Error("Run this script from the repository root");
 }
 
