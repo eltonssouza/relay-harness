@@ -173,6 +173,10 @@
           "path": "harness-core.md"
         },
         {
+          "title": "Adaptive Execution with Laya",
+          "path": "laya.md"
+        },
+        {
           "title": "JSON Event Stream",
           "path": "json.md"
         },
