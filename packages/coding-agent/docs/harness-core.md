@@ -5,7 +5,7 @@ The harness core is four rules that apply to every model Pi runs: Claude, GPT, G
 | Pillar | Failure it addresses | What the harness does |
 |---|---|---|
 | Alignment | Agents violate explicit developer constraints (38% of misalignment), treat questions as permission to edit, and run destructive commands. | Keeps constraints as state and restates them on every request. Asks before destructive or external commands. Stops the first edit in a turn where you only asked a question. Works as a pair: records your corrections and offers constraints and corrections as candidates for AGENTS.md. |
-| Evidence | Agents report "done" when the work failed. LLM judges miss most of these cases. | Records what tool calls actually changed and checked. A completion claim without a passing check after the last change gets one verification request. |
+| Evidence | Agents report "done" when the work failed. LLM judges miss most of these cases. | Records what tool calls actually changed and checked. A completion claim without a passing check after the last change gets one verification request. Counts only checks whose exit code is not masked, optionally only the project's declared commands, and flags oversized changes and files. |
 | Context | Old tool results describe states that no longer exist and grow the context. | Sends recent tool results verbatim, replaces old large ones with one-line stubs, and restates a compact progress digest. |
 | Skills | A skill's organization changes how the agent uses it, and nobody measures it. | Tells the model to treat `SKILL.md` as a router, measures which skill resources lead to actions, and audits skill structure. |
 
@@ -43,6 +43,17 @@ During each request Pi records which files changed and which checks ran (tests, 
 | `acknowledged` | The message states what was not verified or what failed. |
 
 For `unverified`, `contradicted`, and `no-effect`, Pi sends the agent one `[harness:evidence]` verification request instead of ending the run. That message appears in the transcript. If the next answer is still flagged, the run ends and Pi shows a warning.
+
+**Declared verification commands.** By default, common test, type-check, build, and lint commands count as checks. A project can declare its own with `harnessCore.verifyCommands`, for example `["npm run check", "./test.sh"]`. Then only commands that run one of them count, so `npx tsc` on one package does not stand in for the project's full check, and the verification request names the declared commands.
+
+**Masked exit codes.** A check counts only if its exit code reaches the tool. What follows the check can replace it: a pipe (`npm run check | tail`, unless `pipefail` is set), `||` (`npm test || true`), or a later command (`npm test; echo done`). Each of these exits 0 when the check fails, so such a run is not evidence. `&&` keeps the failure: `npm test && echo ok` counts.
+
+**Small slices.** Two signals, shown next to your latest message when they fire:
+
+- **Change size**: lines changed in the git working tree since your request began, against the last commit (added plus deleted lines; all lines of new untracked files). Above `harnessCore.maxChangedLines` (default 500), the agent is asked to verify and report this slice before starting more, and to propose how to split the rest.
+- **File growth**: when an edit takes a file past `harnessCore.maxFileLines` (default 1000), or grows a file already past it by 200 lines or more, the agent is asked to extract a cohesive part before adding more. A small edit to an already large file is not flagged.
+
+Outside a git repository the change-size signal is off; file growth still works. `/harness` shows the current numbers.
 
 ## Context
 

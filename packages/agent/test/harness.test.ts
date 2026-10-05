@@ -20,6 +20,8 @@ import {
 	isCorrection,
 	isQuestionOnly,
 	SkillUsageTracker,
+	SliceDiscipline,
+	type WorkspaceProbe,
 } from "../src/harness/index.ts";
 import type { AgentMessage, AgentTool, AgentToolCall, StreamFn } from "../src/types.ts";
 
@@ -113,6 +115,109 @@ describe("effects", () => {
 		expect(classifyCommand("npm run check").kind).toBe("verify");
 		expect(classifyCommand("npx vitest --run test/a.test.ts").kind).toBe("verify");
 		expect(classifyCommand("git status").kind).toBe("execute");
+	});
+
+	it("does not count a check whose exit code is masked", () => {
+		expect(classifyCommand("npm run check 2>&1 | tail -20").kind).toBe("execute");
+		// With pipefail, a failing check still fails the pipeline.
+		expect(classifyCommand("set -o pipefail; npm test | tee log.txt").kind).toBe("verify");
+		expect(classifyCommand("npm test || true").kind).toBe("execute");
+		expect(classifyCommand("npm test; echo done").kind).toBe("execute");
+		expect(classifyCommand("cd packages/agent && npm test").kind).toBe("verify");
+		expect(classifyCommand("npm test && echo ok").kind).toBe("verify");
+		expect(classifyCommand("npm run build; npm test").kind).toBe("verify");
+	});
+
+	it("counts only the project's declared commands when they are set", () => {
+		const declared = ["npm run check", "./test.sh"];
+		expect(classifyCommand("npm run check", declared).kind).toBe("verify");
+		expect(classifyCommand("cd repo &&  npm   run check", declared).kind).toBe("verify");
+		expect(classifyCommand("./test.sh packages/agent", declared).kind).toBe("verify");
+		expect(classifyCommand("npx tsc --noEmit", declared).kind).toBe("execute");
+		expect(classifyCommand("npm run check | tail", declared).kind).toBe("execute");
+	});
+});
+
+describe("slices", () => {
+	function fakeProbe(files: Map<string, number>, changed: Map<string, number>): WorkspaceProbe {
+		return {
+			changedLines: async () => new Map(changed),
+			fileLines: async (path) => files.get(path),
+		};
+	}
+
+	it("measures changes against the request's baseline and flags a large slice", async () => {
+		const changed = new Map([["old.ts", 40]]);
+		let measurements = 0;
+		const probe = fakeProbe(new Map(), changed);
+		const slices = new SliceDiscipline({
+			probe: {
+				...probe,
+				changedLines: () => {
+					measurements++;
+					return probe.changedLines();
+				},
+			},
+			maxChangedLines: 100,
+		});
+		slices.beginRequest();
+		// A request that changes nothing measures nothing.
+		expect(measurements).toBe(0);
+		await slices.beforeChange("1", []);
+		changed.set("a.ts", 70);
+		await slices.afterChange("1", [], false);
+		await slices.refresh();
+		expect(slices.status()).toMatchObject({ changedLines: 70, changedFiles: 1 });
+		expect(slices.render()).toBeUndefined();
+		await slices.beforeChange("2", []);
+		changed.set("old.ts", 80);
+		await slices.afterChange("2", [], false);
+		await slices.refresh();
+		expect(slices.status()).toMatchObject({ changedLines: 110, changedFiles: 2 });
+		expect(slices.render()).toContain("changed about 110 lines in 2 files");
+	});
+
+	it("stops asking for change size where it cannot be measured", async () => {
+		let measurements = 0;
+		const slices = new SliceDiscipline({
+			probe: {
+				changedLines: async () => {
+					measurements++;
+					return undefined;
+				},
+				fileLines: async () => undefined,
+			},
+		});
+		for (const id of ["1", "2", "3"]) {
+			slices.beginRequest();
+			await slices.beforeChange(id, []);
+			await slices.afterChange(id, [], false);
+			await slices.refresh();
+		}
+		expect(measurements).toBe(1);
+	});
+
+	it("flags a file that crosses the guideline or grows a lot, not a small edit to a large file", async () => {
+		const files = new Map([
+			["big.ts", 1500],
+			["grow.ts", 900],
+		]);
+		const slices = new SliceDiscipline({ probe: fakeProbe(files, new Map()), maxFileLines: 1000 });
+		slices.beginRequest();
+		await slices.beforeChange("1", ["big.ts"]);
+		files.set("big.ts", 1520);
+		await slices.afterChange("1", ["big.ts"], false);
+		expect(slices.render()).toBeUndefined();
+
+		await slices.beforeChange("2", ["grow.ts"]);
+		files.set("grow.ts", 1100);
+		await slices.afterChange("2", ["grow.ts"], false);
+		expect(slices.render()).toContain("grow.ts now has 1100 lines");
+
+		await slices.beforeChange("3", ["big.ts"]);
+		files.set("big.ts", 1800);
+		await slices.afterChange("3", ["big.ts"], false);
+		expect(slices.status().oversizedFiles.get("big.ts")).toBe(1800);
 	});
 });
 
@@ -465,6 +570,31 @@ describe("HarnessCore on an Agent", () => {
 		// The stored transcript keeps the developer's message unchanged.
 		const prompt = agent.state.messages.find((message) => message.role === "user");
 		expect(JSON.stringify(prompt)).not.toContain("harness_state");
+	});
+
+	it("tells the agent to close the slice when a request changes too much", async () => {
+		const requests: TranscriptContext[] = [];
+		const changed = new Map<string, number>();
+		const agent = new Agent({
+			initialState: { systemPrompt: "test", tools: [tool("edit")] },
+			streamFn: scripted(
+				[[call("1", "edit", { path: "src/a.ts" })], [{ type: "text", text: "Continuing with the next part." }]],
+				requests,
+			),
+		});
+		agent.subscribe((event) => {
+			// The edit "writes" 600 lines.
+			if (event.type === "tool_execution_end") changed.set("src/a.ts", 600);
+		});
+		new HarnessCore({
+			evidence: false,
+			slices: { probe: { changedLines: async () => new Map(changed), fileLines: async () => 10 } },
+		}).install(agent);
+
+		await agent.prompt("Refactor src/a.ts");
+
+		expect(lastText(requests[0])).not.toContain("This request has changed");
+		expect(lastText(requests[1])).toContain("This request has changed about 600 lines in 1 files");
 	});
 
 	it("restores the previous hooks on uninstall", () => {

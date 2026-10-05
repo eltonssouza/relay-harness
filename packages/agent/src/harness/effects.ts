@@ -136,12 +136,47 @@ const COMMAND_RULES: CommandRule[] = [
 const VERIFY_PATTERN =
 	/\b(?:test|tests|vitest|jest|mocha|pytest|unittest|tox|nox|rspec|phpunit|go\s+(?:test|vet|build)|cargo\s+(?:test|check|build|clippy)|tsc|mypy|pyright|ruff|eslint|biome|prettier\s+--check|lint|typecheck|type-check|check|build|make|ctest|gradle|mvn|dotnet\s+(?:test|build)|swift\s+(?:test|build)|node\s+--test)\b/;
 
-/** Classify a shell command. */
-export function classifyCommand(command: string): Omit<ToolEffect, "paths"> {
+/**
+ * Whether what follows a check in a command line replaces the check's exit code with another
+ * command's: a pipe (`npm test | tail`, unless `pipefail` is set), `||` (`npm test || true`), or
+ * a later command (`npm test; echo done`). All of them exit 0 when the check fails. `&&` keeps
+ * the failure, so `npm test && echo ok` is still evidence.
+ */
+export function masksExitCode(command: string, checkEnd = 0): boolean {
+	const rest = command.slice(checkEnd);
+	if (/\|\||;|\n/.test(rest)) return true;
+	return /\|/.test(rest) && !/\bpipefail\b/.test(command);
+}
+
+/** End index of the last verification in `command`, or -1 when it runs none. */
+function lastCheckEnd(command: string, verifyCommands: readonly string[]): number {
+	if (verifyCommands.length === 0) {
+		let end = -1;
+		for (const match of command.matchAll(new RegExp(VERIFY_PATTERN.source, "g"))) end = match.index + match[0].length;
+		return end;
+	}
+	let end = -1;
+	for (const declared of verifyCommands) {
+		// Tokens match literally; any run of whitespace between them matches any other.
+		const tokens = declared.trim().split(/\s+/).filter(Boolean);
+		if (tokens.length === 0) continue;
+		const pattern = new RegExp(tokens.map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s+"), "g");
+		for (const match of command.matchAll(pattern)) end = Math.max(end, match.index + match[0].length);
+	}
+	return end;
+}
+
+/**
+ * Classify a shell command. With `verifyCommands`, only those commands count as verification;
+ * otherwise common test, type-check, build, and lint commands do. A check whose exit code is
+ * masked is not verification.
+ */
+export function classifyCommand(command: string, verifyCommands: readonly string[] = []): Omit<ToolEffect, "paths"> {
 	for (const rule of COMMAND_RULES) {
 		if (rule.pattern.test(command)) return { kind: rule.kind, command, reason: rule.reason };
 	}
-	return { kind: VERIFY_PATTERN.test(command) ? "verify" : "execute", command };
+	const end = lastCheckEnd(command, verifyCommands);
+	return { kind: end >= 0 && !masksExitCode(command, end) ? "verify" : "execute", command };
 }
 
 function stringArg(args: Record<string, unknown>, ...keys: string[]): string | undefined {
@@ -152,8 +187,15 @@ function stringArg(args: Record<string, unknown>, ...keys: string[]): string | u
 	return undefined;
 }
 
-/** Default classification by tool name and arguments. Unknown tools are `execute`. */
-export function classifyToolCall(toolCall: AgentToolCall, custom?: ToolEffectClassifier): ToolEffect {
+/**
+ * Default classification by tool name and arguments. Unknown tools are `execute`.
+ * `verifyCommands` are the project's declared checks; see {@link classifyCommand}.
+ */
+export function classifyToolCall(
+	toolCall: AgentToolCall,
+	custom?: ToolEffectClassifier,
+	verifyCommands: readonly string[] = [],
+): ToolEffect {
 	const customEffect = custom?.(toolCall);
 	if (customEffect) return customEffect;
 
@@ -164,7 +206,7 @@ export function classifyToolCall(toolCall: AgentToolCall, custom?: ToolEffectCla
 
 	if (SHELL_TOOLS.has(name)) {
 		const command = stringArg(args, "command", "cmd", "script") ?? "";
-		return { ...classifyCommand(command), paths };
+		return { ...classifyCommand(command, verifyCommands), paths };
 	}
 	if (WRITE_TOOLS.has(name)) return { kind: "write", paths };
 	if (READ_TOOLS.has(name)) return { kind: "read", paths };

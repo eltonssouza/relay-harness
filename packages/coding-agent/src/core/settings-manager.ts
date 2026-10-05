@@ -42,6 +42,9 @@ export interface HarnessCoreSettings {
 	contextKeepRecent?: number; // default: 6 - tool results always sent verbatim
 	contextBatchSize?: number; // default: 6 - aged-out large results per elision batch
 	skills?: boolean; // default: true - skill resource uptake telemetry
+	verifyCommands?: string[]; // default: [] - the project's checks; when set, only these count as verification
+	maxChangedLines?: number; // default: 500 - changed lines per request before the agent is asked to close the slice; 0 disables
+	maxFileLines?: number; // default: 1000 - lines per file before growth is flagged; 0 disables
 }
 
 export interface BranchSummarySettings {
@@ -939,6 +942,9 @@ export class SettingsManager {
 			contextKeepRecent: settings?.contextKeepRecent ?? 6,
 			contextBatchSize: settings?.contextBatchSize ?? 6,
 			skills: settings?.skills ?? true,
+			verifyCommands: settings?.verifyCommands?.filter((command) => typeof command === "string") ?? [],
+			maxChangedLines: settings?.maxChangedLines ?? 500,
+			maxFileLines: settings?.maxFileLines ?? 1000,
 		};
 	}
 
