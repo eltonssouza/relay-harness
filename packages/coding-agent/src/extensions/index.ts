@@ -1,5 +1,6 @@
 import type { InlineExtension } from "../core/extensions/types.ts";
 import codemodeExtension from "./codemode/index.ts";
+import intakeExtension from "./intake/index.ts";
 import layaExtension from "./laya/index.ts";
 import llamaExtension from "./llama/index.ts";
 import mcpExtension from "./mcp/index.ts";
@@ -9,6 +10,8 @@ export const builtInExtensions: InlineExtension[] = [
 	{ name: "llama.cpp", factory: llamaExtension, builtin: true },
 	// Adds the laya/auto virtual model; it routes nothing unless selected.
 	{ name: "laya", factory: layaExtension, builtin: true },
+	// Adds /intake and its deferred intake_questionnaire tool.
+	{ name: "intake", factory: intakeExtension, builtin: true },
 	// Replaceable: an extension that registers `codemode`, `tool_search`, or `/mcp` (such as a third-party
 	// MCP extension) takes over instead of running alongside the built-in one.
 	{ name: "codemode", factory: codemodeExtension, replaceable: true, builtin: true },
