@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/relay-model.svg" alt="Relay Harness">
+</p>
+
 # Relay
 
 Relay is a terminal coding agent and the harness around it. The agent reads files, runs commands, edits code, and works through multi-step tasks with any model: a hosted provider, a subscription, or a local endpoint.
