@@ -16,7 +16,7 @@ import { type EntryId, ROOT_CONVERSATION_ID } from "../src/types.ts";
 const directories = new Set<string>();
 
 async function databasePath(): Promise<string> {
-	const directory = await mkdtemp(join(tmpdir(), "pi-durable-migrations-"));
+	const directory = await mkdtemp(join(tmpdir(), "relay-durable-migrations-"));
 	directories.add(directory);
 	return join(directory, "storage.sqlite");
 }

@@ -138,7 +138,7 @@ describe("Session protocol", () => {
 				attachClient(presentation) {
 					return {
 						async invokeService(call, _publish, context) {
-							if (call.serviceId !== "pi.session-management") throw new Error("Unexpected service");
+							if (call.serviceId !== "relay.session-management") throw new Error("Unexpected service");
 							if (call.member === "attach" && typeof call.args[0] === "string") {
 								await presentation.attachSession(call.args[0], context);
 								return null;
@@ -168,7 +168,7 @@ describe("Session protocol", () => {
 
 		const detached = client.next((message) => message.type === "attachment" && message.attachment === null);
 		await expect(
-			client.requestService({ serverId }, { serviceId: "pi.session-management", member: "detach", args: [] }),
+			client.requestService({ serverId }, { serviceId: "relay.session-management", member: "detach", args: [] }),
 		).resolves.toMatchObject({ ok: true });
 		await expect(detached).resolves.toMatchObject({ type: "attachment", attachment: null });
 		expect(backing.latestHarness("session-1").attachedClients).toBe(0);

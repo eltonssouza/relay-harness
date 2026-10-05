@@ -52,7 +52,7 @@ vi.mock("openai", () => {
 	return { AzureOpenAI };
 });
 
-const PI_USER_AGENT = `pi (${platform()} ${release()}; ${arch()})`;
+const RELAY_USER_AGENT = `relay (${platform()} ${release()}; ${arch()})`;
 
 const context: Context = {
 	messages: [{ role: "user", content: "hello", timestamp: Date.now() }],
@@ -263,8 +263,8 @@ describe("azure-openai-responses provider stream events", () => {
 });
 
 describe("azure-openai-responses user agent", () => {
-	it("uses pi's User-Agent by default", async () => {
-		expect((await captureClientHeaders())["User-Agent"]).toBe(PI_USER_AGENT);
+	it("uses relay's User-Agent by default", async () => {
+		expect((await captureClientHeaders())["User-Agent"]).toBe(RELAY_USER_AGENT);
 	});
 
 	it("lets explicit headers override the default User-Agent", async () => {

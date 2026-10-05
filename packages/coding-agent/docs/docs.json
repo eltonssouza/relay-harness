@@ -12,8 +12,8 @@
           "path": "quickstart.md"
         },
         {
-          "title": "How Pi Works",
-          "path": "how-pi-works.md"
+          "title": "How Relay Works",
+          "path": "how-relay-works.md"
         }
       ]
     },
@@ -21,10 +21,10 @@
       "title": "Guides",
       "items": [
         {
-          "title": "Run Pi",
+          "title": "Run Relay",
           "items": [
             {
-              "title": "Use Pi in the Terminal",
+              "title": "Use Relay in the Terminal",
               "path": "usage.md"
             },
             {
@@ -36,11 +36,11 @@
               "path": "sessions.md"
             },
             {
-              "title": "Run Pi Safely",
+              "title": "Run Relay Safely",
               "path": "security.md"
             },
             {
-              "title": "Isolate Pi",
+              "title": "Isolate Relay",
               "path": "containerization.md"
             },
             {
@@ -56,24 +56,24 @@
               "path": "shell-aliases.md"
             },
             {
-              "title": "Run Pi in tmux",
+              "title": "Run Relay in tmux",
               "path": "tmux.md"
             },
             {
-              "title": "Run Pi on Windows",
+              "title": "Run Relay on Windows",
               "path": "windows.md"
             },
             {
-              "title": "Run Pi on Android",
+              "title": "Run Relay on Android",
               "path": "termux.md"
             }
           ]
         },
         {
-          "title": "Customize Pi",
+          "title": "Customize Relay",
           "items": [
             {
-              "title": "Configure Pi",
+              "title": "Configure Relay",
               "path": "configuration.md"
             },
             {
@@ -89,7 +89,7 @@
               "path": "themes.md"
             },
             {
-              "title": "Use Pi Packages",
+              "title": "Use Relay Packages",
               "path": "packages.md"
             },
             {
@@ -99,7 +99,7 @@
           ]
         },
         {
-          "title": "Build on Pi",
+          "title": "Build on Relay",
           "items": [
             {
               "title": "Build Extensions",

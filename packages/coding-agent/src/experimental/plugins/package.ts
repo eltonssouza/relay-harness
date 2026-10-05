@@ -7,7 +7,7 @@ import {
 	type FacetBundleArtifact,
 	readFacetBundleArtifact,
 } from "@earendil-works/chord/node";
-import type { ServerId } from "@earendil-works/pi-protocol";
+import type { ServerId } from "@relay-harness/protocol";
 
 const PLUGIN_PACKAGE_PROFILE_VERSION = 1;
 const DEFAULT_PLUGIN_FACETS = Object.freeze({ session: "src/session.ts", tui: "src/tui.ts" });

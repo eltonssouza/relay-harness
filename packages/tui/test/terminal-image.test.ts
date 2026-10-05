@@ -45,9 +45,9 @@ const ENV_KEYS = [
 	"CMUX_WORKSPACE_ID",
 	"WARP_SESSION_ID",
 	"WARP_TERMINAL_SESSION_UUID",
-	"PI_HYPERLINKS",
-	"PI_IMAGE_PROTOCOL",
-	"PI_TRUE_COLOR",
+	"RELAY_HYPERLINKS",
+	"RELAY_IMAGE_PROTOCOL",
+	"RELAY_TRUE_COLOR",
 ] as const;
 
 function withEnv<T>(overrides: Record<string, string | undefined>, fn: () => T): T {
@@ -227,12 +227,15 @@ describe("detectCapabilities", () => {
 
 	it("applies environment overrides", () => {
 		assert.deepStrictEqual(
-			withEnv({ PI_HYPERLINKS: "1", PI_IMAGE_PROTOCOL: "kitty", PI_TRUE_COLOR: "1" }, () => detectCapabilities()),
+			withEnv({ RELAY_HYPERLINKS: "1", RELAY_IMAGE_PROTOCOL: "kitty", RELAY_TRUE_COLOR: "1" }, () =>
+				detectCapabilities(),
+			),
 			{ images: "kitty", trueColor: true, hyperlinks: true },
 		);
 		assert.deepStrictEqual(
-			withEnv({ TERM_PROGRAM: "iterm.app", PI_HYPERLINKS: "0", PI_IMAGE_PROTOCOL: "none", PI_TRUE_COLOR: "0" }, () =>
-				detectCapabilities(),
+			withEnv(
+				{ TERM_PROGRAM: "iterm.app", RELAY_HYPERLINKS: "0", RELAY_IMAGE_PROTOCOL: "none", RELAY_TRUE_COLOR: "0" },
+				() => detectCapabilities(),
 			),
 			{ images: null, trueColor: false, hyperlinks: false },
 		);
@@ -243,9 +246,9 @@ describe("detectCapabilities", () => {
 			withEnv(
 				{
 					TERM_PROGRAM: "ghostty",
-					PI_HYPERLINKS: "auto",
-					PI_IMAGE_PROTOCOL: "auto",
-					PI_TRUE_COLOR: "auto",
+					RELAY_HYPERLINKS: "auto",
+					RELAY_IMAGE_PROTOCOL: "auto",
+					RELAY_TRUE_COLOR: "auto",
 				},
 				() => detectCapabilities(),
 			),
@@ -254,7 +257,7 @@ describe("detectCapabilities", () => {
 	});
 
 	it("applies and clears programmatic overrides", () => {
-		withEnv({ PI_HYPERLINKS: "1", PI_IMAGE_PROTOCOL: "kitty", PI_TRUE_COLOR: "1" }, () => {
+		withEnv({ RELAY_HYPERLINKS: "1", RELAY_IMAGE_PROTOCOL: "kitty", RELAY_TRUE_COLOR: "1" }, () => {
 			setCapabilityOverrides({ images: null, trueColor: false, hyperlinks: false });
 			try {
 				assert.deepStrictEqual(getCapabilities(), { images: null, trueColor: false, hyperlinks: false });
@@ -270,7 +273,7 @@ describe("detectCapabilities", () => {
 	it("bypasses the tmux probe when hyperlinks are overridden", () => {
 		let probed = false;
 		const caps = withEnv(
-			{ TMUX: "/tmp/tmux-1000/default,1234,0", PI_HYPERLINKS: "1", PI_IMAGE_PROTOCOL: "kitty" },
+			{ TMUX: "/tmp/tmux-1000/default,1234,0", RELAY_HYPERLINKS: "1", RELAY_IMAGE_PROTOCOL: "kitty" },
 			() =>
 				detectCapabilities(() => {
 					probed = true;
@@ -778,9 +781,9 @@ describe("imageFallback", () => {
 	it("shortens home-prefixed absolute paths without hyperlinks", () => {
 		setCapabilities({ images: null, trueColor: false, hyperlinks: false });
 		try {
-			const abs = join(homedir(), ".pi", "agent", "shot.png");
+			const abs = join(homedir(), ".relay", "agent", "shot.png");
 			const result = imageFallback("image/png", { widthPx: 1280, heightPx: 720 }, abs);
-			assert.strictEqual(result, "[Image: ~/.pi/agent/shot.png [image/png] 1280x720]");
+			assert.strictEqual(result, "[Image: ~/.relay/agent/shot.png [image/png] 1280x720]");
 		} finally {
 			resetCapabilitiesCache();
 		}
@@ -789,7 +792,7 @@ describe("imageFallback", () => {
 	it("wraps shortened absolute paths in OSC 8 file links when hyperlinks are enabled", () => {
 		setCapabilities({ images: null, trueColor: false, hyperlinks: true });
 		try {
-			const abs = join(homedir(), ".pi", "agent", "shot.png");
+			const abs = join(homedir(), ".relay", "agent", "shot.png");
 			const result = imageFallback("image/png", { widthPx: 10, heightPx: 10 }, abs);
 			assert.ok(result.includes("\x1b]8;;file://"), "expected OSC 8 file link");
 			assert.ok(
@@ -798,7 +801,7 @@ describe("imageFallback", () => {
 			);
 			// Visible text must use ~/... not the expanded home path.
 			const visible = result.replace(/\x1b\]8;;.*?\x1b\\/g, "");
-			assert.strictEqual(visible, "[Image: ~/.pi/agent/shot.png [image/png] 10x10]");
+			assert.strictEqual(visible, "[Image: ~/.relay/agent/shot.png [image/png] 10x10]");
 		} finally {
 			resetCapabilitiesCache();
 		}

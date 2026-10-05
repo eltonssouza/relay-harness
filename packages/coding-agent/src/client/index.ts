@@ -1,1 +1,1 @@
-export * from "@earendil-works/pi-client";
+export * from "@relay-harness/client";

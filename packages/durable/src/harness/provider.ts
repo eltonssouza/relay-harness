@@ -1,5 +1,5 @@
 import type { Context } from "@earendil-works/chord";
-import { uuidv7 } from "@earendil-works/pi-ai/utils/uuid";
+import { uuidv7 } from "@relay-harness/ai/utils/uuid";
 import { defineDoc } from "../documents.ts";
 import type { TaskRuntime } from "../types.ts";
 
@@ -10,7 +10,7 @@ export type ProviderState = {
 
 /** Built-in provider state; every fork starts with a fresh identity instead of copying its parent. */
 export const ProviderDoc = defineDoc<ProviderState>({
-	kind: "pi.provider",
+	kind: "relay.provider",
 	version: 1,
 	scope: "conversation",
 	history: "latest",
@@ -20,7 +20,7 @@ export const ProviderDoc = defineDoc<ProviderState>({
 });
 
 /**
- * Return the persisted identity without writing in the normal path. A legacy conversation without `pi.provider` gets
+ * Return the persisted identity without writing in the normal path. A legacy conversation without `relay.provider` gets
  * one migration commit whose `tx.doc()` runs `initial()` before the provider request starts.
  */
 export async function ensureProviderSessionId<I, S, R, H extends object>(

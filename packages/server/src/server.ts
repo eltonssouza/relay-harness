@@ -27,7 +27,7 @@ import {
 	type ServerHello,
 	type ServerHelloError,
 	type ServerMessage,
-} from "@earendil-works/pi-protocol";
+} from "@relay-harness/protocol";
 import {
 	type ByteConnection,
 	type ByteConnectionHandler,

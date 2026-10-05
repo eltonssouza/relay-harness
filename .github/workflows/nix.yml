@@ -10,7 +10,7 @@ name: Nix
 #
 # Release tags are built exactly as tagged, with their committed pin. Once all
 # systems build, the stable branch is fast-forwarded to the tag so that
-# `nix run github:earendil-works/pi/stable` runs the latest release.
+# `nix run github:eltonssouza/relay-harness/stable` runs the latest release.
 
 on:
   push:
@@ -126,10 +126,10 @@ jobs:
 
       - name: Smoke-test
         run: |
-          ./result/bin/pi --version
-          ./result/bin/pi --help > /dev/null
+          ./result/bin/relay --version
+          ./result/bin/relay --help > /dev/null
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-            test "$(./result/bin/pi --version)" = "${GITHUB_REF_NAME#v}"
+            test "$(./result/bin/relay --version)" = "${GITHUB_REF_NAME#v}"
           fi
 
   update-stable:

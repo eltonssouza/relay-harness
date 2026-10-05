@@ -1,18 +1,18 @@
-import type { ModelThinkingLevel } from "@earendil-works/pi-ai";
-import { createRegistry, type HarnessSettings, type ModelRef, type Registry } from "@earendil-works/pi-durable";
+import type { ModelThinkingLevel } from "@relay-harness/ai";
+import { createRegistry, type HarnessSettings, type ModelRef, type Registry } from "@relay-harness/durable";
 import { applyHttpProxySettings, configureHttpDispatcher } from "../../core/http-dispatcher.ts";
 import { findInitialModel, resolveCliModel } from "../../core/model-resolver.ts";
 import type { ModelRuntime } from "../../core/model-runtime.ts";
 import type { SettingsManager } from "../../core/settings-manager.ts";
 import { Search, Vacation } from "./vacation.ts";
 
-/** pi's HTTP setup: proxy, idle timeouts, and one undici for fetch. Without it, some provider streams break off. */
+/** relay's HTTP setup: proxy, idle timeouts, and one undici for fetch. Without it, some provider streams break off. */
 export function configureHarnessHttp(settingsManager: SettingsManager): void {
 	applyHttpProxySettings(settingsManager.getGlobalSettings().httpProxy);
 	configureHttpDispatcher(settingsManager.getHttpIdleTimeoutMs());
 }
 
-/** Harness settings read at every use from pi's settings as loaded at startup. */
+/** Harness settings read at every use from relay's settings as loaded at startup. */
 export function createHarnessSettings(settingsManager: SettingsManager): HarnessSettings {
 	return {
 		get stream() {
@@ -39,7 +39,7 @@ export function createHarnessSettings(settingsManager: SettingsManager): Harness
 	};
 }
 
-/** A registry with the vacation planner and its research subagent's search. No coding tools, no pi prompt. */
+/** A registry with the vacation planner and its research subagent's search. No coding tools, no relay prompt. */
 export function createVacationRegistry(): Registry {
 	const registry = createRegistry();
 	registry.install(Vacation);
@@ -53,7 +53,7 @@ export interface InitialModel {
 	readonly fallbackMessage?: string;
 }
 
-/** The model a new root conversation starts with: an explicit `--provider`/`--model`, or pi's default resolution. */
+/** The model a new root conversation starts with: an explicit `--provider`/`--model`, or relay's default resolution. */
 export async function findInitialAgentModel(
 	settingsManager: SettingsManager,
 	modelRuntime: ModelRuntime,

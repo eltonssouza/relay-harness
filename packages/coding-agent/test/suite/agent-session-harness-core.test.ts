@@ -1,5 +1,5 @@
-import type { AgentTool } from "@earendil-works/pi-agent-core";
-import { fauxAssistantMessage, fauxToolCall, type TranscriptContext } from "@earendil-works/pi-ai";
+import type { AgentTool } from "@relay-harness/agent-core";
+import { fauxAssistantMessage, fauxToolCall, type TranscriptContext } from "@relay-harness/ai";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { HARNESS_CONSTRAINTS_ENTRY } from "../../src/core/harness-core.ts";

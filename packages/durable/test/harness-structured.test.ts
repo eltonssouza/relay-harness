@@ -9,7 +9,7 @@ import {
 	type Models,
 	type ToolResultMessage,
 	Type,
-} from "@earendil-works/pi-ai";
+} from "@relay-harness/ai";
 import {
 	type AgentEvent,
 	type Conversation,
@@ -34,7 +34,7 @@ import {
 	ToolResultEntry,
 	type Tx,
 	watchEvents,
-} from "@earendil-works/pi-durable";
+} from "@relay-harness/durable";
 import { afterEach, describe, expect, it } from "vitest";
 import { openNodeSqliteStorage } from "../src/storage/sqlite/node.ts";
 import { allEntries, chatSetup, openChat, waitFor } from "./chat-support.ts";
@@ -183,7 +183,7 @@ async function until(check: () => boolean | Promise<boolean>): Promise<void> {
 const directories = new Set<string>();
 
 async function sqlitePath(): Promise<string> {
-	const directory = await mkdtemp(join(tmpdir(), "pi-durable-structured-"));
+	const directory = await mkdtemp(join(tmpdir(), "relay-durable-structured-"));
 	directories.add(directory);
 	return join(directory, "session.sqlite");
 }
@@ -1026,11 +1026,14 @@ describe("tool rounds", () => {
 		const { harness, root } = await openChat(new MemoryStorage(), setup);
 		expect((await (await root.submit({ type: "input", content: "go" }, context)).wait(context)).status).toBe("done");
 		const tasks = (await harness.commit((tx) => tx.scanTasks({ conversationId: root.id }, 20), context)).items;
-		const [first, second] = tasks.filter((task) => task.kind === "pi.generation");
-		expect(tasks.filter((task) => task.kind === "pi.tool").map((task) => task.owner)).toEqual([first!.id, first!.id]);
+		const [first, second] = tasks.filter((task) => task.kind === "relay.generation");
+		expect(tasks.filter((task) => task.kind === "relay.tool").map((task) => task.owner)).toEqual([
+			first!.id,
+			first!.id,
+		]);
 		expect(first!.owner).toBeUndefined();
 		expect(second!.owner).toBeUndefined();
-		const assistant = (await allEntries(root)).find((entry) => entry.kind === "pi.assistant")!;
+		const assistant = (await allEntries(root)).find((entry) => entry.kind === "relay.assistant")!;
 		expect(first!.state).toEqual({
 			status: "terminal",
 			outcome: { status: "completed", result: { entryId: assistant.id } },
@@ -1082,7 +1085,7 @@ describe("tool rounds", () => {
 			{ type: "text", text: "<harness>\n[error] Tool two was aborted\n</harness>" },
 		]);
 		const tools = (
-			await harness.commit((tx) => tx.scanTasks({ conversationId: root.id, kind: "pi.tool" }, 20), context)
+			await harness.commit((tx) => tx.scanTasks({ conversationId: root.id, kind: "relay.tool" }, 20), context)
 		).items;
 		expect(tools).toHaveLength(1);
 		await harness.close(context);
@@ -1116,7 +1119,7 @@ describe("tool rounds", () => {
 			events.push(...batch);
 		});
 		await (await root.submit({ type: "input", content: "go" }, context)).wait(context);
-		const first = (await harness.commit((tx) => tx.scanTasks({ kind: "pi.generation" }, 1), context)).items[0]!;
+		const first = (await harness.commit((tx) => tx.scanTasks({ kind: "relay.generation" }, 1), context)).items[0]!;
 		expect((await state(harness, first.id)).status).toBe("completing");
 		const turns = () => events.filter((event) => event.type.startsWith("turn_")).map((event) => event.type);
 		await waitFor(() => turns().length === 4);
@@ -1186,13 +1189,13 @@ describe("tool rounds", () => {
 		// The final commit, with the run's cleanup, is rejected once: nothing of the cleanup lands.
 		await waitFor(() => setup.reports.some((error) => error instanceof StorageRejected));
 		expect((await harness.snapshot(LiveDoc, root.id, context))!.run?.taskId).toBe(generation);
-		expect((await allEntries(root)).map((entry) => entry.kind)).toEqual(["pi.user"]);
+		expect((await allEntries(root)).map((entry) => entry.kind)).toEqual(["relay.user"]);
 		expect(await settled(submission.wait(context))).toBe(false);
 		// The next commit retries it; the partial becomes one aborted entry.
 		await root.commit((tx) => tx.appendEntry(root.id, { kind: "note" }), context);
 		expect(await submission.wait(context)).toMatchObject({ status: "unanswered", reason: "faulted" });
 		expect(await harness.snapshot(LiveDoc, root.id, context)).toEqual({});
-		expect((await allEntries(root)).map((entry) => entry.kind)).toEqual(["pi.user", "note", "pi.assistant"]);
+		expect((await allEntries(root)).map((entry) => entry.kind)).toEqual(["relay.user", "note", "relay.assistant"]);
 		await harness.close(context);
 	});
 });
@@ -1621,7 +1624,7 @@ describe("tool rounds and events", () => {
 		await (await root.submit({ type: "input", content: "go" }, context)).wait(context);
 		const late = await listen(harness, root);
 		open("hooked");
-		const [first] = (await harness.commit((tx) => tx.scanTasks({ kind: "pi.generation" }, 1), context)).items;
+		const [first] = (await harness.commit((tx) => tx.scanTasks({ kind: "relay.generation" }, 1), context)).items;
 		await harness.waitForTask(first!.id, context);
 		await root.commit((tx) => tx.appendEntry(root.id, { kind: "note" }), context);
 		await waitFor(() => late.events.some((event) => event.type === "entry_appended"));

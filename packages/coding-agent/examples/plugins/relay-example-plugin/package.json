@@ -1,10 +1,10 @@
 {
-	"name": "@earendil-works/pi-example-plugin",
+	"name": "@relay-harness/example-plugin",
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
 	"peerDependencies": {
 		"@earendil-works/chord": "^0.84.4",
-		"@earendil-works/pi-coding-agent": "^0.84.4"
+		"@relay-harness/coding-agent": "^0.84.4"
 	}
 }

@@ -10,7 +10,7 @@ import {
 	MemoryStorage,
 	type TaskGraph,
 	type TaskId,
-} from "@earendil-works/pi-durable";
+} from "@relay-harness/durable";
 import { describe, expect, it } from "vitest";
 import { openNodeSqliteStorage } from "../src/storage/sqlite/node.ts";
 import { ControlledStorage, context, flush } from "./session-support.ts";
@@ -166,7 +166,7 @@ describe("task graph view", () => {
 	});
 
 	it("builds from committed tasks, shows surviving tasks as pending after reopen, and marks aborts", async () => {
-		const directory = await mkdtemp(join(tmpdir(), "pi-durable-graph-"));
+		const directory = await mkdtemp(join(tmpdir(), "relay-durable-graph-"));
 		const path = join(directory, "session.sqlite");
 		const gate = deferred();
 		const Work = defineTask<null, { phase: "work" }, null>({

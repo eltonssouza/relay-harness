@@ -1,9 +1,9 @@
 import { defineFacet } from "@earendil-works/chord";
-import { AgentController, PresentationUI, SlashCommands } from "@earendil-works/pi-coding-agent/experimental/plugin";
+import { AgentController, PresentationUI, SlashCommands } from "@relay-harness/coding-agent/experimental/plugin";
 import { ExampleFacetService } from "./contract.ts";
 
 export default defineFacet({
-	id: "@earendil-works/pi-example-plugin/tui",
+	id: "@relay-harness/example-plugin/tui",
 	setup(env) {
 		const example = env.use(ExampleFacetService);
 		const commands = env.use(SlashCommands);

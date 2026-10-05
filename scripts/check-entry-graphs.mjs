@@ -20,13 +20,13 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 /** Workspace package name -> its source root, so cross-package imports are followed. */
 const WORKSPACE = {
 	"@earendil-works/chord": "packages/chord/src",
-	"@earendil-works/pi-ai": "packages/ai/src",
-	"@earendil-works/pi-durable": "packages/durable/src",
-	"@earendil-works/pi-agent-core": "packages/agent/src",
-	"@earendil-works/pi-codemode": "packages/codemode/src",
-	"@earendil-works/pi-telemetry": "packages/telemetry/src",
-	"@earendil-works/pi-mcp": "packages/mcp/src",
-	"@earendil-works/pi-tui": "packages/tui/src",
+	"@relay-harness/ai": "packages/ai/src",
+	"@relay-harness/durable": "packages/durable/src",
+	"@relay-harness/agent-core": "packages/agent/src",
+	"@relay-harness/codemode": "packages/codemode/src",
+	"@relay-harness/telemetry": "packages/telemetry/src",
+	"@relay-harness/mcp": "packages/mcp/src",
+	"@relay-harness/tui": "packages/tui/src",
 };
 
 /**
@@ -43,7 +43,7 @@ const BUDGETS = {
 	},
 	"packages/durable": {
 		".": {
-			// Tool argument validation reaches TypeBox; provider-session creation reaches pi-ai's lean UUID utility.
+			// Tool argument validation reaches TypeBox; provider-session creation reaches relay-ai's lean UUID utility.
 			maxFiles: 62,
 			forbid: ["packages/ai/src/index.ts", "packages/ai/src/utils/typebox-helpers.ts"],
 		},

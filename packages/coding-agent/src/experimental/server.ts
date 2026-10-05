@@ -5,16 +5,16 @@ import { isAbsolute, join } from "node:path";
 import type { Context } from "@earendil-works/chord";
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import type { FacetBundleArtifact } from "@earendil-works/chord/node";
-import { Client, ServerError as ClientServerError, DisconnectedError } from "@earendil-works/pi-client";
-import { createUnixTransportFactory, type UnixServerRoute } from "@earendil-works/pi-client/unix";
-import { isServerId, type ServerId } from "@earendil-works/pi-protocol";
+import { Client, ServerError as ClientServerError, DisconnectedError } from "@relay-harness/client";
+import { createUnixTransportFactory, type UnixServerRoute } from "@relay-harness/client/unix";
+import { isServerId, type ServerId } from "@relay-harness/protocol";
 import {
 	ServerError as RoutedServerError,
 	type Server,
 	type ServerHost,
 	SessionNotFoundError,
-} from "@earendil-works/pi-server";
-import { createUnixServer, getUnixSocketPath } from "@earendil-works/pi-server/unix";
+} from "@relay-harness/server";
+import { createUnixServer, getUnixSocketPath } from "@relay-harness/server/unix";
 import lockfile from "proper-lockfile";
 import type { AuthInput } from "../cli/experimental/command-options.ts";
 import { getAgentDir } from "../config.ts";
@@ -48,11 +48,11 @@ import {
 } from "./session-catalog.ts";
 import { SessionPluginSelectionConflictError, SessionWorkerManager } from "./session-worker-manager.ts";
 
-export const ENV_SERVER_DIR = "PI_SERVER_DIR";
-export const ENV_SERVER_ID = "PI_SERVER_ID";
+export const ENV_SERVER_DIR = "RELAY_SERVER_DIR";
+export const ENV_SERVER_ID = "RELAY_SERVER_ID";
 
 export function resolveServerDirectory(directory?: string): string {
-	return resolvePath(directory ?? process.env[ENV_SERVER_DIR] ?? join(homedir(), ".pi", "server"));
+	return resolvePath(directory ?? process.env[ENV_SERVER_DIR] ?? join(homedir(), ".relay", "server"));
 }
 
 export async function ensurePrivateServerDirectory(directory: string): Promise<void> {
@@ -141,7 +141,7 @@ export interface ActivateServerOptions {
 	readonly model?: string;
 }
 
-/** Ensure the selected logical server is reachable, launching the current Pi installation if needed. */
+/** Ensure the selected logical server is reachable, launching the current Relay installation if needed. */
 export async function activateServer(options: ActivateServerOptions): Promise<ActivatedServer> {
 	if (options.provider !== undefined && options.model === undefined) {
 		throw new Error("Server model provider requires a model");
@@ -331,9 +331,9 @@ export interface RunningServer {
 }
 
 export interface StartServerOptions {
-	/** Server profile and socket directory. Defaults to PI_SERVER_DIR or ~/.pi/server. */
+	/** Server profile and socket directory. Defaults to RELAY_SERVER_DIR or ~/.relay/server. */
 	readonly directory?: string;
-	/** Logical service ID. Defaults to PI_SERVER_ID or the directory's default-server-id. */
+	/** Logical service ID. Defaults to RELAY_SERVER_ID or the directory's default-server-id. */
 	readonly serverId?: ServerId;
 	/** Durable session directory. Defaults to the experimental directory under the configured agent directory. */
 	readonly sessionDir?: string;

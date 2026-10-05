@@ -6,7 +6,7 @@
 import { execFile } from "node:child_process";
 import { readFile, stat } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
-import type { WorkspaceProbe } from "@earendil-works/pi-agent-core";
+import type { WorkspaceProbe } from "@relay-harness/agent-core";
 
 /** Files larger than this are not read to count lines; generated or binary files say little about a slice. */
 const MAX_COUNTED_BYTES = 2 * 1024 * 1024;

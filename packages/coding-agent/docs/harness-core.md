@@ -1,6 +1,6 @@
 # Harness Core
 
-The harness core is four rules that apply to every model Pi runs: Claude, GPT, Gemini, Grok, or a local model. They act on the agent loop's hooks and events, not on a provider API, and need no extra model call. Each one addresses a measured failure of coding agents.
+The harness core is four rules that apply to every model Relay runs: Claude, GPT, Gemini, Grok, or a local model. They act on the agent loop's hooks and events, not on a provider API, and need no extra model call. Each one addresses a measured failure of coding agents.
 
 | Pillar | Failure it addresses | What the harness does |
 |---|---|---|
@@ -20,19 +20,19 @@ All four are enabled by default. Inspect them with `/harness`; configure them wi
 - destructive: `git reset --hard`, `git push --force`, `git clean -f`, `git checkout .`, `git rebase`, `git branch -D`, `rm -r`, `Remove-Item -Recurse`, `DROP TABLE`, `DELETE` without `WHERE`
 - external: `git push`, `npm publish`, `gh pr create|merge`, `kubectl apply`, `terraform apply`, `docker push`, deploy commands, `curl -X POST|PUT|PATCH|DELETE`
 
-A command runs without asking when your latest message names the operation in an affirmative clause: "push the branch" allows `git push`, "apague o diretório dist" allows `rm -r dist`. A deletion also needs its target named, so "remove the unused import" allows no `rm`. "Push it, but not with force" does not allow `git push --force`. Otherwise, in the interactive TUI and RPC modes, Pi asks with a confirmation dialog. In print and JSON modes the call is blocked, the agent asks you in chat, and a "yes" (or "sim", "ok", "go ahead") as your next message allows that exact command once.
+A command runs without asking when your latest message names the operation in an affirmative clause: "push the branch" allows `git push`, "apague o diretório dist" allows `rm -r dist`. A deletion also needs its target named, so "remove the unused import" allows no `rm`. "Push it, but not with force" does not allow `git push --force`. Otherwise, in the interactive TUI and RPC modes, Relay asks with a confirmation dialog. In print and JSON modes the call is blocked, the agent asks you in chat, and a "yes" (or "sim", "ok", "go ahead") as your next message allows that exact command once.
 
 **Pair programming.** The agent works as a pair, not a code generator: you bring the what and the why, the agent brings the how. The system prompt carries three rules: ask when the goal or its reason is unclear; propose the simplest design that meets the stated requirements, and a more complex one only by naming the requirement that needs it; treat your context about the environment, services, or domain as authoritative over the model's assumptions. Interrupt a run to redirect it ([Change direction](usage.md#change-direction)).
 
 **Corrections.** A message that pushes back on the agent's approach after it has worked ("Não, simplifica…", "Para, isso tá complicado demais", "That's too complex", "Actually, use…") is recorded as a correction. The next request reminds the model to adopt it, prefer the simplest design that satisfies it, and not reintroduce what you rejected. Ordinary openings such as "Para o módulo X…" or "Não sei por que…" are not corrections.
 
-**Learnings and the living AGENTS.md.** Constraints and corrections are kept in the session file, so they survive compaction and resume, but a new session starts without them. `/harness` lists them under "Learnings (candidates for AGENTS.md)". Recording the lasting ones in AGENTS.md, as a "Common hurdles" entry with the symptom, cause, solution, and how to verify it, means the next session, with any model, starts with them. Pi never edits AGENTS.md on its own; ask the agent to record the entry, or use a prompt template such as this repository's [`.pi/prompts/hurdle.md`](../../../.pi/prompts/hurdle.md).
+**Learnings and the living AGENTS.md.** Constraints and corrections are kept in the session file, so they survive compaction and resume, but a new session starts without them. `/harness` lists them under "Learnings (candidates for AGENTS.md)". Recording the lasting ones in AGENTS.md, as a "Common hurdles" entry with the symptom, cause, solution, and how to verify it, means the next session, with any model, starts with them. Relay never edits AGENTS.md on its own; ask the agent to record the entry, or use a prompt template such as this repository's [`.relay/prompts/hurdle.md`](../../../.relay/prompts/hurdle.md).
 
 **Question turns.** When your message only asks a question ("Why does the build fail on Windows?"), the first file edit in that turn is blocked with a request to answer first and propose the change. "Why does it fail? Please fix it." is a request, not a question.
 
 ## Evidence
 
-During each request Pi records which files changed and which checks ran (tests, type checks, builds, linters) and whether they passed. A failing exit code is a failed check. When the agent's final message claims completion, Pi compares the claim with that record:
+During each request Relay records which files changed and which checks ran (tests, type checks, builds, linters) and whether they passed. A failing exit code is a failed check. When the agent's final message claims completion, Relay compares the claim with that record:
 
 | Status | Meaning |
 |---|---|
@@ -42,7 +42,7 @@ During each request Pi records which files changed and which checks ran (tests, 
 | `no-effect` | You requested a change and the message reports it done, but the tool calls only read state. |
 | `acknowledged` | The message states what was not verified or what failed. |
 
-For `unverified`, `contradicted`, and `no-effect`, Pi sends the agent one `[harness:evidence]` verification request instead of ending the run. That message appears in the transcript. If the next answer is still flagged, the run ends and Pi shows a warning.
+For `unverified`, `contradicted`, and `no-effect`, Relay sends the agent one `[harness:evidence]` verification request instead of ending the run. That message appears in the transcript. If the next answer is still flagged, the run ends and Relay shows a warning.
 
 **Declared verification commands.** By default, common test, type-check, build, and lint commands count as checks. A project can declare its own with `harnessCore.verifyCommands`, for example `["npm run check", "./test.sh"]`. Then only commands that run one of them count, so `npx tsc` on one package does not stand in for the project's full check, and the verification request names the declared commands.
 
@@ -67,7 +67,7 @@ The session file is never changed; only the request is. Replacing an old message
 
 ## Skills
 
-The skills section of the system prompt tells the model to treat a skill file as a router and to load the references and scripts it points to when a step needs them. During each run Pi records, per skill, how many resources were loaded (fanout), whether each load was followed by an action within three tool calls (effective uptake), when in the run loads happened, and revisits. `/harness` shows the last run's numbers and audits each `SKILL.md` skill for:
+The skills section of the system prompt tells the model to treat a skill file as a router and to load the references and scripts it points to when a step needs them. During each run Relay records, per skill, how many resources were loaded (fanout), whether each load was followed by an action within three tool calls (effective uptake), when in the run loads happened, and revisits. `/harness` shows the last run's numbers and audits each `SKILL.md` skill for:
 
 - an entry file over 300 lines with no resources (consider splitting into references; keep strict formats and numeric contracts in the entry), or over 300 lines although it has resources
 - a `description` over 300 characters (it is all the model reads before deciding to load the skill, and it is paid for in every request)
@@ -77,10 +77,10 @@ The skills section of the system prompt tells the model to treat a skill file as
 
 ## For SDK and extension authors
 
-The pillars live in `@earendil-works/pi-agent-core` as `HarnessCore` and can be installed on any `Agent`:
+The pillars live in `@relay-harness/agent-core` as `HarnessCore` and can be installed on any `Agent`:
 
 ```typescript
-import { Agent, HarnessCore } from "@earendil-works/pi-agent-core";
+import { Agent, HarnessCore } from "@relay-harness/agent-core";
 
 const agent = new Agent({ streamFn });
 const uninstall = new HarnessCore({
@@ -89,7 +89,7 @@ const uninstall = new HarnessCore({
 }).install(agent);
 ```
 
-In Pi, `session.harnessCore.core` exposes the constraint ledger, evidence ledger, context policy, and skill tracker.
+In Relay, `session.harnessCore.core` exposes the constraint ledger, evidence ledger, context policy, and skill tracker.
 
 ## Sources
 

@@ -1,5 +1,5 @@
 import { type Context, defineService, type ReplicatedState } from "@earendil-works/chord";
-import type { ServerId } from "@earendil-works/pi-protocol";
+import type { ServerId } from "@relay-harness/protocol";
 
 export interface SessionAddress {
 	serverId: ServerId;
@@ -23,7 +23,7 @@ export interface SessionDirectory {
 	readonly state: ReplicatedState<SessionDirectoryState>;
 }
 
-export const SessionDirectory = defineService<SessionDirectory>("pi.session-directory");
+export const SessionDirectory = defineService<SessionDirectory>("relay.session-directory");
 
 export interface SessionManagement {
 	create(options: SessionCreateOptions, context: Context): Promise<SessionSummary>;
@@ -32,4 +32,4 @@ export interface SessionManagement {
 	detach(context: Context): Promise<void>;
 }
 
-export const SessionManagement = defineService<SessionManagement>("pi.session-management");
+export const SessionManagement = defineService<SessionManagement>("relay.session-management");

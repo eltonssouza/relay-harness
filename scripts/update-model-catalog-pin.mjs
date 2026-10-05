@@ -26,9 +26,9 @@ async function fetchRevision(revision) {
 
 async function fetchLiveCatalog(root) {
 	const { version } = JSON.parse(readFileSync(join(root, "packages/coding-agent/package.json"), "utf8"));
-	const response = await fetch(`https://pi.dev/api/models?pi-version=${encodeURIComponent(version)}&${MODEL_TYPES}`);
+	const response = await fetch(`https://pi.dev/api/models?relay-version=${encodeURIComponent(version)}&${MODEL_TYPES}`);
 	if (!response.ok) throw new Error(`Catalog discovery failed: HTTP ${response.status}`);
-	const revision = response.headers.get("x-pi-model-catalog-revision");
+	const revision = response.headers.get("x-relay-model-catalog-revision");
 	if (typeof revision !== "string" || !REVISION_RE.test(revision)) {
 		throw new Error("Catalog discovery returned an invalid or missing revision");
 	}
@@ -55,7 +55,7 @@ function modelTypeGroups(root, bytes) {
 
 /** Return why the catalog cannot hydrate this checkout, or undefined if it can. */
 function hydrationProblem(root, bytes) {
-	const directory = mkdtempSync(join(tmpdir(), "pi-model-catalog-pin-"));
+	const directory = mkdtempSync(join(tmpdir(), "relay-model-catalog-pin-"));
 	try {
 		const catalogPath = join(directory, "models.all.json");
 		writeFileSync(catalogPath, bytes);

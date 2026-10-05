@@ -24,9 +24,9 @@ import {
 	type SimpleStreamOptions,
 	type StreamOptions,
 	type TranscriptContext,
-} from "@earendil-works/pi-ai";
-import { getApiProvider } from "@earendil-works/pi-ai/compat";
-import { classifierErrorResult, imageErrorResult } from "@earendil-works/pi-ai/utils/model-operations";
+} from "@relay-harness/ai";
+import { getApiProvider } from "@relay-harness/ai/compat";
+import { classifierErrorResult, imageErrorResult } from "@relay-harness/ai/utils/model-operations";
 import type { ModelConfig, ModelsJsonModel, ModelsJsonModelOverride, ModelsJsonProvider } from "./model-config.ts";
 import {
 	clearConfigValueCache,

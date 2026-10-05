@@ -1,11 +1,11 @@
 ---
 name: security-review
-description: Security review of pi code that runs commands, resolves paths, loads extensions, skills, prompts, MCP servers or settings from a project, stores credentials, or authorizes tool calls. Use when changing those surfaces or reviewing a PR that touches them.
+description: Security review of relay code that runs commands, resolves paths, loads extensions, skills, prompts, MCP servers or settings from a project, stores credentials, or authorizes tool calls. Use when changing those surfaces or reviewing a PR that touches them.
 ---
 
-# Security review for pi
+# Security review for relay
 
-pi runs commands the model chooses and loads executable resources from project directories. Its attack surface is not a web app's; review these surfaces.
+relay runs commands the model chooses and loads executable resources from project directories. Its attack surface is not a web app's; review these surfaces.
 
 ## The surfaces
 
@@ -13,7 +13,7 @@ pi runs commands the model chooses and loads executable resources from project d
 |---|---|---|
 | Command execution | `core/tools/bash.ts`, `core/tools/powershell.ts`, `core/exec.ts`, `!command` config values in `core/resolve-config-value.ts` | A value from the model, a repo file, or settings is parsed as shell syntax |
 | Path boundaries | `core/package-manager.ts`, `core/resource-loader.ts`, `core/tools/path-utils.ts` | A path escapes its root |
-| Writing that becomes executing | extensions, skills, prompt templates, `.pi/settings.json`, MCP server config, package `scripts` | A file written or cloned now runs code later |
+| Writing that becomes executing | extensions, skills, prompt templates, `.relay/settings.json`, MCP server config, package `scripts` | A file written or cloned now runs code later |
 | Trust and authorization | `core/project-trust.ts`, `core/trust-manager.ts`, the harness authorization gate (`packages/agent/src/harness/alignment.ts`) | An untrusted project's resource runs, or a destructive command passes |
 | Credentials | `core/auth-storage.ts`, `packages/ai/src/auth/` | A token reaches a log, an error message, a session file, or another provider |
 
@@ -45,7 +45,7 @@ Each finding has five parts:
 1. **Location**: `file:line`.
 2. **Mechanism**: how the input reaches the sink.
 3. **Reproduction**: the input, file, or command that triggers it.
-4. **Impact for pi**: what an attacker gets, such as code execution on the developer's machine or a leaked provider token.
+4. **Impact for relay**: what an attacker gets, such as code execution on the developer's machine or a leaked provider token.
 5. **Fix at the right layer**: one call site, or the boundary that fixes the class. Say which.
 
 Rate exploitability and impact separately, and state the assumptions the rating depends on ("assumes the project was trusted"). Do not report unread scanner output, a theoretical class with no path, or a style preference with a severity.

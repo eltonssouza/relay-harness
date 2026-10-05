@@ -1,5 +1,5 @@
 /**
- * Wires the model-independent harness core from `pi-agent-core` into a coding session:
+ * Wires the model-independent harness core from `relay-agent-core` into a coding session:
  * settings, interactive authorization, constraint persistence, skills, and notifications.
  */
 
@@ -13,7 +13,7 @@ import {
 	HarnessCore,
 	type HarnessCoreEvent,
 	type SkillUsageReport,
-} from "@earendil-works/pi-agent-core";
+} from "@relay-harness/agent-core";
 import type { ExtensionMode, ExtensionUIContext } from "./extensions/index.ts";
 import type { SessionManager } from "./session-manager.ts";
 import type { SettingsManager } from "./settings-manager.ts";

@@ -6,7 +6,7 @@ import {
 	getModel,
 	toToolDeclaration,
 	type UserMessage,
-} from "@earendil-works/pi-ai/compat";
+} from "@relay-harness/ai/compat";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import {

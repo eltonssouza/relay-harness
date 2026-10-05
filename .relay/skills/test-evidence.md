@@ -5,7 +5,7 @@ description: Decide whether a test result is evidence. Use when writing a regres
 
 # Test evidence
 
-A green run shows that the tests that ran passed. It does not show that they can fail, that they ran at all, or that a nondeterministic fix worked. This skill covers the four places where pi work most often confuses the two. Run test commands as AGENTS.md says (specific files with the vitest CLI or `node --test`, never the full vitest suite).
+A green run shows that the tests that ran passed. It does not show that they can fail, that they ran at all, or that a nondeterministic fix worked. This skill covers the four places where relay work most often confuses the two. Run test commands as AGENTS.md says (specific files with the vitest CLI or `node --test`, never the full vitest suite).
 
 ## 1. A red observation for every regression test
 

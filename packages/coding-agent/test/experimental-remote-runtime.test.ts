@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type Context, createFacetHost, defineFacet, defineService } from "@earendil-works/chord";
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import { Client, ServerError as ClientServerError } from "@earendil-works/pi-client";
-import { createUnixTransportFactory } from "@earendil-works/pi-client/unix";
+import { Client, ServerError as ClientServerError } from "@relay-harness/client";
+import { createUnixTransportFactory } from "@relay-harness/client/unix";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { ExampleFacetService } from "../examples/plugins/pi-example-plugin/src/contract.ts";
+import { ExampleFacetService } from "../examples/plugins/relay-example-plugin/src/contract.ts";
 import { runClient } from "../src/experimental/client.ts";
 import { activateBuiltinClientServices, openClientRuntime } from "../src/experimental/client-runtime.ts";
 import { createPresentationFacetLoaders } from "../src/experimental/plugins/bundled.ts";
@@ -36,10 +36,10 @@ const SecondPluginService = defineService<{ read(context: Context): Promise<stri
 let agentDir: string;
 
 beforeEach(async () => {
-	agentDir = await mkdtemp(join("/tmp", "pi-experimental-agent-"));
+	agentDir = await mkdtemp(join("/tmp", "relay-experimental-agent-"));
 	directories.add(agentDir);
 	await configureExperimentalWorkerModel(agentDir);
-	vi.stubEnv("PI_CODING_AGENT_DIR", agentDir);
+	vi.stubEnv("RELAY_CODING_AGENT_DIR", agentDir);
 	await createExperimentalSessions(join(agentDir, "experimental", "sessions"), ["demo-1", "demo-2"]);
 });
 
@@ -82,12 +82,12 @@ afterEach(async () => {
 });
 
 describe("experimental durable server composition", () => {
-	test("uses PI_SERVER_DIR and PI_SERVER_ID", async () => {
-		const directory = await mkdtemp(join("/tmp", "pi-server-dir-"));
+	test("uses RELAY_SERVER_DIR and RELAY_SERVER_ID", async () => {
+		const directory = await mkdtemp(join("/tmp", "relay-server-dir-"));
 		directories.add(directory);
 		const serverId = "00000000-0000-4000-8000-000000000001";
-		vi.stubEnv("PI_SERVER_DIR", directory);
-		vi.stubEnv("PI_SERVER_ID", serverId);
+		vi.stubEnv("RELAY_SERVER_DIR", directory);
+		vi.stubEnv("RELAY_SERVER_ID", serverId);
 		const runtime = await startServer();
 		servers.add(runtime);
 
@@ -165,11 +165,11 @@ describe("experimental durable server composition", () => {
 	});
 
 	test("serializes concurrent cold activation and retires after both clients leave", async () => {
-		const directory = await mkdtemp(join("/tmp", "pi-auto-server-"));
+		const directory = await mkdtemp(join("/tmp", "relay-auto-server-"));
 		directories.add(directory);
 		const serverId = "00000000-0000-4000-8000-000000000001";
-		vi.stubEnv("PI_SERVER_DIR", directory);
-		vi.stubEnv("PI_SERVER_ID", serverId);
+		vi.stubEnv("RELAY_SERVER_DIR", directory);
+		vi.stubEnv("RELAY_SERVER_ID", serverId);
 
 		const results = await Promise.all([runClient({ command: "client" }), runClient({ command: "client" })]);
 		expect(results).toEqual([
@@ -194,12 +194,12 @@ describe("experimental durable server composition", () => {
 	});
 
 	test("passes client plugin packages to a cold server and restores them for its next generation", async () => {
-		const directory = await mkdtemp(join("/tmp", "pi-auto-plugin-"));
+		const directory = await mkdtemp(join("/tmp", "relay-auto-plugin-"));
 		directories.add(directory);
 		const serverId = "00000000-0000-4000-8000-000000000001";
-		const packagePath = fileURLToPath(new URL("../examples/plugins/pi-example-plugin", import.meta.url));
-		vi.stubEnv("PI_SERVER_DIR", directory);
-		vi.stubEnv("PI_SERVER_ID", serverId);
+		const packagePath = fileURLToPath(new URL("../examples/plugins/relay-example-plugin", import.meta.url));
+		vi.stubEnv("RELAY_SERVER_DIR", directory);
+		vi.stubEnv("RELAY_SERVER_ID", serverId);
 
 		const first = await openClientRuntime({ command: "client", ...sessionWorkerModel });
 		try {
@@ -210,7 +210,7 @@ describe("experimental durable server composition", () => {
 			);
 			await activated.management.attach("demo-1", BACKGROUND_CONTEXT);
 			const loaded = await createPresentationFacetLoaders(presentationPlugins)[0]!.load();
-			expect(loaded.facets.map(({ id }) => id)).toEqual(["@earendil-works/pi-example-plugin/tui"]);
+			expect(loaded.facets.map(({ id }) => id)).toEqual(["@relay-harness/example-plugin/tui"]);
 			await loaded.dispose();
 		} finally {
 			await first.dispose();
@@ -232,11 +232,11 @@ describe("experimental durable server composition", () => {
 	});
 
 	test("retires a cold server after its only Session attachment disconnects", async () => {
-		const directory = await mkdtemp(join("/tmp", "pi-auto-session-"));
+		const directory = await mkdtemp(join("/tmp", "relay-auto-session-"));
 		directories.add(directory);
 		const serverId = "00000000-0000-4000-8000-000000000001";
-		vi.stubEnv("PI_SERVER_DIR", directory);
-		vi.stubEnv("PI_SERVER_ID", serverId);
+		vi.stubEnv("RELAY_SERVER_DIR", directory);
+		vi.stubEnv("RELAY_SERVER_ID", serverId);
 
 		await expect(runClient({ command: "client", sessionId: "demo-1", ...sessionWorkerModel })).resolves.toEqual({
 			kind: "attached",
@@ -248,7 +248,7 @@ describe("experimental durable server composition", () => {
 	});
 
 	test("runs and discovers multiple logical servers from one directory", async () => {
-		const directory = await mkdtemp(join("/tmp", "pi-multi-server-"));
+		const directory = await mkdtemp(join("/tmp", "relay-multi-server-"));
 		directories.add(directory);
 		const firstId = "00000000-0000-4000-8000-000000000001";
 		const secondId = "00000000-0000-4000-8000-000000000002";
@@ -408,7 +408,7 @@ describe("experimental durable server composition", () => {
 			{
 				sessionId: "demo-1",
 				packagePaths: [
-					fileURLToPath(new URL("../examples/plugins/pi-example-plugin", import.meta.url)),
+					fileURLToPath(new URL("../examples/plugins/relay-example-plugin", import.meta.url)),
 					secondPackagePath,
 				],
 			},
@@ -636,7 +636,7 @@ describe("experimental durable server composition", () => {
 					reason: null,
 				});
 				await vi.waitFor(() => {
-					expect(transcript.state.value?.entries.filter((entry) => entry.kind === "pi.assistant")).toHaveLength(
+					expect(transcript.state.value?.entries.filter((entry) => entry.kind === "relay.assistant")).toHaveLength(
 						message === "first question" ? 1 : 2,
 					);
 				});
@@ -722,7 +722,7 @@ describe("experimental durable server composition", () => {
 	});
 
 	test("retires an unclaimed idle worker after replacement demand expires", async () => {
-		const directory = await mkdtemp(join("/tmp", "pi-orphan-worker-"));
+		const directory = await mkdtemp(join("/tmp", "relay-orphan-worker-"));
 		directories.add(directory);
 		vi.stubEnv("__PI_SESSION_WORKER_ORPHAN_DEMAND_GRACE_MS", "50");
 		const first = await startServer({ ...sessionWorkerModel, directory });

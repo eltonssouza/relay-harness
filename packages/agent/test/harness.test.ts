@@ -4,7 +4,7 @@ import {
 	EventStream,
 	type ToolResultMessage,
 	type TranscriptContext,
-} from "@earendil-works/pi-ai";
+} from "@relay-harness/ai";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import { Agent } from "../src/agent.ts";

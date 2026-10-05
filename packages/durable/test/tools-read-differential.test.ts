@@ -154,7 +154,7 @@ async function outcome<T>(run: () => T | Promise<T>): Promise<T | { error: strin
 
 describe("read tool", () => {
 	it("returns exactly what reading the whole file returned", async () => {
-		const cwd = mkdtempSync(join(tmpdir(), "pi-durable-read-"));
+		const cwd = mkdtempSync(join(tmpdir(), "relay-durable-read-"));
 		dirs.push(cwd);
 		const env = new NodeExecutionEnv({ cwd });
 		const tool = createReadTool();
@@ -178,7 +178,7 @@ describe("read tool", () => {
 	}, 120_000);
 
 	it("detects animated PNGs whose acTL chunk lies far beyond the header", async () => {
-		const cwd = mkdtempSync(join(tmpdir(), "pi-durable-read-"));
+		const cwd = mkdtempSync(join(tmpdir(), "relay-durable-read-"));
 		dirs.push(cwd);
 		const chunk = (type: string, length: number): number[] => [
 			(length >>> 24) & 0xff,

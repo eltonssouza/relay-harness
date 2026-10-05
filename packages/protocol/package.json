@@ -1,7 +1,7 @@
 {
-	"name": "@earendil-works/pi-protocol",
+	"name": "@relay-harness/protocol",
 	"version": "1.0.2",
-	"description": "Transport-neutral CBOR protocol for remote pi sessions",
+	"description": "Transport-neutral CBOR protocol for remote relay sessions",
 	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -22,7 +22,7 @@
 		"prepublishOnly": "npm run clean && npm run build"
 	},
 	"keywords": [
-		"pi",
+		"relay",
 		"protocol",
 		"cbor",
 		"binary",
