@@ -40,6 +40,8 @@ export interface LayaPaths {
 	venv: string;
 	venvPython: string;
 	serveScript: string;
+	/** Written by native training (`training.ts`) before each run. */
+	trainScript: string;
 	log: string;
 }
 
@@ -55,6 +57,7 @@ export function layaPaths(home: string, manifest: LayaModelManifest): LayaPaths 
 			process.platform === "win32" ? "python.exe" : "python",
 		),
 		serveScript: join(home, "serve.py"),
+		trainScript: join(home, "train.py"),
 		log: join(home, "server.log"),
 	};
 }
