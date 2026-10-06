@@ -84,7 +84,7 @@ This monorepo holds the Relay CLI and the libraries it is built from.
 
 Relay has no sandbox for filesystem, process, network, or credential access. It runs with the permissions of the user who started it. The harness asks before destructive or external commands, but that is a safeguard against mistakes, not a security boundary.
 
-For stronger isolation, see [containerization](packages/coding-agent/docs/containerization.md): a Gondolin micro-VM extension, plain Docker, or an OpenShell sandbox. Review [Security](packages/coding-agent/docs/security.md) before using untrusted repositories, extensions, or unattended automation.
+For stronger isolation, see [containerization](packages/coding-agent/docs/containerization.md): plain Docker, Docker Sandboxes, or an OpenShell sandbox. Review [Security](packages/coding-agent/docs/security.md) before using untrusted repositories, extensions, or unattended automation.
 
 ## Development
 
