@@ -13,6 +13,7 @@ import {
 	missingModelFiles,
 	runtimeStatus,
 	SERVE_SCRIPT,
+	setupLayaRuntime,
 } from "../src/extensions/laya/runtime.ts";
 import { isLocalUrl, LayaServer } from "../src/extensions/laya/server.ts";
 
@@ -114,6 +115,22 @@ describe("laya runtime", () => {
 			throw new Error("not found");
 		};
 		expect(await findPython(failing)).toBeUndefined();
+	});
+
+	it("updates pip in the new environment before installing torch", async () => {
+		const calls: string[][] = [];
+		const exec: ExecFunction = async (command, args) => {
+			calls.push([command, ...args]);
+			if (command === "python3") return { stdout: "3 11\n", stderr: "", code: 0 };
+			if (args.includes("pip")) return { stdout: "", stderr: "", code: 0 };
+			return { stdout: "", stderr: "", code: 1 };
+		};
+		await setupLayaRuntime({ exec, home, manifest, fetch: fakeFetch(assets), report: () => {} });
+		const pipInstalls = calls.filter((call) => call.includes("pip")).map((call) => call.slice(5));
+		// Debian 12 seeds pip 23.0, which rejects the torch index's wheel metadata.
+		expect(pipInstalls[0]).toEqual(["--disable-pip-version-check", "--upgrade", "pip"]);
+		expect(pipInstalls[1]).toContain("torch");
+		expect(pipInstalls[2]).toContain(manifest.layaPackage);
 	});
 
 	it("ships a manifest that matches the model layout the server loads", () => {
