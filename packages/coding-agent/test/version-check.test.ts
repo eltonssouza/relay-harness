@@ -35,24 +35,24 @@ describe("version checks", () => {
 	});
 
 	it("returns only newer versions", async () => {
-		const fetchMock = vi.fn(async () => Response.json({ tag_name: "v1.2.3" }));
+		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.3" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(checkForNewRelayVersion("1.2.3")).resolves.toBeUndefined();
 		await expect(checkForNewRelayVersion("1.2.2")).resolves.toEqual({ version: "1.2.3" });
 	});
 
-	it("uses the GitHub releases api with a relay user agent", async () => {
-		const fetchMock = vi.fn(async () => Response.json({ tag_name: "v1.2.4" }));
+	it("reads the latest version from the npm registry with a relay user agent", async () => {
+		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(getLatestRelayVersion("1.2.3")).resolves.toBe("1.2.4");
 		expect(fetchMock).toHaveBeenCalledWith(
-			"https://api.github.com/repos/eltonssouza/relay-harness/releases/latest",
+			"https://registry.npmjs.org/@relay-harness/coding-agent/latest",
 			expect.objectContaining({
 				headers: expect.objectContaining({
 					"User-Agent": expect.stringMatching(/^relay\/1\.2\.3 /),
-					accept: "application/vnd.github+json",
+					accept: "application/json",
 				}),
 			}),
 		);
@@ -63,7 +63,7 @@ describe("version checks", () => {
 			.fn()
 			.mockRejectedValueOnce(new Error("fetch failed"))
 			.mockRejectedValueOnce(new Error("fetch failed"))
-			.mockResolvedValueOnce(Response.json({ tag_name: "v1.2.4" }));
+			.mockResolvedValueOnce(Response.json({ version: "1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(getLatestRelayRelease("1.2.3", { retry: true })).resolves.toEqual({ version: "1.2.4" });
@@ -89,28 +89,35 @@ describe("version checks", () => {
 		expect(formatVersionCheckError(error)).toBe("fetch failed (ETIMEDOUT, ENETUNREACH)");
 	});
 
-	it("strips the leading v from the release tag", async () => {
+	it("reads the version from a full registry document", async () => {
+		// The registry's /latest document is the package.json of the version plus dist metadata.
 		vi.stubGlobal(
 			"fetch",
-			vi.fn(async () => Response.json({ tag_name: "1.2.4" })),
+			vi.fn(async () =>
+				Response.json({
+					name: "@relay-harness/coding-agent",
+					version: "1.2.4",
+					dist: { tarball: "https://x/y.tgz" },
+				}),
+			),
 		);
 		await expect(getLatestRelayRelease("1.2.3")).resolves.toEqual({ version: "1.2.4" });
 	});
 
-	it("returns undefined when the repository has no releases", async () => {
+	it("returns undefined when the package is not published", async () => {
 		vi.stubGlobal(
 			"fetch",
-			vi.fn(async () => Response.json({ message: "Not Found" }, { status: 404 })),
+			vi.fn(async () => Response.json({ error: "Not found" }, { status: 404 })),
 		);
 		await expect(getLatestRelayRelease("1.2.3")).resolves.toBeUndefined();
 		await expect(checkForNewRelayVersion("1.2.2")).resolves.toBeUndefined();
 	});
 
-	it("returns undefined for release data without a semver tag", async () => {
+	it("returns undefined for registry data without a semver version", async () => {
 		const fetchMock = vi
 			.fn()
-			.mockResolvedValueOnce(Response.json({ name: "no tag" }))
-			.mockResolvedValueOnce(Response.json({ tag_name: "nightly" }))
+			.mockResolvedValueOnce(Response.json({ name: "no version" }))
+			.mockResolvedValueOnce(Response.json({ version: "nightly" }))
 			.mockResolvedValueOnce(Response.json(null));
 		vi.stubGlobal("fetch", fetchMock);
 
@@ -130,7 +137,7 @@ describe("version checks", () => {
 
 	it("allows direct api calls when automatic version checks are disabled", async () => {
 		process.env.RELAY_SKIP_VERSION_CHECK = "1";
-		const fetchMock = vi.fn(async () => Response.json({ tag_name: "v1.2.4" }));
+		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(getLatestRelayVersion("1.2.3")).resolves.toBe("1.2.4");

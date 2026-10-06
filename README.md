@@ -24,7 +24,18 @@ Inspect the state with `/harness` and tune it through the `harnessCore` settings
 
 ## Getting started
 
-Relay requires Node.js 22.19 or newer. Build it from source:
+Relay requires Node.js 22.19 or newer. Install it from npm and run it in any directory:
+
+```bash
+npm install -g --ignore-scripts @relay-harness/coding-agent
+relay
+```
+
+Inside Relay, run `/login` to connect a subscription or API key, then give it a task. Relay stores its configuration in `~/.relay/agent` and project resources in `.relay/`.
+
+### From source
+
+To work on Relay itself, build it from a checkout:
 
 ```bash
 git clone https://github.com/eltonssouza/relay-harness.git
@@ -33,14 +44,12 @@ npm install --ignore-scripts
 npm run build
 ```
 
-Run it from the sources in any directory:
+Run the sources in any directory:
 
 ```bash
 ./relay-test.sh      # Linux and macOS
 ./relay-test.ps1     # Windows PowerShell
 ```
-
-Inside Relay, run `/login` to connect a subscription or API key, then give it a task. Relay stores its configuration in `~/.relay/agent` and project resources in `.relay/`.
 
 `npm run build` refreshes model data from the network first. Use `npm run build:offline` to rebuild from existing model data.
 

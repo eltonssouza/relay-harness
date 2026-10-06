@@ -17,16 +17,13 @@ Use Relay [interactively](docs/usage.md), automate it in [print or JSON mode](do
 
 ## Getting started
 
-Relay is installed from source and requires Node.js 22.19 or newer:
+Relay requires Node.js 22.19 or newer. Install it from npm:
 
 ```bash
-git clone https://github.com/eltonssouza/relay-harness.git
-cd relay-harness
-npm install --ignore-scripts
-npm run build
+npm install -g --ignore-scripts @relay-harness/coding-agent
 ```
 
-Relay does not require dependency lifecycle scripts. To update Relay, pull the checkout and build again. `relay update` updates installed packages and model catalogs, not Relay itself.
+Relay does not require dependency lifecycle scripts, so `--ignore-scripts` is safe. To update Relay, run the same command again. `relay update` updates installed packages and model catalogs, not Relay itself.
 
 On macOS and Linux, Nix users can install the latest release with `nix profile add github:eltonssouza/relay-harness/stable`. See the [quickstart](docs/quickstart.md#1-install-relay) for updating and pinning releases.
 
@@ -56,7 +53,7 @@ To publish sessions, use [`badlogic/pi-share-hf`](https://github.com/badlogic/pi
 
 ## Development
 
-Clone the repository, install its dependencies, and run Relay from source:
+To work on Relay itself, clone the repository, install its dependencies, and run Relay from source:
 
 ```bash
 git clone https://github.com/eltonssouza/relay-harness

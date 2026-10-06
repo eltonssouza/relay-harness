@@ -4574,8 +4574,7 @@ export class InteractiveMode {
 	}
 
 	showNewVersionNotification(release: LatestRelayRelease): void {
-		const releaseUrl = "https://github.com/eltonssouza/relay-harness/releases/latest";
-		const changelogUrl = "https://github.com/eltonssouza/relay-harness/blob/main/packages/coding-agent/CHANGELOG.md";
+		const packageUrl = "https://www.npmjs.com/package/@relay-harness/coding-agent";
 		const linkLine = (label: string, url: string) => () => {
 			const link = getCapabilities().hyperlinks ? hyperlink(theme.fg("accent", url), url) : theme.fg("accent", url);
 			return theme.fg("muted", label) + link;
@@ -4591,8 +4590,16 @@ export class InteractiveMode {
 				0,
 			),
 		);
-		this.chatContainer.addChild(new ThemedText(linkLine("Release: ", releaseUrl), 1, 0));
-		this.chatContainer.addChild(new ThemedText(linkLine("Changelog: ", changelogUrl), 1, 0));
+		this.chatContainer.addChild(
+			new ThemedText(
+				() =>
+					theme.fg("muted", "Update with ") +
+					theme.fg("accent", "npm install -g --ignore-scripts @relay-harness/coding-agent"),
+				1,
+				0,
+			),
+		);
+		this.chatContainer.addChild(new ThemedText(linkLine("Package: ", packageUrl), 1, 0));
 		this.chatContainer.addChild(new DynamicBorder((text) => theme.fg("warning", text)));
 		this.ui.requestRender();
 	}
