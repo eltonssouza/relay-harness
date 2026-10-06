@@ -34,7 +34,7 @@ Run repository commands from the repo root (two directories above this skill), u
 
    Load and follow [interactive-testing.md](interactive-testing.md) for the tmux workflow. Start each release binary from `/tmp`, not the repo root.
 
-3. **Run the release script**:
+3. **Run the release script** from an up-to-date `main` (it refuses any other branch, and a `main` that differs from `origin/main`):
    ```bash
    RELAY_ALLOW_LOCKFILE_CHANGE=1 npm_config_min_release_age=0 npm run release:patch    # fixes + additions
    RELAY_ALLOW_LOCKFILE_CHANGE=1 npm_config_min_release_age=0 npm run release:minor    # breaking changes
