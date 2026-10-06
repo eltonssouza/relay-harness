@@ -1,17 +1,18 @@
 # Changelog
 
+Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner and Earendil Works. The sections up to 1.0.2 are pi's changelog, kept as history; their issue and pull request links point to pi. Relay 1.0.2, the first release on npm, shipped pi's code as of 2026-10-05 together with Relay's own changes, which are not listed there.
+
 ## [Unreleased]
 
-### Changed
+### Added
 
-- Codemode `image()` now also saves each image to a temp file and names the path in the result, so later turns can copy or move generated images ([#10310](https://github.com/earendil-works/pi/issues/10310))
-- Output files (full text of truncated tool output, binary MCP resources, codemode images) are now readable only by the user
+- `/laya learn [session file]` labels the requests of a session with the evidence of how each went and trains Laya on them in the background. A trained model routes requests only if it scores within 1% of the current one on the held-out test. See [Teach Laya from your sessions](docs/laya.md#teach-laya-from-your-sessions).
+- `/laya train`, `/laya models` and `/laya use <model>` retrain on the collected tasks, list the shipped and trained models, and switch the model that routes requests.
+- Laya memory: a request similar to a task learned with `/laya learn` is routed with that task's labels from the next request on, without waiting for training; the status line shows `(memory)`. Lessons of similar tasks (how to validate, where the change belongs, a mistake to avoid) are given to the running model. `"laya": { "memory": false }` turns both off.
 
 ### Fixed
 
-- Fixed subscription logins such as Sign in with ChatGPT failing with `refresh_token_invalidated` after a request was cancelled during an OAuth token refresh
-- Fixed codemode failing for the rest of a session after a pnpm global update removed the running install, and added a restart hint when errors occur after pi was updated or removed on disk ([#10439](https://github.com/earendil-works/pi/issues/10439))
-- Fixed interactive sessions reporting a `read EIO` or `setRawMode EIO` crash (and asking to run /bug) when the terminal went away, e.g. after closing the window or resuming a suspended pi in a closed terminal
+- Fixed the update notice never appearing: it read the latest GitHub release, which the private repository hides from anonymous users. It now reads `@relay-harness/coding-agent` on npm and shows the update command.
 
 ## [1.0.2] - 2026-10-04
 

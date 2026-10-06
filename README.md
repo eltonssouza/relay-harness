@@ -133,6 +133,8 @@ Dependency changes are reviewed as code.
 - Installs use `--ignore-scripts`, and CI runs `npm ci --ignore-scripts` plus a scheduled `npm audit` and signature check.
 - The install lock has an explicit allowlist for lifecycle scripts. New ones fail the checks until reviewed.
 
-## License
+## Credits and license
 
-MIT
+Relay is a fork of [pi](https://github.com/earendil-works/pi), the coding agent by Mario Zechner and Earendil Works, released under the MIT license. Relay adds the model-independent harness core, the `laya/auto` adaptive router, and its own release line on npm.
+
+MIT. See [LICENSE](LICENSE).

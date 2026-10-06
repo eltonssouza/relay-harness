@@ -199,11 +199,8 @@ function addUnreleasedSection() {
 	for (const changelog of changelogs) {
 		const content = readFileSync(changelog, "utf-8");
 
-		// Insert after "# Changelog\n\n"
-		const updated = content.replace(
-			/^(# Changelog\n\n)/,
-			`$1${unreleasedSection}`
-		);
+		// Insert before the first version section, below the intro note
+		const updated = content.replace(/^## \[/m, `${unreleasedSection}## [`);
 		writeFileSync(changelog, updated);
 		console.log(`  Added [Unreleased] to ${changelog}`);
 	}

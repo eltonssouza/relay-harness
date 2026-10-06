@@ -36,7 +36,11 @@
 		"relay",
 		"server"
 	],
-	"author": "Earendil Works",
+	"author": "Elton Souza",
+	"contributors": [
+		"Mario Zechner",
+		"Earendil Works"
+	],
 	"license": "MIT",
 	"repository": {
 		"type": "git",

@@ -1,10 +1,8 @@
 # Changelog
 
+Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner and Earendil Works. The sections up to 1.0.2 are pi's changelog, kept as history; their issue and pull request links point to pi. Relay 1.0.2, the first release on npm, shipped pi's code as of 2026-10-05 together with Relay's own changes, which are not listed there.
+
 ## [Unreleased]
-
-### Fixed
-
-- Fixed OAuth credentials being invalidated when a request or model refresh was cancelled or superseded during a token refresh: a token refresh that has started now completes and persists the rotated refresh token
 
 ## [1.0.2] - 2026-10-04
 
