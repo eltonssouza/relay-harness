@@ -127,7 +127,7 @@ describe("laya runtime", () => {
 			]),
 		);
 		for (const file of LAYA_MODEL_MANIFEST.files) {
-			expect(file.asset).toBe(file.path.replaceAll("/", "__"));
+			expect(file.asset).toBe(file.path);
 			expect(file.sha256).toMatch(/^[0-9a-f]{64}$/);
 		}
 		expect(LAYA_MODEL_MANIFEST.baseUrl).toMatch(/^https:\/\/.+\/$/);

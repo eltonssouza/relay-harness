@@ -65,7 +65,7 @@ The npm package does not contain the trained model (650 MB) or the Python enviro
 
 | Piece | Where it comes from | Size |
 |---|---|---|
-| Trained model | The `laya-model-<version>` GitHub Release of this repository, every file checked against the sha256 in the package | about 680 MB |
+| Trained model | The public Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya), pinned to one commit, every file checked against the sha256 in the package | about 680 MB |
 | Python environment | A venv created from Python 3.10 to 3.13, with `torch` (a CUDA build only when `nvidia-smi` finds a GPU, the CPU build otherwise), `laya[serve]`, `fastapi` and `uvicorn` | a few GB |
 
 The first time you send a request with `laya/auto` selected, Relay asks whether to install them. You can also run `/laya setup` at any time. After that, `laya/auto` starts the server on `127.0.0.1:8000` by itself when a request needs it and stops it when the session ends. A server that already answers on that port is used as is, so you can run your own. Until the install finishes, or when it is declined, keyword rules route requests.
@@ -87,15 +87,15 @@ Over time, replace opinion with evidence: `/laya export` writes one exercise per
 
 ### Ship a new model
 
-A retrained model reaches users through a new release asset and a new manifest in the package:
+A retrained model reaches users through a new revision of the Hugging Face repository and a new manifest in the package:
 
 ```bash
-node scripts/package-laya-model.mjs --model .laya/models/v2 --version v2 --out /tmp/laya-model-v2
-gh release create laya-model-v2 --title "Laya model v2" $(ls /tmp/laya-model-v2/* | grep -v model-manifest.ts)
-cp /tmp/laya-model-v2/model-manifest.ts packages/coding-agent/src/extensions/laya/model-manifest.ts
+hf upload eltonssouza/relay-laya .laya/models/v2 . --commit-message "Laya model v2"
+node scripts/package-laya-model.mjs --model .laya/models/v2 --version v2 --out /tmp/laya-v2 --revision <commit from the upload>
+cp /tmp/laya-v2/model-manifest.ts packages/coding-agent/src/extensions/laya/model-manifest.ts
 ```
 
-Publish the GitHub Release before the npm release that embeds the new manifest. The manifest pins the version, file sizes and hashes, so a missing or altered asset makes the install fail instead of running an unknown model. Installed users get the new version in a new directory on their next `/laya setup`.
+`hf upload` needs `hf auth login` with a token that can write to the repository. Upload before the npm release that embeds the new manifest. The manifest pins the commit, file sizes and hashes, so a missing or altered file makes the install fail instead of running an unknown model. Installed users get the new version in a new directory on their next `/laya setup`.
 
 ## Commands
 
