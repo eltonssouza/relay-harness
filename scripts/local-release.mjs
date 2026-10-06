@@ -212,7 +212,7 @@ for (const pkg of packages) {
 }
 
 if (!options.skipTest) {
-	run("./test.sh", [], { cwd: repoRoot });
+	run("bash", ["./test.sh"], { cwd: repoRoot });
 }
 
 const tarballs = packReleasePackages(packages, tarballDirectory);

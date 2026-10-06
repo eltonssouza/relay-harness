@@ -3,7 +3,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, relative, resolve } from "node:path";
+import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getPublicWorkspacePackages } from "./release-packages.mjs";
 
@@ -14,7 +14,9 @@ function run(command, args, options = {}) {
 	console.log(`$ ${[command, ...args].join(" ")}`);
 	const result = spawnSync(command, args, {
 		encoding: "utf8",
-		shell: process.platform === "win32",
+		// npm and bun are .cmd shims on Windows and need a shell; an absolute runtime path such as
+		// C:\Program Files\nodejs\node.exe must run without one, or cmd splits it at the space.
+		shell: process.platform === "win32" && !isAbsolute(command),
 		timeout: 300_000,
 		...options,
 	});
