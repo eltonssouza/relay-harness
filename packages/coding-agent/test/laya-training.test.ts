@@ -15,8 +15,16 @@ import {
 	type LearnToolParams,
 	sessionTasks,
 } from "../src/extensions/laya/learn.ts";
+import {
+	LESSON_SIMILARITY,
+	ROUTE_SIMILARITY,
+	renderLessons,
+	TaskMemory,
+	words,
+} from "../src/extensions/laya/memory.ts";
 import { LAYA_PLAN_MESSAGE } from "../src/extensions/laya/routers.ts";
 import { type LayaModelManifest, layaPaths } from "../src/extensions/laya/runtime.ts";
+import { generateSeed } from "../src/extensions/laya/seed.ts";
 import { LayaServer } from "../src/extensions/laya/server.ts";
 import {
 	ensureWorkspace,
@@ -28,6 +36,7 @@ import {
 	SEED_ROWS,
 	type SpawnTraining,
 	type TrainingProgress,
+	type TrainingRow,
 	trainingWorkspace,
 } from "../src/extensions/laya/training.ts";
 import { createHarness, getAssistantTexts, type Harness } from "./suite/harness.ts";
@@ -76,8 +85,8 @@ const call = (id: string, name: string, args: Record<string, unknown>) => ({
 	name,
 	arguments: args,
 });
-const result = (id: string, toolName: string, isError = false) =>
-	message({ role: "toolResult", toolCallId: id, toolName, content: [], isError, timestamp: 0 });
+const result = (id: string, toolName: string, isError = false, text = "") =>
+	message({ role: "toolResult", toolCallId: id, toolName, content: [{ type: "text", text }], isError, timestamp: 0 });
 
 describe("laya learn: session tasks", () => {
 	it("extracts each request with the evidence of how it went", () => {
@@ -98,7 +107,7 @@ describe("laya learn: session tasks", () => {
 				},
 			}),
 			assistant([call("c1", "edit", { path: "src/pager.ts" })]),
-			result("c1", "edit", true),
+			result("c1", "edit", true, "Could not find the exact text in src/pager.ts.\nThe old text must match."),
 			assistant([call("c2", "edit", { path: "src/pager.ts" })]),
 			result("c2", "edit"),
 			assistant([call("c3", "bash", { command: "npm test -- pager" })]),
@@ -129,6 +138,7 @@ describe("laya learn: session tasks", () => {
 			files: ["src/pager.ts"],
 			commands: ["npm test -- pager"],
 			toolFailures: 1,
+			errors: ["edit: Could not find the exact text in src/pager.ts."],
 			testsPassed: true,
 			outcome: "completed",
 			models: ["anthropic/claude-haiku-4-5 (fast tier) • low"],
@@ -146,6 +156,8 @@ describe("laya learn: session tasks", () => {
 		expect(prompt.startsWith("[laya:learn]")).toBe(true);
 		expect(prompt).toContain("### Task 1");
 		expect(prompt).toContain("Laya planned: bug_fix, balanced tier, low effort (laya)");
+		expect(prompt).toContain("Errors: edit: Could not find the exact text");
+		expect(prompt).toContain("also write a lesson");
 		expect(prompt).toContain("- capability_tier: What is the cheapest model capability tier");
 		expect(prompt).toContain("- complexity: How complex is the task? An integer: 0 trivial;");
 	});
@@ -154,7 +166,9 @@ describe("laya learn: session tasks", () => {
 		const tasks = sessionTasks([user("Fix the pager."), assistant([{ type: "text", text: "Done." }])]);
 		const meta = { session: "s-1", created: "2026-10-06T00:00:00.000Z" };
 		const exercises = (task: number, labels: Record<string, unknown>) =>
-			[{ task, labels, note: "Finished on haiku." }] as LearnToolParams["exercises"];
+			[
+				{ task, labels, note: "Finished on haiku.", lesson: " Run npm test -- pager. " },
+			] as LearnToolParams["exercises"];
 
 		expect(exercisesToRows(tasks, exercises(1, LABELS), meta)).toEqual([
 			{
@@ -165,6 +179,7 @@ describe("laya learn: session tasks", () => {
 				session: "s-1",
 				label_source: "agent",
 				note: "Finished on haiku.",
+				lesson: "Run npm test -- pager.",
 				created: meta.created,
 			},
 		]);
@@ -173,6 +188,78 @@ describe("laya learn: session tasks", () => {
 			'capability_tier: "huge" is not a valid answer',
 		);
 		expect(() => exercisesToRows(tasks, exercises(1, { ...LABELS, complexity: 9 }), meta)).toThrow("complexity");
+	});
+});
+
+describe("laya memory", () => {
+	const learned = [
+		{
+			id: "s1",
+			request: "Fix the off-by-one in the pager: the last page is always empty",
+			expected: {},
+			lesson: "Pages are 1-based in src/pager.ts; run npm test -- pager.",
+		},
+		{ id: "s2", request: "rode o npm run check e corrija os erros", expected: {} },
+		{ id: "s3", request: "faça o commit das minhas mudanças e abra o PR", expected: {} },
+	];
+	const memory = new TaskMemory(learned, [
+		...generateSeed(1100).map((row) => row.state.request),
+		...learned.map((task) => task.request),
+	]);
+	const best = (request: string) => memory.search(request, 0, 1)[0];
+
+	it("splits identifiers, drops accents and stopwords", () => {
+		expect(words("Corrija o cálculo do calculateTotal no PR")).toEqual([
+			"corrija",
+			"calculo",
+			"calculate",
+			"total",
+			"pr",
+		]);
+	});
+
+	it("finds a learned task in other words and ignores unrelated requests", () => {
+		expect(best("The pager shows an empty last page, fix the off by one")).toMatchObject({ task: { id: "s1" } });
+		expect(best("The pager shows an empty last page, fix the off by one").similarity).toBeGreaterThan(
+			ROUTE_SIMILARITY,
+		);
+		expect(best("rode npm run check e conserte os erros que aparecerem").similarity).toBeGreaterThan(
+			ROUTE_SIMILARITY,
+		);
+		expect(best("faça commit e abra um PR").task.id).toBe("s3");
+		// Close enough for a lesson, not for routing.
+		const near = best("fix the pager").similarity;
+		expect(near).toBeGreaterThan(LESSON_SIMILARITY);
+		expect(near).toBeLessThan(ROUTE_SIMILARITY);
+		for (const unrelated of ["Write the README for the auth module", "Corrija o texto deste botão"]) {
+			expect(memory.search(unrelated, LESSON_SIMILARITY)).toEqual([]);
+		}
+	});
+
+	it("renders the lessons of the matches that have one", () => {
+		const matches = memory.search("The pager shows an empty last page, fix the off by one", 0, 3);
+		expect(renderLessons(matches)).toMatch(
+			/^Lessons from similar tasks done before in this harness \(check they still apply\):\n {2}- "Fix the off-by-one in the pager: the last page is always empty" \(\d+% similar\): Pages are 1-based/,
+		);
+		expect(renderLessons(memory.search("faça commit e abra um PR", 0, 1))).toBeUndefined();
+	});
+
+	it("is built from the session tasks of a dataset", () => {
+		const rows: TrainingRow[] = [
+			{ id: "r1", state: { request: "Fix the pager" }, expected: {}, source: "synthetic" },
+			{
+				id: "s1",
+				state: { request: "Fix the pager" },
+				expected: { capability_tier: "strong" },
+				source: "session",
+				lesson: "x",
+			},
+		];
+		const fromRows = TaskMemory.fromRows(rows);
+		expect(fromRows.size).toBe(1);
+		expect(fromRows.search("fix the pager", ROUTE_SIMILARITY)[0]).toMatchObject({
+			task: { id: "s1", expected: { capability_tier: "strong" }, lesson: "x" },
+		});
 	});
 });
 

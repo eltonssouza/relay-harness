@@ -22,6 +22,7 @@ export const LEARN_MESSAGE_PREFIX = "[laya:learn]";
 const MAX_TASKS = 60;
 const MAX_FILES = 12;
 const MAX_COMMANDS = 8;
+const MAX_ERRORS = 3;
 
 export interface SessionTask {
 	/** 1-based number the agent refers to. */
@@ -32,6 +33,8 @@ export interface SessionTask {
 	files: string[];
 	commands: string[];
 	toolFailures: number;
+	/** First line of the first failed tool results. */
+	errors: string[];
 	/** Outcome of the last test, type check, build or lint run, or null when none ran. */
 	testsPassed: boolean | null;
 	outcome: "completed" | "error" | "aborted";
@@ -93,8 +96,14 @@ export function sessionTasks(
 		const files = new Set<string>();
 		const commands: string[] = [];
 		const models = new Set<string>();
+		const errors: string[] = [];
 		let reply = "";
 		for (const message of group.messages) {
+			if (message.role === "toolResult" && message.isError && errors.length < MAX_ERRORS) {
+				const text = message.content.flatMap((block) => (block.type === "text" ? [block.text] : [])).join("\n");
+				const line = text.split("\n").find((candidate) => candidate.trim());
+				if (line) errors.push(`${message.toolName}: ${clip(line, 160)}`);
+			}
 			if (message.role !== "assistant") continue;
 			const ref = `${message.provider}/${message.model}`;
 			const tier = tierOf(ref);
@@ -120,6 +129,7 @@ export function sessionTasks(
 			files: [...files],
 			commands,
 			toolFailures: summary.toolFailures,
+			errors,
 			testsPassed: summary.testsPassed,
 			outcome: summary.outcome,
 			models: [...models],
@@ -156,6 +166,7 @@ export function renderTask(task: SessionTask): string {
 	if (task.commands.length > 0) {
 		lines.push(`Commands: ${task.commands.slice(0, MAX_COMMANDS).join(" | ")}`);
 	}
+	if (task.errors.length > 0) lines.push(`Errors: ${task.errors.join(" | ")}`);
 	if (task.reply) lines.push(`Last reply: ${task.reply}`);
 	if (task.next) lines.push(`Next user message: ${task.next}`);
 	return lines.join("\n");
@@ -194,11 +205,15 @@ How to decide:
 - complexity, risk, ambiguity, reasoning_requirement, validation_level, agent, task_type, security_sensitive: judge the request and what doing it right took.
 - Leave out entries that are not tasks for a coding agent: greetings, thanks, or remarks about the conversation itself.
 
+For each task, also write a lesson when the session taught something a model doing a similar task should know: the command that validated the result, where the change belongs, a mistake that cost a retry and how it was fixed, a convention the user asked for. Write it as advice for next time, in one to three sentences, in English, with concrete names (commands, paths, settings). Leave it out when there is nothing beyond the obvious. Never put secrets, tokens or personal data in a lesson.
+
+Relay applies what you save at once: a new request similar to a learned task is routed with its labels, and the model that runs it reads its lesson. Training then teaches the routing model the same tasks.
+
 <tasks>
 ${tasks.map(renderTask).join("\n\n")}
 </tasks>
 
-Then call the \`${LEARN_TOOL_NAME}\` tool once, with one exercise per task you keep. It saves them and starts training. Finally reply, in the language the user writes in, with a short table (task, type, tier, effort) and what happens next.`;
+Then call the \`${LEARN_TOOL_NAME}\` tool once, with one exercise per task you keep. It saves them and starts training. Finally reply, in the language the user writes in, with a short table (task, type, tier, effort, lesson in a few words) and what happens next.`;
 }
 
 function labelSchema(): TSchema {
@@ -229,6 +244,13 @@ export const learnToolSchema = Type.Object({
 			labels: labelSchema(),
 			note: Type.Optional(
 				Type.String({ description: "One sentence: the evidence behind the tier and the effort." }),
+			),
+			lesson: Type.Optional(
+				Type.String({
+					maxLength: 600,
+					description:
+						"Advice for a model doing a similar task: how to validate, where the change belongs, a mistake to avoid. One to three sentences, no secrets.",
+				}),
 			),
 		}),
 		{ minItems: 1, description: "One exercise per task worth learning." },
@@ -283,6 +305,7 @@ export function exercisesToRows(
 			session: meta.session,
 			label_source: "agent",
 			...(exercise.note ? { note: exercise.note } : {}),
+			...(exercise.lesson?.trim() ? { lesson: exercise.lesson.trim() } : {}),
 			created: meta.created,
 		});
 	}

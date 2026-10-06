@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
 	type Api,
@@ -16,7 +16,7 @@ import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types
 import { SessionManager } from "../../core/session-manager.ts";
 import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
-import { assessmentFromAnswers, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
+import { assessmentFromAnswers, assessmentFromLabels, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
 import {
 	buildLearnPrompt,
 	exercisesToRows,
@@ -27,6 +27,7 @@ import {
 	type SessionTask,
 	sessionTasks,
 } from "./learn.ts";
+import { LAYA_LESSONS_MESSAGE, LESSON_SIMILARITY, ROUTE_SIMILARITY, renderLessons, TaskMemory } from "./memory.ts";
 import { LAYA_MODEL_MANIFEST } from "./model-manifest.ts";
 import {
 	applyPolicy,
@@ -62,6 +63,7 @@ import {
 	describeProgress,
 	hasAccelerator,
 	readRegistry,
+	readRows,
 	type Score,
 	SESSION_SOURCE,
 	sharedTrainer,
@@ -206,6 +208,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	let learnTasks: { tasks: SessionTask[]; session: string } | undefined;
 	/** This runtime's training listener, while it is the latest one. */
 	let listener: TrainingListener | undefined;
+	let memoryCache: { version: string; memory: TaskMemory } | undefined;
 
 	const refreshSettings = () => {
 		settings = relay.getSettings().laya ?? {};
@@ -226,7 +229,42 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	relay.registerProvider(createLayaProvider(() => settings.baseUrl));
 
 	/** System 1: Laya's answers, or keyword rules when the server cannot answer. */
+	/** Learned tasks, reloaded when the training dataset changes. Undefined when off or empty. */
+	function memory(): TaskMemory | undefined {
+		if (settings.memory === false) return undefined;
+		let version: string;
+		try {
+			const stat = statSync(trainer.workspace.dataset);
+			version = `${stat.mtimeMs}:${stat.size}`;
+		} catch {
+			return undefined;
+		}
+		if (memoryCache?.version !== version) {
+			memoryCache = { version, memory: TaskMemory.fromRows(readRows(trainer.workspace.dataset)) };
+		}
+		return memoryCache.memory.size > 0 ? memoryCache.memory : undefined;
+	}
+
+	/** Lessons of learned tasks similar to a request; none for harness messages such as /laya learn's. */
+	const lessonsFor = (request: string) =>
+		HARNESS_MESSAGE.test(request.trimStart())
+			? undefined
+			: renderLessons(memory()?.search(request, LESSON_SIMILARITY) ?? []);
+
+	/** The labels of a learned task close to the request, then Laya's answers, then keyword rules. */
 	async function assess(request: string, ctx: ExtensionContext, signal?: AbortSignal): Promise<TaskAssessment> {
+		const learned = memory()?.search(request, ROUTE_SIMILARITY, 1)[0];
+		if (learned) {
+			try {
+				return {
+					...assessmentFromLabels(learned.task.expected),
+					source: "memory",
+					confidence: learned.similarity,
+				};
+			} catch {
+				// Labeled against questions that have changed since; Laya answers instead.
+			}
+		}
 		const classifier = ctx.modelRegistry.findOfType("classifier", LAYA_PROVIDER_ID, LAYA_CLASSIFIER_ID);
 		if (!classifier || Date.now() < layaUnavailableUntil) return heuristicAssessment(request);
 		// Starts the local server when the runtime is installed; a failed start falls through to the
@@ -322,7 +360,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 		ctx.ui.setStatus(
 			"laya",
 			`laya ${profile()}: ${base.assessment.task.type} → ${chosen.tier} ${chosen.model.id} • ${state.thinkingLevel}${
-				base.assessment.source === "heuristic" ? " (rules)" : ""
+				{ laya: "", memory: " (memory)", heuristic: " (rules)" }[base.assessment.source]
 			}`,
 		);
 		return { route: { model: chosen.model, thinkingLevel: state.thinkingLevel, state }, state };
@@ -543,7 +581,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 			const { added, updated } = trainer.addExercises(rows);
 			learnTasks = undefined;
 			const sessionRows = trainer.counts()[SESSION_SOURCE] ?? 0;
-			const saved = `Saved ${rows.length} exercises (${added} new, ${updated} updated); ${sessionRows} session tasks in total, in ${trainer.workspace.dataset}.`;
+			const saved = `Saved ${rows.length} exercises (${added} new, ${updated} updated); ${sessionRows} session tasks in total, in ${trainer.workspace.dataset}. Requests similar to these tasks use their labels and lessons from the next one.`;
 			const training =
 				params.train === false ? "Training was not started (run /laya train)." : await startTraining(ctx);
 			return { content: [{ type: "text", text: `${saved} ${training}` }], details: { added, updated, training } };
@@ -566,7 +604,18 @@ export default function layaExtension(relay: ExtensionAPI): void {
 			relay.setActiveTools(userTools());
 			toolBaseline = undefined;
 		}
-		if (!isSelected(ctx)) return;
+		if (!isSelected(ctx)) {
+			// Lessons help whichever model runs the request.
+			const lessons = lessonsFor(event.prompt);
+			if (!lessons) return;
+			return {
+				message: {
+					customType: LAYA_LESSONS_MESSAGE,
+					content: `[laya:lessons] ${lessons}`,
+					display: false,
+				},
+			};
+		}
 		// First use: offer to install the trained Laya once per session. Without it, keyword rules route.
 		if (
 			settings.autostart !== false &&
@@ -598,10 +647,12 @@ export default function layaExtension(relay: ExtensionAPI): void {
 			toolBaseline = { tools: baseline, applied };
 			relay.setActiveTools(applied);
 		}
+		const lessons = lessonsFor(event.prompt);
+		const plan = renderPlanMessage(assessment, policy, skills, deactivated);
 		return {
 			message: {
 				customType: LAYA_PLAN_MESSAGE,
-				content: renderPlanMessage(assessment, policy, skills, deactivated),
+				content: lessons ? `${plan}\n- ${lessons}` : plan,
 				display: false,
 				details: { assessment, policy, skills, deactivated },
 			},
@@ -844,6 +895,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 								? `; training ${trainer.progress ? describeProgress(trainer.progress) : "starting"}`
 								: ""
 						}`,
+						`Memory: ${settings.memory === false ? "off" : `${memory()?.size ?? 0} learned tasks route similar requests and share their lessons`}`,
 						`Telemetry: ${settings.telemetry === false ? "off" : store.path}`,
 					];
 					if (current) {

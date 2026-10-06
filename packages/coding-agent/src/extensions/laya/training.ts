@@ -24,6 +24,8 @@ export interface TrainingRow {
 	session?: string;
 	label_source?: string;
 	note?: string;
+	/** What to know when doing a similar task. Shown to the model, never trained on. */
+	lesson?: string;
 	created?: string;
 }
 

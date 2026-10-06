@@ -112,6 +112,7 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 | `laya.escalateAfterFailures` | number | `3` | Failed tool calls in one turn before moving to the next tier. `0` disables. |
 | `laya.toolRouting` | string | `advise` | `advise` names unneeded tools in the plan; `enforce` also deactivates them for the request. |
 | `laya.telemetry` | boolean | `true` | Record each routed request in `~/.relay/agent/laya/telemetry.jsonl`. |
+| `laya.memory` | boolean | `true` | Route requests similar to tasks learned with `/laya learn` by their labels, and give the running model their lessons. See [laya.md](laya.md#teach-laya-from-your-sessions). |
 | `laya.timeoutMs` | number | `5000` | Classifier timeout before keyword rules answer instead. |
 
 ### Branch summaries
