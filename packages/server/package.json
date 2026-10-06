@@ -40,14 +40,14 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
+		"url": "git+https://github.com/eltonssouza/relay-harness.git",
 		"directory": "packages/server"
 	},
 	"engines": {
 		"node": ">=22.19.0"
 	},
 	"dependencies": {
-		"@earendil-works/chord": "^1.0.2",
+		"@relay-harness/chord": "^1.0.2",
 		"@relay-harness/protocol": "^1.0.2"
 	},
 	"devDependencies": {

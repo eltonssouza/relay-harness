@@ -3,9 +3,9 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"paths": {
-			"@earendil-works/chord": ["../chord/dist/index.d.ts"],
-			"@earendil-works/chord/bundler": ["../chord/dist/bundler.d.ts"],
-			"@earendil-works/chord/node": ["../chord/dist/node.d.ts"],
+			"@relay-harness/chord": ["../chord/dist/index.d.ts"],
+			"@relay-harness/chord/bundler": ["../chord/dist/bundler.d.ts"],
+			"@relay-harness/chord/node": ["../chord/dist/node.d.ts"],
 			"@relay-harness/agent-core": ["../agent/dist/index.d.ts"],
 			"@relay-harness/agent-core/*": ["../agent/dist/*.d.ts"],
 			"@relay-harness/ai": ["../ai/dist/index.d.ts"],

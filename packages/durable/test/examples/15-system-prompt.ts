@@ -1,9 +1,10 @@
 // System prompt sections and per-conversation instructions.
 // Run from packages/durable:
 //   node --conditions=source --experimental-strip-types test/examples/15-system-prompt.ts
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+
 import { createModels } from "@relay-harness/ai/models";
 import { fauxAssistantMessage, fauxProvider } from "@relay-harness/ai/providers/faux";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { NodeExecutionEnv } from "../../src/env/node.ts";
 import {
 	type Conversation,

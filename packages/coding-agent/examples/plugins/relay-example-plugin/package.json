@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"peerDependencies": {
-		"@earendil-works/chord": "^0.84.4",
+		"@relay-harness/chord": "^0.84.4",
 		"@relay-harness/coding-agent": "^0.84.4"
 	}
 }

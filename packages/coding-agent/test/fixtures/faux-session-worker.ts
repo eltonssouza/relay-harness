@@ -1,8 +1,8 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createStaticFacetLoader, defineFacet } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { createModels, fauxAssistantMessage, fauxProvider } from "@relay-harness/ai";
+import { createStaticFacetLoader, defineFacet } from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { createRegistry, Harness } from "@relay-harness/durable";
 import { openNodeSqliteStorage } from "@relay-harness/durable/storage/sqlite/node";
 import { consumeInternalProcessRole } from "../../src/experimental/process.ts";

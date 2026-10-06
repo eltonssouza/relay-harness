@@ -1,4 +1,4 @@
-import { type Context, defineService } from "@earendil-works/chord";
+import { type Context, defineService } from "@relay-harness/chord";
 
 export interface PresentationSelectItem {
 	readonly value: string;

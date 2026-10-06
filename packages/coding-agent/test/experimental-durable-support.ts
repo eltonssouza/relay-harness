@@ -1,5 +1,5 @@
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { createModels, type FauxProviderHandle, type FauxResponseStep, fauxProvider } from "@relay-harness/ai";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { type Conversation, createRegistry, Harness, MemoryStorage } from "@relay-harness/durable";
 
 export interface FauxConversation {

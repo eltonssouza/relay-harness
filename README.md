@@ -78,7 +78,7 @@ This monorepo holds the Relay CLI and the libraries it is built from.
 | **[@relay-harness/telemetry](packages/telemetry)**                                                                       | Vendor-neutral telemetry contracts and typed schemas                                 |
 | **[@relay-harness/protocol](packages/protocol)**, **[client](packages/client)**, **[server](packages/server)** | Experimental remote sessions over framed CBOR                                        |
 | **[@relay-harness/evals](packages/evals)**                                                                               | Evaluation harness for the coding agent                                              |
-| **[@earendil-works/chord](packages/chord)**                                                                              | Application-composition runtime for services, replicated state, RPC, and plugins     |
+| **[@relay-harness/chord](packages/chord)**                                                                              | Application-composition runtime for services, replicated state, RPC, and plugins     |
 
 ## Permissions and containerization
 

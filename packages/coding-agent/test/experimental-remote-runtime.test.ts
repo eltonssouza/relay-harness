@@ -1,8 +1,8 @@
 import { lstat, mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type Context, createFacetHost, defineFacet, defineService } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import { type Context, createFacetHost, defineFacet, defineService } from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { Client, ServerError as ClientServerError } from "@relay-harness/client";
 import { createUnixTransportFactory } from "@relay-harness/client/unix";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -390,14 +390,14 @@ describe("experimental durable server composition", () => {
 			writeFile(
 				join(secondPackagePath, "package.json"),
 				`${JSON.stringify({
-					name: "@earendil-works/second-session-plugin",
+					name: "@relay-harness/second-session-plugin",
 					version: "1.0.0",
-					peerDependencies: { "@earendil-works/chord": "^0.84.4" },
+					peerDependencies: { "@relay-harness/chord": "^0.84.4" },
 				})}\n`,
 			),
 			writeFile(
 				join(secondPackagePath, "src", "session.ts"),
-				'import { defineFacet, defineService } from "@earendil-works/chord"; const Service = defineService("test.second-plugin"); export default defineFacet({ id: "second-session-plugin", setup(env) { env.provide(Service, { async read() { return "second"; } }); } });\n',
+				'import { defineFacet, defineService } from "@relay-harness/chord"; const Service = defineService("test.second-plugin"); export default defineFacet({ id: "second-session-plugin", setup(env) { env.provide(Service, { async read() { return "second"; } }); } });\n',
 			),
 		]);
 		const runtime = await startServer({ ...sessionWorkerModel, directory });

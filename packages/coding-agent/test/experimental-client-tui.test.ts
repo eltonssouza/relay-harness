@@ -1,19 +1,19 @@
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
+import { fauxAssistantMessage } from "@relay-harness/ai";
 import {
 	createRemoteServiceBinding,
 	type MutableReplicatedState,
 	RemoteServiceProvider,
 	type RemoteServiceTransport,
 	replicatedState,
-} from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+} from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import {
 	FACET_BUNDLE_ARTIFACT_FORMAT,
 	FACET_BUNDLE_ARTIFACT_FORMAT_VERSION,
 	type FacetBundleArtifact,
-} from "@earendil-works/chord/node";
-import { fauxAssistantMessage } from "@relay-harness/ai";
+} from "@relay-harness/chord/node";
 import { ProcessTerminal, TuiMainScreen } from "@relay-harness/tui";
 import { beforeAll, describe, expect, test, vi } from "vitest";
 import { type ClientTuiServer, ExperimentalClientTui } from "../src/experimental/client-tui.ts";
@@ -122,7 +122,7 @@ describe("experimental client TUI", () => {
 			const transcriptState = await durable.conversation.viewState(BACKGROUND_CONTEXT);
 
 			const reloadSource =
-				'"use strict";\nconst { defineFacet, defineService } = require("@earendil-works/chord");\nconst Models = defineService("relay.models");\nmodule.exports = { __esModule: true, default: defineFacet({ id: "test-tui-facet", setup(env) { env.use(Models); } }) };\n';
+				'"use strict";\nconst { defineFacet, defineService } = require("@relay-harness/chord");\nconst Models = defineService("relay.models");\nmodule.exports = { __esModule: true, default: defineFacet({ id: "test-tui-facet", setup(env) { env.use(Models); } }) };\n';
 			const reloadArtifact: FacetBundleArtifact = {
 				format: FACET_BUNDLE_ARTIFACT_FORMAT,
 				formatVersion: FACET_BUNDLE_ARTIFACT_FORMAT_VERSION,
@@ -131,7 +131,7 @@ describe("experimental client TUI", () => {
 				entry: {
 					file: "tui.cjs",
 					integrity: `sha256-${createHash("sha256").update(reloadSource).digest("base64")}`,
-					externalImports: ["@earendil-works/chord"],
+					externalImports: ["@relay-harness/chord"],
 				},
 				source: reloadSource,
 			};

@@ -1,6 +1,6 @@
-import { createFacetHost, defineFacet } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { fauxAssistantMessage } from "@relay-harness/ai";
+import { createFacetHost, defineFacet } from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import type { InboxState, LiveState } from "@relay-harness/durable";
 import { describe, expect, test } from "vitest";
 import { AgentController } from "../src/experimental/services/agent-controller.ts";

@@ -1,5 +1,5 @@
-import type { Context } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import type { Context } from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import {
 	type CommitPublication,
 	type ConversationId,

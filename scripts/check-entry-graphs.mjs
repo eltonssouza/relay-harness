@@ -19,7 +19,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 /** Workspace package name -> its source root, so cross-package imports are followed. */
 const WORKSPACE = {
-	"@earendil-works/chord": "packages/chord/src",
+	"@relay-harness/chord": "packages/chord/src",
 	"@relay-harness/ai": "packages/ai/src",
 	"@relay-harness/durable": "packages/durable/src",
 	"@relay-harness/agent-core": "packages/agent/src",

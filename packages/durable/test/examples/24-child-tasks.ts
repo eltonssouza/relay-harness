@@ -5,8 +5,8 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { createModels } from "@relay-harness/ai/models";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import {
 	type Conversation,
 	createRegistry,

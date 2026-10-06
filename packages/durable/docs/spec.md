@@ -11,8 +11,8 @@ import type {
   JsonRepresentation,
   JsonValue,
   ReplicatedState,
-} from "@earendil-works/chord";
-import type { Op } from "@earendil-works/chord/delta";
+} from "@relay-harness/chord";
+import type { Op } from "@relay-harness/chord/delta";
 import type {
   AssistantMessage,
   CacheRetention,

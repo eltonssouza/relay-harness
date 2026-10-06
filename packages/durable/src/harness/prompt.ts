@@ -1,6 +1,6 @@
-import type { Context } from "@earendil-works/chord";
 import type { Message, SystemMessage, Tool, ToolReference } from "@relay-harness/ai";
 import { declarationsEqual, getCurrentTools, toToolDeclaration } from "@relay-harness/ai/utils/transcript";
+import type { Context } from "@relay-harness/chord";
 import { SystemEntry } from "../entries.ts";
 import type { ContextEdit, TypedEntryDraft } from "../types.ts";
 import type { ContextView, PromptInput, PromptSection, ToolRegistration } from "./types.ts";

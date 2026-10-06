@@ -4,7 +4,7 @@
 
 A durable agent harness. Conversations, model turns, tool calls, and your own state are committed to storage before anything is shown. If the process dies mid-turn, reopening the storage picks the work up where it stopped.
 
-Built on [`@relay-harness/ai`](../ai/README.md) for model access and `@earendil-works/chord` for document state.
+Built on [`@relay-harness/ai`](../ai/README.md) for model access and `@relay-harness/chord` for document state.
 
 ## Table of Contents
 
@@ -38,13 +38,13 @@ Built on [`@relay-harness/ai`](../ai/README.md) for model access and `@earendil-
 ## Installation
 
 ```bash
-npm install @relay-harness/durable @relay-harness/ai @earendil-works/chord
+npm install @relay-harness/durable @relay-harness/ai @relay-harness/chord
 ```
 
 ## Quick Start
 
 ```typescript
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { createModels } from "@relay-harness/ai/models";
 import { openaiProvider } from "@relay-harness/ai/providers/openai";
 import { AssistantEntry, createRegistry, Harness, MemoryStorage } from "@relay-harness/durable";

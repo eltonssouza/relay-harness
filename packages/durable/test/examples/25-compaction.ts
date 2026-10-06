@@ -1,10 +1,11 @@
 // Compaction: a long trip-planning chat whose older messages are summarized so the model context stays small.
 // Run from packages/durable:
 //   node --conditions=source --experimental-strip-types test/examples/25-compaction.ts
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+
 import type { AssistantMessage, Message, TranscriptContext } from "@relay-harness/ai";
 import { createModels } from "@relay-harness/ai/models";
 import { fauxAssistantMessage, fauxProvider } from "@relay-harness/ai/providers/faux";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import {
 	CompactionEntry,
 	type Conversation,

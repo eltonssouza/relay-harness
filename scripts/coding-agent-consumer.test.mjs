@@ -6,12 +6,12 @@ import test from "node:test";
 import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentConsumer } from "./coding-agent-consumer.mjs";
 
 const codingAgentName = "@relay-harness/coding-agent";
-const devPackages = ["relay-client", "relay-protocol", "relay-server"].map((name) => `@earendil-works/${name}`);
+const devPackages = ["client", "protocol", "server"].map((name) => `@relay-harness/${name}`);
 
 function createFixture(t, { importServer = false, declareServer = false } = {}) {
 	const root = mkdtempSync(join(tmpdir(), "relay-consumer-test-"));
 	t.after(() => rmSync(root, { recursive: true, force: true }));
-	const packages = [codingAgentName, "@earendil-works/chord", ...devPackages].map((name) => ({
+	const packages = [codingAgentName, "@relay-harness/chord", ...devPackages].map((name) => ({
 		name,
 		directory: join(root, "packages", name.split("/")[1]),
 	}));
@@ -29,7 +29,7 @@ function createFixture(t, { importServer = false, declareServer = false } = {}) 
 			...(isAgent ? {
 				bin: { relay: "dist/bundle/cli.js" },
 				dependencies: {
-					"@earendil-works/chord": "1.0.0",
+					"@relay-harness/chord": "1.0.0",
 					...(declareServer ? { "@relay-harness/server": "1.0.0" } : {}),
 				},
 				devDependencies: Object.fromEntries(devPackages.map((name) => [name, "1.0.0"])),
@@ -39,7 +39,7 @@ function createFixture(t, { importServer = false, declareServer = false } = {}) 
 			"package.json": JSON.stringify(manifest),
 			"dist/index.js": isAgent ? `
 ${importServer ? 'import "@relay-harness/server";' : ""}
-import { marker } from "@earendil-works/chord";
+import { marker } from "@relay-harness/chord";
 if (marker !== "local tarball") throw new Error("Wrong Chord artifact");
 export function createAgentSession() {}
 export class SessionManager { static inMemory() {} }

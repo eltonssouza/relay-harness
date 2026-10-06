@@ -8,9 +8,11 @@ export interface ChangelogEntry {
 	content: string;
 }
 
-const GITHUB_REPO = "earendil-works/pi";
+const GITHUB_REPO = "eltonssouza/relay-harness";
 const CHANGELOG_LINK_BASE_PATH = "packages/coding-agent";
 const LEGACY_REPO_RE = /^https:\/\/github\.com\/(?:badlogic|earendil-works)\/pi-mono(?=\/|$)/;
+/** Issues and pull requests from before the fork live in the original project. */
+const UPSTREAM_REPO = "earendil-works/pi";
 const URL_SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i;
 const INLINE_MARKDOWN_LINK_RE = /(!?\[[^\]\n]+\]\()([^\s)]+)((?:\s+[^)]*)?\))/g;
 
@@ -66,8 +68,17 @@ function isDirectoryTarget(originalPath: string, repositoryPath: string): boolea
 	return !basename.includes(".");
 }
 
+/** Legacy pi-mono URLs: issues and pull requests to the original project, files to this repository. */
+function canonicalizeLegacyUrl(target: string): string {
+	const legacy = LEGACY_REPO_RE.exec(target);
+	if (!legacy) return target;
+	const rest = target.slice(legacy[0].length);
+	const repo = /^\/(?:issues|pull)\//.test(rest) ? UPSTREAM_REPO : GITHUB_REPO;
+	return `https://github.com/${repo}${rest}`;
+}
+
 function normalizeChangelogLinkTarget(target: string, tag: string): string {
-	let canonicalTarget = target.replace(LEGACY_REPO_RE, `https://github.com/${GITHUB_REPO}`);
+	let canonicalTarget = canonicalizeLegacyUrl(target);
 	const repoUrl = `https://github.com/${GITHUB_REPO}`;
 
 	for (const route of ["blob", "tree"]) {

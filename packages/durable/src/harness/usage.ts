@@ -1,5 +1,5 @@
-import { copyJson, type Draft, type JsonRepresentation } from "@earendil-works/chord";
 import type { Usage } from "@relay-harness/ai";
+import { copyJson, type Draft, type JsonRepresentation } from "@relay-harness/chord";
 import { defineDoc } from "../documents.ts";
 import type { ConversationId, Tx } from "../types.ts";
 

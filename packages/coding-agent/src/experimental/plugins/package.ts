@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
-import { bundleFacetPackage } from "@earendil-works/chord/bundler";
+import { bundleFacetPackage } from "@relay-harness/chord/bundler";
 import {
 	FACET_BUNDLE_MANIFEST_FILE,
 	type FacetBundleArtifact,
 	readFacetBundleArtifact,
-} from "@earendil-works/chord/node";
+} from "@relay-harness/chord/node";
 import type { ServerId } from "@relay-harness/protocol";
 
 const PLUGIN_PACKAGE_PROFILE_VERSION = 1;

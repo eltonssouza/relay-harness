@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { AgentDoc, createSession, type ModelRef, ROOT_CONVERSATION_ID } from "@relay-harness/durable";
 import { openNodeSqliteStorage } from "@relay-harness/durable/storage/sqlite/node";
 import {

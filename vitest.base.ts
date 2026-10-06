@@ -34,11 +34,11 @@ export const workspaceSourcePaths = {
 export default defineConfig({
 	resolve: {
 		alias: [
-			{ find: /^@earendil-works\/chord$/, replacement: workspaceSourcePaths.chordIndex },
-			{ find: /^@earendil-works\/chord\/context$/, replacement: workspaceSourcePaths.chordContext },
-			{ find: /^@earendil-works\/chord\/delta$/, replacement: workspaceSourcePaths.chordDelta },
-			{ find: /^@earendil-works\/chord\/bundler$/, replacement: workspaceSourcePaths.chordBundler },
-			{ find: /^@earendil-works\/chord\/node$/, replacement: workspaceSourcePaths.chordNode },
+			{ find: /^@relay-harness\/chord$/, replacement: workspaceSourcePaths.chordIndex },
+			{ find: /^@relay-harness\/chord\/context$/, replacement: workspaceSourcePaths.chordContext },
+			{ find: /^@relay-harness\/chord\/delta$/, replacement: workspaceSourcePaths.chordDelta },
+			{ find: /^@relay-harness\/chord\/bundler$/, replacement: workspaceSourcePaths.chordBundler },
+			{ find: /^@relay-harness\/chord\/node$/, replacement: workspaceSourcePaths.chordNode },
 			{ find: /^@relay-harness\/telemetry$/, replacement: workspaceSourcePaths.telemetryIndex },
 			{ find: /^@relay-harness\/telemetry\/testing$/, replacement: workspaceSourcePaths.telemetryTesting },
 			{ find: /^@relay-harness\/mcp$/, replacement: workspaceSourcePaths.mcpIndex },

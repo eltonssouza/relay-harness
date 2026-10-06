@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import { readFacetBundleManifest } from "@earendil-works/chord/node";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
+import { readFacetBundleManifest } from "@relay-harness/chord/node";
 import { afterEach, describe, expect, test } from "vitest";
 import {
 	activateBuiltinClientServices,
@@ -49,10 +49,10 @@ describe("server-selected presentation facets", () => {
 		await writeFile(
 			join(packagePath, "package.json"),
 			`${JSON.stringify({
-				name: "@earendil-works/test-plugin",
+				name: "@relay-harness/test-plugin",
 				version: "1.0.0",
 				peerDependencies: {
-					"@earendil-works/chord": "^0.84.4",
+					"@relay-harness/chord": "^0.84.4",
 					"@relay-harness/coding-agent": "^0.84.4",
 				},
 			})}\n`,
@@ -60,7 +60,7 @@ describe("server-selected presentation facets", () => {
 		const sourcePath = join(packagePath, "src", "tui.ts");
 		await writeFile(
 			sourcePath,
-			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-a", setup(env) { env.use(SlashCommands); } });\n',
+			'import { defineFacet } from "@relay-harness/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-a", setup(env) { env.use(SlashCommands); } });\n',
 		);
 		const plugin = createServerPluginPackage(directory, serverId, packagePath);
 
@@ -69,14 +69,14 @@ describe("server-selected presentation facets", () => {
 		expect(plugin.manifestPath).toMatch(
 			new RegExp(`/plugin-builds/${serverId}/relay-example-plugin-[a-f0-9]{12}/chord-facets\\.json$`, "u"),
 		);
-		expect(first[0]?.plugin).toEqual({ id: "@earendil-works/test-plugin", version: "1.0.0" });
+		expect(first[0]?.plugin).toEqual({ id: "@relay-harness/test-plugin", version: "1.0.0" });
 		const firstLoaded = await createPresentationFacetLoaders(createPresentationFacetData(first))[0]!.load();
 		expect(firstLoaded.facets.map(({ id }) => id)).toEqual(["built-a"]);
 		await firstLoaded.dispose();
 
 		await writeFile(
 			sourcePath,
-			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-b", setup(env) { env.use(SlashCommands); } });\n',
+			'import { defineFacet } from "@relay-harness/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-b", setup(env) { env.use(SlashCommands); } });\n',
 		);
 		const second = await plugin.build();
 		expect(second[0]?.source).not.toBe(first[0]?.source);
@@ -90,14 +90,14 @@ describe("server-selected presentation facets", () => {
 			writeFile(
 				join(secondPackagePath, "package.json"),
 				`${JSON.stringify({
-					name: "@earendil-works/second-test-plugin",
+					name: "@relay-harness/second-test-plugin",
 					version: "1.0.0",
-					peerDependencies: { "@earendil-works/chord": "^0.84.4" },
+					peerDependencies: { "@relay-harness/chord": "^0.84.4" },
 				})}\n`,
 			),
 			writeFile(
 				join(secondPackagePath, "src", "tui.ts"),
-				'import { defineFacet } from "@earendil-works/chord"; export default defineFacet({ id: "second-built", setup() {} });\n',
+				'import { defineFacet } from "@relay-harness/chord"; export default defineFacet({ id: "second-built", setup() {} });\n',
 			),
 		]);
 		const running = await startServer({
@@ -127,7 +127,7 @@ describe("server-selected presentation facets", () => {
 
 		await writeFile(
 			sourcePath,
-			'import { defineFacet } from "@earendil-works/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-c", setup(env) { env.use(SlashCommands); } });\n',
+			'import { defineFacet } from "@relay-harness/chord"; import { SlashCommands } from "@relay-harness/coding-agent/experimental/plugin"; export default defineFacet({ id: "built-c", setup(env) { env.use(SlashCommands); } });\n',
 		);
 		const services = runtime.servers[0]!.server.open({
 			services: [PresentationPlugins],

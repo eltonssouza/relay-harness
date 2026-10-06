@@ -1,6 +1,6 @@
 import { once } from "node:events";
 import { createConnection, type Socket } from "node:net";
-import type { JsonValue, ServiceCall } from "@earendil-works/chord";
+import type { JsonValue, ServiceCall } from "@relay-harness/chord";
 import {
 	type ClientMessage,
 	encodeClientMessage,

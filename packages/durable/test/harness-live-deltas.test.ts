@@ -1,5 +1,5 @@
-import type { Op } from "@earendil-works/chord/delta";
 import { fauxAssistantMessage, fauxText, fauxToolCall, Type } from "@relay-harness/ai";
+import type { Op } from "@relay-harness/chord/delta";
 import {
 	type CommitPublication,
 	defineTool,

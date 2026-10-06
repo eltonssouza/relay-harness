@@ -1,5 +1,5 @@
-import type { Context, RemoteServices } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import type { Context, RemoteServices } from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import type { Client } from "@relay-harness/client";
 import {
 	createServerServiceSource,

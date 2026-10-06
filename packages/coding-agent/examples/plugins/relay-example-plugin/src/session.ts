@@ -1,5 +1,5 @@
-import { defineFacet } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import { defineFacet } from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { ExampleFacetService } from "./contract.ts";
 
 export default defineFacet({

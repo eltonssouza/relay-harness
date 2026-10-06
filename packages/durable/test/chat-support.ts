@@ -1,4 +1,3 @@
-import type { Context } from "@earendil-works/chord";
 import {
 	createModels,
 	type FauxProviderHandle,
@@ -8,6 +7,7 @@ import {
 	type Models,
 	type RegisterFauxProviderOptions,
 } from "@relay-harness/ai";
+import type { Context } from "@relay-harness/chord";
 import {
 	type Conversation,
 	createRegistry,

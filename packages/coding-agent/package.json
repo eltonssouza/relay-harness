@@ -47,7 +47,7 @@
 		"prepublishOnly": "npm run clean && npm run build"
 	},
 	"dependencies": {
-		"@earendil-works/chord": "^1.0.2",
+		"@relay-harness/chord": "^1.0.2",
 		"@relay-harness/agent-core": "^1.0.2",
 		"@relay-harness/ai": "^1.0.2",
 		"@relay-harness/codemode": "^1.0.2",
@@ -99,7 +99,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
+		"url": "git+https://github.com/eltonssouza/relay-harness.git",
 		"directory": "packages/coding-agent"
 	},
 	"engines": {

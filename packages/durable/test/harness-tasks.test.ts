@@ -1,6 +1,6 @@
-import type { Context } from "@earendil-works/chord";
-import { withCancel } from "@earendil-works/chord/context";
 import { createModels, Type } from "@relay-harness/ai";
+import type { Context } from "@relay-harness/chord";
+import { withCancel } from "@relay-harness/chord/context";
 import {
 	type Conversation,
 	createRegistry,

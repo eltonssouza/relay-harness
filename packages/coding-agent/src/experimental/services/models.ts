@@ -1,5 +1,5 @@
-import { type Context, defineService, type ReplicatedState } from "@earendil-works/chord";
 import type { ModelThinkingLevel } from "@relay-harness/ai";
+import { type Context, defineService, type ReplicatedState } from "@relay-harness/chord";
 
 export interface ModelRef {
 	provider: string;

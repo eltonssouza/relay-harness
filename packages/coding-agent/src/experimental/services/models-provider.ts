@@ -1,6 +1,6 @@
-import { type Context, defineFacet, type Facet, type MutableReplicatedState } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { clampThinkingLevel, getSupportedThinkingLevels, type ModelThinkingLevel } from "@relay-harness/ai";
+import { type Context, defineFacet, type Facet, type MutableReplicatedState } from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { AgentDoc, type AgentState, type Conversation, type DocumentState, type Harness } from "@relay-harness/durable";
 import type { ModelRuntime } from "../../core/model-runtime.ts";
 import type { SettingsManager } from "../../core/settings-manager.ts";
