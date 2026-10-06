@@ -100,7 +100,8 @@ describe("xAI OAuth device flow", () => {
 				const form = requestForm(init);
 				expect(form.get("client_id")).toBe("b1a00492-073a-47ea-816f-4c329264a828");
 				expect(form.get("scope")).toBe("openid profile email offline_access grok-cli:access api:access");
-				expect(form.get("referrer")).toBe("relay");
+				// xAI validates the referrer, so it keeps the original value.
+				expect(form.get("referrer")).toBe("pi");
 				return jsonResponse(deviceCodeResponse());
 			}
 

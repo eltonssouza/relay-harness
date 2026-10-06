@@ -262,7 +262,7 @@ export function verifySystemPrompt(
 	if (!systemPrompt.includes("\n<rules>\n")) {
 		throw new Error(`Relay system prompt lost its rules in the ${options.name} eval variant.`);
 	}
-	const hasDocumentation = systemPrompt.includes("\n<docs>\nPi documentation (read only");
+	const hasDocumentation = systemPrompt.includes("\n<docs>\nRelay documentation (read only");
 	if (hasDocumentation !== options.expectedRelayDocumentation) {
 		throw new Error(`Relay system prompt does not match the ${options.name} eval variant.`);
 	}
