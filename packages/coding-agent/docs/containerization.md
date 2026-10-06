@@ -11,9 +11,8 @@ You can isolate the complete Relay process or keep Relay on the host and route s
 | Plain Docker | Container | Relay, built-in tools, `!` commands, and extensions | Credentials passed into the container | A straightforward local container boundary |
 | Docker Sandboxes | Managed sandbox | Relay, built-in tools, `!` commands, and extensions | Provider credentials remain on the host and are substituted by the proxy | Managed local isolation without exposing the real provider key |
 | OpenShell | Local or remote sandbox | Relay, built-in tools, `!` commands, and extensions | Policy-controlled credentials and inference routing | Filesystem, process, network, and credential policies |
-| Gondolin extension | Host | Built-in tools and `!` commands | Stored Relay credentials remain on the host, but commands inherit host environment variables | A local micro-VM for tool execution while retaining the host interface |
 
-The method changes where extensions run. When the complete Relay process runs inside an isolated environment, its extensions run there too. When host Relay delegates built-in tools through Gondolin, other extension tools still run on the host unless they also delegate their work.
+The method changes where extensions run. When the complete Relay process runs inside an isolated environment, its extensions run there too.
 
 ## Decide what Relay can access
 
@@ -153,35 +152,3 @@ openshell sandbox download relay-sandbox /workspace/working-folder ./working-fol
 ```
 
 OpenShell inference routing can keep raw model credentials outside the sandbox. When configured, point Relay at the corresponding OpenAI-compatible or Anthropic-compatible endpoint exposed by the gateway.
-
-## Route tools through Gondolin
-
-[Gondolin](https://github.com/earendil-works/gondolin) is a local Linux micro-VM. Its example extension keeps the Relay process and file-based provider credentials on the host while routing the built-in tools and user `!` commands into the VM.
-
-Commands inside the VM inherit the host process environment. Provider keys supplied through environment variables can therefore be visible inside the VM. Do not use this pattern as a credential boundary unless you remove sensitive variables or change the extension's environment handling.
-
-Gondolin requires Node.js 23.6 or newer and QEMU installed through your operating-system package manager.
-
-### Install the extension
-
-From a Relay source checkout:
-
-```bash
-mkdir -p ~/.relay/agent/extensions
-cp -R packages/coding-agent/examples/extensions/gondolin ~/.relay/agent/extensions/gondolin
-cd ~/.relay/agent/extensions/gondolin
-npm install --ignore-scripts
-```
-
-### Start Relay
-
-Run Relay from the working folder you want mounted:
-
-```bash
-cd /path/to/working-folder
-relay -e ~/.relay/agent/extensions/gondolin
-```
-
-The extension mounts the host working folder at `/workspace` in the VM and overrides `read`, `write`, `edit`, `bash`, `grep`, `find`, and `ls`. File changes under `/workspace` write through to the host.
-
-Other extension tools still run on the host unless they explicitly delegate their operations. Review the [Gondolin example](../examples/extensions/gondolin/) before adding tools that could bypass the VM boundary.
