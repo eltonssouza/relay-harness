@@ -144,6 +144,8 @@ export interface LayaSettings {
 	python?: string;
 	/** Write routing telemetry to the agent directory. Default: true. */
 	telemetry?: boolean;
+	/** Route requests similar to tasks learned with `/laya learn` by their labels, and show their lessons. Default: true. */
+	memory?: boolean;
 	/** Classifier request timeout in milliseconds before falling back to keyword rules. Default: 5000. */
 	timeoutMs?: number;
 }

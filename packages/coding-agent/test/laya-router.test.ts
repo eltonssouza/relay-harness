@@ -15,8 +15,14 @@ import {
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { ENV_AGENT_DIR } from "../src/config.ts";
-import { assessmentFromAnswers, heuristicAssessment, type TaskAssessment } from "../src/extensions/laya/assessment.ts";
+import {
+	assessmentFromAnswers,
+	assessmentFromLabels,
+	heuristicAssessment,
+	type TaskAssessment,
+} from "../src/extensions/laya/assessment.ts";
 import layaExtension, { LAYA_PLAN_MESSAGE } from "../src/extensions/laya/index.ts";
+import { LAYA_LESSONS_MESSAGE } from "../src/extensions/laya/memory.ts";
 import {
 	applyPolicy,
 	type Candidate,
@@ -27,6 +33,7 @@ import {
 import { LAYA_QUESTIONS, layaDecisionsFile } from "../src/extensions/laya/questions.ts";
 import { generateSeed } from "../src/extensions/laya/seed.ts";
 import { datasetFromTelemetry, historyFromTelemetry, type TelemetryRecord } from "../src/extensions/laya/telemetry.ts";
+import { trainingWorkspace, writeRows } from "../src/extensions/laya/training.ts";
 import { createHarness, type Harness } from "./suite/harness.ts";
 
 interface Script {
@@ -101,6 +108,28 @@ function answersFor(script: Script): Record<string, ClassifierAnswer> {
 		security_sensitive: bool(script.security),
 	};
 }
+
+/** Labels of SIMPLE_FIX in the dataset format. */
+const assessmentLabels: Record<string, string | number | boolean> = {
+	task_type: "bug_fix",
+	complexity: 1,
+	scope: "single_file",
+	risk: 0,
+	ambiguity: 0,
+	reasoning_requirement: 1,
+	capability_tier: "fast",
+	reasoning_effort: "low",
+	agent: "software-engineer",
+	validation_level: "unit_test",
+	requires_write: true,
+	requires_shell: false,
+	requires_tests: true,
+	requires_web: false,
+	requires_browser: false,
+	requires_database: false,
+	requires_git: false,
+	security_sensitive: false,
+};
 
 const assessment = (script: Partial<Script> = {}): TaskAssessment =>
 	assessmentFromAnswers(answersFor({ ...SIMPLE_FIX, ...script }));
@@ -205,6 +234,11 @@ describe("laya assessment", () => {
 		const answers = answersFor(SIMPLE_FIX);
 		answers.capability_tier = { type: "choice", choice: "huge", probabilities: { huge: 1 }, confidence: 1 };
 		expect(() => assessmentFromAnswers(answers)).toThrow(/capability_tier/);
+	});
+
+	it("reads learned labels as a certain assessment", () => {
+		expect(assessmentFromLabels(assessmentLabels)).toEqual({ ...assessment(), confidence: 1 });
+		expect(() => assessmentFromLabels({ ...assessmentLabels, capability_tier: "huge" })).toThrow("capability_tier");
 	});
 
 	it("falls back to keyword rules in English and Portuguese", () => {
@@ -447,5 +481,57 @@ describe("laya/auto router", () => {
 
 		expect(dispatched()).toEqual(["haiku-4-5:minimal", "haiku-4-5:minimal"]);
 		expect(telemetry().map((record) => record.classification.source)).toEqual(["heuristic", "heuristic"]);
+	});
+
+	/** A task learned with /laya learn: the button text lives in a translation file the rules cannot know. */
+	function learnTask() {
+		writeRows(trainingWorkspace(join(agentDir, "laya")).dataset, [
+			...generateSeed(50).map((row, i) => ({ id: `r${i}`, ...row })),
+			{
+				id: "s00001",
+				state: { request: "Corrija o texto do botão Salvar na tela de pedidos" },
+				expected: {
+					...assessmentLabels,
+					task_type: "bug_fix",
+					capability_tier: "strong",
+					reasoning_effort: "high",
+					scope: "multi_module",
+				},
+				source: "session",
+				split: "train",
+				lesson: "The label comes from locales/pt-BR/orders.json, not the component; run npm run i18n:check.",
+			},
+		]);
+	}
+
+	it("routes a request like a learned task by its labels, at once and without the Laya server", async () => {
+		learnTask();
+		const { harness, respond, dispatched, plan, telemetry } = await setup(undefined, []);
+
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos, está cortado");
+
+		// Keyword rules would route this text fix to haiku with minimal effort.
+		expect(dispatched()).toEqual(["opus-5-5:high"]);
+		expect(plan()[0]).toContain("Lessons from similar tasks done before");
+		expect(plan()[0]).toContain("locales/pt-BR/orders.json");
+		expect(telemetry()[0].classification.source).toBe("memory");
+	});
+
+	it("gives the lessons of similar tasks to a model laya/auto does not route", async () => {
+		learnTask();
+		const { harness, respond } = await setup(undefined, []);
+		await harness.session.setModel(harness.session.modelRuntime.getModel("anthropic", "claude-haiku-4-5")!);
+
+		respond(fauxAssistantMessage("done"), fauxAssistantMessage("ok"));
+		await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos");
+		await harness.session.prompt("Write the README for the auth module");
+
+		const lessons = harness.session.messages.flatMap((m) =>
+			m.role === "custom" && m.customType === LAYA_LESSONS_MESSAGE ? [String(m.content)] : [],
+		);
+		expect(lessons).toHaveLength(1);
+		expect(lessons[0]).toMatch(/^\[laya:lessons\] Lessons from similar tasks/);
+		expect(lessons[0]).toContain("npm run i18n:check");
 	});
 });
