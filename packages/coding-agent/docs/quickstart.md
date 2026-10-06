@@ -6,7 +6,15 @@ For native Windows setup, read [Windows Setup](windows.md). For Android, read [T
 
 ## 1. Install Relay
 
-Relay is installed from source. It requires Node.js 22.19 or newer:
+Relay requires Node.js 22.19 or newer. Install it from npm:
+
+```bash
+npm install -g --ignore-scripts @relay-harness/coding-agent
+```
+
+Relay does not require dependency lifecycle scripts, so `--ignore-scripts` is safe. To update Relay, run the same command again. `relay update` updates installed packages and model catalogs, not Relay itself.
+
+To work on Relay itself, build it from a checkout instead:
 
 ```bash
 git clone https://github.com/eltonssouza/relay-harness.git
@@ -14,8 +22,6 @@ cd relay-harness
 npm install --ignore-scripts
 npm run build
 ```
-
-Relay does not require dependency lifecycle scripts. To update Relay, pull the latest changes in the checkout and run `npm install --ignore-scripts` and `npm run build` again. `relay update` updates installed packages and model catalogs, not Relay itself.
 
 With Nix on macOS or Linux, install the latest release from Relay's flake. Nix builds Relay from source:
 
@@ -25,12 +31,13 @@ nix profile add github:eltonssouza/relay-harness/stable
 
 Older Nix versions use `nix profile install` instead. Update with `nix profile upgrade relay`. To pin a release, use a tag such as `github:eltonssouza/relay-harness/v1.0.0`.
 
-Verify the installation from the checkout:
+Verify the installation:
 
 ```bash
-./relay-test.sh --version      # Linux and macOS
-./relay-test.ps1 --version     # Windows PowerShell
+relay --version
 ```
+
+From a source checkout, run `./relay-test.sh --version` (Linux and macOS) or `./relay-test.ps1 --version` (Windows PowerShell) instead.
 
 The examples below use `relay` for this command.
 
@@ -114,6 +121,12 @@ Start with the least powerful mechanism that meets your need:
 | Install or distribute several resources | [Relay package](packages.md) |
 
 ## Uninstall Relay
+
+If you installed Relay from npm, run:
+
+```bash
+npm uninstall -g @relay-harness/coding-agent
+```
 
 If you built Relay from source, delete the checkout.
 

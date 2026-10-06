@@ -2,7 +2,11 @@ import { compare, valid } from "semver";
 import { fetchWithRetry } from "./management-http.ts";
 import { getRelayUserAgent } from "./relay-user-agent.ts";
 
-const LATEST_RELEASE_URL = "https://api.github.com/repos/eltonssouza/relay-harness/releases/latest";
+/**
+ * The npm registry is public, so every install can read it. The GitHub releases API answers 404 for a
+ * private repository, which would silence the update notice for everyone.
+ */
+const LATEST_VERSION_URL = "https://registry.npmjs.org/@relay-harness/coding-agent/latest";
 const DEFAULT_VERSION_CHECK_TIMEOUT_MS = 10000;
 
 export interface LatestRelayRelease {
@@ -53,11 +57,11 @@ export async function getLatestRelayRelease(
 	if (process.env.RELAY_OFFLINE) return undefined;
 
 	const response = await fetchWithRetry(
-		LATEST_RELEASE_URL,
+		LATEST_VERSION_URL,
 		{
 			headers: {
 				"User-Agent": getRelayUserAgent(currentVersion),
-				accept: "application/vnd.github+json",
+				accept: "application/json",
 			},
 		},
 		{
@@ -65,12 +69,12 @@ export async function getLatestRelayRelease(
 			timeoutMs: options.timeoutMs ?? DEFAULT_VERSION_CHECK_TIMEOUT_MS,
 		},
 	);
-	// GitHub answers 404 when the repository has no published release yet.
+	// The registry answers 404 when the package is not published.
 	if (!response.ok) return undefined;
 
-	const data = (await response.json()) as { tag_name?: unknown } | null;
-	if (typeof data?.tag_name !== "string") return undefined;
-	const version = valid(data.tag_name.trim().replace(/^v/, ""));
+	const data = (await response.json()) as { version?: unknown } | null;
+	if (typeof data?.version !== "string") return undefined;
+	const version = valid(data.version.trim());
 	return version ? { version } : undefined;
 }
 
