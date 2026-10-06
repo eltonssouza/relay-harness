@@ -489,7 +489,11 @@ describe("AgentSession compaction characterization", () => {
 			const order: string[] = [];
 			const observedSettings: unknown[] = [];
 			const harness = await createHarness({
-				models: [{ id: "faux-1", contextWindow: 2600, maxTokens: 100 }],
+				// The request that resumes after compaction (system prompt, summary, tool call and the 2000
+				// token result) must fit the window. Sized to it exactly, it overflowed by a few tokens
+				// whenever the system prompt grew, and a second, "overflow" compaction replaced the one
+				// asserted below. Keep a margin of a few hundred tokens.
+				models: [{ id: "faux-1", contextWindow: 3000, maxTokens: 100 }],
 				settings: {
 					compaction: modelOverride
 						? {
