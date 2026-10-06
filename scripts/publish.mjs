@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { getPublicWorkspacePackages } from "./release-packages.mjs";
+import { spawnNpm } from "./npm-command.mjs";
+import { getPublicWorkspacePackages, sortByInternalDependencies } from "./release-packages.mjs";
 
-const packages = getPublicWorkspacePackages();
+const packages = sortByInternalDependencies(getPublicWorkspacePackages());
 
 const dryRun = process.argv.includes("--dry-run");
 const unknownArgs = process.argv.slice(2).filter((arg) => arg !== "--dry-run");
@@ -15,13 +15,9 @@ if (unknownArgs.length > 0) {
 	process.exit(1);
 }
 
-function commandForPlatform(command) {
-	return process.platform === "win32" ? `${command}.cmd` : command;
-}
-
 function run(command, args, options = {}) {
 	console.log(`$ ${[command, ...args].join(" ")}`);
-	const result = spawnSync(commandForPlatform(command), args, {
+	const result = spawnNpm(args, {
 		cwd: options.cwd,
 		encoding: "utf8",
 		stdio: options.capture ? ["inherit", "pipe", "pipe"] : "inherit",
@@ -48,7 +44,7 @@ function validatePack(directory) {
 }
 
 function isPublished(name, version) {
-	const result = spawnSync(commandForPlatform("npm"), ["view", `${name}@${version}`, "version", "--json"], {
+	const result = spawnNpm(["view", `${name}@${version}`, "version", "--json"], {
 		encoding: "utf8",
 		stdio: ["inherit", "pipe", "pipe"],
 	});

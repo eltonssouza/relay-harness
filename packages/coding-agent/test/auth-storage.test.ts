@@ -1,4 +1,4 @@
-import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { type CredentialStore, createModels, type Provider } from "@relay-harness/ai";
@@ -20,8 +20,16 @@ describe("AuthStorage", () => {
 		vi.restoreAllMocks();
 	});
 
+	let writes = 0;
+
 	function writeAuthJson(data: Record<string, unknown>): void {
 		writeFileSync(authJsonPath, JSON.stringify(data));
+		// AuthStorage decides whether to reload from the file's revision (inode, size and times). The
+		// kernel clock ticks every few milliseconds, so two writes in a row can leave the same times,
+		// and a same-size rewrite such as "old" to "new" then looks unchanged. Give each write its own
+		// modification time.
+		const seconds = Math.floor(Date.now() / 1000) + ++writes;
+		utimesSync(authJsonPath, seconds, seconds);
 	}
 
 	test("reads and resolves stored API-key credentials", async () => {
