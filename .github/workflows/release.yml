@@ -1,9 +1,12 @@
 name: Release
 
 # Publishes every public workspace package to npm when a version tag is pushed.
-# Authentication is npm trusted publishing (GitHub Actions OIDC): no npm token is stored.
-# One-time setup on npmjs.com: for each @relay-harness/* package, add a trusted publisher for
-# repository eltonssouza/relay-harness, workflow release.yml, environment npm-publish.
+# Authentication is the NPM_TOKEN secret of the npm-publish environment: a granular access token
+# with read and write (publish and stage) on the @relay-harness scope, with 2FA bypass. It expires;
+# when publishing starts failing with 401 or 403, create a new token and replace the secret.
+# Provenance is off: npm only issues it for public repositories. To switch to trusted publishing
+# once the repository is public, drop NODE_AUTH_TOKEN, add `id-token: write`, set
+# NPM_PROVENANCE=true and register the workflow as a trusted publisher on each package.
 
 on:
   push:
@@ -28,7 +31,6 @@ jobs:
     environment: npm-publish
     permissions:
       contents: read
-      id-token: write
     env:
       RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
@@ -75,11 +77,12 @@ jobs:
       - name: Smoke-test packed npm consumer
         run: npm run check:package-install
 
-      # Trusted publishing needs npm 11.5.1 or newer; Node 22 ships an older npm.
-      - name: Upgrade npm for trusted publishing
-        run: |
-          npm install -g npm@11.16.0 --ignore-scripts
-          npm --version
+      - name: Check the npm token
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish npm packages
         run: node scripts/publish.mjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

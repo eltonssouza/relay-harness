@@ -5,11 +5,13 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "no
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-const DEFAULT_REPO = "earendil-works/pi";
+const DEFAULT_REPO = "eltonssouza/relay-harness";
 const DEFAULT_BASE_PATH = "packages/coding-agent";
 const DEFAULT_CHANGELOG = "packages/coding-agent/CHANGELOG.md";
 const DEFAULT_FIX_SINCE_TAG = "v0.74.0";
 const LEGACY_REPO_RE = /^https:\/\/github\.com\/(?:badlogic|earendil-works)\/pi-mono(?=\/|$)/;
+// Issues and pull requests from before the fork live in the original project.
+const UPSTREAM_REPO = "earendil-works/pi";
 const URL_SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i;
 const INLINE_MARKDOWN_LINK_RE = /(!?\[[^\]\n]+\]\()([^\s)]+)((?:\s+[^)]*)?\))/g;
 
@@ -195,7 +197,11 @@ function isDirectoryTarget(originalPath, repositoryPath) {
 }
 
 function normalizeLinkTarget(target, options) {
-	let canonicalTarget = target.replace(LEGACY_REPO_RE, `https://github.com/${options.repo}`);
+	const legacy = LEGACY_REPO_RE.exec(target);
+	const legacyRest = legacy ? target.slice(legacy[0].length) : "";
+	let canonicalTarget = legacy
+		? `https://github.com/${/^\/(?:issues|pull)\//.test(legacyRest) ? UPSTREAM_REPO : options.repo}${legacyRest}`
+		: target;
 	const repoUrl = `https://github.com/${options.repo}`;
 
 	for (const route of ["blob", "tree"]) {

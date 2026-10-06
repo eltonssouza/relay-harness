@@ -1,4 +1,4 @@
-import { type Context, defineFacet, type Facet } from "@earendil-works/chord";
+import { type Context, defineFacet, type Facet } from "@relay-harness/chord";
 import type { Conversation } from "@relay-harness/durable";
 import { Transcript } from "./transcript.ts";
 

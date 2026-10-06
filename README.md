@@ -78,13 +78,13 @@ This monorepo holds the Relay CLI and the libraries it is built from.
 | **[@relay-harness/telemetry](packages/telemetry)**                                                                       | Vendor-neutral telemetry contracts and typed schemas                                 |
 | **[@relay-harness/protocol](packages/protocol)**, **[client](packages/client)**, **[server](packages/server)** | Experimental remote sessions over framed CBOR                                        |
 | **[@relay-harness/evals](packages/evals)**                                                                               | Evaluation harness for the coding agent                                              |
-| **[@earendil-works/chord](packages/chord)**                                                                              | Application-composition runtime for services, replicated state, RPC, and plugins     |
+| **[@relay-harness/chord](packages/chord)**                                                                              | Application-composition runtime for services, replicated state, RPC, and plugins     |
 
 ## Permissions and containerization
 
 Relay has no sandbox for filesystem, process, network, or credential access. It runs with the permissions of the user who started it. The harness asks before destructive or external commands, but that is a safeguard against mistakes, not a security boundary.
 
-For stronger isolation, see [containerization](packages/coding-agent/docs/containerization.md): a Gondolin micro-VM extension, plain Docker, or an OpenShell sandbox. Review [Security](packages/coding-agent/docs/security.md) before using untrusted repositories, extensions, or unattended automation.
+For stronger isolation, see [containerization](packages/coding-agent/docs/containerization.md): plain Docker, Docker Sandboxes, or an OpenShell sandbox. Review [Security](packages/coding-agent/docs/security.md) before using untrusted repositories, extensions, or unattended automation.
 
 ## Development
 

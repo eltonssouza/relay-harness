@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
 	type Api,
@@ -13,9 +13,21 @@ import {
 import { typesafeSystemOneApi } from "@relay-harness/ai/api/typesafe-system-one.lazy";
 import { getAgentDir } from "../../config.ts";
 import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types.ts";
+import { SessionManager } from "../../core/session-manager.ts";
 import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
-import { assessmentFromAnswers, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
+import { assessmentFromAnswers, assessmentFromLabels, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
+import {
+	buildLearnPrompt,
+	exercisesToRows,
+	LEARN_TOOL_NAME,
+	learnToolSchema,
+	renderQuestions,
+	renderTask,
+	type SessionTask,
+	sessionTasks,
+} from "./learn.ts";
+import { LAYA_LESSONS_MESSAGE, LESSON_SIMILARITY, ROUTE_SIMILARITY, renderLessons, TaskMemory } from "./memory.ts";
 import { LAYA_MODEL_MANIFEST } from "./model-manifest.ts";
 import {
 	applyPolicy,
@@ -34,7 +46,7 @@ import {
 	taskKey,
 } from "./policy.ts";
 import { CAPABILITY_TIERS, type CapabilityTier, LAYA_QUESTIONS, layaDecisionsFile } from "./questions.ts";
-import { renderPlanMessage, selectSkills, unneededTools } from "./routers.ts";
+import { LAYA_PLAN_MESSAGE, renderPlanMessage, selectSkills, unneededTools } from "./routers.ts";
 import { layaPaths, setupLayaRuntime } from "./runtime.ts";
 import { generateSeed } from "./seed.ts";
 import { isLocalUrl, LayaServer } from "./server.ts";
@@ -46,12 +58,25 @@ import {
 	TelemetryStore,
 	truncateRequest,
 } from "./telemetry.ts";
+import {
+	accuracy,
+	describeProgress,
+	hasAccelerator,
+	readRegistry,
+	readRows,
+	type Score,
+	SESSION_SOURCE,
+	sharedTrainer,
+	type TrainingListener,
+	type TrainingOutcome,
+} from "./training.ts";
+
+export { LAYA_PLAN_MESSAGE } from "./routers.ts";
 
 export const LAYA_PROVIDER_ID = "laya";
 export const LAYA_CLASSIFIER_ID = "execution-intelligence";
 export const LAYA_VIRTUAL_MODEL_ID = "auto";
 export const DEFAULT_LAYA_BASE_URL = "http://127.0.0.1:8000/v1";
-export const LAYA_PLAN_MESSAGE = "laya.plan";
 
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MIN_CONFIDENCE = 0.5;
@@ -142,14 +167,28 @@ function failuresThisTurn(messages: readonly Message[]): { count: number; eviden
 	return { count, evidence };
 }
 
+const percent = (score: Score) => `${(accuracy(score) * 100).toFixed(1)}%`;
+
+/** What a finished training changed, for the user. */
+export function describeTrainingOutcome({ model, activated, previous }: TrainingOutcome): string {
+	const session = `${model.session.candidate.correct} of ${model.session.candidate.n} answers on the session tasks right (${previous}: ${model.session.current.correct})`;
+	const minutes = Math.max(1, Math.round(model.seconds / 60));
+	return activated
+		? `Laya learned ${model.sessionTasks} session tasks in about ${minutes} min: ${model.name} now routes requests. It gets ${session}; test ${percent(model.test.candidate)} (${previous}: ${percent(model.test.current)}).`
+		: `Laya trained ${model.name}, but ${previous} keeps routing: the test score fell from ${percent(model.test.current)} to ${percent(model.test.candidate)}. It gets ${session}. /laya use ${model.name} activates it anyway.`;
+}
+
 export default function layaExtension(relay: ExtensionAPI): void {
 	const quota = new QuotaManager();
 	const layaHome = join(getAgentDir(), "laya");
 	const store = new TelemetryStore(join(layaHome, "telemetry.jsonl"));
+	const paths = layaPaths(layaHome, LAYA_MODEL_MANIFEST);
+	const trainer = sharedTrainer({ home: layaHome, manifest: LAYA_MODEL_MANIFEST, paths });
 	const server = new LayaServer({
-		paths: layaPaths(layaHome, LAYA_MODEL_MANIFEST),
+		paths,
 		manifest: LAYA_MODEL_MANIFEST,
 		baseUrl: () => settings.baseUrl ?? process.env.LAYA_BASE_URL ?? DEFAULT_LAYA_BASE_URL,
+		model: () => trainer.activeModel().dir,
 	});
 	let setupOffered = false;
 	let setupRunning: Promise<void> | undefined;
@@ -165,6 +204,11 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	let run: { taskId: string; startedAt: number } | undefined;
 	/** Tools active before enforced tool routing changed them. */
 	let toolBaseline: { tools: string[]; applied: string[] } | undefined;
+	/** Tasks `/laya learn` listed for the agent to label, numbered as the agent saw them. */
+	let learnTasks: { tasks: SessionTask[]; session: string } | undefined;
+	/** This runtime's training listener, while it is the latest one. */
+	let listener: TrainingListener | undefined;
+	let memoryCache: { version: string; memory: TaskMemory } | undefined;
 
 	const refreshSettings = () => {
 		settings = relay.getSettings().laya ?? {};
@@ -185,12 +229,47 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	relay.registerProvider(createLayaProvider(() => settings.baseUrl));
 
 	/** System 1: Laya's answers, or keyword rules when the server cannot answer. */
+	/** Learned tasks, reloaded when the training dataset changes. Undefined when off or empty. */
+	function memory(): TaskMemory | undefined {
+		if (settings.memory === false) return undefined;
+		let version: string;
+		try {
+			const stat = statSync(trainer.workspace.dataset);
+			version = `${stat.mtimeMs}:${stat.size}`;
+		} catch {
+			return undefined;
+		}
+		if (memoryCache?.version !== version) {
+			memoryCache = { version, memory: TaskMemory.fromRows(readRows(trainer.workspace.dataset)) };
+		}
+		return memoryCache.memory.size > 0 ? memoryCache.memory : undefined;
+	}
+
+	/** Lessons of learned tasks similar to a request; none for harness messages such as /laya learn's. */
+	const lessonsFor = (request: string) =>
+		HARNESS_MESSAGE.test(request.trimStart())
+			? undefined
+			: renderLessons(memory()?.search(request, LESSON_SIMILARITY) ?? []);
+
+	/** The labels of a learned task close to the request, then Laya's answers, then keyword rules. */
 	async function assess(request: string, ctx: ExtensionContext, signal?: AbortSignal): Promise<TaskAssessment> {
+		const learned = memory()?.search(request, ROUTE_SIMILARITY, 1)[0];
+		if (learned) {
+			try {
+				return {
+					...assessmentFromLabels(learned.task.expected),
+					source: "memory",
+					confidence: learned.similarity,
+				};
+			} catch {
+				// Labeled against questions that have changed since; Laya answers instead.
+			}
+		}
 		const classifier = ctx.modelRegistry.findOfType("classifier", LAYA_PROVIDER_ID, LAYA_CLASSIFIER_ID);
 		if (!classifier || Date.now() < layaUnavailableUntil) return heuristicAssessment(request);
 		// Starts the local server when the runtime is installed; a failed start falls through to the
-		// classifier call, which fails fast and lands on the keyword rules.
-		if (settings.autostart !== false) await server.ensureRunning(signal);
+		// classifier call, which fails fast and lands on the keyword rules. Training has the GPU to itself.
+		if (settings.autostart !== false && !trainer.running) await server.ensureRunning(signal);
 		const result = await ctx.modelRegistry.classify(
 			classifier,
 			{ state: { request: truncateRequest(request) }, questions: LAYA_QUESTIONS },
@@ -281,7 +360,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 		ctx.ui.setStatus(
 			"laya",
 			`laya ${profile()}: ${base.assessment.task.type} → ${chosen.tier} ${chosen.model.id} • ${state.thinkingLevel}${
-				base.assessment.source === "heuristic" ? " (rules)" : ""
+				{ laya: "", memory: " (memory)", heuristic: " (rules)" }[base.assessment.source]
 			}`,
 		);
 		return { route: { model: chosen.model, thinkingLevel: state.thinkingLevel, state }, state };
@@ -415,9 +494,98 @@ export default function layaExtension(relay: ExtensionAPI): void {
 		return setupRunning;
 	}
 
-	relay.on("session_start", () => {
+	/** Capability tier of a `provider/model` in the Laya model registry. */
+	const tierOf = (ref: string): CapabilityTier | undefined => {
+		const registry = { ...DEFAULT_MODEL_REGISTRY, ...settings.models };
+		return CAPABILITY_TIERS.find((tier) => registry[tier]?.includes(ref));
+	};
+
+	/**
+	 * Starts training on the collected exercises. It runs in the background in interactive modes and
+	 * reports through the listener; print and JSON mode wait for it, since the process ends with the turn.
+	 */
+	async function startTraining(ctx: ExtensionContext): Promise<string> {
+		if (trainer.running) return "Laya is already training; run /laya train after it ends to include these tasks.";
+		if (server.status() === "missing-environment") {
+			return "Laya is not installed, so it cannot train yet. Run /laya setup, then /laya train.";
+		}
+		if (!(await hasAccelerator((command, args, options) => relay.exec(command, args, options)))) {
+			const accepted =
+				!ctx.hasUI ||
+				(await ctx.ui.confirm(
+					"Train Laya on the CPU?",
+					"This computer has no GPU Laya can use. Training still works, but can take an hour or more. Keyword rules route requests meanwhile.",
+				));
+			if (!accepted) return "Training was not started. Run /laya train when you want it.";
+		}
+		// Training needs the GPU memory the server holds; keyword rules route until it ends.
+		server.stop();
+		const job = trainer.train();
+		if (ctx.mode === "print" || ctx.mode === "json") {
+			try {
+				return describeTrainingOutcome(await job);
+			} catch (error) {
+				return `Laya training failed: ${error instanceof Error ? error.message : String(error)}`;
+			}
+		}
+		// The listener reports the result.
+		job.catch(() => {});
+		return "Laya is training in the background (a few minutes with a GPU). Keyword rules route requests until it ends; then the new model routes them if it passes the test.";
+	}
+
+	relay.on("session_start", (_event, ctx) => {
 		refreshSettings();
 		history = settings.telemetry === false ? new PerformanceHistory() : historyFromTelemetry(store.read());
+		listener = {
+			progress: (progress) => ctx.ui.setStatus("laya-train", `laya training: ${describeProgress(progress)}`),
+			finished: (result) => {
+				ctx.ui.setStatus("laya-train", undefined);
+				if ("error" in result) {
+					ctx.ui.notify(`Laya training failed: ${result.error.message}`, "error");
+					return;
+				}
+				// A server still running here serves the previous model.
+				if (result.outcome.activated) server.stop();
+				ctx.ui.notify(describeTrainingOutcome(result.outcome), result.outcome.activated ? "info" : "warning");
+			},
+		};
+		trainer.listener = listener;
+	});
+
+	relay.registerTool<typeof learnToolSchema, { added: number; updated: number; training?: string }>({
+		name: LEARN_TOOL_NAME,
+		label: "Laya learn",
+		description:
+			"Save labeled tasks of this session as training exercises for Laya, Relay's routing model, and train it so similar requests get the right model, effort and tools. Use after /laya learn lists the tasks, or when the user asks Relay to learn from this session or conversation.",
+		parameters: learnToolSchema,
+		// Loaded by /laya learn, or found by tool search when the user asks in their own words.
+		exposure: "deferred",
+		executionMode: "sequential",
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			if (!learnTasks) {
+				// Called without /laya learn: number this session's tasks and ask for labels against them.
+				const tasks = sessionTasks(ctx.sessionManager.getBranch(), tierOf);
+				learnTasks = { tasks, session: ctx.sessionManager.getSessionId() };
+				throw new Error(
+					[
+						`Nothing was saved: label these tasks of the session by their numbers, then call ${LEARN_TOOL_NAME} again. Leave out entries that are not coding tasks, such as this request to learn.`,
+						`Questions:\n${renderQuestions()}`,
+						...tasks.map(renderTask),
+					].join("\n\n"),
+				);
+			}
+			const rows = exercisesToRows(learnTasks.tasks, params.exercises, {
+				session: learnTasks.session,
+				created: new Date().toISOString(),
+			});
+			const { added, updated } = trainer.addExercises(rows);
+			learnTasks = undefined;
+			const sessionRows = trainer.counts()[SESSION_SOURCE] ?? 0;
+			const saved = `Saved ${rows.length} exercises (${added} new, ${updated} updated); ${sessionRows} session tasks in total, in ${trainer.workspace.dataset}. Requests similar to these tasks use their labels and lessons from the next one.`;
+			const training =
+				params.train === false ? "Training was not started (run /laya train)." : await startTraining(ctx);
+			return { content: [{ type: "text", text: `${saved} ${training}` }], details: { added, updated, training } };
+		},
 	});
 
 	/** The user's own tool set: the active tools, or the set enforcement replaced while it is unchanged. */
@@ -436,7 +604,18 @@ export default function layaExtension(relay: ExtensionAPI): void {
 			relay.setActiveTools(userTools());
 			toolBaseline = undefined;
 		}
-		if (!isSelected(ctx)) return;
+		if (!isSelected(ctx)) {
+			// Lessons help whichever model runs the request.
+			const lessons = lessonsFor(event.prompt);
+			if (!lessons) return;
+			return {
+				message: {
+					customType: LAYA_LESSONS_MESSAGE,
+					content: `[laya:lessons] ${lessons}`,
+					display: false,
+				},
+			};
+		}
 		// First use: offer to install the trained Laya once per session. Without it, keyword rules route.
 		if (
 			settings.autostart !== false &&
@@ -468,18 +647,23 @@ export default function layaExtension(relay: ExtensionAPI): void {
 			toolBaseline = { tools: baseline, applied };
 			relay.setActiveTools(applied);
 		}
+		const lessons = lessonsFor(event.prompt);
+		const plan = renderPlanMessage(assessment, policy, skills, deactivated);
 		return {
 			message: {
 				customType: LAYA_PLAN_MESSAGE,
-				content: renderPlanMessage(assessment, policy, skills, deactivated),
+				content: lessons ? `${plan}\n- ${lessons}` : plan,
 				display: false,
 				details: { assessment, policy, skills, deactivated },
 			},
 		};
 	});
 
-	relay.on("session_shutdown", () => {
+	relay.on("session_shutdown", (event) => {
 		server.stop();
+		if (trainer.listener === listener) trainer.listener = undefined;
+		// Training belongs to the process: it goes on into the next session, and stops when Relay quits.
+		if (event.reason === "quit") trainer.stop();
 	});
 
 	relay.on("agent_start", () => {
@@ -539,9 +723,22 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	};
 
 	relay.registerCommand("laya", {
-		description: "Laya execution router: status, policy, decisions, seed, export",
+		description: "Laya execution router: status, setup, learn from sessions, train, models, policy",
 		getArgumentCompletions: (prefix) =>
-			["status", "setup", "start", "stop", "policy ", "decisions", "seed", "export"]
+			[
+				"status",
+				"setup",
+				"start",
+				"stop",
+				"learn",
+				"train",
+				"models",
+				"use ",
+				"policy ",
+				"decisions",
+				"seed",
+				"export",
+			]
 				.filter((item) => item.startsWith(prefix))
 				.map((item) => ({ value: item, label: item.trim() })),
 		handler: async (args, ctx) => {
@@ -584,6 +781,81 @@ export default function layaExtension(relay: ExtensionAPI): void {
 					ctx.ui.notify(`Exported ${rows.length} evidence-labeled exercises to ${path}`);
 					return;
 				}
+				case "learn": {
+					const file = rest.join(" ");
+					let entries = ctx.sessionManager.getBranch();
+					let session = ctx.sessionManager.getSessionId();
+					if (file) {
+						const path = resolve(ctx.cwd, file);
+						if (!existsSync(path)) {
+							ctx.ui.notify(`No session file at ${path}`, "warning");
+							return;
+						}
+						const manager = SessionManager.open(path);
+						entries = manager.getBranch();
+						session = manager.getSessionId();
+					}
+					const tasks = sessionTasks(entries, tierOf);
+					if (tasks.length === 0) {
+						ctx.ui.notify("The session has no requests to learn from yet.", "warning");
+						return;
+					}
+					learnTasks = { tasks, session };
+					const active = relay.getActiveTools();
+					if (!active.includes(LEARN_TOOL_NAME)) relay.setActiveTools([...active, LEARN_TOOL_NAME]);
+					const prompt = buildLearnPrompt(tasks, { source: file ? resolve(ctx.cwd, file) : undefined });
+					if (ctx.isIdle()) relay.sendUserMessage(prompt);
+					else relay.sendUserMessage(prompt, { deliverAs: "followUp" });
+					return;
+				}
+				case "train": {
+					ctx.ui.notify(await startTraining(ctx));
+					return;
+				}
+				case "models": {
+					const active = trainer.activeModel().name;
+					const registry = readRegistry(trainer.workspace);
+					const mark = (name: string) => (name === active ? " (routing)" : "");
+					const lines = [`${LAYA_MODEL_MANIFEST.version}: shipped with Relay${mark(LAYA_MODEL_MANIFEST.version)}`];
+					for (const model of registry.models) {
+						lines.push(
+							`${model.name}: ${model.createdAt.slice(0, 16).replace("T", " ")}, from ${model.basedOn}, ${model.sessionTasks} session tasks, test ${percent(model.test.candidate)} (${model.basedOn}: ${percent(model.test.current)}), session answers ${model.session.candidate.correct}/${model.session.candidate.n}${mark(model.name)}`,
+						);
+					}
+					const counts = trainer.counts();
+					lines.push(
+						`Exercises: ${
+							Object.entries(counts)
+								.map(([source, count]) => `${count} ${source}`)
+								.join(", ") || "none yet"
+						} (${trainer.workspace.dataset})`,
+					);
+					if (trainer.running) {
+						lines.push(`Training: ${trainer.progress ? describeProgress(trainer.progress) : "starting"}`);
+					}
+					ctx.ui.notify(lines.join("\n"));
+					return;
+				}
+				case "use": {
+					const name = rest[0];
+					if (!name) {
+						ctx.ui.notify(
+							`Usage: /laya use <model> (current: ${trainer.activeModel().name}; see /laya models)`,
+							"warning",
+						);
+						return;
+					}
+					try {
+						trainer.use(name);
+					} catch (error) {
+						ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning");
+						return;
+					}
+					// The next request starts the server with the selected model.
+					server.stop();
+					ctx.ui.notify(`${trainer.activeModel().name} routes requests from the next one`);
+					return;
+				}
 				case "setup": {
 					await setupRuntime(ctx);
 					return;
@@ -618,6 +890,12 @@ export default function layaExtension(relay: ExtensionAPI): void {
 								.map(([name, value]) => `${name} ${value}`)
 								.join(", ") || "none"
 						}`,
+						`Routing model: ${trainer.activeModel().name}${
+							trainer.running
+								? `; training ${trainer.progress ? describeProgress(trainer.progress) : "starting"}`
+								: ""
+						}`,
+						`Memory: ${settings.memory === false ? "off" : `${memory()?.size ?? 0} learned tasks route similar requests and share their lessons`}`,
 						`Telemetry: ${settings.telemetry === false ? "off" : store.path}`,
 					];
 					if (current) {
@@ -636,7 +914,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 				}
 				default:
 					ctx.ui.notify(
-						"Usage: /laya [status|setup|start|stop|policy <profile>|decisions [path]|seed [count] [path]|export [path]]",
+						"Usage: /laya [status|setup|start|stop|learn [session file]|train|models|use <model>|policy <profile>|decisions [path]|seed [count] [path]|export [path]]",
 						"warning",
 					);
 			}

@@ -1,4 +1,3 @@
-import { type Context, copyJson, type Draft, type JsonValue } from "@earendil-works/chord";
 import type {
 	Api,
 	AssistantMessage,
@@ -12,6 +11,7 @@ import type {
 import { isContextOverflow } from "@relay-harness/ai/utils/overflow";
 import { isRetryableAssistantError, retryDelayMs } from "@relay-harness/ai/utils/retry";
 import { getCurrentTools } from "@relay-harness/ai/utils/transcript";
+import { type Context, copyJson, type Draft, type JsonValue } from "@relay-harness/chord";
 import { AssistantEntry, ResetEntry, SystemEntry, UserEntry } from "../entries.ts";
 import type { ExecutionEnv } from "../env/index.ts";
 import { defineTask } from "../tasks.ts";

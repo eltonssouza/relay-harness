@@ -10,8 +10,8 @@ import {
 	replicatedState,
 	type Service,
 	type ServiceCatalogueEntry,
-} from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+} from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { type Client, createClientServiceTransport } from "@relay-harness/client";
 import type { SessionTarget } from "@relay-harness/protocol";
 

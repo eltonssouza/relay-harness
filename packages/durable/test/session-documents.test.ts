@@ -1,4 +1,4 @@
-import type { Draft, JsonValue } from "@earendil-works/chord";
+import type { Draft, JsonValue } from "@relay-harness/chord";
 import { type ConversationId, defineDoc, defineDocFamily, type JsonObject, type TaskId } from "@relay-harness/durable";
 import { describe, expect, it } from "vitest";
 import { idFromNumber } from "../src/ids.ts";

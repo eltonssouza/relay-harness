@@ -7,7 +7,7 @@ import { spawnSync } from "node:child_process";
 import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentConsumer } from "./coding-agent-consumer.mjs";
 
 const packages = [
-	{ directory: "packages/chord", name: "@earendil-works/chord" },
+	{ directory: "packages/chord", name: "@relay-harness/chord" },
 	{ directory: "packages/telemetry", name: "@relay-harness/telemetry" },
 	{ directory: "packages/codemode", name: "@relay-harness/codemode" },
 	{ directory: "packages/mcp", name: "@relay-harness/mcp" },

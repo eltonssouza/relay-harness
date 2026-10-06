@@ -10,8 +10,8 @@ import {
 	type RemoteServiceErrorCode,
 	type ServiceCall,
 	type ServiceProviderUpdate,
-} from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT, TODO_CONTEXT, withCancel } from "@earendil-works/chord/context";
+} from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT, TODO_CONTEXT, withCancel } from "@relay-harness/chord/context";
 import { Harness, ROOT_CONVERSATION_ID, type TaskGraph } from "@relay-harness/durable";
 import { openNodeSqliteStorage } from "@relay-harness/durable/storage/sqlite/node";
 import lockfile from "proper-lockfile";

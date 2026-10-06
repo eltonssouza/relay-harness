@@ -7,8 +7,8 @@ import {
 	RemoteServiceError,
 	type ServiceCall,
 	type ServiceProviderUpdate,
-} from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT, TODO_CONTEXT, withAbortSignal } from "@earendil-works/chord/context";
+} from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT, TODO_CONTEXT, withAbortSignal } from "@relay-harness/chord/context";
 import {
 	type CancelEnvelope,
 	type ClientHello,

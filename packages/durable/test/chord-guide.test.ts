@@ -12,9 +12,9 @@ import {
 	type FacetHost,
 	type RemoteServiceTransport,
 	type ReplicatedState,
-} from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import type { Op } from "@earendil-works/chord/delta";
+} from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
+import type { Op } from "@relay-harness/chord/delta";
 import {
 	type ConversationId,
 	type DocumentObserver,

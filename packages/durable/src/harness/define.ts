@@ -1,5 +1,5 @@
-import type { JsonValue } from "@earendil-works/chord";
 import type { TSchema } from "@relay-harness/ai";
+import type { JsonValue } from "@relay-harness/chord";
 import type { AnyTask, Extension, HookRegistration, HooksOf, PromptSection, ToolRegistration, Wrap } from "./types.ts";
 
 /** Identity function that types an extension. */

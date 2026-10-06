@@ -14,7 +14,7 @@ Relay normally runs every request on the model you selected. A typo fix then cos
 
 ## How a request is routed
 
-1. **Task intelligence (Laya).** [Laya](https://github.com/NandhaKishorM/laya) is a small local classifier, the fast "System 1". It answers 18 typed questions about the request in one call: task type, complexity, scope, risk, ambiguity, reasoning needed, recommended capability tier and effort, agent role, validation level, the tools needed, and whether the task is security-sensitive. Relay calls it through the same System One protocol it uses for TypeSafe classifiers.
+1. **Task intelligence (Laya).** [Laya](https://github.com/NandhaKishorM/laya) is a small local classifier, the fast "System 1". It answers 18 typed questions about the request in one call: task type, complexity, scope, risk, ambiguity, reasoning needed, recommended capability tier and effort, agent role, validation level, the tools needed, and whether the task is security-sensitive. Relay calls it through the same System One protocol it uses for TypeSafe classifiers. A request close to a task learned with `/laya learn` takes that task's answers instead ([memory](#teach-laya-from-your-sessions)).
 2. **Policy engine.** Deterministic rules set floors Laya cannot lower. Production database migrations, authentication, security vulnerabilities and payment processing require at least the `strong` tier, an effort of at least `medium`, and review. High risk also requires `strong`. An answer whose confidence is below `laya.minConfidence` raises the tier by one.
 3. **Model registry.** Tiers are abstract (`fast`, `balanced`, `strong`, `frontier`), so Laya never learns model names. The registry maps each tier to concrete models; only models whose provider has credentials are candidates.
 4. **Selection.** Each candidate gets a utility from the cost profile: `quality × P(success) − cost × quota cost − latency × latency − risk × failure risk`. `P(success)` starts from a prior (0.90 when the model's tier is the required tier, +0.04 per tier above, −0.18 per tier below) and moves toward the observed success rate of that model on that task class. The best candidate whose success estimate reaches the profile minimum wins.
@@ -74,16 +74,45 @@ Relay only starts a server for a local `laya.baseUrl`. Set `"laya": { "autostart
 
 Requirements: Python 3.10 to 3.13 (set `laya.python` if it is not on the PATH under `python3`, `python` or `py`), and on Windows a home directory path short enough for torch's DLLs (the default is).
 
-## Train and serve Laya
+## Teach Laya from your sessions
 
-Laya is trained with the `laya-trainer` Claude Code plugin. The questions Relay sends are the contract with the trained checkpoint, so train with Relay's own definitions:
+The shipped model learned from synthetic requests, so it routes your kind of work by rules of thumb. Teach it the tasks you actually do:
+
+```
+/laya learn
+```
+
+1. **Collect.** Relay lists every request of the current session with the evidence of how it went: the model and effort that ran it, the tools called, the files changed, the commands, the errors of failed tool calls, whether tests and builds passed, what laya/auto planned, and your next message (a correction there means the task was not done right). `/laya learn <session file>` reads another session instead.
+2. **Label.** The agent answers Laya's 18 questions for each task from that evidence, for example "this fix needed the `balanced` tier, not `fast`: it took two failed edits and a correction". When the task taught something, it also writes a lesson: "The label comes from `locales/pt-BR/orders.json`, not the component; run `npm run i18n:check`." It saves them with the `laya_learn` tool and replies with a table of what it labeled. The labels are exercises in `~/.relay/agent/laya/training/data/dataset.jsonl`; a request learned again replaces its old labels.
+3. **Remember.** From the next request on, without waiting for training and without the Laya environment:
+   - A request close to a learned task is routed with that task's labels instead of Laya's or the keyword rules' answers. The status line shows `(memory)`. "Corrija o texto do botão Salvar na tela de pedidos, está cortado" goes to the tier and effort the learned "Corrija o texto do botão Salvar na tela de pedidos" needed, not to the cheapest tier the words "corrija o texto" suggest.
+   - The model that runs a request gets the lessons of similar learned tasks: in the laya/auto plan, or in a hidden `[laya:lessons]` message when you selected a model yourself.
+
+   Closeness is the cosine of the requests' word vectors, with words common to every coding request weighted down: routing needs 0.6, a lesson 0.45. Requests in another language than the learned one rarely match; training covers those. Turn the memory off with `"laya": { "memory": false }`.
+4. **Train.** Training starts in the background, from the model that routes today. It mixes the session tasks with a replay sample of the earlier exercises, so Laya learns the new tasks without forgetting the rest. With an 8 GB GPU it takes about 7 minutes; without a GPU Relay asks first, because it can take an hour or more. The memory and keyword rules route requests while it runs, and the status line shows its progress.
+5. **Test and activate.** The new model and the current one answer the same held-out test, exercises neither was trained on. The new model routes requests from then on unless it answers more than 1% fewer test questions; Relay then reports how many answers on the session tasks it now gets right, before and after.
+
+You can also ask in your own words ("learn from this conversation"): with [`tool_search`](cli.md#tools) active, the agent finds `laya_learn` itself.
+
+| Command | Effect |
+|---|---|
+| `/laya learn [session file]` | Label the tasks of this session (or of a session file) and train on them |
+| `/laya train` | Train again on every session task collected so far |
+| `/laya models` | The shipped and trained models, their test scores, the exercises, and training progress |
+| `/laya use <model>` | Route with another model, for example `/laya use v1` to go back to the shipped one |
+
+Trained models live in `~/.relay/agent/laya/training/models` (about 680 MB each). Relay keeps the active one and the two newest others, and deletes older ones. Training needs the Laya environment (`/laya setup`), and stops when Relay quits; it continues across `/new` and `/resume`.
+
+## Retrain from scratch
+
+To change the questions or rebuild the model, train with the `laya-trainer` Claude Code plugin. The questions Relay sends are the contract with the trained checkpoint, so train with Relay's own definitions:
 
 1. `/laya-init` prepares the training tools.
 2. `/laya decisions` (in Relay) writes the questions to `.laya/decisions.json`.
-3. `/laya seed 1100` writes synthetic bootstrap exercises to `.laya/data/relay-seed.jsonl`; add them with `/laya-data`. Their labels follow one rule from the task profile, so they teach Laya the policy, not evidence.
+3. `/laya seed 1100` writes synthetic bootstrap exercises to `.laya/data/relay-seed.jsonl`; add them with `/laya-data`. Their labels follow one rule from the task profile, so they teach Laya the policy, not evidence. The session tasks in `~/.relay/agent/laya/training/data/dataset.jsonl` (source `session`) can be added the same way.
 4. `/laya-train`, then `/laya-eval`.
 
-Over time, replace opinion with evidence: `/laya export` writes one exercise per successful routed request, labeled with the tier that finished it, to `.laya/data/relay-telemetry.jsonl`. Review it, add it with `/laya-data`, and train again. Telemetry stays local and contains your requests; turn it off with `"laya": { "telemetry": false }`.
+`/laya export` writes one exercise per successful routed request, labeled only with the tier that finished it, to `.laya/data/relay-telemetry.jsonl`. Telemetry stays local and contains your requests; turn it off with `"laya": { "telemetry": false }`.
 
 ### Ship a new model
 
@@ -101,9 +130,12 @@ cp /tmp/laya-v2/model-manifest.ts packages/coding-agent/src/extensions/laya/mode
 
 | Command | Effect |
 |---|---|
-| `/laya` | Profile, runtime and server status, models with credentials, quota, and the last plan with its alternatives and escalations |
+| `/laya` | Profile, runtime and server status, the routing model and training progress, models with credentials, quota, and the last plan with its alternatives and escalations |
 | `/laya setup` | Install the Python environment and download the trained model |
 | `/laya start`, `/laya stop` | Start the local server, or stop the one this session started |
+| `/laya learn [session file]` | Teach Laya the tasks of this session ([details](#teach-laya-from-your-sessions)) |
+| `/laya train` | Train again on the session tasks collected so far |
+| `/laya models`, `/laya use <model>` | List the shipped and trained models, or route with another one |
 | `/laya policy <profile>` | Cost profile for this session |
 | `/laya decisions [path]` | Write the questions in laya-trainer format |
 | `/laya seed [count] [path]` | Write synthetic training exercises |

@@ -5,10 +5,10 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import type { AssistantMessage } from "@relay-harness/ai";
 import { createModels } from "@relay-harness/ai/models";
 import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@relay-harness/ai/providers/faux";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { NodeExecutionEnv } from "../../src/env/node.ts";
 import {
 	AssistantEntry,

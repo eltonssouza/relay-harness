@@ -5,10 +5,10 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { type ToolResultMessage, Type } from "@relay-harness/ai";
 import { createModels } from "@relay-harness/ai/models";
 import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@relay-harness/ai/providers/faux";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { createRegistry, defineExtension, defineTool, Harness, ToolResultEntry } from "../../src/index.ts";
 import { openNodeSqliteStorage } from "../../src/storage/sqlite/node.ts";
 

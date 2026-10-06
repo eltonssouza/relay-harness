@@ -1,4 +1,4 @@
-import type { ServiceSubscriptionSnapshot } from "@earendil-works/chord";
+import type { ServiceSubscriptionSnapshot } from "@relay-harness/chord";
 import type { RpcTarget, SessionTarget } from "@relay-harness/protocol";
 import type { ByteTransportFactory } from "./transport.ts";
 

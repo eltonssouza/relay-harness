@@ -2,10 +2,11 @@
 // view or the snapshot event, and then only what changes after that.
 // Run from packages/durable:
 //   node --conditions=source --experimental-strip-types test/examples/21-late-join.ts
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+
 import { Type } from "@relay-harness/ai";
 import { createModels } from "@relay-harness/ai/models";
 import { fauxAssistantMessage, fauxProvider, fauxText, fauxToolCall } from "@relay-harness/ai/providers/faux";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import {
 	type AgentEvent,
 	createRegistry,

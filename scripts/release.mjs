@@ -19,9 +19,10 @@
  * 10. Push main and the tag
  */
 
-import { execSync, spawnSync } from "node:child_process";
+import { execSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { spawnNpm } from "./npm-command.mjs";
 import { findPackageDirectories } from "./package-workspaces.mjs";
 import { getPublicWorkspacePackages } from "./release-packages.mjs";
 
@@ -58,7 +59,7 @@ function assertPackagesAreRegisteredWithNpm() {
 
 	console.log("Checking npm package registration...");
 	for (const packageName of packageNames) {
-		const result = spawnSync(process.platform === "win32" ? "npm.cmd" : "npm", ["view", packageName, "version", "--json"], {
+		const result = spawnNpm(["view", packageName, "version", "--json"], {
 			encoding: "utf8",
 			stdio: ["ignore", "pipe", "pipe"],
 		});
@@ -211,6 +212,22 @@ function addUnreleasedSection() {
 // Main flow
 console.log("\n=== Release Script ===\n");
 
+// 0. The release commits, tags and pushes `main`, so it must start from an up-to-date `main`.
+console.log("Checking the branch...");
+const branch = run("git branch --show-current", { silent: true }).trim();
+if (branch !== "main") {
+	console.error(`Error: releases are made from main, but the current branch is ${branch || "(detached HEAD)"}.`);
+	process.exit(1);
+}
+run("git fetch origin main", { silent: true });
+const behind = Number(run("git rev-list --count HEAD..origin/main", { silent: true }).trim());
+const ahead = Number(run("git rev-list --count origin/main..HEAD", { silent: true }).trim());
+if (behind > 0 || ahead > 0) {
+	console.error(`Error: local main differs from origin/main (${ahead} ahead, ${behind} behind). Sync it first.`);
+	process.exit(1);
+}
+console.log("  On main, up to date with origin/main\n");
+
 // 1. Check for uncommitted changes
 console.log("Checking for uncommitted changes...");
 const status = run("git status --porcelain", { silent: true });
@@ -250,7 +267,7 @@ run("npm run build:offline");
 console.log();
 
 console.log("Running tests...");
-run("./test.sh");
+run("bash ./test.sh");
 console.log();
 
 console.log("Checking the packed coding-agent consumer install...");

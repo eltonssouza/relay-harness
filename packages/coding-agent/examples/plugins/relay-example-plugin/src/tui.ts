@@ -1,4 +1,4 @@
-import { defineFacet } from "@earendil-works/chord";
+import { defineFacet } from "@relay-harness/chord";
 import { AgentController, PresentationUI, SlashCommands } from "@relay-harness/coding-agent/experimental/plugin";
 import { ExampleFacetService } from "./contract.ts";
 

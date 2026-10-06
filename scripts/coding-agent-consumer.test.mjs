@@ -6,12 +6,12 @@ import test from "node:test";
 import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentConsumer } from "./coding-agent-consumer.mjs";
 
 const codingAgentName = "@relay-harness/coding-agent";
-const devPackages = ["relay-client", "relay-protocol", "relay-server"].map((name) => `@earendil-works/${name}`);
+const devPackages = ["client", "protocol", "server"].map((name) => `@relay-harness/${name}`);
 
 function createFixture(t, { importServer = false, declareServer = false } = {}) {
 	const root = mkdtempSync(join(tmpdir(), "relay-consumer-test-"));
 	t.after(() => rmSync(root, { recursive: true, force: true }));
-	const packages = [codingAgentName, "@earendil-works/chord", ...devPackages].map((name) => ({
+	const packages = [codingAgentName, "@relay-harness/chord", ...devPackages].map((name) => ({
 		name,
 		directory: join(root, "packages", name.split("/")[1]),
 	}));
@@ -29,7 +29,7 @@ function createFixture(t, { importServer = false, declareServer = false } = {}) 
 			...(isAgent ? {
 				bin: { relay: "dist/bundle/cli.js" },
 				dependencies: {
-					"@earendil-works/chord": "1.0.0",
+					"@relay-harness/chord": "1.0.0",
 					...(declareServer ? { "@relay-harness/server": "1.0.0" } : {}),
 				},
 				devDependencies: Object.fromEntries(devPackages.map((name) => [name, "1.0.0"])),
@@ -39,7 +39,7 @@ function createFixture(t, { importServer = false, declareServer = false } = {}) 
 			"package.json": JSON.stringify(manifest),
 			"dist/index.js": isAgent ? `
 ${importServer ? 'import "@relay-harness/server";' : ""}
-import { marker } from "@earendil-works/chord";
+import { marker } from "@relay-harness/chord";
 if (marker !== "local tarball") throw new Error("Wrong Chord artifact");
 export function createAgentSession() {}
 export class SessionManager { static inMemory() {} }
@@ -75,7 +75,7 @@ test("installs only coding-agent directly and uses overrides only for declared r
 	const nested = join(directory, "node_modules", codingAgentName, "node_modules/@relay-harness/server");
 	mkdirSync(nested, { recursive: true });
 	writeFileSync(join(nested, "package.json"), JSON.stringify({ name: "@relay-harness/server", version: "1.0.0" }));
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /relay-server must not be installed/);
+	assert.throws(() => smokeTestCodingAgentConsumer(directory), /@relay-harness\/server must not be installed/);
 	rmSync(nested, { recursive: true });
 
 	const experimental = join(directory, "node_modules", codingAgentName, "dist/experimental");
@@ -91,5 +91,5 @@ test("fails when the SDK imports an undeclared server despite a working CLI", (t
 
 test("fails if a development-only dependency is added back to the published dependency tree", (t) => {
 	const directory = createFixture(t, { declareServer: true });
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /relay-server must not be installed/);
+	assert.throws(() => smokeTestCodingAgentConsumer(directory), /@relay-harness\/server must not be installed/);
 });

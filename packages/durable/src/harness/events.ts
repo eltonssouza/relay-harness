@@ -1,6 +1,6 @@
-import type { Context, JsonValue } from "@earendil-works/chord";
-import type { Op, Path } from "@earendil-works/chord/delta";
 import type { AssistantMessage, Message, Usage } from "@relay-harness/ai";
+import type { Context, JsonValue } from "@relay-harness/chord";
+import type { Op, Path } from "@relay-harness/chord/delta";
 import { CommittedWatch } from "../session/observation.ts";
 import type {
 	CommitChange,

@@ -1,10 +1,10 @@
-import { combineFacetLoaders, type FacetLoader, type JsonValue } from "@earendil-works/chord";
+import { combineFacetLoaders, type FacetLoader, type JsonValue } from "@relay-harness/chord";
 import {
 	createFacetBundleArtifactLoader,
 	createFacetBundleLoader,
 	type FacetBundleArtifact,
 	readFacetBundleManifest,
-} from "@earendil-works/chord/node";
+} from "@relay-harness/chord/node";
 
 const PRESENTATION_FACET_BUNDLES_KEY = "presentationFacetBundles";
 const RELAY_PLUGIN_API = "@relay-harness/coding-agent/experimental/plugin";

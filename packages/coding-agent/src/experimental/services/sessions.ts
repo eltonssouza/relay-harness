@@ -1,4 +1,4 @@
-import { type Context, defineService, type ReplicatedState } from "@earendil-works/chord";
+import { type Context, defineService, type ReplicatedState } from "@relay-harness/chord";
 import type { ServerId } from "@relay-harness/protocol";
 
 export interface SessionAddress {

@@ -9,6 +9,9 @@ import { AGENTS, type AgentId, type ToolRequirement, type ValidationLevel } from
  * `laya.toolRouting: "enforce"` the tools a task clearly does not need are deactivated.
  */
 
+/** Custom message type of the plan sent with each routed request. */
+export const LAYA_PLAN_MESSAGE = "laya.plan";
+
 const AGENT_SKILL_KEYWORDS: Record<AgentId, string[]> = {
 	"software-engineer": [
 		"code",

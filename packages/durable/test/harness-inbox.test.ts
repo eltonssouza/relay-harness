@@ -1,7 +1,6 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Op } from "@earendil-works/chord/delta";
 import {
 	type AssistantMessage,
 	type FauxResponseStep,
@@ -12,6 +11,7 @@ import {
 	Type,
 	type Usage,
 } from "@relay-harness/ai";
+import type { Op } from "@relay-harness/chord/delta";
 import {
 	type Conversation,
 	defineDoc,

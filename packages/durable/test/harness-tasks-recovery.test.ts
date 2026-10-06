@@ -1,8 +1,8 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Context, JsonValue } from "@earendil-works/chord";
 import { createModels, Type } from "@relay-harness/ai";
+import type { Context, JsonValue } from "@relay-harness/chord";
 import {
 	createRegistry,
 	defineDoc,

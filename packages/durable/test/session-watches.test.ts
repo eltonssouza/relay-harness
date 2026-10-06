@@ -1,12 +1,12 @@
-import type { Context } from "@earendil-works/chord";
+import type { Context } from "@relay-harness/chord";
 import {
 	BACKGROUND_CONTEXT,
 	createContextKey,
 	withAbortSignal,
 	withCancel,
 	withContextValue,
-} from "@earendil-works/chord/context";
-import { applyImmutable } from "@earendil-works/chord/delta";
+} from "@relay-harness/chord/context";
+import { applyImmutable } from "@relay-harness/chord/delta";
 import { defineDoc } from "@relay-harness/durable";
 import { describe, expect, it } from "vitest";
 import { context, documentChanges, flush, openTestSession } from "./session-support.ts";

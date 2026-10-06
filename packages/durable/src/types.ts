@@ -1,6 +1,6 @@
-import type { AttachedReplicatedState, Context, Draft, JsonValue } from "@earendil-works/chord";
-import type { Op } from "@earendil-works/chord/delta";
 import type { Message, Models } from "@relay-harness/ai";
+import type { AttachedReplicatedState, Context, Draft, JsonValue } from "@relay-harness/chord";
+import type { Op } from "@relay-harness/chord/delta";
 import type { ExecutionEnv } from "./env/index.ts";
 import type {
 	Agent,

@@ -1,6 +1,6 @@
 import { type ChildProcess, spawn, spawnSync } from "node:child_process";
-import { closeSync, mkdirSync, openSync } from "node:fs";
-import { dirname } from "node:path";
+import { closeSync, existsSync, mkdirSync, openSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { type LayaModelManifest, type LayaPaths, runtimeStatus } from "./runtime.ts";
 
 const HEALTH_TIMEOUT_MS = 1500;
@@ -12,6 +12,8 @@ export interface LayaServerOptions {
 	manifest: LayaModelManifest;
 	/** The configured System One URL, e.g. `http://127.0.0.1:8000/v1`. */
 	baseUrl: () => string;
+	/** Model directory to serve. Default: the shipped model of the manifest. */
+	model?: () => string;
 	fetch?: typeof fetch;
 }
 
@@ -34,8 +36,15 @@ export class LayaServer {
 		this.options = options;
 	}
 
+	private modelDir(): string {
+		return this.options.model?.() ?? this.options.paths.model;
+	}
+
 	status() {
-		return runtimeStatus(this.options.manifest, this.options.paths);
+		const status = runtimeStatus(this.options.manifest, this.options.paths);
+		const model = this.modelDir();
+		if (status === "missing-environment" || model === this.options.paths.model) return status;
+		return existsSync(join(model, "model.safetensors")) ? "ready" : "missing-model";
 	}
 
 	async isUp(): Promise<boolean> {
@@ -71,7 +80,7 @@ export class LayaServer {
 				[
 					paths.serveScript,
 					"--model",
-					paths.model,
+					this.modelDir(),
 					"--host",
 					hostname.replace(/^\[|\]$/g, ""),
 					"--port",

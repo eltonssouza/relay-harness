@@ -4,23 +4,15 @@
 // apply. Remove an entry once a fixed version is installed; the script warns
 // about entries that no longer match.
 
-import { spawnSync } from "node:child_process";
+import { spawnNpm } from "./npm-command.mjs";
 
 const auditLevel = "moderate";
 const severities = ["info", "low", "moderate", "high", "critical"];
 
 /** @type {Record<string, { package: string; reason: string }>} */
-const acceptedAdvisories = {
-	"GHSA-86w9-cpqp-85rv": {
-		package: "node-forge",
-		reason:
-			"No fixed node-forge release exists. It is only reachable through @earendil-works/gondolin in the private, " +
-			"unpublished gondolin example extension. Gondolin only verifies leaf certificates against its own locally " +
-			"generated CA (public exponent 65537), so the low-exponent signature forgery does not apply.",
-	},
-};
+const acceptedAdvisories = {};
 
-const result = spawnSync("npm", ["audit", "--omit=dev", "--json"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+const result = spawnNpm(["audit", "--omit=dev", "--json"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
 if (result.error) {
 	throw result.error;
 }

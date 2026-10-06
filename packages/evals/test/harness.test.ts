@@ -76,7 +76,7 @@ describe("documentation variant", () => {
 			cwd: "/workspace",
 			selectedTools: [...DOCUMENTATION_EVAL_TOOLS],
 		});
-		expect(prompt).toContain("\n<docs>\nPi documentation (read only");
+		expect(prompt).toContain("\n<docs>\nRelay documentation (read only");
 		expect(prompt).toContain("\n<rules>\n");
 		expect(prompt).toContain("\n<cwd>\n/workspace\n</cwd>");
 		expect(prompt).toContain("docs/models.md");
@@ -107,7 +107,7 @@ describe("documentation variant", () => {
 
 	it("fails closed when prompt markers are missing", () => {
 		expect(() => excludeRelayDocumentation("Instructions")).toThrow("no Relay documentation section");
-		expect(() => excludeRelayDocumentation("\n<docs>\nPi documentation\n</docs>")).toThrow(
+		expect(() => excludeRelayDocumentation("\n<docs>\nRelay documentation\n</docs>")).toThrow(
 			"no working-directory section",
 		);
 	});

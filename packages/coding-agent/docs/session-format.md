@@ -31,7 +31,7 @@ Existing sessions are automatically migrated to the current version (v3) when lo
 
 ## Source Files
 
-Source on GitHub ([relay](https://github.com/earendil-works/pi)):
+Source on GitHub ([relay](https://github.com/eltonssouza/relay-harness)):
 - [`packages/coding-agent/src/core/session-manager.ts`](https://github.com/eltonssouza/relay-harness/blob/main/packages/coding-agent/src/core/session-manager.ts) - Session entry types and SessionManager
 - [Message Types](message-types.md) - Shared message and content-block reference
 - [`packages/coding-agent/src/core/messages.ts`](https://github.com/eltonssouza/relay-harness/blob/main/packages/coding-agent/src/core/messages.ts) - Extended message types

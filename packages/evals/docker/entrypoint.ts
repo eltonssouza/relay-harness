@@ -32,9 +32,9 @@ function assertWorkspace(): void {
 	for (const name of ["package.json", "dist/index.js"]) {
 		if (!existsSync(join(codingAgentDir, name))) throw new Error(`Installed coding-agent is missing ${name}.`);
 	}
-	const internalScope = "/repo/node_modules/@earendil-works";
+	const internalScope = "/repo/node_modules/@relay-harness";
 	for (const packageName of readdirSync(internalScope)) {
-		if (packageName === "relay-coding-agent") continue;
+		if (packageName === "coding-agent") continue;
 		const packageDirectory = join(internalScope, packageName);
 		for (const entry of readdirSync(packageDirectory, { withFileTypes: true })) {
 			if (

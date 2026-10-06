@@ -1,8 +1,9 @@
 // Conversation handles, typed entries, created conversations, and forks.
 // Run from packages/durable:
 //   node --conditions=source --experimental-strip-types test/examples/08-harness-conversations.ts
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+
 import { createModels } from "@relay-harness/ai/models";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { createRegistry, defineEntry, Harness, MemoryStorage } from "../../src/index.ts";
 
 const context = BACKGROUND_CONTEXT;
