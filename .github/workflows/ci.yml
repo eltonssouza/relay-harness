@@ -48,6 +48,10 @@ jobs:
       - name: Check
         run: npm run check
 
+      # Packs every public package and lists what a release would publish. It publishes nothing.
+      - name: Validate the packages to publish
+        run: node scripts/publish.mjs --dry-run
+
       - name: Test
         run: ./test.sh
 
