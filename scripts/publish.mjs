@@ -105,6 +105,8 @@ for (const pkg of packageStates) {
 		continue;
 	}
 
-	run("npm", ["publish", "--access", "public", "--provenance", "--ignore-scripts"], { cwd: pkg.directory });
+	// npm issues provenance only for public repositories; enable it with NPM_PROVENANCE=true.
+	const provenance = process.env.NPM_PROVENANCE === "true" ? ["--provenance"] : [];
+	run("npm", ["publish", "--access", "public", ...provenance, "--ignore-scripts"], { cwd: pkg.directory });
 	console.log();
 }
