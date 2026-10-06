@@ -1,5 +1,5 @@
-import type { Context } from "@earendil-works/chord";
 import { uuidv7 } from "@relay-harness/ai/utils/uuid";
+import type { Context } from "@relay-harness/chord";
 import { defineDoc } from "../documents.ts";
 import type { TaskRuntime } from "../types.ts";
 

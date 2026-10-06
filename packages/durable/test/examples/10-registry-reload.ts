@@ -1,9 +1,10 @@
 // Reload extension code through the registry.
 // Run from packages/durable:
 //   node --conditions=source --experimental-strip-types test/examples/10-registry-reload.ts
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+
 import { Type } from "@relay-harness/ai";
 import { createModels } from "@relay-harness/ai/models";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { createRegistry, defineExtension, defineTool, Harness, MemoryStorage, wrapTool } from "../../src/index.ts";
 
 const context = BACKGROUND_CONTEXT;

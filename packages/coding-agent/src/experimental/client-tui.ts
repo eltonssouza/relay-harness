@@ -7,8 +7,8 @@ import {
 	type FacetLoader,
 	type JsonValue,
 	type LoadedFacets,
-} from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+} from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import type { AgentState, ConversationView } from "@relay-harness/durable";
 import {
 	CombinedAutocompleteProvider,

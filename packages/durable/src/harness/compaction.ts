@@ -1,7 +1,7 @@
-import type { Context, Draft } from "@earendil-works/chord";
 import type { AssistantMessage, Message, ModelThinkingLevel, SimpleStreamOptions } from "@relay-harness/ai";
 import { calculateContextTokens, estimateMessageTokens } from "@relay-harness/ai/utils/estimate";
 import { isRetryableAssistantError, retryDelayMs } from "@relay-harness/ai/utils/retry";
+import type { Context, Draft } from "@relay-harness/chord";
 import { CompactionEntry } from "../entries.ts";
 import { defineTask } from "../tasks.ts";
 import type {

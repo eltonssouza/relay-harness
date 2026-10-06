@@ -2,7 +2,7 @@
 
 This reference describes automatic compaction, branch summarization, persisted entries, and extension hooks. For the user workflow, see [Sessions and Context](sessions.md#manage-conversation-context).
 
-**Source files** ([relay](https://github.com/earendil-works/pi)):
+**Source files** ([relay](https://github.com/eltonssouza/relay-harness)):
 - [`packages/coding-agent/src/core/compaction/compaction.ts`](https://github.com/eltonssouza/relay-harness/blob/main/packages/coding-agent/src/core/compaction/compaction.ts) - Auto-compaction logic
 - [`packages/coding-agent/src/core/compaction/branch-summarization.ts`](https://github.com/eltonssouza/relay-harness/blob/main/packages/coding-agent/src/core/compaction/branch-summarization.ts) - Branch summarization
 - [`packages/coding-agent/src/core/compaction/utils.ts`](https://github.com/eltonssouza/relay-harness/blob/main/packages/coding-agent/src/core/compaction/utils.ts) - Shared utilities (file tracking, serialization)

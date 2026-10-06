@@ -1,5 +1,5 @@
-import { applyImmutable, type Op } from "@earendil-works/chord/delta";
 import { type AssistantMessage, type FauxResponseStep, fauxAssistantMessage, fauxText } from "@relay-harness/ai";
+import { applyImmutable, type Op } from "@relay-harness/chord/delta";
 import {
 	AgentDoc,
 	type Conversation,

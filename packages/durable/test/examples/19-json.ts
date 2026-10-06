@@ -9,10 +9,10 @@
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { createModels } from "@relay-harness/ai/models";
 import { fauxAssistantMessage, fauxProvider, fauxText, fauxToolCall } from "@relay-harness/ai/providers/faux";
 import { openaiProvider } from "@relay-harness/ai/providers/openai";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { NodeExecutionEnv } from "../../src/env/node.ts";
 import {
 	createRegistry,

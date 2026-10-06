@@ -1,8 +1,8 @@
-import { type Context, copyJson, type JsonValue } from "@earendil-works/chord";
-import { awaitWithContext } from "@earendil-works/chord/context";
-import { overlap } from "@earendil-works/chord/delta";
 import type { ImageContent, TextContent, ToolCall, ToolResultMessage } from "@relay-harness/ai";
 import { validateToolArguments } from "@relay-harness/ai/utils/validation";
+import { type Context, copyJson, type JsonValue } from "@relay-harness/chord";
+import { awaitWithContext } from "@relay-harness/chord/context";
+import { overlap } from "@relay-harness/chord/delta";
 import { AssistantEntry, ToolResultEntry } from "../entries.ts";
 import { defineTask } from "../tasks.ts";
 import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, utf8ByteLength } from "../truncate.ts";

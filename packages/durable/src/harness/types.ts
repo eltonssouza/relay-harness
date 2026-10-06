@@ -1,4 +1,3 @@
-import type { AttachedReplicatedState, Context, JsonValue } from "@earendil-works/chord";
 import type {
 	AssistantMessage,
 	CacheRetention,
@@ -14,6 +13,7 @@ import type {
 	Usage,
 	UserMessage,
 } from "@relay-harness/ai";
+import type { AttachedReplicatedState, Context, JsonValue } from "@relay-harness/chord";
 import type { ExecutionEnv, ShellOutputSkip, ShellOutputWindow } from "../env/index.ts";
 import type {
 	ConversationId,

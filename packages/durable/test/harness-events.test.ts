@@ -1,4 +1,3 @@
-import type { Draft } from "@earendil-works/chord";
 import {
 	type AssistantMessage,
 	type FauxResponseStep,
@@ -8,6 +7,7 @@ import {
 	fauxToolCall,
 	Type,
 } from "@relay-harness/ai";
+import type { Draft } from "@relay-harness/chord";
 import {
 	AgentDoc,
 	type AgentEvent,

@@ -59,7 +59,7 @@ To publish sessions, use [`badlogic/pi-share-hf`](https://github.com/badlogic/pi
 Clone the repository, install its dependencies, and run Relay from source:
 
 ```bash
-git clone https://github.com/earendil-works/pi
+git clone https://github.com/eltonssouza/relay-harness
 cd relay
 npm install --ignore-scripts
 ./relay-test.sh

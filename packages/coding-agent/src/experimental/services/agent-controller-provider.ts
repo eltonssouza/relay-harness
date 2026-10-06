@@ -1,5 +1,5 @@
-import type { Context } from "@earendil-works/chord";
 import type { ImageContent, TextContent } from "@relay-harness/ai";
+import type { Context } from "@relay-harness/chord";
 import {
 	type Conversation,
 	ConversationBusy,

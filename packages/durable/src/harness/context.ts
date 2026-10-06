@@ -1,5 +1,5 @@
-import type { Context } from "@earendil-works/chord";
 import type { AssistantMessage, Message, ToolCall, ToolResultMessage } from "@relay-harness/ai";
+import type { Context } from "@relay-harness/chord";
 import type { SessionImpl } from "../session/session.ts";
 import type { ContextEdit, ConversationId, Cursor, EntryId, EntryRecord, Storage } from "../types.ts";
 import type { ContextView } from "./types.ts";

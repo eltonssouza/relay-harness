@@ -1,5 +1,5 @@
-import type { Context } from "@earendil-works/chord";
 import type { ModelThinkingLevel } from "@relay-harness/ai";
+import type { Context } from "@relay-harness/chord";
 import {
 	createRegistry,
 	type EnvTarget,

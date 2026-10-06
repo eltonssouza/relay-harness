@@ -1,7 +1,6 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import type { JsonValue } from "@earendil-works/chord";
 import {
 	type AssistantMessage,
 	fauxAssistantMessage,
@@ -10,6 +9,7 @@ import {
 	type ToolResultMessage,
 	Type,
 } from "@relay-harness/ai";
+import type { JsonValue } from "@relay-harness/chord";
 import {
 	defineTool,
 	type EntryRecord,

@@ -1,4 +1,4 @@
-import type { RemoteServiceErrorCode } from "@earendil-works/chord";
+import type { RemoteServiceErrorCode } from "@relay-harness/chord";
 
 type ServerOperationErrorCode =
 	| RemoteServiceErrorCode

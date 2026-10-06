@@ -35,8 +35,8 @@ conversation object and `Entry`/`Task` are typed definitions. The imports:
 import {
   createFacetHost, createRemoteServiceBinding, defineFacet, defineService,
   type Context, type Facet, type FacetHost, type RemoteServiceTransport, type ReplicatedState,
-} from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+} from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import {
   type ConversationId, defineDoc, defineDocFamily, type DocumentObserver,
   type Harness, type Session, type TaskId, type TaskRuntime,

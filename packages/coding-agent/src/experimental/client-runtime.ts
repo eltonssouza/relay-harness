@@ -1,5 +1,5 @@
 import { basename } from "node:path";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { Client, ServerError } from "@relay-harness/client";
 import { createUnixTransportFactory, discoverUnixServers, type UnixServerRoute } from "@relay-harness/client/unix";
 import { isServerId } from "@relay-harness/protocol";

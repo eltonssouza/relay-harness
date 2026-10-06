@@ -1,6 +1,6 @@
-import { type AttachedReplicatedState, type Context, type JsonValue, replicatedState } from "@earendil-works/chord";
-import { withoutAbortSignal } from "@earendil-works/chord/context";
-import { applyImmutable, type NonEmptyPath, type Op, type Path } from "@earendil-works/chord/delta";
+import { type AttachedReplicatedState, type Context, type JsonValue, replicatedState } from "@relay-harness/chord";
+import { withoutAbortSignal } from "@relay-harness/chord/context";
+import { applyImmutable, type NonEmptyPath, type Op, type Path } from "@relay-harness/chord/delta";
 import { CommittedStateSource, CommittedWatch } from "../session/observation.ts";
 import type { SessionImpl } from "../session/session.ts";
 import type {

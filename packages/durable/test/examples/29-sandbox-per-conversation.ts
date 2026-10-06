@@ -6,9 +6,9 @@
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { createModels } from "@relay-harness/ai/models";
 import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@relay-harness/ai/providers/faux";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { NodeExecutionEnv } from "../../src/env/node.ts";
 import { createRegistry, defineDoc, Harness, MemoryStorage } from "../../src/index.ts";
 import { CodingTools } from "../../src/tools/index.ts";

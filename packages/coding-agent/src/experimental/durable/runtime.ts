@@ -1,6 +1,6 @@
-import type { AttachedReplicatedState } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { clampThinkingLevel, getSupportedThinkingLevels, type ModelThinkingLevel } from "@relay-harness/ai";
+import type { AttachedReplicatedState } from "@relay-harness/chord";
+import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import {
 	type AgentState,
 	type Conversation,
