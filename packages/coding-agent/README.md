@@ -44,12 +44,12 @@ If you use Relay for open source work, please share your coding agent sessions.
 
 Public OSS session data helps improve models, prompts, tools, and evaluations using real development workflows.
 
-For the full explanation, see [this post on X](https://x.com/badlogicgames/status/2037811643774652911).
+For the full explanation, see [this post on X by pi's author](https://x.com/badlogicgames/status/2037811643774652911).
 
-To publish sessions, use [`badlogic/pi-share-hf`](https://github.com/badlogic/pi-share-hf) using a Hugging Face account and the Hugging Face CLI.
+To publish sessions, use [`badlogic/pi-share-hf`](https://github.com/badlogic/pi-share-hf), written for pi, with a Hugging Face account and the Hugging Face CLI.
 
-- [Demo video](https://x.com/badlogicgames/status/2041151967695634619) on how to publish Relay sessions
-- Published Relay development sessions: [`badlogicgames/pi-mono` on Hugging Face](https://huggingface.co/datasets/badlogicgames/pi-mono).
+- [Demo video](https://x.com/badlogicgames/status/2041151967695634619) on how to publish pi sessions
+- Published pi development sessions: [`badlogicgames/pi-mono` on Hugging Face](https://huggingface.co/datasets/badlogicgames/pi-mono).
 
 ## Development
 
@@ -73,6 +73,8 @@ npm run check
 
 Read [CONTRIBUTING.md](https://github.com/eltonssouza/relay-harness/blob/main/CONTRIBUTING.md) before opening an issue or pull request. It defines the contribution gate, issue quality bar, and required checks. Read [AGENTS.md](https://github.com/eltonssouza/relay-harness/blob/main/AGENTS.md) for repository-specific implementation, testing, dependency, and release rules.
 
-## License
+## Credits and license
 
-MIT
+Relay is a fork of [pi](https://github.com/earendil-works/pi), the coding agent by Mario Zechner and Earendil Works, released under the MIT license. Relay adds the model-independent harness core, the `laya/auto` adaptive router, and its own release line on npm.
+
+MIT. The license text ships in the package as `LICENSE`.

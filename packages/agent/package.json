@@ -33,7 +33,11 @@
 		"transport",
 		"state-management"
 	],
-	"author": "Mario Zechner",
+	"author": "Elton Souza",
+	"contributors": [
+		"Mario Zechner",
+		"Earendil Works"
+	],
 	"license": "MIT",
 	"repository": {
 		"type": "git",
