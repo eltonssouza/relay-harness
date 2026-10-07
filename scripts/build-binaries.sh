@@ -77,7 +77,9 @@ fi
 if [[ -z "$OUTPUT_DIR" ]]; then
     OUTPUT_DIR="packages/coding-agent/binaries"
 fi
-if [[ "$OUTPUT_DIR" != /* ]]; then
+# A Windows drive path (C:\out or C:/out) is absolute too.
+windows_absolute='^[A-Za-z]:[/\\]'
+if [[ "$OUTPUT_DIR" != /* && ! "$OUTPUT_DIR" =~ $windows_absolute ]]; then
     OUTPUT_DIR="$(pwd)/$OUTPUT_DIR"
 fi
 
@@ -165,7 +167,12 @@ for platform in "${PLATFORMS[@]}"; do
     if [[ "$platform" == windows-* ]]; then
         # Windows (zip)
         echo "Creating relay-$platform.zip..."
-        (cd "$platform" && zip -r ../relay-$platform.zip .)
+        if command -v zip >/dev/null 2>&1; then
+            (cd "$platform" && zip -r ../relay-$platform.zip .)
+        else
+            # Git Bash on Windows has no zip, and its tar is GNU tar; the system bsdtar writes zip archives.
+            (cd "$platform" && "$(cygpath "$SYSTEMROOT")/System32/tar.exe" -a -c -f ../relay-$platform.zip .)
+        fi
     else
         # Unix platforms (tar.gz) - use wrapper directory for mise compatibility
         echo "Creating relay-$platform.tar.gz..."
