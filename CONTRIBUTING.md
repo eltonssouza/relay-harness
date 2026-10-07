@@ -57,6 +57,8 @@ If you send a large volume of issues through automation, your GitHub account wil
 
 Do not open a PR unless you have already been approved by a maintainer using `lgtm` in the command position described above.
 
+Open pull requests against `develop`, the default branch. `main` only receives `develop` when a release is made; a pull request to `main` from any other branch is closed automatically.
+
 Before submitting a PR:
 
 ```bash
