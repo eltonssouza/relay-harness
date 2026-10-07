@@ -3,7 +3,8 @@ name: Release
 # Publishes the Laya Docker images, then every public workspace package to npm, when a version tag
 # is pushed. The images go to ghcr.io/eltonssouza/relay-laya with the workflow's GITHUB_TOKEN; a tag
 # that is already published (same build context) is skipped. The package must be public on GitHub
-# (Packages > relay-laya > Package settings > Change visibility) so Relay can pull it without login.
+# (Packages > relay-laya > Package settings > Change visibility) so Relay can pull it without login;
+# until it is, the job fails before npm publishes anything.
 # Authentication is the NPM_TOKEN secret of the npm-publish environment: a granular access token
 # with read and write (publish and stage) on the @relay-harness scope, with 2FA bypass. It expires;
 # when publishing starts failing with 401 or 403, create a new token and replace the secret.
@@ -59,6 +60,19 @@ jobs:
 
       - name: Build and push the Laya images
         run: node scripts/laya-image.mjs --variant all --push
+
+      # Relay pulls the images without logging in. A new package on ghcr.io is private, so the first
+      # release stops here, before npm, until the package is made public; then re-run this job.
+      - name: Check the images can be pulled without logging in
+        run: |
+          set -euo pipefail
+          docker logout ghcr.io
+          for image in $(node scripts/laya-image.mjs --print); do
+            if ! docker manifest inspect "${image}" > /dev/null; then
+              echo "::error::${image} cannot be pulled without logging in. Make the relay-laya package public (https://github.com/users/eltonssouza/packages/container/relay-laya/settings, Change visibility), then re-run this job."
+              exit 1
+            fi
+          done
 
   publish-npm:
     needs: publish-laya-image
