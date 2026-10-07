@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed Kimi K3 on the `moonshotai` and `moonshotai-cn` providers charging for cache writes when models.dev reports a cache write price: it always uses Moonshot's official pricing, which has none.
+
 ## [1.0.3] - 2026-10-07
 
 ## [1.0.2] - 2026-10-04
