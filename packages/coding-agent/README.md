@@ -1,9 +1,8 @@
 <p align="center">
-  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
   <a href="https://www.npmjs.com/package/@relay-harness/coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@relay-harness/coding-agent?style=flat-square&logo=npm&logoColor=white" /></a>
 </p>
 
-> New issues and PRs from new contributors are closed automatically. Maintainers review closed submissions daily. See [CONTRIBUTING.md](https://github.com/eltonssouza/relay-harness/blob/main/CONTRIBUTING.md).
+> Open an issue before a pull request, and send pull requests to `develop`. See [CONTRIBUTING.md](https://github.com/eltonssouza/relay-harness/blob/develop/CONTRIBUTING.md).
 
 # Relay
 
@@ -71,7 +70,7 @@ npm run check
 ./test.sh
 ```
 
-Read [CONTRIBUTING.md](https://github.com/eltonssouza/relay-harness/blob/main/CONTRIBUTING.md) before opening an issue or pull request. It defines the contribution gate, issue quality bar, and required checks. Read [AGENTS.md](https://github.com/eltonssouza/relay-harness/blob/main/AGENTS.md) for repository-specific implementation, testing, dependency, and release rules.
+Read [CONTRIBUTING.md](https://github.com/eltonssouza/relay-harness/blob/main/CONTRIBUTING.md) before opening an issue or pull request. It defines the issue quality bar, the branch pull requests go to, and the required checks. Read [AGENTS.md](https://github.com/eltonssouza/relay-harness/blob/main/AGENTS.md) for repository-specific implementation, testing, dependency, and release rules.
 
 ## Credits and license
 

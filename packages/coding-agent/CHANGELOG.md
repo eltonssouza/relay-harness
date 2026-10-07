@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed the Laya image download showing `0/N layers` until it finished with Docker Desktop: its containerd image store reports a layer as downloaded before it extracts it, which the progress now counts. The first message also says the download is a few GB.
+
 ## [1.0.3] - 2026-10-07
 
 ### Breaking Changes
