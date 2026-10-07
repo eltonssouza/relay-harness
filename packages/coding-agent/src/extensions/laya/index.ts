@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
 	type Api,
@@ -17,6 +17,7 @@ import { SessionManager } from "../../core/session-manager.ts";
 import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
 import { assessmentFromAnswers, assessmentFromLabels, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
+import { type DockerRun, spawnDocker } from "./docker.ts";
 import {
 	buildLearnPrompt,
 	exercisesToRows,
@@ -47,7 +48,7 @@ import {
 } from "./policy.ts";
 import { CAPABILITY_TIERS, type CapabilityTier, LAYA_QUESTIONS, layaDecisionsFile } from "./questions.ts";
 import { LAYA_PLAN_MESSAGE, renderPlanMessage, selectSkills, unneededTools } from "./routers.ts";
-import { layaPaths, setupLayaRuntime } from "./runtime.ts";
+import { type LayaImageVariant, layaImage } from "./runtime.ts";
 import { generateSeed } from "./seed.ts";
 import { isLocalUrl, LayaServer } from "./server.ts";
 import {
@@ -61,7 +62,7 @@ import {
 import {
 	accuracy,
 	describeProgress,
-	hasAccelerator,
+	dockerHasGpu,
 	readRegistry,
 	readRows,
 	type Score,
@@ -76,7 +77,8 @@ export { LAYA_PLAN_MESSAGE } from "./routers.ts";
 export const LAYA_PROVIDER_ID = "laya";
 export const LAYA_CLASSIFIER_ID = "execution-intelligence";
 export const LAYA_VIRTUAL_MODEL_ID = "auto";
-export const DEFAULT_LAYA_BASE_URL = "http://127.0.0.1:8000/v1";
+/** Not 8000, the port laya-trainer's own server and many development servers use. */
+export const DEFAULT_LAYA_BASE_URL = "http://127.0.0.1:8737/v1";
 
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MIN_CONFIDENCE = 0.5;
@@ -178,20 +180,44 @@ export function describeTrainingOutcome({ model, activated, previous }: Training
 		: `Laya trained ${model.name}, but ${previous} keeps routing: the test score fell from ${percent(model.test.current)} to ${percent(model.test.candidate)}. It gets ${session}. /laya use ${model.name} activates it anyway.`;
 }
 
-export default function layaExtension(relay: ExtensionAPI): void {
+export interface LayaExtensionOptions {
+	/** Docker CLI runner. Default: the `docker` command. */
+	docker?: DockerRun;
+}
+
+/** Files of the Python runtime Relay used to install on the host, before Laya moved to Docker. */
+const HOST_RUNTIME_LEFTOVERS = ["venv", "models", "serve.py", "train.py", "server.log"];
+
+export default function layaExtension(relay: ExtensionAPI, options: LayaExtensionOptions = {}): void {
 	const quota = new QuotaManager();
+	const docker = options.docker ?? spawnDocker;
 	const layaHome = join(getAgentDir(), "laya");
 	const store = new TelemetryStore(join(layaHome, "telemetry.jsonl"));
-	const paths = layaPaths(layaHome, LAYA_MODEL_MANIFEST);
-	const trainer = sharedTrainer({ home: layaHome, manifest: LAYA_MODEL_MANIFEST, paths });
-	const server = new LayaServer({
-		paths,
-		manifest: LAYA_MODEL_MANIFEST,
-		baseUrl: () => settings.baseUrl ?? process.env.LAYA_BASE_URL ?? DEFAULT_LAYA_BASE_URL,
-		model: () => trainer.activeModel().dir,
-	});
-	let setupOffered = false;
-	let setupRunning: Promise<void> | undefined;
+	const baseUrl = () => settings.baseUrl ?? process.env.LAYA_BASE_URL ?? DEFAULT_LAYA_BASE_URL;
+	let variant: Promise<LayaImageVariant> | undefined;
+	let gpu: Promise<boolean> | undefined;
+	/** The CUDA image where an NVIDIA GPU exists, the smaller CPU image otherwise. */
+	const hostVariant = async (): Promise<LayaImageVariant> => {
+		if (process.platform === "darwin") return "cpu";
+		try {
+			return (await relay.exec("nvidia-smi", ["-L"], { timeout: 10_000 })).code === 0 ? "cuda" : "cpu";
+		} catch {
+			return "cpu";
+		}
+	};
+	const imageVariant = () => {
+		variant ??= hostVariant();
+		return variant;
+	};
+	const image = async () => settings.image ?? layaImage(LAYA_MODEL_MANIFEST, await imageVariant());
+	const trainingGpu = () => {
+		gpu ??= (async () => (await imageVariant()) === "cuda" && dockerHasGpu(docker, await image()))();
+		return gpu;
+	};
+	const trainer = sharedTrainer({ home: layaHome, manifest: LAYA_MODEL_MANIFEST, docker, image, gpu: trainingGpu });
+	const server = new LayaServer({ docker, baseUrl, image, model: () => trainer.activeModel().dir });
+	/** Server problem last reported, so a failing Docker is not reported on every start. */
+	let reportedProblem: string | undefined;
 	let history = new PerformanceHistory();
 	let settings: LayaSettings = {};
 	let profileOverride: PolicyProfile | undefined;
@@ -266,10 +292,10 @@ export default function layaExtension(relay: ExtensionAPI): void {
 			}
 		}
 		const classifier = ctx.modelRegistry.findOfType("classifier", LAYA_PROVIDER_ID, LAYA_CLASSIFIER_ID);
-		if (!classifier || Date.now() < layaUnavailableUntil) return heuristicAssessment(request);
-		// Starts the local server when the runtime is installed; a failed start falls through to the
-		// classifier call, which fails fast and lands on the keyword rules. Training has the GPU to itself.
-		if (settings.autostart !== false && !trainer.running) await server.ensureRunning(signal);
+		// While the container installs, or without Docker, the classifier call would only fail.
+		if (!classifier || Date.now() < layaUnavailableUntil || server.state === "installing") {
+			return heuristicAssessment(request);
+		}
 		const result = await ctx.modelRegistry.classify(
 			classifier,
 			{ state: { request: truncateRequest(request) }, questions: LAYA_QUESTIONS },
@@ -471,27 +497,42 @@ export default function layaExtension(relay: ExtensionAPI): void {
 		route,
 	});
 
-	/** Installs the Python environment and downloads the trained model. Concurrent calls share one run. */
-	function setupRuntime(ctx: ExtensionContext): Promise<void> {
-		setupRunning ??= (async () => {
+	/**
+	 * Pulls the image and starts or updates the server container, with progress in the status line.
+	 * `explicit` is a user command: it always reports the result. Otherwise only a finished
+	 * installation and a new problem are reported.
+	 */
+	async function install(ctx: ExtensionContext, explicit = false): Promise<boolean> {
+		let worked = false;
+		const ok = await server.install((message) => {
+			worked = true;
+			ctx.ui.setStatus("laya-setup", `laya: ${message}`);
+		});
+		ctx.ui.setStatus("laya-setup", undefined);
+		if (ok) {
+			layaUnavailableUntil = 0;
+			lastClassifierError = undefined;
+			reportedProblem = undefined;
+			if (explicit || worked) ctx.ui.notify(`Laya is ${server.describe()}; it routes laya/auto requests.`);
+			return true;
+		}
+		const problem = server.describe();
+		if (explicit || problem !== reportedProblem) {
+			reportedProblem = problem;
+			ctx.ui.notify(`Laya ${problem}. Keyword rules route laya/auto requests until it runs.`, "warning");
+		}
+		return false;
+	}
+
+	/** Deletes the Python environment and model that Relay installed on the host before Laya moved to Docker. */
+	function removeHostRuntime(): void {
+		for (const name of HOST_RUNTIME_LEFTOVERS) {
 			try {
-				await setupLayaRuntime({
-					exec: (command, args, options) => relay.exec(command, args, options),
-					home: layaHome,
-					manifest: LAYA_MODEL_MANIFEST,
-					python: settings.python,
-					signal: ctx.signal,
-					report: (message) => ctx.ui.setStatus("laya-setup", `laya setup: ${message}`),
-				});
-				ctx.ui.notify("Laya is installed. Starting the server on the next request.");
-			} catch (error) {
-				ctx.ui.notify(`Laya setup failed: ${error instanceof Error ? error.message : String(error)}`, "error");
-			} finally {
-				ctx.ui.setStatus("laya-setup", undefined);
-				setupRunning = undefined;
+				rmSync(join(layaHome, name), { recursive: true, force: true });
+			} catch {
+				// In use or not ours to delete; it does no harm.
 			}
-		})();
-		return setupRunning;
+		}
 	}
 
 	/** Capability tier of a `provider/model` in the Laya model registry. */
@@ -506,20 +547,19 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	 */
 	async function startTraining(ctx: ExtensionContext): Promise<string> {
 		if (trainer.running) return "Laya is already training; run /laya train after it ends to include these tasks.";
-		if (server.status() === "missing-environment") {
-			return "Laya is not installed, so it cannot train yet. Run /laya setup, then /laya train.";
+		if (server.state !== "ready" && !(await server.install())) {
+			return `Laya ${server.describe()}, so it cannot train yet. Run /laya setup, then /laya train.`;
 		}
-		if (!(await hasAccelerator((command, args, options) => relay.exec(command, args, options)))) {
+		if (!(await trainingGpu())) {
 			const accepted =
 				!ctx.hasUI ||
 				(await ctx.ui.confirm(
 					"Train Laya on the CPU?",
-					"This computer has no GPU Laya can use. Training still works, but can take an hour or more. Keyword rules route requests meanwhile.",
+					"Docker gives Laya no GPU on this computer. Training still works, but can take an hour or more. Laya keeps routing requests meanwhile.",
 				));
 			if (!accepted) return "Training was not started. Run /laya train when you want it.";
 		}
-		// Training needs the GPU memory the server holds; keyword rules route until it ends.
-		server.stop();
+		// The server runs on the CPU, so it keeps routing while the training container has the GPU.
 		const job = trainer.train();
 		if (ctx.mode === "print" || ctx.mode === "json") {
 			try {
@@ -530,12 +570,16 @@ export default function layaExtension(relay: ExtensionAPI): void {
 		}
 		// The listener reports the result.
 		job.catch(() => {});
-		return "Laya is training in the background (a few minutes with a GPU). Keyword rules route requests until it ends; then the new model routes them if it passes the test.";
+		return "Laya is training in a Docker container (a few minutes with a GPU). The current model keeps routing until it ends; then the new model routes requests if it passes the test.";
 	}
 
 	relay.on("session_start", (_event, ctx) => {
 		refreshSettings();
 		history = settings.telemetry === false ? new PerformanceHistory() : historyFromTelemetry(store.read());
+		removeHostRuntime();
+		// Install right away in the background: pull the image on first use, then keep the container
+		// running. Sessions without a UI (print mode, SDK, tests) leave Docker alone.
+		if (settings.autostart !== false && ctx.hasUI && isLocalUrl(baseUrl())) void install(ctx);
 		listener = {
 			progress: (progress) => ctx.ui.setStatus("laya-train", `laya training: ${describeProgress(progress)}`),
 			finished: (result) => {
@@ -544,9 +588,9 @@ export default function layaExtension(relay: ExtensionAPI): void {
 					ctx.ui.notify(`Laya training failed: ${result.error.message}`, "error");
 					return;
 				}
-				// A server still running here serves the previous model.
-				if (result.outcome.activated) server.stop();
 				ctx.ui.notify(describeTrainingOutcome(result.outcome), result.outcome.activated ? "info" : "warning");
+				// The server container is replaced by one serving the new model.
+				if (result.outcome.activated) void install(ctx);
 			},
 		};
 		trainer.listener = listener;
@@ -616,22 +660,6 @@ export default function layaExtension(relay: ExtensionAPI): void {
 				},
 			};
 		}
-		// First use: offer to install the trained Laya once per session. Without it, keyword rules route.
-		if (
-			settings.autostart !== false &&
-			!setupOffered &&
-			ctx.hasUI &&
-			server.status() !== "ready" &&
-			isLocalUrl(settings.baseUrl ?? process.env.LAYA_BASE_URL ?? DEFAULT_LAYA_BASE_URL) &&
-			!(await server.isUp())
-		) {
-			setupOffered = true;
-			const accepted = await ctx.ui.confirm(
-				"Install Laya?",
-				"laya/auto routes with a trained Laya model. This downloads about 680 MB of model and a Python environment (a few GB, including torch) into ~/.relay/agent/laya. Until then, keyword rules route requests.",
-			);
-			if (accepted) await setupRuntime(ctx);
-		}
 		const assessment = await assess(event.prompt, ctx, ctx.signal);
 		pending = { request: event.prompt, assessment };
 		const policy = applyPolicy(assessment, event.prompt, {
@@ -660,7 +688,7 @@ export default function layaExtension(relay: ExtensionAPI): void {
 	});
 
 	relay.on("session_shutdown", (event) => {
-		server.stop();
+		// The server container keeps running for the next session.
 		if (trainer.listener === listener) trainer.listener = undefined;
 		// Training belongs to the process: it goes on into the next session, and stops when Relay quits.
 		if (event.reason === "quit") trainer.stop();
@@ -851,34 +879,26 @@ export default function layaExtension(relay: ExtensionAPI): void {
 						ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning");
 						return;
 					}
-					// The next request starts the server with the selected model.
-					server.stop();
-					ctx.ui.notify(`${trainer.activeModel().name} routes requests from the next one`);
+					ctx.ui.notify(`${trainer.activeModel().name} routes requests once the Laya container restarts with it`);
+					// Replaces the server container with one serving the selected model.
+					await install(ctx, true);
 					return;
 				}
-				case "setup": {
-					await setupRuntime(ctx);
-					return;
-				}
+				case "setup":
 				case "start": {
-					ctx.ui.notify(
-						(await server.ensureRunning(ctx.signal))
-							? "Laya server is running"
-							: "Laya server did not start (see /laya status)",
-						"info",
-					);
+					await install(ctx, true);
 					return;
 				}
 				case "stop": {
-					server.stop();
-					ctx.ui.notify("Stopped the Laya server this session started");
+					await server.stop();
+					ctx.ui.notify("Stopped the Laya container; /laya start or the next Relay start runs it again");
 					return;
 				}
 				case "status": {
 					const providers = new Set(candidates(ctx).map((candidate) => candidate.provider));
 					const lines = [
 						`Profile: ${profile()}${isSelected(ctx) ? "" : " (select laya/auto to route with Laya)"}`,
-						`Laya runtime: ${server.status()}${server.status() === "ready" ? "" : " (run /laya setup)"}; server ${(await server.isUp()) ? "answering" : "not answering"}`,
+						`Laya container: ${server.describe()}; server ${(await server.isUp()) ? "answering" : "not answering"} at ${baseUrl()}`,
 						`Laya server: ${lastClassifierError ? `unavailable, using keyword rules (${lastClassifierError})` : "ok or not yet asked"}`,
 						`Models with credentials: ${
 							candidates(ctx)

@@ -4,16 +4,24 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Laya runs in Docker instead of a Python environment on the host: `laya/auto` routes with the trained Laya only where Docker is installed and running, and falls back to keyword rules otherwise. The `laya.python` setting is removed; `laya.image` selects another image. See [Laya runs in Docker](docs/laya.md#laya-runs-in-docker).
+
 ### Added
 
 - `/laya learn [session file]` labels the requests of a session with the evidence of how each went and trains Laya on them in the background. A trained model routes requests only if it scores within 1% of the current one on the held-out test. See [Teach Laya from your sessions](docs/laya.md#teach-laya-from-your-sessions).
 - `/laya train`, `/laya models` and `/laya use <model>` retrain on the collected tasks, list the shipped and trained models, and switch the model that routes requests.
 - Laya memory: a request similar to a task learned with `/laya learn` is routed with that task's labels from the next request on, without waiting for training; the status line shows `(memory)`. Lessons of similar tasks (how to validate, where the change belongs, a mistake to avoid) are given to the running model. `"laya": { "memory": false }` turns both off.
 
+### Changed
+
+- Laya installs itself when Relay starts in interactive mode, without asking: Relay pulls the Laya image from `ghcr.io/eltonssouza/relay-laya` (with Python, torch and the trained model) and keeps a `relay-laya` container running on `127.0.0.1:8737` (no longer 8000, which laya-trainer and many development servers use), so requests do not wait for the model to load. `/laya setup` and `/laya start` do it right away; `"laya": { "autostart": false }` turns it off. The Python environment and model that Relay 1.0.2 installed in `~/.relay/agent/laya` are deleted.
+
 ### Fixed
 
 - Fixed the update notice never appearing: it read the latest GitHub release, which the private repository hides from anonymous users. It now reads `@relay-harness/coding-agent` on npm and shows the update command.
-- Fixed `/laya setup` failing at "Installing torch" on Debian 12 and other distributions whose Python seeds an old pip: the new environment now updates pip first.
+- Fixed `/laya setup` failing at "Installing torch" on Debian 12 and other distributions whose Python seeds an old pip: Laya no longer uses the host's Python.
 - Fixed package resource filters toggled in `/config` on Windows being saved with backslashes (`-extensions\bar.ts`), which broke shared project settings on Linux and macOS; they are now saved with `/`.
 
 ## [1.0.2] - 2026-10-04

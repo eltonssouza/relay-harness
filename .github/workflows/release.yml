@@ -1,6 +1,9 @@
 name: Release
 
-# Publishes every public workspace package to npm when a version tag is pushed.
+# Publishes the Laya Docker images, then every public workspace package to npm, when a version tag
+# is pushed. The images go to ghcr.io/eltonssouza/relay-laya with the workflow's GITHUB_TOKEN; a tag
+# that is already published (same build context) is skipped. The package must be public on GitHub
+# (Packages > relay-laya > Package settings > Change visibility) so Relay can pull it without login.
 # Authentication is the NPM_TOKEN secret of the npm-publish environment: a granular access token
 # with read and write (publish and stage) on the @relay-harness scope, with 2FA bypass. It expires;
 # when publishing starts failing with 401 or 403, create a new token and replace the secret.
@@ -26,7 +29,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  publish-laya-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      # The CUDA image needs about 15 GB while it builds.
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+
+      - name: Log in to ghcr.io
+        run: echo "${GITHUB_TOKEN}" | docker login ghcr.io --username "${GITHUB_ACTOR}" --password-stdin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push the Laya images
+        run: node scripts/laya-image.mjs --variant all --push
+
   publish-npm:
+    needs: publish-laya-image
     runs-on: ubuntu-latest
     environment: npm-publish
     permissions:

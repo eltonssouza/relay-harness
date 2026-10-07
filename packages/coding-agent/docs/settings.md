@@ -102,9 +102,9 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 
 | Setting | Type | Default | Description |
 |---|---|---|---|
-| `laya.baseUrl` | string | `LAYA_BASE_URL` or `http://127.0.0.1:8000/v1` | Laya System One server. |
-| `laya.autostart` | boolean | `true` | Offer to install the trained Laya on first use and start the local server when a request needs it. |
-| `laya.python` | string | First of `python3`, `python`, `py` | Python 3.10 to 3.13 used to create the Laya environment. |
+| `laya.baseUrl` | string | `LAYA_BASE_URL` or `http://127.0.0.1:8737/v1` | Laya System One server. |
+| `laya.autostart` | boolean | `true` | Install Laya in Docker when Relay starts and keep its container running. See [laya.md](laya.md#laya-runs-in-docker). |
+| `laya.image` | string | The image built from this Relay version | Docker image of Laya, for example one built locally with `npm run laya:image`. |
 | `laya.policy` | string | `balanced` | Cost profile: `economy`, `balanced`, `quality` or `critical`. `--laya-policy` and `/laya policy` override it. |
 | `laya.models` | object | See [laya.md](laya.md#model-registry) | Models per tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order. A tier you set replaces that tier's default list. |
 | `laya.quota` | object | `1` per provider | Share of each provider's quota still available, 0 to 1, e.g. `{ "openai-codex": 0.25 }`. |

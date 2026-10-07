@@ -1,6 +1,6 @@
 /**
- * Training script for the routing model. `LayaTrainer` writes it to the Laya home and runs it in the
- * Laya Python environment (the one `/laya setup` creates). It is adapted from laya-trainer's
+ * Training script for the routing model. It is built into the Laya Docker image as `train.py`, and
+ * `LayaTrainer` runs it in a training container. It is adapted from laya-trainer's
  * `laya_ml.py`; the recipe and the hash split match, so its test split is the one the shipped model
  * never saw.
  */

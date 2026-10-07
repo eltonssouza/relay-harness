@@ -1,16 +1,22 @@
-import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { type DockerRun, dockerError } from "./docker.ts";
 import { layaDecisionsFile } from "./questions.ts";
-import type { ExecFunction, LayaModelManifest, LayaPaths } from "./runtime.ts";
+import {
+	LAYA_IMAGE_PATHS,
+	LAYA_MODELS_VOLUME,
+	LAYA_TRAIN_CONTAINER,
+	type LayaModelManifest,
+	trainedModelPath,
+} from "./runtime.ts";
 import { generateSeed } from "./seed.ts";
-import { TRAIN_SCRIPT } from "./train-script.ts";
 
 /**
- * Native training of the routing model. Exercises live in a workspace in the Laya home: the
- * synthetic seed the shipped model was trained on, plus the tasks labeled from sessions
- * (`/laya learn`). Training starts from the model that routes today, and the new model replaces it
- * only when it answers the held-out test split about as well.
+ * Training of the routing model, in a Docker container. Exercises live in a workspace in the Laya
+ * home on the host: the synthetic seed the shipped model was trained on, plus the tasks labeled from
+ * sessions (`/laya learn`). The container reads the workspace and writes the new model to the models
+ * volume. Training starts from the model that routes today, and the new model replaces it only when
+ * it answers the held-out test split about as well.
  */
 
 /** One exercise in laya-trainer's dataset format. */
@@ -33,7 +39,6 @@ export interface TrainingWorkspace {
 	dir: string;
 	decisions: string;
 	dataset: string;
-	models: string;
 	registry: string;
 }
 
@@ -52,7 +57,6 @@ export function trainingWorkspace(home: string): TrainingWorkspace {
 		dir,
 		decisions: join(dir, "decisions.json"),
 		dataset: join(dir, "data", "dataset.jsonl"),
-		models: join(dir, "models"),
 		registry: join(dir, "models.json"),
 	};
 }
@@ -167,13 +171,15 @@ export function passesGate(test: TrainedModel["test"]): boolean {
 	return accuracy(test.candidate) >= accuracy(test.current) - REGRESSION_TOLERANCE;
 }
 
-/** Removes trained models beyond the newest inactive ones, never the active one. */
-export function pruneModels(workspace: TrainingWorkspace, registry: ModelRegistry): ModelRegistry {
+/** Keeps the newest inactive models and the active one; returns the names to delete. */
+export function pruneModels(registry: ModelRegistry): { registry: ModelRegistry; removed: string[] } {
 	// The registry lists models in the order they were trained.
 	const inactive = registry.models.filter((model) => model.name !== registry.active).reverse();
-	const removed = new Set(inactive.slice(KEEP_INACTIVE_MODELS).map((model) => model.name));
-	for (const name of removed) rmSync(join(workspace.models, name), { recursive: true, force: true });
-	return { ...registry, models: registry.models.filter((model) => !removed.has(model.name)) };
+	const removed = inactive.slice(KEEP_INACTIVE_MODELS).map((model) => model.name);
+	return {
+		registry: { ...registry, models: registry.models.filter((model) => !removed.includes(model.name)) },
+		removed,
+	};
 }
 
 export interface TrainingProgress {
@@ -196,49 +202,6 @@ export function describeProgress(progress: TrainingProgress): string {
 		minutes && progress.done !== 1 ? `, about ${minutes} min left` : ""
 	}`;
 }
-
-/** A running training process: its stderr lines as they come, and its exit. */
-export interface TrainingProcess {
-	done: Promise<{ code: number; stdout: string }>;
-	kill(): void;
-}
-
-export type SpawnTraining = (
-	command: string,
-	args: string[],
-	env: NodeJS.ProcessEnv,
-	onStderrLine: (line: string) => void,
-) => TrainingProcess;
-
-const spawnTraining: SpawnTraining = (command, args, env, onStderrLine) => {
-	const child = spawn(command, args, { env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
-	let stdout = "";
-	let pending = "";
-	child.stdout.setEncoding("utf8").on("data", (chunk: string) => {
-		stdout += chunk;
-	});
-	child.stderr.setEncoding("utf8").on("data", (chunk: string) => {
-		const lines = (pending + chunk).split(/\r?\n/);
-		pending = lines.pop() ?? "";
-		for (const line of lines) onStderrLine(line);
-	});
-	return {
-		done: new Promise((resolve) => {
-			child.once("error", (error) =>
-				resolve({ code: 1, stdout: JSON.stringify({ ok: false, message: error.message }) }),
-			);
-			child.once("close", (code) => resolve({ code: code ?? 1, stdout }));
-		}),
-		kill: () => {
-			if (!child.pid || child.exitCode !== null) return;
-			if (process.platform === "win32") {
-				spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], { windowsHide: true });
-			} else {
-				child.kill();
-			}
-		},
-	};
-};
 
 type ScriptResult =
 	| {
@@ -267,8 +230,36 @@ export interface TrainingListener {
 export interface LayaTrainerOptions {
 	home: string;
 	manifest: LayaModelManifest;
-	paths: LayaPaths;
-	spawn?: SpawnTraining;
+	docker: DockerRun;
+	/** Image the training container runs; the server's image. */
+	image: () => Promise<string>;
+	/** Whether the training container can use an NVIDIA GPU. */
+	gpu: () => Promise<boolean>;
+}
+
+/** Runs a Python one-liner in the image, with the models volume mounted. */
+function inImage(image: string, code: string, extra: string[] = [], gpu = false): string[] {
+	return [
+		"run",
+		"--rm",
+		...(gpu ? ["--gpus", "all"] : []),
+		"--volume",
+		`${LAYA_MODELS_VOLUME}:${LAYA_IMAGE_PATHS.trainedModels}`,
+		image,
+		"python",
+		"-c",
+		code,
+		...extra,
+	];
+}
+
+/** Whether a container of the image sees an NVIDIA GPU: needs the CUDA image and Docker GPU support. */
+export async function dockerHasGpu(docker: DockerRun, image: string): Promise<boolean> {
+	const result = await docker(
+		inImage(image, "import sys, torch; sys.exit(0 if torch.cuda.is_available() else 1)", [], true),
+		{ timeout: 120_000 },
+	);
+	return result.code === 0;
 }
 
 /**
@@ -278,7 +269,7 @@ export interface LayaTrainerOptions {
 export class LayaTrainer {
 	readonly workspace: TrainingWorkspace;
 	private readonly options: LayaTrainerOptions;
-	private child: TrainingProcess | undefined;
+	private abort: AbortController | undefined;
 	private job: Promise<TrainingOutcome> | undefined;
 	/** Latest progress of the running training. */
 	progress: TrainingProgress | undefined;
@@ -293,12 +284,14 @@ export class LayaTrainer {
 		return this.job !== undefined;
 	}
 
-	/** The model that routes requests: the active trained model, or the shipped one. */
+	/** The model that routes requests, with its path inside the containers: the active trained model, or the shipped one. */
 	activeModel(): { name: string; dir: string } {
-		const active = readRegistry(this.workspace).active;
-		const dir = active ? join(this.workspace.models, active) : undefined;
-		if (active && dir && existsSync(join(dir, "model.safetensors"))) return { name: active, dir };
-		return { name: this.options.manifest.version, dir: this.options.paths.model };
+		const registry = readRegistry(this.workspace);
+		const active = registry.active;
+		if (active && registry.models.some((model) => model.name === active)) {
+			return { name: active, dir: trainedModelPath(active) };
+		}
+		return { name: this.options.manifest.version, dir: LAYA_IMAGE_PATHS.shippedModel };
 	}
 
 	/** Selects the model that routes requests; the shipped model's version selects it. */
@@ -308,7 +301,7 @@ export class LayaTrainer {
 			writeRegistry(this.workspace, { ...registry, active: undefined });
 			return;
 		}
-		if (!registry.models.some((model) => model.name === name) || !existsSync(join(this.workspace.models, name))) {
+		if (!registry.models.some((model) => model.name === name)) {
 			throw new Error(
 				`No trained model named ${name}. Models: ${[this.options.manifest.version, ...registry.models.map((model) => model.name)].join(", ")}`,
 			);
@@ -337,10 +330,11 @@ export class LayaTrainer {
 	 */
 	train(): Promise<TrainingOutcome> {
 		if (this.job) return Promise.reject(new Error("Laya is already training"));
-		this.job = this.run()
+		this.abort = new AbortController();
+		this.job = this.run(this.abort.signal)
 			.finally(() => {
 				this.job = undefined;
-				this.child = undefined;
+				this.abort = undefined;
 				this.progress = undefined;
 			})
 			.then(
@@ -357,33 +351,44 @@ export class LayaTrainer {
 		return this.job;
 	}
 
+	/** Stops a running training and removes its container. */
 	stop(): void {
-		this.child?.kill();
+		if (!this.abort) return;
+		this.abort.abort();
+		void this.options.docker(["rm", "--force", LAYA_TRAIN_CONTAINER], { timeout: 60_000 });
 	}
 
-	private async run(): Promise<TrainingOutcome> {
-		const { paths } = this.options;
-		if (!existsSync(paths.venvPython)) throw new Error("Laya is not installed. Run /laya setup first.");
+	private async run(signal: AbortSignal): Promise<TrainingOutcome> {
 		ensureWorkspace(this.workspace);
 		if (!readRows(this.workspace.dataset).some((row) => row.source === SESSION_SOURCE)) {
 			throw new Error("There are no session tasks to learn yet. Run /laya learn in a session first.");
 		}
-		writeFileSync(paths.trainScript, TRAIN_SCRIPT, "utf8");
+		const image = await this.options.image();
+		const gpu = await this.options.gpu();
 		const registry = readRegistry(this.workspace);
 		const base = this.activeModel();
-		if (!existsSync(join(base.dir, "model.safetensors"))) {
-			throw new Error(`The ${base.name} model is not downloaded. Run /laya setup first.`);
-		}
 		const number = Math.max(0, ...registry.models.map((model) => Number(/^local-(\d+)$/.exec(model.name)?.[1] ?? 0)));
 		const name = `local-${number + 1}`;
-		const out = join(this.workspace.models, name);
-		rmSync(out, { recursive: true, force: true });
+		const out = trainedModelPath(name);
+		// A container left by a training that was killed would block the name.
+		await this.options.docker(["rm", "--force", LAYA_TRAIN_CONTAINER], { timeout: 60_000 });
 
 		const args = [
-			paths.trainScript,
+			"run",
+			"--rm",
+			"--name",
+			LAYA_TRAIN_CONTAINER,
+			...(gpu ? ["--gpus", "all"] : []),
+			"--volume",
+			`${LAYA_MODELS_VOLUME}:${LAYA_IMAGE_PATHS.trainedModels}`,
+			"--mount",
+			`type=bind,source=${this.workspace.dir},target=${LAYA_IMAGE_PATHS.workspace},readonly`,
+			image,
+			"python",
+			LAYA_IMAGE_PATHS.trainScript,
 			"learn",
 			"--workspace",
-			this.workspace.dir,
+			LAYA_IMAGE_PATHS.workspace,
 			"--init",
 			base.dir,
 			"--out",
@@ -391,13 +396,16 @@ export class LayaTrainer {
 			"--focus-source",
 			SESSION_SOURCE,
 		];
-		let result = await this.runScript(args);
+		let result = await this.runScript(args, signal);
 		if (!result.ok && result.error === "out_of_memory") {
 			// The smallest batch that still trains; the GPU may have been shared with another process.
-			result = await this.runScript([...args, "--micro-batch", "1", "--grad-accum", "16", "--low-memory", "on"]);
+			result = await this.runScript(
+				[...args, "--micro-batch", "1", "--grad-accum", "16", "--low-memory", "on"],
+				signal,
+			);
 		}
 		if (!result.ok) {
-			rmSync(out, { recursive: true, force: true });
+			await this.removeModels(image, [name]);
 			throw new Error(result.message);
 		}
 
@@ -412,25 +420,31 @@ export class LayaTrainer {
 			device: result.device,
 		};
 		const activated = passesGate(model.test);
-		const updated = { active: activated ? name : registry.active, models: [...registry.models, model] };
-		writeRegistry(this.workspace, pruneModels(this.workspace, updated));
+		const pruned = pruneModels({ active: activated ? name : registry.active, models: [...registry.models, model] });
+		writeRegistry(this.workspace, pruned.registry);
+		await this.removeModels(image, pruned.removed);
 		return { model, activated, previous: base.name };
 	}
 
-	private async runScript(args: string[]): Promise<ScriptResult> {
+	/** Deletes trained models from the volume. */
+	private async removeModels(image: string, names: string[]): Promise<void> {
+		if (names.length === 0) return;
+		await this.options.docker(
+			inImage(
+				image,
+				"import shutil, sys; [shutil.rmtree(path, ignore_errors=True) for path in sys.argv[1:]]",
+				names.map(trainedModelPath),
+			),
+			{ timeout: 120_000 },
+		);
+	}
+
+	private async runScript(args: string[], signal: AbortSignal): Promise<ScriptResult> {
 		const stderr: string[] = [];
-		const child = (this.options.spawn ?? spawnTraining)(
-			this.options.paths.venvPython,
-			args,
-			{
-				...process.env,
-				USE_TF: "0",
-				HF_HUB_OFFLINE: "1",
-				TRANSFORMERS_OFFLINE: "1",
-				TOKENIZERS_PARALLELISM: "false",
-				PYTHONIOENCODING: "utf-8",
-			},
-			(line) => {
+		const result = await this.options.docker(args, {
+			signal,
+			onLine: (line, stream) => {
+				if (stream === "stdout") return;
 				if (line.startsWith("PROGRESS ")) {
 					try {
 						this.progress = JSON.parse(line.slice("PROGRESS ".length)) as TrainingProgress;
@@ -443,15 +457,14 @@ export class LayaTrainer {
 					if (stderr.length > 20) stderr.shift();
 				}
 			},
-		);
-		this.child = child;
-		const { code, stdout } = await child.done;
-		const last = stdout.trim().split("\n").at(-1) ?? "";
+		});
+		if (signal.aborted) return { ok: false, message: "Training was stopped" };
+		const last = result.stdout.trim().split("\n").at(-1) ?? "";
 		try {
 			return JSON.parse(last) as ScriptResult;
 		} catch {
-			const detail = stderr.slice(-4).join(" ").trim();
-			return { ok: false, message: `The training script exited with code ${code}${detail ? `: ${detail}` : ""}` };
+			const detail = stderr.slice(-4).join(" ").trim() || dockerError(result);
+			return { ok: false, message: `The training container exited with code ${result.code}: ${detail}` };
 		}
 	}
 }
@@ -466,14 +479,4 @@ export function sharedTrainer(options: LayaTrainerOptions): LayaTrainer {
 		trainers.set(options.home, trainer);
 	}
 	return trainer;
-}
-
-/** Whether training can use a GPU. Without one it still works, slowly. */
-export async function hasAccelerator(exec: ExecFunction): Promise<boolean> {
-	if (process.platform === "darwin" && process.arch === "arm64") return true;
-	try {
-		return (await exec("nvidia-smi", ["-L"], { timeout: 10_000 })).code === 0;
-	} catch {
-		return false;
-	}
 }
