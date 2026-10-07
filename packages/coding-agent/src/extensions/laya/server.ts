@@ -150,17 +150,25 @@ export class LayaServer {
 		const image = await this.options.image();
 		const present = await docker(["image", "inspect", "--format", "{{.Id}}", image], { signal });
 		if (present.code !== 0) {
-			report("downloading the Laya image");
-			let layers = 0;
-			let done = 0;
+			report("downloading the Laya image (a few GB, only the first time)");
+			// Docker Desktop's containerd store reports "Download complete" per layer while it downloads
+			// and "Pull complete" only when it extracts, and also completes blobs that are not layers.
+			// A layer counts once, when it is downloaded or already present.
+			const layers = new Set<string>();
+			const done = new Set<string>();
 			const pull = await docker(["pull", image], {
 				signal,
 				timeout: PULL_TIMEOUT_MS,
 				onLine: (line) => {
-					if (/: Pulling fs layer$/.test(line)) layers++;
-					else if (/: (Pull complete|Already exists)$/.test(line)) done++;
-					else return;
-					report(`downloading the Laya image: ${done}/${layers} layers`);
+					const match = /^([0-9a-f]{12}): (Pulling fs layer|Already exists|Download complete|Pull complete)$/.exec(
+						line.trim(),
+					);
+					if (!match) return;
+					const [, id, status] = match;
+					if (status === "Pulling fs layer" || status === "Already exists") layers.add(id);
+					if (status !== "Pulling fs layer" && layers.has(id) && !done.has(id)) done.add(id);
+					else if (status !== "Pulling fs layer") return;
+					report(`downloading the Laya image: ${done.size}/${layers.size} layers`);
 				},
 			});
 			if (pull.code !== 0) return this.fail("failed", `Pulling ${image} failed: ${dockerError(pull)}`);
