@@ -1,0 +1,28 @@
+name: PR base
+
+# Pull requests go to develop. main only receives develop, through the maintainer's release pull
+# request; any other pull request to main is closed with a note.
+# pull_request_target runs this file from the default branch with a write token, so it must never
+# check out or run the pull request's code. It only reads the event and closes the pull request.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited]
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  close:
+    if: github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.ref != 'develop'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Close the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh pr close "${PR_NUMBER}" --repo "${REPOSITORY}" --comment "Pull requests go to \`develop\`, not \`main\`; \`main\` only receives \`develop\` when a release is made. Please open this pull request again against \`develop\`."
