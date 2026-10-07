@@ -73,7 +73,7 @@ If rebase conflicts occur:
 
 ## Issues and PRs
 
-See `CONTRIBUTING.md` for the contributor gate (auto-close workflows, `lgtm`/`lgtmi`, quality bar).
+See `CONTRIBUTING.md` for the contribution rules (issues first, quality bar). Pull requests go to `develop`; `main` only receives `develop` for a release.
 
 When reviewing PRs:
 
