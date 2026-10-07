@@ -3,7 +3,7 @@
  */
 
 import { homedir } from "node:os";
-import { basename, dirname, join, relative } from "node:path";
+import { basename, dirname, join, relative, sep } from "node:path";
 import {
 	type Component,
 	Container,
@@ -868,7 +868,8 @@ class ResourceList implements Component, Focusable {
 
 	private getPackageResourcePattern(item: ResourceItem): string {
 		const baseDir = item.metadata.baseDir ?? dirname(item.path);
-		return relative(baseDir, item.path);
+		// Package filters are shared settings; keep them portable instead of writing Windows separators.
+		return relative(baseDir, item.path).split(sep).join("/");
 	}
 }
 

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
@@ -18,6 +19,10 @@ import { PresentationPlugins } from "../src/experimental/services/plugins.ts";
 const runtimes = new Set<ClientRuntime>();
 const runningServers = new Set<RunningServer>();
 const directories = new Set<string>();
+// /tmp keeps Unix socket paths short; Windows has no /tmp, so use the OS temp directory there.
+const tempRoot = process.platform === "win32" ? tmpdir() : "/tmp";
+// Experimental servers listen on Unix-domain sockets, which are not supported on Windows.
+const serverTest = test.skipIf(process.platform === "win32");
 
 afterEach(async () => {
 	await Promise.allSettled([...runtimes].map((runtime) => runtime.dispose()));
@@ -30,7 +35,7 @@ afterEach(async () => {
 
 describe("server-selected presentation facets", () => {
 	test("restores plugin package selections for later server generations", async () => {
-		const directory = await mkdtemp("/tmp/relay-presentation-profile-");
+		const directory = await mkdtemp(join(tempRoot, "relay-presentation-profile-"));
 		directories.add(directory);
 		const serverId = randomUUID();
 		const packagePaths = [join(directory, "first-plugin"), join(directory, "second-plugin")];
@@ -40,8 +45,8 @@ describe("server-selected presentation facets", () => {
 		await expect(restoreServerPluginPackageProfile(directory, serverId)).resolves.toEqual([]);
 	});
 
-	test("builds conventional plugin entries into the server-owned plugin cache", async () => {
-		const directory = await mkdtemp("/tmp/relay-presentation-package-");
+	serverTest("builds conventional plugin entries into the server-owned plugin cache", async () => {
+		const directory = await mkdtemp(join(tempRoot, "relay-presentation-package-"));
 		directories.add(directory);
 		const serverId = randomUUID();
 		const packagePath = join(directory, "relay-example-plugin");
@@ -146,7 +151,7 @@ describe("server-selected presentation facets", () => {
 	});
 
 	test("builds the example plugin package without a package-owned build script", async () => {
-		const directory = await mkdtemp("/tmp/relay-example-plugin-");
+		const directory = await mkdtemp(join(tempRoot, "relay-example-plugin-"));
 		directories.add(directory);
 		const serverId = randomUUID();
 		const packagePath = fileURLToPath(new URL("../examples/plugins/relay-example-plugin", import.meta.url));

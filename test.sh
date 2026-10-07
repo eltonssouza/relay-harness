@@ -3,6 +3,11 @@ set -euo pipefail
 
 # Isolate user resources, credentials, temporary files, and tool configuration.
 temp_parent="${TMPDIR:-/tmp}"
+# On Windows the temp directory is inside the user profile, so project resource discovery above the
+# test root would find the developer's own ~/.agents and ~/.relay. Use the system drive root there.
+if command -v cygpath >/dev/null 2>&1; then
+	temp_parent="$(cygpath -u "${SYSTEMDRIVE:-C:}\\")"
+fi
 temp_parent="${temp_parent%/}"
 test_root="$(mktemp -d "$temp_parent/relay-test.XXXXXX")"
 git_askpass="$(type -P false)"
@@ -36,17 +41,27 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Node on native Windows cannot resolve MSYS paths such as /tmp/relay-test.X (it reads them as
+# a directory named tmp on the current drive), so pass each path to the tests as a Windows path there.
+native() {
+	if command -v cygpath >/dev/null 2>&1; then
+		cygpath -w "$1"
+	else
+		printf '%s' "$1"
+	fi
+}
+
 # Start from an empty environment and allow only required platform and test settings.
 test_env=(
 	"PATH=$PATH"
-	"PWD=$PWD"
-	"HOME=$test_root/home"
-	"USERPROFILE=$test_root/home"
-	"TMPDIR=$test_root/tmp"
-	"TMP=$test_root/tmp"
-	"TEMP=$test_root/tmp"
-	"XDG_CONFIG_HOME=$test_root/home/.config"
-	"XDG_CACHE_HOME=$test_root/cache"
+	"PWD=$(native "$PWD")"
+	"HOME=$(native "$test_root/home")"
+	"USERPROFILE=$(native "$test_root/home")"
+	"TMPDIR=$(native "$test_root/tmp")"
+	"TMP=$(native "$test_root/tmp")"
+	"TEMP=$(native "$test_root/tmp")"
+	"XDG_CONFIG_HOME=$(native "$test_root/home/.config")"
+	"XDG_CACHE_HOME=$(native "$test_root/cache")"
 	"LANG=C"
 	"LC_ALL=C"
 	"TZ=UTC"
@@ -56,15 +71,15 @@ test_env=(
 	"GIT_ASKPASS=$git_askpass"
 	"GIT_EDITOR=true"
 	"GIT_SEQUENCE_EDITOR=true"
-	"NPM_CONFIG_USERCONFIG=$test_root/npm-userconfig"
-	"NPM_CONFIG_GLOBALCONFIG=$test_root/npm-globalconfig"
-	"NPM_CONFIG_CACHE=$test_root/cache/npm"
+	"NPM_CONFIG_USERCONFIG=$(native "$test_root/npm-userconfig")"
+	"NPM_CONFIG_GLOBALCONFIG=$(native "$test_root/npm-globalconfig")"
+	"NPM_CONFIG_CACHE=$(native "$test_root/cache/npm")"
 	"RELAY_NO_LOCAL_LLM=1"
 	"AWS_EC2_METADATA_DISABLED=true"
 )
 
 # Native Windows needs these inherited values to launch child processes.
-for name in SystemRoot SYSTEMROOT WINDIR COMSPEC PATHEXT; do
+for name in SystemRoot SYSTEMROOT SystemDrive SYSTEMDRIVE WINDIR COMSPEC PATHEXT; do
 	value="${!name-}"
 	[[ -z "$value" ]] || test_env+=("$name=$value")
 done
@@ -75,5 +90,5 @@ for name in CI GITHUB_ACTIONS; do
 	[[ -z "$value" ]] || test_env+=("$name=$value")
 done
 
-echo "Running tests without API keys in isolated home: $test_root/home"
+echo "Running tests without API keys in isolated home: $(native "$test_root/home")"
 env -i "${test_env[@]}" npm test

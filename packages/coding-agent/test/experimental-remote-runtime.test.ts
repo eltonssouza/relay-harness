@@ -1,4 +1,5 @@
 import { lstat, mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type Context, createFacetHost, defineFacet, defineService } from "@relay-harness/chord";
@@ -33,10 +34,14 @@ const fauxWorkerEntryUrl = new URL("fixtures/faux-session-worker.ts", import.met
 const realSpawnInternalProcess = processRuntime.spawnInternalProcess;
 const sessionWorkerModel = { provider: "anthropic", model: "claude-sonnet-4-5" } as const;
 const SecondPluginService = defineService<{ read(context: Context): Promise<string> }>("test.second-plugin");
+// /tmp keeps Unix socket paths short; Windows has no /tmp, so use the OS temp directory there.
+const tempRoot = process.platform === "win32" ? tmpdir() : "/tmp";
+// Experimental servers listen on Unix-domain sockets, which are not supported on Windows.
+const serverTest = test.skipIf(process.platform === "win32");
 let agentDir: string;
 
 beforeEach(async () => {
-	agentDir = await mkdtemp(join("/tmp", "relay-experimental-agent-"));
+	agentDir = await mkdtemp(join(tempRoot, "relay-experimental-agent-"));
 	directories.add(agentDir);
 	await configureExperimentalWorkerModel(agentDir);
 	vi.stubEnv("RELAY_CODING_AGENT_DIR", agentDir);
@@ -44,7 +49,7 @@ beforeEach(async () => {
 });
 
 async function makeServer(): Promise<{ directory: string; runtime: RunningServer }> {
-	const directory = await mkdtemp(join("/tmp", "pes-"));
+	const directory = await mkdtemp(join(tempRoot, "pes-"));
 	directories.add(directory);
 	const runtime = await startServer({ ...sessionWorkerModel, directory });
 	servers.add(runtime);
@@ -82,8 +87,8 @@ afterEach(async () => {
 });
 
 describe("experimental durable server composition", () => {
-	test("uses RELAY_SERVER_DIR and RELAY_SERVER_ID", async () => {
-		const directory = await mkdtemp(join("/tmp", "relay-server-dir-"));
+	serverTest("uses RELAY_SERVER_DIR and RELAY_SERVER_ID", async () => {
+		const directory = await mkdtemp(join(tempRoot, "relay-server-dir-"));
 		directories.add(directory);
 		const serverId = "00000000-0000-4000-8000-000000000001";
 		vi.stubEnv("RELAY_SERVER_DIR", directory);
@@ -113,17 +118,17 @@ describe("experimental durable server composition", () => {
 	});
 
 	test("rejects a provider without a model", async () => {
-		const directory = await mkdtemp(join("/tmp", "pes-"));
+		const directory = await mkdtemp(join(tempRoot, "pes-"));
 		directories.add(directory);
 		await expect(startServer({ directory, provider: "anthropic" })).rejects.toThrow("provider requires a model");
 	});
 
-	test("preserves an existing Session model when the server default changes", async () => {
+	serverTest("preserves an existing Session model when the server default changes", async () => {
 		await writeFile(
 			join(agentDir, "settings.json"),
 			JSON.stringify({ defaultProvider: "anthropic", defaultModel: "claude-opus-4-6" }),
 		);
-		const directory = await mkdtemp(join("/tmp", "pes-"));
+		const directory = await mkdtemp(join(tempRoot, "pes-"));
 		directories.add(directory);
 		const first = await startServer({ directory });
 		servers.add(first);
@@ -143,14 +148,14 @@ describe("experimental durable server composition", () => {
 		expect(state.model).toEqual({ provider: "anthropic", modelId: "claude-opus-4-6" });
 	});
 
-	test("rejects model options when discovery selects an existing server", async () => {
+	serverTest("rejects model options when discovery selects an existing server", async () => {
 		const { directory } = await makeServer();
 		await expect(runClient({ command: "client", model: "anthropic/claude-opus-4-6" }, { directory })).rejects.toThrow(
 			"Model selection is only valid when automatically activating a new server",
 		);
 	});
 
-	test("rechecks an auto-discovered server after a version mismatch", async () => {
+	serverTest("rechecks an auto-discovered server after a version mismatch", async () => {
 		const { directory, runtime } = await makeServer();
 		const connect = Client.connect.bind(Client);
 		vi.spyOn(Client, "connect")
@@ -164,8 +169,8 @@ describe("experimental durable server composition", () => {
 		}
 	});
 
-	test("serializes concurrent cold activation and retires after both clients leave", async () => {
-		const directory = await mkdtemp(join("/tmp", "relay-auto-server-"));
+	serverTest("serializes concurrent cold activation and retires after both clients leave", async () => {
+		const directory = await mkdtemp(join(tempRoot, "relay-auto-server-"));
 		directories.add(directory);
 		const serverId = "00000000-0000-4000-8000-000000000001";
 		vi.stubEnv("RELAY_SERVER_DIR", directory);
@@ -193,8 +198,8 @@ describe("experimental durable server composition", () => {
 		await expect.poll(() => pathExists(join(directory, `control-${serverId}.sock`)), { timeout: 5_000 }).toBe(false);
 	});
 
-	test("passes client plugin packages to a cold server and restores them for its next generation", async () => {
-		const directory = await mkdtemp(join("/tmp", "relay-auto-plugin-"));
+	serverTest("passes client plugin packages to a cold server and restores them for its next generation", async () => {
+		const directory = await mkdtemp(join(tempRoot, "relay-auto-plugin-"));
 		directories.add(directory);
 		const serverId = "00000000-0000-4000-8000-000000000001";
 		const packagePath = fileURLToPath(new URL("../examples/plugins/relay-example-plugin", import.meta.url));
@@ -231,8 +236,8 @@ describe("experimental durable server composition", () => {
 		}
 	});
 
-	test("retires a cold server after its only Session attachment disconnects", async () => {
-		const directory = await mkdtemp(join("/tmp", "relay-auto-session-"));
+	serverTest("retires a cold server after its only Session attachment disconnects", async () => {
+		const directory = await mkdtemp(join(tempRoot, "relay-auto-session-"));
 		directories.add(directory);
 		const serverId = "00000000-0000-4000-8000-000000000001";
 		vi.stubEnv("RELAY_SERVER_DIR", directory);
@@ -247,8 +252,8 @@ describe("experimental durable server composition", () => {
 		await expect.poll(() => pathExists(join(directory, `control-${serverId}.sock`)), { timeout: 5_000 }).toBe(false);
 	});
 
-	test("runs and discovers multiple logical servers from one directory", async () => {
-		const directory = await mkdtemp(join("/tmp", "relay-multi-server-"));
+	serverTest("runs and discovers multiple logical servers from one directory", async () => {
+		const directory = await mkdtemp(join(tempRoot, "relay-multi-server-"));
 		directories.add(directory);
 		const firstId = "00000000-0000-4000-8000-000000000001";
 		const secondId = "00000000-0000-4000-8000-000000000002";
@@ -282,7 +287,7 @@ describe("experimental durable server composition", () => {
 		});
 	});
 
-	test("hydrates and mutates server Session services across framed clients", async () => {
+	serverTest("hydrates and mutates server Session services across framed clients", async () => {
 		const { runtime } = await makeServer();
 		const firstClient = await Client.connect({
 			serverId: runtime.serverId,
@@ -343,7 +348,7 @@ describe("experimental durable server composition", () => {
 		await Promise.all([firstServices.dispose(BACKGROUND_CONTEXT), secondServices.dispose(BACKGROUND_CONTEXT)]);
 	});
 
-	test("hydrates and updates the Models service across concurrent framed clients", async () => {
+	serverTest("hydrates and updates the Models service across concurrent framed clients", async () => {
 		const { runtime } = await makeServer();
 		const firstClient = await attachClient(runtime, "demo-1");
 		const workerPid = runtime.workerPids.get("demo-1");
@@ -381,8 +386,8 @@ describe("experimental durable server composition", () => {
 		await Promise.all([firstServices.dispose(BACKGROUND_CONTEXT), secondServices.dispose(BACKGROUND_CONTEXT)]);
 	});
 
-	test("loads conventional Session facets from multiple configured plugin packages", async () => {
-		const directory = await mkdtemp(join("/tmp", "pes-plugin-"));
+	serverTest("loads conventional Session facets from multiple configured plugin packages", async () => {
+		const directory = await mkdtemp(join(tempRoot, "pes-plugin-"));
 		directories.add(directory);
 		const secondPackagePath = join(directory, "second-plugin");
 		await mkdir(join(secondPackagePath, "src"), { recursive: true });
@@ -430,8 +435,8 @@ describe("experimental durable server composition", () => {
 		}
 	});
 
-	test("uses the most recently selected model for a new Session", async () => {
-		const directory = await mkdtemp(join("/tmp", "pes-model-default-"));
+	serverTest("uses the most recently selected model for a new Session", async () => {
+		const directory = await mkdtemp(join(tempRoot, "pes-model-default-"));
 		directories.add(directory);
 		const runtime = await startServer({ directory });
 		servers.add(runtime);
@@ -456,7 +461,7 @@ describe("experimental durable server composition", () => {
 		await secondServices.dispose(BACKGROUND_CONTEXT);
 	});
 
-	test("composes management attachment with Session service hydration", async () => {
+	serverTest("composes management attachment with Session service hydration", async () => {
 		const { runtime } = await makeServer();
 		const clientRuntime = await openClientRuntime({
 			command: "client",
@@ -477,7 +482,7 @@ describe("experimental durable server composition", () => {
 		}
 	});
 
-	test("fences superseded attachment hydration by attachment generation", async ({ onTestFinished }) => {
+	serverTest("fences superseded attachment hydration by attachment generation", async ({ onTestFinished }) => {
 		const { runtime } = await makeServer();
 		const client = await Client.connect({
 			serverId: runtime.serverId,
@@ -533,63 +538,64 @@ describe("experimental durable server composition", () => {
 		expect(errors).toEqual([]);
 	});
 
-	test("observes keyed service instances and fences replacement generations over framed transport", async ({
-		onTestFinished,
-	}) => {
-		const spawn = vi
-			.spyOn(processRuntime, "spawnInternalProcess")
-			.mockImplementation((role, args, options) =>
-				realSpawnInternalProcess(
-					role,
-					args,
-					role === "session-worker" ? { ...options, entryUrl: fauxWorkerEntryUrl } : options,
-				),
-			);
-		onTestFinished(() => spawn.mockRestore());
-		const { runtime } = await makeServer();
-		const client = await attachClient(runtime, "demo-1");
-		const errors: Error[] = [];
-		const services = createSessionServiceSource(client, {
-			onError: (error) => errors.push(error),
-		});
-		await expect(services.catalogue(BACKGROUND_CONTEXT)).resolves.toContainEqual({
-			serviceId: KeyedProbe.id,
-			mode: "keyed",
-		});
-		const observed: { service: KeyedProbe; value: string | undefined }[] = [];
-		const consumer = defineFacet({
-			id: "@test/keyed-probe-consumer",
-			setup(env) {
-				env.observe(KeyedProbe, (service) => {
-					observed.push({ service, value: service.state.value?.value });
-				});
-			},
-		});
-		const facetHost = await createFacetHost({ facets: [consumer], serviceSources: [services] });
+	serverTest(
+		"observes keyed service instances and fences replacement generations over framed transport",
+		async ({ onTestFinished }) => {
+			const spawn = vi
+				.spyOn(processRuntime, "spawnInternalProcess")
+				.mockImplementation((role, args, options) =>
+					realSpawnInternalProcess(
+						role,
+						args,
+						role === "session-worker" ? { ...options, entryUrl: fauxWorkerEntryUrl } : options,
+					),
+				);
+			onTestFinished(() => spawn.mockRestore());
+			const { runtime } = await makeServer();
+			const client = await attachClient(runtime, "demo-1");
+			const errors: Error[] = [];
+			const services = createSessionServiceSource(client, {
+				onError: (error) => errors.push(error),
+			});
+			await expect(services.catalogue(BACKGROUND_CONTEXT)).resolves.toContainEqual({
+				serviceId: KeyedProbe.id,
+				mode: "keyed",
+			});
+			const observed: { service: KeyedProbe; value: string | undefined }[] = [];
+			const consumer = defineFacet({
+				id: "@test/keyed-probe-consumer",
+				setup(env) {
+					env.observe(KeyedProbe, (service) => {
+						observed.push({ service, value: service.state.value?.value });
+					});
+				},
+			});
+			const facetHost = await createFacetHost({ facets: [consumer], serviceSources: [services] });
 
-		expect(services.attachment.value).toEqual({ status: "attached", sessionId: "demo-1" });
-		await vi.waitFor(() => expect(observed).toHaveLength(1));
-		expect(observed[0]!.value).toBe("first");
-		const staleReplace = observed[0]!.service.replace;
-		await expect(staleReplace("second", BACKGROUND_CONTEXT)).resolves.toBeUndefined();
-		await vi.waitFor(() => expect(observed).toHaveLength(2));
-		expect(observed[1]!.value).toBe("second");
-		expect(() => staleReplace("late", BACKGROUND_CONTEXT)).toThrow("observation is closed");
+			expect(services.attachment.value).toEqual({ status: "attached", sessionId: "demo-1" });
+			await vi.waitFor(() => expect(observed).toHaveLength(1));
+			expect(observed[0]!.value).toBe("first");
+			const staleReplace = observed[0]!.service.replace;
+			await expect(staleReplace("second", BACKGROUND_CONTEXT)).resolves.toBeUndefined();
+			await vi.waitFor(() => expect(observed).toHaveLength(2));
+			expect(observed[1]!.value).toBe("second");
+			expect(() => staleReplace("late", BACKGROUND_CONTEXT)).toThrow("observation is closed");
 
-		const replacedReplace = observed[1]!.service.replace;
-		await expect(attachSession(client, "demo-2")).resolves.toBeUndefined();
-		await services.whenAttached("demo-2", BACKGROUND_CONTEXT);
-		expect(observed).toHaveLength(3);
-		expect(services.attachment.value).toEqual({ status: "attached", sessionId: "demo-2" });
-		expect(observed[2]!.value).toBe("first");
-		expect(() => replacedReplace("late", BACKGROUND_CONTEXT)).toThrow("observation is closed");
-		expect(errors).toEqual([]);
+			const replacedReplace = observed[1]!.service.replace;
+			await expect(attachSession(client, "demo-2")).resolves.toBeUndefined();
+			await services.whenAttached("demo-2", BACKGROUND_CONTEXT);
+			expect(observed).toHaveLength(3);
+			expect(services.attachment.value).toEqual({ status: "attached", sessionId: "demo-2" });
+			expect(observed[2]!.value).toBe("first");
+			expect(() => replacedReplace("late", BACKGROUND_CONTEXT)).toThrow("observation is closed");
+			expect(errors).toEqual([]);
 
-		await facetHost.dispose();
-		await expect(services.dispose(BACKGROUND_CONTEXT)).resolves.toBeUndefined();
-	});
+			await facetHost.dispose();
+			await expect(services.dispose(BACKGROUND_CONTEXT)).resolves.toBeUndefined();
+		},
+	);
 
-	test("answers a client prompt through the worker-owned service provider", async ({ onTestFinished }) => {
+	serverTest("answers a client prompt through the worker-owned service provider", async ({ onTestFinished }) => {
 		const spawn = vi
 			.spyOn(processRuntime, "spawnInternalProcess")
 			.mockImplementation((role, args, options) =>
@@ -607,7 +613,7 @@ describe("experimental durable server composition", () => {
 		expect(result).toMatchObject({ kind: "prompted", text: "deterministic remote answer" });
 	});
 
-	test("replicates the transcript after consecutive prompts", async ({ onTestFinished }) => {
+	serverTest("replicates the transcript after consecutive prompts", async ({ onTestFinished }) => {
 		const spawn = vi
 			.spyOn(processRuntime, "spawnInternalProcess")
 			.mockImplementation((role, args, options) =>
@@ -646,7 +652,7 @@ describe("experimental durable server composition", () => {
 		}
 	});
 
-	test("stops an idle Session worker after its client disconnects", async () => {
+	serverTest("stops an idle Session worker after its client disconnects", async () => {
 		const { runtime } = await makeServer();
 		const client = await attachClient(runtime, "demo-1");
 		const pid = runtime.workerPids.get("demo-1");
@@ -658,7 +664,7 @@ describe("experimental durable server composition", () => {
 		expect(processExists(pid!)).toBe(false);
 	});
 
-	test("starts one process per attached session and stops them during shutdown", async () => {
+	serverTest("starts one process per attached session and stops them during shutdown", async () => {
 		const { runtime } = await makeServer();
 		await Promise.all([attachClient(runtime, "demo-1"), attachClient(runtime, "demo-2")]);
 
@@ -672,8 +678,8 @@ describe("experimental durable server composition", () => {
 		await Promise.all(pids.map((pid) => expect.poll(() => processExists(pid)).toBe(false)));
 	});
 
-	test("server runtime replaces an exited worker on the next attach", async () => {
-		const directory = await mkdtemp(join("/tmp", "pew-"));
+	serverTest("server runtime replaces an exited worker on the next attach", async () => {
+		const directory = await mkdtemp(join(tempRoot, "pew-"));
 		directories.add(directory);
 		const runtime = await startServer({ ...sessionWorkerModel, directory });
 		servers.add(runtime);
@@ -689,8 +695,8 @@ describe("experimental durable server composition", () => {
 		expect(replacementPid).not.toBe(firstPid);
 	});
 
-	test("discovers workers after replacing the server", async () => {
-		const firstDirectory = await mkdtemp(join("/tmp", "per-"));
+	serverTest("discovers workers after replacing the server", async () => {
+		const firstDirectory = await mkdtemp(join(tempRoot, "per-"));
 		directories.add(firstDirectory);
 		const first = await startServer({ ...sessionWorkerModel, directory: firstDirectory });
 		servers.add(first);
@@ -721,8 +727,8 @@ describe("experimental durable server composition", () => {
 		expect(replacement.workerPids.get("demo-2")).not.toBe(firstWorkerPid);
 	});
 
-	test("retires an unclaimed idle worker after replacement demand expires", async () => {
-		const directory = await mkdtemp(join("/tmp", "relay-orphan-worker-"));
+	serverTest("retires an unclaimed idle worker after replacement demand expires", async () => {
+		const directory = await mkdtemp(join(tempRoot, "relay-orphan-worker-"));
 		directories.add(directory);
 		vi.stubEnv("__PI_SESSION_WORKER_ORPHAN_DEMAND_GRACE_MS", "50");
 		const first = await startServer({ ...sessionWorkerModel, directory });
@@ -740,9 +746,9 @@ describe("experimental durable server composition", () => {
 		expect(processExists(workerPid!)).toBe(false);
 	});
 
-	test("restores tracked sessions that are outside the replacement catalog", async () => {
-		const directory = await mkdtemp(join("/tmp", "pet-"));
-		const emptySessionDir = await mkdtemp(join("/tmp", "pet-sessions-"));
+	serverTest("restores tracked sessions that are outside the replacement catalog", async () => {
+		const directory = await mkdtemp(join(tempRoot, "pet-"));
+		const emptySessionDir = await mkdtemp(join(tempRoot, "pet-sessions-"));
 		directories.add(directory);
 		directories.add(emptySessionDir);
 		const first = await startServer({ ...sessionWorkerModel, directory });
@@ -766,8 +772,8 @@ describe("experimental durable server composition", () => {
 		expect(replacement.workerPids.get("demo-1")).toBe(workerPid);
 	});
 
-	test("reports missing and ambiguous session selections", async () => {
-		const sharedDirectory = await mkdtemp(join("/tmp", "ped-"));
+	serverTest("reports missing and ambiguous session selections", async () => {
+		const sharedDirectory = await mkdtemp(join(tempRoot, "ped-"));
 		directories.add(sharedDirectory);
 		const firstShared = await startServer({
 			...sessionWorkerModel,

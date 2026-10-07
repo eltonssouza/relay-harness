@@ -6,6 +6,9 @@ import { describe, expect, it } from "vitest";
 import { type ExternalEditorResult, editInExternalEditor } from "../src/modes/interactive/external-editor.ts";
 
 const editorFixturePath = fileURLToPath(new URL("./fixtures/fake-external-editor.mjs", import.meta.url));
+// The editor command is split on spaces, so fall back to the PATH lookup when the node path has one
+// (e.g. C:\Program Files\nodejs\node.exe on Windows).
+const nodeCommand = process.execPath.includes(" ") ? "node" : process.execPath;
 
 interface EditorCapture {
 	filePath: string;
@@ -22,7 +25,7 @@ async function runExternalEditor(fixtureFlag?: "--fail" | "--empty"): Promise<{
 	const capturePath = join(testDirectory, "capture.json");
 	try {
 		const result = await editInExternalEditor({
-			command: `${process.execPath} ${editorFixturePath} ${capturePath}${fixtureFlag ? ` ${fixtureFlag}` : ""}`,
+			command: `${nodeCommand} ${editorFixturePath} ${capturePath}${fixtureFlag ? ` ${fixtureFlag}` : ""}`,
 			content: "original",
 		});
 		const capture = JSON.parse(readFileSync(capturePath, "utf-8")) as EditorCapture;

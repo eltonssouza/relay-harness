@@ -9,7 +9,7 @@ describe("experimental server session directory", () => {
 	test("uses the experimental directory under the configured agent directory by default", () => {
 		vi.stubEnv("RELAY_CODING_AGENT_DIR", "/tmp/relay-agent-config");
 
-		expect(resolveSessionDirectory()).toBe("/tmp/relay-agent-config/experimental/sessions");
+		expect(resolveSessionDirectory()).toBe(resolve("/tmp/relay-agent-config", "experimental", "sessions"));
 	});
 
 	test("resolves an explicit relative directory from the current working directory", () => {
