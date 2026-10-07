@@ -16,7 +16,7 @@ import {
 	type TextContent,
 } from "@relay-harness/ai/compat";
 import { Type } from "typebox";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AgentSession } from "../src/core/agent-session.ts";
 import { AuthStorage } from "../src/core/auth-storage.ts";
 import { SessionManager } from "../src/core/session-manager.ts";
@@ -137,8 +137,8 @@ describe("AgentSession concurrent prompt guard", () => {
 		// Start first prompt (don't await, it will block until abort)
 		const firstPrompt = session.prompt("First message");
 
-		// Wait a tick for isStreaming to be set
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		// Wait until streaming starts; a fixed delay is too short on a loaded machine
+		await vi.waitFor(() => expect(session.isStreaming).toBe(true));
 
 		// Verify we're streaming
 		expect(session.isStreaming).toBe(true);
@@ -158,7 +158,7 @@ describe("AgentSession concurrent prompt guard", () => {
 
 		// Start first prompt
 		const firstPrompt = session.prompt("First message");
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await vi.waitFor(() => expect(session.isStreaming).toBe(true));
 
 		// steer should work while streaming
 		await expect(session.steer("Steering message")).resolves.toBe("queued");
@@ -174,7 +174,7 @@ describe("AgentSession concurrent prompt guard", () => {
 
 		// Start first prompt
 		const firstPrompt = session.prompt("First message");
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await vi.waitFor(() => expect(session.isStreaming).toBe(true));
 
 		// followUp should work while streaming
 		await expect(session.followUp("Follow-up message")).resolves.toBe("queued");
@@ -269,7 +269,7 @@ describe("AgentSession concurrent prompt guard", () => {
 		});
 
 		const firstPrompt = session.prompt("First message");
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await vi.waitFor(() => expect(session.isStreaming).toBe(true));
 		expect(session.isStreaming).toBe(true);
 
 		const relay = (

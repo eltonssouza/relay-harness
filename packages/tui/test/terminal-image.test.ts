@@ -4,7 +4,7 @@
 
 import assert from "node:assert";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import { Image, setImageTranscoder } from "../src/components/image.ts";
 import {
@@ -778,12 +778,15 @@ describe("image cell sizing", () => {
 });
 
 describe("imageFallback", () => {
+	// The shortened path keeps the platform separator after "~".
+	const shortShot = ["~", ".relay", "agent", "shot.png"].join(sep);
+
 	it("shortens home-prefixed absolute paths without hyperlinks", () => {
 		setCapabilities({ images: null, trueColor: false, hyperlinks: false });
 		try {
 			const abs = join(homedir(), ".relay", "agent", "shot.png");
 			const result = imageFallback("image/png", { widthPx: 1280, heightPx: 720 }, abs);
-			assert.strictEqual(result, "[Image: ~/.relay/agent/shot.png [image/png] 1280x720]");
+			assert.strictEqual(result, `[Image: ${shortShot} [image/png] 1280x720]`);
 		} finally {
 			resetCapabilitiesCache();
 		}
@@ -801,7 +804,7 @@ describe("imageFallback", () => {
 			);
 			// Visible text must use ~/... not the expanded home path.
 			const visible = result.replace(/\x1b\]8;;.*?\x1b\\/g, "");
-			assert.strictEqual(visible, "[Image: ~/.relay/agent/shot.png [image/png] 10x10]");
+			assert.strictEqual(visible, `[Image: ${shortShot} [image/png] 10x10]`);
 		} finally {
 			resetCapabilitiesCache();
 		}

@@ -10,6 +10,8 @@ import { TestServerHost } from "../src/testing/index.ts";
 import { createUnixServer } from "../src/transports/unix/index.ts";
 
 const host = new TestServerHost();
+// Unix-domain socket listeners are not supported on Windows (Node binds named pipes there).
+const unixSocketTest = test.skipIf(process.platform === "win32");
 
 let server: Server | undefined;
 let tempDirectory: string | undefined;
@@ -32,7 +34,7 @@ test("requires explicit listeners and a canonical UUIDv4 server identity", () =>
 	expect(() => new Server(host, { listeners: [], serverId: "invalid-server" })).toThrow(/serverId/);
 });
 
-test("rejects concurrent start calls without leaking the Unix listener", async () => {
+unixSocketTest("rejects concurrent start calls without leaking the Unix listener", async () => {
 	const path = await makeSocketPath();
 	server = createUnixServer(host, { path, serverId: "00000000-0000-4000-8000-000000000001" });
 	const starting = server.start();

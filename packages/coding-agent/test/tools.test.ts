@@ -436,13 +436,15 @@ describe("Coding Agent Tools", () => {
 			const testFile = join(testDir, "edit-readonly.txt");
 			writeFileSync(testFile, "hello\n");
 			chmodSync(testFile, 0o444);
+			// Windows maps 0o444 to the read-only attribute, which reports EPERM instead of EACCES.
+			const expectedCode = process.platform === "win32" ? "EPERM" : "EACCES";
 
 			await expect(
 				editTool.execute("test-call-14", {
 					path: testFile,
 					edits: [{ oldText: "hello", newText: "world" }],
 				}),
-			).rejects.toThrow(`Could not edit file: ${testFile}. Error code: EACCES.`);
+			).rejects.toThrow(`Could not edit file: ${testFile}. Error code: ${expectedCode}.`);
 		});
 
 		it("should include the original error message for unknown edit access errors", async () => {
@@ -471,15 +473,19 @@ describe("Coding Agent Tools", () => {
 			expect(result).toEqual({ error: `Could not edit file: ${missingFile}. Error code: ENOENT.` });
 		});
 
-		it("should include EACCES in diff preview for unreadable files", async () => {
-			const unreadableFile = join(testDir, "unreadable-preview.txt");
-			writeFileSync(unreadableFile, "hello\n");
-			chmodSync(unreadableFile, 0o222);
+		// Windows has no write-only file mode; chmod cannot make a file unreadable there.
+		it.skipIf(process.platform === "win32")(
+			"should include EACCES in diff preview for unreadable files",
+			async () => {
+				const unreadableFile = join(testDir, "unreadable-preview.txt");
+				writeFileSync(unreadableFile, "hello\n");
+				chmodSync(unreadableFile, 0o222);
 
-			const result = await computeEditsDiff(unreadableFile, [{ oldText: "hello", newText: "world" }], testDir);
+				const result = await computeEditsDiff(unreadableFile, [{ oldText: "hello", newText: "world" }], testDir);
 
-			expect(result).toEqual({ error: `Could not edit file: ${unreadableFile}. Error code: EACCES.` });
-		});
+				expect(result).toEqual({ error: `Could not edit file: ${unreadableFile}. Error code: EACCES.` });
+			},
+		);
 	});
 
 	describe("bash tool", () => {
@@ -909,7 +915,8 @@ describe("Coding Agent Tools", () => {
 			writeFileSync(testFile, "target\n");
 
 			const result = await grepTool.execute("test-call-grep-injection", {
-				pattern: `--pre=${payload}`,
+				// Forward slashes keep Windows path separators from becoming regex escapes such as \U.
+				pattern: `--pre=${payload.replace(/\\/g, "/")}`,
 				path: testDir,
 			});
 
@@ -1085,13 +1092,12 @@ describe("tool cwd resolution", () => {
 
 	it("bash uses ctx.cwd when provided", async () => {
 		const tool = createBashToolDefinition("/", { exposeSessionEnvironment: false });
-		const result = await tool.execute(
-			"test-bash-ctx-cwd",
-			{ command: "pwd" },
-			undefined,
-			undefined,
-			fakeCtx(testDir),
-		);
+		// Git Bash on Windows prints an MSYS path from pwd (/tmp/...), so ask node for the native cwd there.
+		const command =
+			process.platform === "win32"
+				? `${JSON.stringify(process.execPath)} -e ${JSON.stringify("process.stdout.write(process.cwd())")}`
+				: "pwd";
+		const result = await tool.execute("test-bash-ctx-cwd", { command }, undefined, undefined, fakeCtx(testDir));
 		const output = getTextOutput(result);
 		expect(output).toContain(testDir);
 	});

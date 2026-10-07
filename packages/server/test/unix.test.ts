@@ -1,6 +1,7 @@
 import { type ChildProcess, fork } from "node:child_process";
 import { once } from "node:events";
 import { lstat, mkdtemp, readdir, readFile, rm, unlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
 import type { Server } from "../src/index.ts";
@@ -11,9 +12,13 @@ const servers = new Set<Server>();
 const clients = new Set<ProtocolTestClient>();
 const children = new Set<ChildProcess>();
 const tempDirectories = new Set<string>();
+// /tmp keeps Unix socket paths short; Windows has no /tmp, so use the OS temp directory there.
+const tempRoot = process.platform === "win32" ? tmpdir() : "/tmp";
+// Unix-domain socket listeners are not supported on Windows (Node binds named pipes there).
+const unixSocketTest = test.skipIf(process.platform === "win32");
 
 async function makeSocketPath(nested = false): Promise<string> {
-	const directory = await mkdtemp(join("/tmp", "ps-"));
+	const directory = await mkdtemp(join(tempRoot, "ps-"));
 	tempDirectories.add(directory);
 	return nested ? join(directory, "p", "n", "server.sock") : join(directory, "server.sock");
 }
@@ -38,8 +43,8 @@ afterEach(async () => {
 	tempDirectories.clear();
 });
 
-test("creates an in-memory server ID and derives its explicit Unix socket path", async () => {
-	const directory = await mkdtemp(join("/tmp", "relay-server-"));
+unixSocketTest("creates an in-memory server ID and derives its explicit Unix socket path", async () => {
+	const directory = await mkdtemp(join(tempRoot, "relay-server-"));
 	tempDirectories.add(directory);
 	const serverId = "00000000-0000-4000-8000-000000000001";
 	const path = getUnixSocketPath(serverId, directory);
@@ -65,7 +70,7 @@ test("creates an in-memory server ID and derives its explicit Unix socket path",
 });
 
 describe("Unix listener filesystem lifecycle", () => {
-	test("rejects a live listener without unlinking it", async () => {
+	unixSocketTest("rejects a live listener without unlinking it", async () => {
 		const path = await makeSocketPath();
 		const first = makeServer(path);
 		await first.start();
@@ -93,7 +98,7 @@ describe("Unix listener filesystem lifecycle", () => {
 		expect(await readFile(path, "utf8")).toBe("do not remove");
 	});
 
-	test("creates nested temp parents, restricts permissions, and removes its own socket", async () => {
+	unixSocketTest("creates nested temp parents, restricts permissions, and removes its own socket", async () => {
 		const path = await makeSocketPath(true);
 		const server = makeServer(path);
 		await server.start();
@@ -106,7 +111,7 @@ describe("Unix listener filesystem lifecycle", () => {
 		await expect(lstat(path)).rejects.toMatchObject({ code: "ENOENT" });
 	});
 
-	test("does not remove a replacement inode during shutdown", async () => {
+	unixSocketTest("does not remove a replacement inode during shutdown", async () => {
 		const path = await makeSocketPath();
 		const server = makeServer(path);
 		await server.start();
@@ -119,7 +124,7 @@ describe("Unix listener filesystem lifecycle", () => {
 		expect(await readFile(path, "utf8")).toBe("replacement");
 	});
 
-	test("removes a genuinely stale socket before binding", async () => {
+	unixSocketTest("removes a genuinely stale socket before binding", async () => {
 		const path = await makeSocketPath();
 		const child = fork(new URL("fixtures/stale-socket-server.mjs", import.meta.url), [path], {
 			stdio: ["ignore", "ignore", "inherit", "ipc"],

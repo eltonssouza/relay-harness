@@ -90,7 +90,8 @@ afterEach(async () => {
 	tempDirectories.clear();
 });
 
-describe("discoverUnixServers", () => {
+// Unix-domain socket transport is not supported on Windows; discoverUnixServers throws there.
+describe.skipIf(process.platform === "win32")("discoverUnixServers", () => {
 	test("returns no routes when the server directory is missing", async () => {
 		const directory = join(await makeDirectory(), "missing");
 		await expect(discoverUnixServers({ directory })).resolves.toEqual([]);
