@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Changed
+
+- The dark, light and system themes use the cyan of the Relay logo as their accent instead of violet: accents, borders, custom messages, inline code, list bullets, syntax types and the high thinking level. The system theme takes them from the terminal's cyan (ANSI 6) instead of magenta (ANSI 5).
+
 ### Fixed
 
 - Fixed the Laya image download showing `0/N layers` until it finished with Docker Desktop: its containerd image store reports a layer as downloaded before it extracts it, which the progress now counts. The first message also says the download is a few GB.
