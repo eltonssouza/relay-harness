@@ -153,7 +153,8 @@ function buildBunBinaryRelease(targetDirectory, archiveDirectory) {
 	}
 	const platform = currentBinaryPlatform();
 	const binaryBuildDirectory = join(archiveDirectory, "binary-build");
-	run("./scripts/build-binaries.sh", [
+	run("bash", [
+		"./scripts/build-binaries.sh",
 		"--skip-install",
 		"--skip-build",
 		"--platform",
