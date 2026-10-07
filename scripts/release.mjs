@@ -19,7 +19,7 @@
  * 10. Push main and the tag
  */
 
-import { execSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnNpm } from "./npm-command.mjs";
@@ -99,10 +99,6 @@ function compareVersions(a, b) {
 	return 0;
 }
 
-function shellQuote(value) {
-	return `'${value.replace(/'/g, `'\\''`)}'`;
-}
-
 function removeStaleWorkspaceLockEntries() {
 	const workspaceVersions = new Map(
 		getPublicWorkspacePackages().map((pkg) => [pkg.name, pkg.version]),
@@ -137,7 +133,13 @@ function stageChangedFiles() {
 		return;
 	}
 
-	run(`git add -- ${paths.map(shellQuote).join(" ")}`);
+	// Paths go to git as arguments, not through a shell: cmd.exe on Windows keeps POSIX quotes.
+	console.log(`$ git add -- ${paths.join(" ")}`);
+	const result = spawnSync("git", ["add", "--", ...paths], { stdio: "inherit" });
+	if (result.status !== 0) {
+		console.error("Command failed: git add");
+		process.exit(1);
+	}
 }
 
 function bumpOrSetVersion(target) {
