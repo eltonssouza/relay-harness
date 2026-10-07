@@ -14,6 +14,7 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 - Fixed the update notice never appearing: it read the latest GitHub release, which the private repository hides from anonymous users. It now reads `@relay-harness/coding-agent` on npm and shows the update command.
 - Fixed `/laya setup` failing at "Installing torch" on Debian 12 and other distributions whose Python seeds an old pip: the new environment now updates pip first.
+- Fixed package resource filters toggled in `/config` on Windows being saved with backslashes (`-extensions\bar.ts`), which broke shared project settings on Linux and macOS; they are now saved with `/`.
 
 ## [1.0.2] - 2026-10-04
 
