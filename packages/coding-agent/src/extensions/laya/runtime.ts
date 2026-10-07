@@ -220,6 +220,16 @@ export async function setupLayaRuntime(options: SetupOptions): Promise<LayaPaths
 			"Creating the environment failed",
 		);
 		const pip = [paths.venvPython, "-m", "pip", "install", "-q", "--disable-pip-version-check"] as const;
+		// Distribution pythons seed old pips (Debian 12: 23.0) that reject current wheel metadata on
+		// the torch index and fall back to source builds that cannot finish there.
+		report("Updating pip");
+		await run(
+			exec,
+			pip[0],
+			[...pip.slice(1), "--upgrade", "pip"],
+			{ signal, timeout: PIP_TIMEOUT_MS },
+			"Updating pip failed",
+		);
 		report("Installing torch (large download)");
 		await run(
 			exec,
