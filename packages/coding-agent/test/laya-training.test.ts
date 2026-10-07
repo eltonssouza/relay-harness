@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AgentMessage, AgentTool } from "@relay-harness/agent-core";
@@ -7,6 +7,8 @@ import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ENV_AGENT_DIR } from "../src/config.ts";
 import type { SessionEntry } from "../src/core/session-manager.ts";
+import type { DockerRun } from "../src/extensions/laya/docker.ts";
+import { DOCKER_MISSING } from "../src/extensions/laya/docker.ts";
 import layaExtension from "../src/extensions/laya/index.ts";
 import {
 	buildLearnPrompt,
@@ -23,9 +25,8 @@ import {
 	words,
 } from "../src/extensions/laya/memory.ts";
 import { LAYA_PLAN_MESSAGE } from "../src/extensions/laya/routers.ts";
-import { type LayaModelManifest, layaPaths } from "../src/extensions/laya/runtime.ts";
+import { LAYA_IMAGE_PATHS, type LayaModelManifest } from "../src/extensions/laya/runtime.ts";
 import { generateSeed } from "../src/extensions/laya/seed.ts";
-import { LayaServer } from "../src/extensions/laya/server.ts";
 import {
 	ensureWorkspace,
 	LayaTrainer,
@@ -34,7 +35,6 @@ import {
 	readRows,
 	type Score,
 	SEED_ROWS,
-	type SpawnTraining,
 	type TrainingProgress,
 	type TrainingRow,
 	trainingWorkspace,
@@ -313,33 +313,40 @@ const manifest: LayaModelManifest = {
 
 const score = (correct: number, n = 100): Score => ({ n, correct, per_question: {} });
 
-/** A training script stand-in: reports progress, writes the model and prints the scores. */
-function fakeSpawn(
+/**
+ * Docker stand-in for training: the training container reports progress and prints the scores,
+ * and the cleanup container records which model paths it deletes.
+ */
+function fakeDocker(
 	scores: { candidate: number; current: number },
 	calls: string[][],
-	failFirst?: string,
-): SpawnTraining {
-	return (_command, args, _env, onStderrLine) => {
-		calls.push(args);
-		const out = args[args.indexOf("--out") + 1];
-		onStderrLine('PROGRESS {"phase": "train", "epoch": 1, "epochs": 3, "done": 0.5, "eta_s": 240}');
-		onStderrLine("a warning from torch");
-		let stdout: string;
-		if (failFirst && calls.length === 1) {
-			stdout = JSON.stringify({ ok: false, error: failFirst, message: "The GPU ran out of memory while training." });
-		} else {
-			mkdirSync(out, { recursive: true });
-			writeFileSync(join(out, "model.safetensors"), "model");
-			stdout = JSON.stringify({
-				ok: true,
-				seconds: 300,
-				device: "cuda",
-				rows: { focus: 2 },
-				test: { candidate: score(scores.candidate), current: score(scores.current) },
-				focus: { candidate: score(34, 36), current: score(20, 36) },
-			});
+	options: { failFirst?: string; removed?: string[] } = {},
+): DockerRun {
+	return async (args, runOptions) => {
+		if (args[0] === "rm") return { code: 0, stdout: "", stderr: "" };
+		if (args.includes("-c")) {
+			options.removed?.push(...args.slice(args.indexOf("-c") + 2));
+			return { code: 0, stdout: "", stderr: "" };
 		}
-		return { done: Promise.resolve({ code: 0, stdout: `${stdout}\n` }), kill: () => {} };
+		calls.push(args);
+		runOptions?.onLine?.('PROGRESS {"phase": "train", "epoch": 1, "epochs": 3, "done": 0.5, "eta_s": 240}', "stderr");
+		runOptions?.onLine?.("a warning from torch", "stderr");
+		const stdout =
+			options.failFirst && calls.length === 1
+				? JSON.stringify({
+						ok: false,
+						error: options.failFirst,
+						message: "The GPU ran out of memory while training.",
+					})
+				: JSON.stringify({
+						ok: true,
+						seconds: 300,
+						device: "cuda",
+						rows: { focus: 2 },
+						test: { candidate: score(scores.candidate), current: score(scores.current) },
+						focus: { candidate: score(34, 36), current: score(20, 36) },
+					});
+		return { code: 0, stdout: `${stdout}\n`, stderr: "" };
 	};
 }
 
@@ -352,44 +359,65 @@ describe("laya trainer", () => {
 		rmSync(home, { recursive: true, force: true });
 	});
 
-	function setup(spawn: SpawnTraining) {
-		const paths = layaPaths(home, manifest);
-		mkdirSync(join(paths.venvPython, ".."), { recursive: true });
-		writeFileSync(paths.venvPython, "");
-		mkdirSync(paths.model, { recursive: true });
-		writeFileSync(join(paths.model, "model.safetensors"), "model");
-		const trainer = new LayaTrainer({ home, manifest, paths, spawn });
+	function setup(docker: DockerRun, gpu = true) {
+		const trainer = new LayaTrainer({
+			home,
+			manifest,
+			docker,
+			image: async () => "relay-laya:test",
+			gpu: async () => gpu,
+		});
 		trainer.addExercises([
 			{ state: { request: "Fix the pager" }, expected: { ...LABELS }, source: "session", split: "train" },
 		]);
-		return { trainer, paths };
+		return trainer;
 	}
 
-	it("starts from the active model and activates the new one when the test score holds", async () => {
+	it("trains in a container from the active model and activates the new one when the test score holds", async () => {
 		const calls: string[][] = [];
-		const { trainer, paths } = setup(fakeSpawn({ candidate: 97, current: 97.5 }, calls));
+		const trainer = setup(fakeDocker({ candidate: 97, current: 97.5 }, calls));
 		const progress: TrainingProgress[] = [];
 		const finished: unknown[] = [];
 		trainer.listener = { progress: (value) => progress.push(value), finished: (value) => finished.push(value) };
 
 		const outcome = await trainer.train();
 
-		expect(calls[0]).toEqual(expect.arrayContaining(["learn", "--init", paths.model, "--focus-source", "session"]));
-		expect(readFileSync(paths.trainScript, "utf8")).toContain("def cmd_learn(a):");
+		expect(calls[0]).toEqual(
+			expect.arrayContaining([
+				"--gpus",
+				"all",
+				`type=bind,source=${trainer.workspace.dir},target=${LAYA_IMAGE_PATHS.workspace},readonly`,
+				"relay-laya:test",
+				LAYA_IMAGE_PATHS.trainScript,
+				"learn",
+				"--init",
+				LAYA_IMAGE_PATHS.shippedModel,
+				"--out",
+				"/data/models/local-1",
+				"--focus-source",
+				"session",
+			]),
+		);
 		expect(progress).toEqual([{ phase: "train", epoch: 1, epochs: 3, done: 0.5, eta_s: 240 }]);
 		expect(outcome).toMatchObject({ activated: true, previous: "v1", model: { name: "local-1", basedOn: "v1" } });
 		expect(finished).toEqual([{ outcome }]);
-		expect(trainer.activeModel()).toEqual({ name: "local-1", dir: join(trainer.workspace.models, "local-1") });
+		expect(trainer.activeModel()).toEqual({ name: "local-1", dir: "/data/models/local-1" });
 		expect(trainer.running).toBe(false);
 
 		// The next training starts from the trained model.
 		await trainer.train();
-		expect(calls[1][calls[1].indexOf("--init") + 1]).toBe(join(trainer.workspace.models, "local-1"));
+		expect(calls[1][calls[1].indexOf("--init") + 1]).toBe("/data/models/local-1");
 		expect(trainer.activeModel().name).toBe("local-2");
 	});
 
+	it("trains on the CPU when Docker gives the container no GPU", async () => {
+		const calls: string[][] = [];
+		await setup(fakeDocker({ candidate: 97, current: 97 }, calls), false).train();
+		expect(calls[0]).not.toContain("--gpus");
+	});
+
 	it("keeps the current model when the new one does worse on the test", async () => {
-		const { trainer } = setup(fakeSpawn({ candidate: 90, current: 97 }, []));
+		const trainer = setup(fakeDocker({ candidate: 90, current: 97 }, []));
 		const outcome = await trainer.train();
 		expect(outcome.activated).toBe(false);
 		expect(trainer.activeModel().name).toBe("v1");
@@ -404,47 +432,36 @@ describe("laya trainer", () => {
 
 	it("retries with the smallest batch when the GPU runs out of memory", async () => {
 		const calls: string[][] = [];
-		const { trainer } = setup(fakeSpawn({ candidate: 97, current: 97 }, calls, "out_of_memory"));
-		await trainer.train();
+		await setup(fakeDocker({ candidate: 97, current: 97 }, calls, { failFirst: "out_of_memory" })).train();
 		expect(calls).toHaveLength(2);
 		expect(calls[1]).toEqual(expect.arrayContaining(["--micro-batch", "1", "--low-memory", "on"]));
 	});
 
-	it("deletes old inactive models and keeps the active one", async () => {
-		const { trainer } = setup(fakeSpawn({ candidate: 97, current: 97 }, []));
+	it("deletes old inactive models from the volume and keeps the active one", async () => {
+		const removed: string[] = [];
+		const trainer = setup(fakeDocker({ candidate: 97, current: 97 }, [], { removed }));
 		for (let i = 0; i < 4; i++) await trainer.train();
-		const names = readRegistry(trainer.workspace).models.map((model) => model.name);
-		expect(names).toEqual(["local-2", "local-3", "local-4"]);
-		expect(existsSync(join(trainer.workspace.models, "local-1"))).toBe(false);
+		expect(readRegistry(trainer.workspace).models.map((model) => model.name)).toEqual([
+			"local-2",
+			"local-3",
+			"local-4",
+		]);
+		expect(removed).toEqual(["/data/models/local-1"]);
 		expect(trainer.activeModel().name).toBe("local-4");
 	});
 
-	it("needs the Laya environment and session tasks", async () => {
-		const paths = layaPaths(home, manifest);
-		const trainer = new LayaTrainer({ home, manifest, paths, spawn: fakeSpawn({ candidate: 1, current: 1 }, []) });
+	it("needs session tasks", async () => {
+		const trainer = new LayaTrainer({
+			home,
+			manifest,
+			docker: fakeDocker({ candidate: 1, current: 1 }, []),
+			image: async () => "relay-laya:test",
+			gpu: async () => true,
+		});
 		const finished: unknown[] = [];
 		trainer.listener = { progress: () => {}, finished: (value) => finished.push(value) };
-		await expect(trainer.train()).rejects.toThrow("Run /laya setup first");
-		expect(finished).toHaveLength(1);
-
-		mkdirSync(join(paths.venvPython, ".."), { recursive: true });
-		writeFileSync(paths.venvPython, "");
 		await expect(trainer.train()).rejects.toThrow("no session tasks to learn yet");
-	});
-
-	it("serves the active model", () => {
-		const paths = layaPaths(home, manifest);
-		let model = join(home, "training", "models", "local-1");
-		const server = new LayaServer({ paths, manifest, baseUrl: () => "http://127.0.0.1:1/v1", model: () => model });
-		mkdirSync(join(paths.venvPython, ".."), { recursive: true });
-		writeFileSync(paths.venvPython, "");
-		writeFileSync(paths.serveScript, "");
-		expect(server.status()).toBe("missing-model");
-		mkdirSync(model, { recursive: true });
-		writeFileSync(join(model, "model.safetensors"), "model");
-		expect(server.status()).toBe("ready");
-		model = paths.model;
-		expect(server.status()).toBe("missing-model");
+		expect(finished).toHaveLength(1);
 	});
 });
 
@@ -467,6 +484,8 @@ describe("/laya learn", () => {
 		rmSync(agentDir, { recursive: true, force: true });
 	});
 
+	const withoutDocker: DockerRun = async () => ({ code: DOCKER_MISSING, stdout: "", stderr: "not found" });
+
 	const editTool: AgentTool = {
 		name: "edit",
 		label: "edit",
@@ -479,7 +498,8 @@ describe("/laya learn", () => {
 		harness = await createHarness({
 			tools: [editTool],
 			settings: { harnessCore: { evidence: false } },
-			extensionFactories: [layaExtension],
+			// No Docker in the test: the exercises are saved and training waits for /laya setup.
+			extensionFactories: [(relay) => layaExtension(relay, { docker: withoutDocker })],
 		});
 		harness.setResponses([
 			fauxAssistantMessage(fauxToolCall("edit", { path: "src/pager.ts" }), { stopReason: "toolUse" }),
@@ -502,7 +522,6 @@ describe("/laya learn", () => {
 		expect(JSON.stringify(prompt?.content)).toContain("Fix the off-by-one in the pager.");
 		const toolResult = harness.session.messages.findLast((m) => m.role === "toolResult");
 		expect(toolResult).toMatchObject({ toolName: LEARN_TOOL_NAME, isError: false });
-		// No Laya environment in the test: the exercises are saved and training waits for /laya setup.
 		expect(JSON.stringify(toolResult?.content)).toContain("Run /laya setup, then /laya train");
 
 		const rows = readRows(trainingWorkspace(join(agentDir, "laya")).dataset);

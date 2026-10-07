@@ -1,136 +1,81 @@
-import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { DockerResult, DockerRun, DockerRunOptions } from "../src/extensions/laya/docker.ts";
+import { DOCKER_MISSING } from "../src/extensions/laya/docker.ts";
 import { LAYA_MODEL_MANIFEST } from "../src/extensions/laya/model-manifest.ts";
 import {
-	downloadModel,
-	type ExecFunction,
-	findPython,
+	LAYA_IMAGE_PATHS,
+	LAYA_IMAGE_REPOSITORY,
 	type LayaModelManifest,
-	layaPaths,
-	missingModelFiles,
-	runtimeStatus,
-	SERVE_SCRIPT,
-	setupLayaRuntime,
+	layaImage,
+	layaImageContext,
+	layaImageTag,
 } from "../src/extensions/laya/runtime.ts";
 import { isLocalUrl, LayaServer } from "../src/extensions/laya/server.ts";
-
-const sha256 = (content: string) => createHash("sha256").update(content).digest("hex");
 
 const manifest: LayaModelManifest = {
 	version: "v-test",
 	layaPackage: "laya[serve]==0.0.0",
-	baseUrl: "https://example.test/releases/",
-	files: [
-		{ path: "model.safetensors", asset: "model.safetensors", size: 5, sha256: sha256("model") },
-		{ path: "tokenizer/tokenizer.json", asset: "tokenizer__tokenizer.json", size: 4, sha256: sha256("tok1") },
-	],
+	baseUrl: "https://example.test/models/",
+	files: [{ path: "model.safetensors", asset: "model.safetensors", size: 5, sha256: "a".repeat(64) }],
 };
 
-const assets: Record<string, string> = { "model.safetensors": "model", "tokenizer__tokenizer.json": "tok1" };
+const ok = (stdout = ""): DockerResult => ({ code: 0, stdout, stderr: "" });
+const fail = (stderr = "error"): DockerResult => ({ code: 1, stdout: "", stderr });
 
-function fakeFetch(served: Record<string, string>, requested: string[] = []): typeof fetch {
-	return (async (input: Parameters<typeof fetch>[0]) => {
-		const name = new URL(String(input)).pathname.split("/").at(-1) ?? "";
-		requested.push(name);
-		return name in served ? new Response(served[name]) : new Response("missing", { status: 404 });
+/** A Docker CLI stand-in: answers each command with the first handler whose prefix matches. */
+function fakeDocker(handlers: Array<[string[], (args: string[], options?: DockerRunOptions) => DockerResult]>) {
+	const calls: string[][] = [];
+	const docker: DockerRun = async (args, options) => {
+		calls.push(args);
+		const handler = handlers.find(([prefix]) => prefix.every((part, i) => args[i] === part));
+		return handler ? handler[1](args, options) : fail(`unexpected: docker ${args.join(" ")}`);
+	};
+	return { docker, calls };
+}
+
+/** Health checks answer only while `state.up` is true. */
+function health(state: { up: boolean }): typeof fetch {
+	return (async () => {
+		if (!state.up) throw new Error("ECONNREFUSED");
+		return new Response(JSON.stringify({ ok: true }));
 	}) as typeof fetch;
 }
 
-describe("laya runtime", () => {
-	let home: string;
+const IMAGE = `${LAYA_IMAGE_REPOSITORY}:v1-cpu-abc`;
 
-	beforeEach(() => {
-		home = mkdtempSync(join(tmpdir(), "relay-laya-runtime-"));
+function server(docker: DockerRun, state: { up: boolean }, model: string = LAYA_IMAGE_PATHS.shippedModel) {
+	return new LayaServer({
+		docker,
+		baseUrl: () => "http://127.0.0.1:8000/v1",
+		image: async () => IMAGE,
+		model: () => model,
+		fetch: health(state),
+	});
+}
+
+const labels = (model: string = LAYA_IMAGE_PATHS.shippedModel) =>
+	JSON.stringify({ "relay.laya.image": IMAGE, "relay.laya.model": model, "relay.laya.address": "127.0.0.1:8000" });
+
+describe("laya image", () => {
+	it("tags the image with the model version, the variant and a hash of its build context", () => {
+		const cpu = layaImageTag(manifest, "cpu");
+		expect(cpu).toMatch(/^v-test-cpu-[0-9a-f]{12}$/);
+		expect(layaImageTag(manifest, "cpu")).toBe(cpu);
+		expect(layaImageTag(manifest, "cuda")).toMatch(/^v-test-cuda-/);
+		// A different model or Laya version is a different image.
+		expect(layaImageTag({ ...manifest, layaPackage: "laya[serve]==0.0.1" }, "cpu")).not.toBe(cpu);
+		expect(layaImage(manifest, "cpu")).toBe(`${LAYA_IMAGE_REPOSITORY}:${cpu}`);
 	});
 
-	afterEach(() => {
-		rmSync(home, { recursive: true, force: true });
-	});
-
-	it("downloads every file into its path and verifies the hash", async () => {
-		const paths = layaPaths(home, manifest);
-		expect(missingModelFiles(manifest, paths)).toHaveLength(2);
-
-		await downloadModel(manifest, paths, { fetch: fakeFetch(assets) });
-
-		expect(readFileSync(join(paths.model, "model.safetensors"), "utf8")).toBe("model");
-		expect(readFileSync(join(paths.model, "tokenizer", "tokenizer.json"), "utf8")).toBe("tok1");
-		expect(missingModelFiles(manifest, paths)).toEqual([]);
-	});
-
-	it("rejects a file whose hash differs and leaves nothing behind", async () => {
-		const paths = layaPaths(home, manifest);
-		// Same size as the manifest, different content: only the hash catches it.
-		await expect(
-			downloadModel(manifest, paths, { fetch: fakeFetch({ ...assets, "model.safetensors": "MODEL" }) }),
-		).rejects.toThrow(/does not match the manifest/);
-		expect(existsSync(join(paths.model, "model.safetensors"))).toBe(false);
-		expect(existsSync(join(paths.model, "model.safetensors.part"))).toBe(false);
-	});
-
-	it("fails on an HTTP error", async () => {
-		await expect(downloadModel(manifest, layaPaths(home, manifest), { fetch: fakeFetch({}) })).rejects.toThrow(
-			/HTTP 404/,
-		);
-	});
-
-	it("downloads only what is missing or has the wrong size", async () => {
-		const paths = layaPaths(home, manifest);
-		mkdirSync(paths.model, { recursive: true });
-		writeFileSync(join(paths.model, "model.safetensors"), "model");
-		const requested: string[] = [];
-
-		await downloadModel(manifest, paths, { fetch: fakeFetch(assets, requested) });
-		expect(requested).toEqual(["tokenizer__tokenizer.json"]);
-
-		writeFileSync(join(paths.model, "model.safetensors"), "tru");
-		requested.length = 0;
-		await downloadModel(manifest, paths, { fetch: fakeFetch(assets, requested) });
-		expect(requested).toEqual(["model.safetensors"]);
-	});
-
-	it("reports the runtime status", async () => {
-		const paths = layaPaths(home, manifest);
-		expect(runtimeStatus(manifest, paths)).toBe("missing-environment");
-		mkdirSync(join(paths.venvPython, ".."), { recursive: true });
-		writeFileSync(paths.venvPython, "");
-		writeFileSync(paths.serveScript, SERVE_SCRIPT);
-		expect(runtimeStatus(manifest, paths)).toBe("missing-model");
-		await downloadModel(manifest, paths, { fetch: fakeFetch(assets) });
-		expect(runtimeStatus(manifest, paths)).toBe("ready");
-	});
-
-	it("picks the first Python between 3.10 and 3.13", async () => {
-		const versions: Record<string, string> = { python3: "3.9", python: "3.14", py: "3.12" };
-		const exec: ExecFunction = async (command) =>
-			command in versions
-				? { stdout: `3 ${versions[command].split(".")[1]}\n`, stderr: "", code: 0 }
-				: { stdout: "", stderr: "", code: 1 };
-		expect(await findPython(exec)).toEqual(["py", ["-3"]]);
-		expect(await findPython(exec, "python3")).toBeUndefined();
-		const failing: ExecFunction = async () => {
-			throw new Error("not found");
-		};
-		expect(await findPython(failing)).toBeUndefined();
-	});
-
-	it("updates pip in the new environment before installing torch", async () => {
-		const calls: string[][] = [];
-		const exec: ExecFunction = async (command, args) => {
-			calls.push([command, ...args]);
-			if (command === "python3") return { stdout: "3 11\n", stderr: "", code: 0 };
-			if (args.includes("pip")) return { stdout: "", stderr: "", code: 0 };
-			return { stdout: "", stderr: "", code: 1 };
-		};
-		await setupLayaRuntime({ exec, home, manifest, fetch: fakeFetch(assets), report: () => {} });
-		const pipInstalls = calls.filter((call) => call.includes("pip")).map((call) => call.slice(5));
-		// Debian 12 seeds pip 23.0, which rejects the torch index's wheel metadata.
-		expect(pipInstalls[0]).toEqual(["--disable-pip-version-check", "--upgrade", "pip"]);
-		expect(pipInstalls[1]).toContain("torch");
-		expect(pipInstalls[2]).toContain(manifest.layaPackage);
+	it("builds Python, torch, Laya and the shipped model into the image", () => {
+		const cpu = layaImageContext(manifest, "cpu");
+		expect(cpu.Dockerfile).toContain("https://download.pytorch.org/whl/cpu");
+		expect(cpu.Dockerfile).toContain('pip install "laya[serve]==0.0.0"');
+		expect(cpu.Dockerfile).toContain(`fetch_model.py /opt/laya/model.json ${LAYA_IMAGE_PATHS.shippedModel}`);
+		expect(layaImageContext(manifest, "cuda").Dockerfile).toContain("https://download.pytorch.org/whl/cu128");
+		expect(JSON.parse(cpu["model.json"])).toEqual({ baseUrl: manifest.baseUrl, files: manifest.files });
+		expect(cpu["train.py"]).toContain("def cmd_learn(a):");
+		expect(cpu["serve.py"]).toContain('@app.post("/v1/systemone")');
 	});
 
 	it("ships a manifest that matches the model layout the server loads", () => {
@@ -149,37 +94,174 @@ describe("laya runtime", () => {
 		}
 		expect(LAYA_MODEL_MANIFEST.baseUrl).toMatch(/^https:\/\/.+\/$/);
 	});
+});
 
-	it("starts servers only on this machine and reuses one that is already listening", async () => {
+describe("laya server container", () => {
+	it("only manages servers on this machine", () => {
 		expect(isLocalUrl("http://127.0.0.1:8000/v1")).toBe(true);
 		expect(isLocalUrl("http://localhost:8000/v1")).toBe(true);
 		expect(isLocalUrl("https://laya.example.com/v1")).toBe(false);
+	});
 
-		let healthChecks = 0;
-		const listening = (async () => {
-			healthChecks++;
-			return new Response(JSON.stringify({ ok: true }));
-		}) as typeof fetch;
-		const server = new LayaServer({
-			paths: layaPaths(home, manifest),
-			manifest,
-			baseUrl: () => "http://127.0.0.1:8000/v1",
-			fetch: listening,
-		});
-		// Nothing is installed, yet an answering server counts: the user may run their own.
-		expect(await server.ensureRunning()).toBe(true);
-		expect(server.running).toBe(false);
-		expect(healthChecks).toBe(1);
+	it("reports a missing or stopped Docker", async () => {
+		const missing = fakeDocker([[["version"], () => ({ code: DOCKER_MISSING, stdout: "", stderr: "not found" })]]);
+		const withoutDocker = server(missing.docker, { up: false });
+		expect(await withoutDocker.install()).toBe(false);
+		expect(withoutDocker.state).toBe("no-docker");
+		expect(withoutDocker.describe()).toBe("not available: Docker is not installed");
 
-		const down = new LayaServer({
-			paths: layaPaths(home, manifest),
-			manifest,
+		const stopped = fakeDocker([[["version"], () => fail("Cannot connect to the Docker daemon")]]);
+		const withStoppedDocker = server(stopped.docker, { up: false });
+		expect(await withStoppedDocker.install()).toBe(false);
+		expect(withStoppedDocker.describe()).toContain("Docker does not answer");
+	});
+
+	it("pulls the image, starts the container on the local port and frees older images", async () => {
+		const state = { up: false };
+		const reports: string[] = [];
+		const { docker, calls } = fakeDocker([
+			[["version"], () => ok("29.0.0")],
+			[["container", "inspect"], () => fail("No such container")],
+			[["image", "inspect"], () => fail("No such image")],
+			[
+				["pull"],
+				(_args, options) => {
+					for (const line of [
+						"a1: Pulling fs layer",
+						"b2: Pulling fs layer",
+						"a1: Pull complete",
+						"b2: Pull complete",
+					]) {
+						options?.onLine?.(line, "stdout");
+					}
+					return ok();
+				},
+			],
+			[
+				["run"],
+				() => {
+					state.up = true;
+					return ok("container-id");
+				},
+			],
+			[["image", "ls"], () => ok(`${IMAGE}\n${LAYA_IMAGE_REPOSITORY}:v1-cpu-old\n`)],
+			[["rmi"], () => ok()],
+		]);
+		const laya = server(docker, state);
+
+		expect(await laya.install((message) => reports.push(message))).toBe(true);
+
+		expect(laya.state).toBe("ready");
+		expect(reports).toContain("downloading the Laya image: 2/2 layers");
+		const run = calls.find((args) => args[0] === "run");
+		expect(run).toEqual(
+			expect.arrayContaining([
+				"--detach",
+				"--restart",
+				"unless-stopped",
+				"--publish",
+				"127.0.0.1:8000:8000",
+				"--volume",
+				`relay-laya-models:${LAYA_IMAGE_PATHS.trainedModels}`,
+				IMAGE,
+				"--model",
+				LAYA_IMAGE_PATHS.shippedModel,
+			]),
+		);
+		expect(calls.find((args) => args[0] === "rmi")).toEqual(["rmi", `${LAYA_IMAGE_REPOSITORY}:v1-cpu-old`]);
+	});
+
+	it("starts a stopped container that runs the right image and model", async () => {
+		const state = { up: false };
+		const { docker, calls } = fakeDocker([
+			[["version"], () => ok("29.0.0")],
+			[["container", "inspect"], () => ok(`false ${labels()}`)],
+			[["image", "inspect"], () => ok("sha256:1")],
+			[
+				["start"],
+				() => {
+					state.up = true;
+					return ok();
+				},
+			],
+			[["image", "ls"], () => ok(IMAGE)],
+		]);
+		expect(await server(docker, state).install()).toBe(true);
+		expect(calls.map((args) => args[0])).not.toContain("pull");
+		expect(calls.map((args) => args[0])).not.toContain("run");
+		expect(calls).toContainEqual(["start", "relay-laya"]);
+	});
+
+	it("leaves a running container that matches alone and reports nothing", async () => {
+		const reports: string[] = [];
+		const { docker, calls } = fakeDocker([
+			[["version"], () => ok("29.0.0")],
+			[["container", "inspect"], () => ok(`true ${labels()}`)],
+			[["image", "inspect"], () => ok("sha256:1")],
+			[["image", "ls"], () => ok(IMAGE)],
+		]);
+		expect(await server(docker, { up: true }).install((message) => reports.push(message))).toBe(true);
+		expect(reports).toEqual([]);
+		expect(calls.map((args) => args[0])).toEqual(["version", "container", "image", "image"]);
+	});
+
+	it("replaces the container when the active model changes", async () => {
+		const state = { up: true };
+		const trained = "/data/models/local-1";
+		const { docker, calls } = fakeDocker([
+			[["version"], () => ok("29.0.0")],
+			[["container", "inspect"], () => ok(`true ${labels()}`)],
+			[["image", "inspect"], () => ok("sha256:1")],
+			[["rm"], () => ok()],
+			[["run"], () => ok("container-id")],
+			[["image", "ls"], () => ok(IMAGE)],
+		]);
+		expect(await server(docker, state, trained).install()).toBe(true);
+		expect(calls).toContainEqual(["rm", "--force", "relay-laya"]);
+		const run = calls.find((args) => args[0] === "run");
+		expect(run?.[run.indexOf("--model") + 1]).toBe(trained);
+	});
+
+	it("uses a server that already answers when the container is not Relay's", async () => {
+		const { docker, calls } = fakeDocker([
+			[["version"], () => ok("29.0.0")],
+			[["container", "inspect"], () => fail("No such container")],
+		]);
+		expect(await server(docker, { up: true }).install()).toBe(true);
+		expect(calls.map((args) => args[0])).toEqual(["version", "container"]);
+	});
+
+	it("refuses a server on the port that answers other questions", async () => {
+		const { docker, calls } = fakeDocker([
+			[["version"], () => ok("29.0.0")],
+			[["container", "inspect"], () => fail("No such container")],
+		]);
+		const laya = new LayaServer({
+			docker,
 			baseUrl: () => "http://127.0.0.1:8000/v1",
-			fetch: (async () => {
-				throw new Error("ECONNREFUSED");
-			}) as typeof fetch,
+			image: async () => IMAGE,
+			model: () => LAYA_IMAGE_PATHS.shippedModel,
+			// A laya-trainer server of another project.
+			fetch: (async () =>
+				new Response(JSON.stringify({ ok: true, decisions: ["natureza", "intencao"] }))) as typeof fetch,
 		});
-		// Not installed and not answering: nothing to start.
-		expect(await down.ensureRunning()).toBe(false);
+		expect(await laya.install()).toBe(false);
+		expect(laya.describe()).toContain("another Laya server, which answers other questions, uses 127.0.0.1:8000");
+		expect(calls.map((args) => args[0])).not.toContain("run");
+	});
+
+	it("fails with the container's last log lines when it stops while loading", async () => {
+		let inspections = 0;
+		const { docker } = fakeDocker([
+			[["version"], () => ok("29.0.0")],
+			// Missing at first, created, then found stopped.
+			[["container", "inspect"], () => (inspections++ === 0 ? fail("No such container") : ok(`false ${labels()}`))],
+			[["image", "inspect"], () => ok("sha256:1")],
+			[["run"], () => ok("container-id")],
+			[["logs"], () => ({ code: 0, stdout: "", stderr: "RuntimeError: model.safetensors is corrupt" })],
+		]);
+		const laya = server(docker, { up: false });
+		expect(await laya.install()).toBe(false);
+		expect(laya.describe()).toBe("failed: The Laya container stopped: RuntimeError: model.safetensors is corrupt");
 	});
 });

@@ -138,10 +138,10 @@ export interface LayaSettings {
 	escalateAfterFailures?: number;
 	/** `advise` names unneeded tools in the plan; `enforce` also deactivates them. Default: `advise`. */
 	toolRouting?: "advise" | "enforce";
-	/** Start the local Laya server when laya/auto needs it and offer to install it on first use. Default: true. */
+	/** Install Laya in Docker when Relay starts and keep its container running. Default: true. */
 	autostart?: boolean;
-	/** Python 3.10 to 3.13 used to create the Laya environment. Default: the first of python3, python, py found. */
-	python?: string;
+	/** Docker image of Laya. Default: the image built from this Relay version on ghcr.io. */
+	image?: string;
 	/** Write routing telemetry to the agent directory. Default: true. */
 	telemetry?: boolean;
 	/** Route requests similar to tasks learned with `/laya learn` by their labels, and show their lessons. Default: true. */

@@ -1,19 +1,17 @@
 import { createHash } from "node:crypto";
-import { createWriteStream, existsSync, mkdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { Readable, Transform } from "node:stream";
-import { pipeline } from "node:stream/promises";
+import { TRAIN_SCRIPT } from "./train-script.ts";
 
 /**
- * Local Laya runtime: the trained model, a Python environment with the `laya` package, and the
- * script that serves them. The npm package carries none of these (the model is 650 MB, the
- * environment a few GB); `setupLayaRuntime()` fetches them on first use into the agent directory.
+ * Laya runs in Docker, never on the host: an image carries Python, torch, the `laya` package, the
+ * shipped model and the scripts that serve and train it. Relay pulls the image, keeps one server
+ * container running and starts a short-lived container for each training. The host only keeps
+ * Relay's own data (training exercises, the model registry, telemetry).
  */
 
 export interface LayaModelFile {
 	/** Path inside the model directory, with forward slashes. */
 	path: string;
-	/** Flat file name of the release asset. */
+	/** File name in the model repository. */
 	asset: string;
 	size: number;
 	sha256: string;
@@ -23,244 +21,38 @@ export interface LayaModelManifest {
 	version: string;
 	/** pip requirement for the Laya runtime. */
 	layaPackage: string;
-	/** Directory URL the assets are downloaded from, ending in a slash. */
+	/** Directory URL the model files are downloaded from when the image is built, ending in a slash. */
 	baseUrl: string;
 	files: LayaModelFile[];
 }
 
-export type ExecFunction = (
-	command: string,
-	args: string[],
-	options?: { signal?: AbortSignal; timeout?: number },
-) => Promise<{ stdout: string; stderr: string; code: number }>;
+/** Registry the images are published to. */
+export const LAYA_IMAGE_REPOSITORY = "ghcr.io/eltonssouza/relay-laya";
+/** The server container, kept running between Relay sessions. */
+export const LAYA_CONTAINER = "relay-laya";
+/** The container of a running training; removed when it ends. */
+export const LAYA_TRAIN_CONTAINER = "relay-laya-train";
+/** Volume with the models trained from sessions. */
+export const LAYA_MODELS_VOLUME = "relay-laya-models";
+/** Port the server listens on inside its container. */
+export const LAYA_CONTAINER_PORT = 8000;
 
-export interface LayaPaths {
-	home: string;
-	model: string;
-	venv: string;
-	venvPython: string;
-	serveScript: string;
-	/** Written by native training (`training.ts`) before each run. */
-	trainScript: string;
-	log: string;
-}
+/** Paths inside the image and its containers. */
+export const LAYA_IMAGE_PATHS = {
+	shippedModel: "/opt/laya/model",
+	trainedModels: "/data/models",
+	serveScript: "/opt/laya/serve.py",
+	trainScript: "/opt/laya/train.py",
+	workspace: "/workspace",
+} as const;
 
-export function layaPaths(home: string, manifest: LayaModelManifest): LayaPaths {
-	const venv = join(home, "venv");
-	return {
-		home,
-		model: join(home, "models", manifest.version),
-		venv,
-		venvPython: join(
-			venv,
-			process.platform === "win32" ? "Scripts" : "bin",
-			process.platform === "win32" ? "python.exe" : "python",
-		),
-		serveScript: join(home, "serve.py"),
-		trainScript: join(home, "train.py"),
-		log: join(home, "server.log"),
-	};
-}
+/** `cpu` runs everywhere; `cuda` carries the CUDA build of torch for machines with an NVIDIA GPU. */
+export type LayaImageVariant = "cpu" | "cuda";
 
-export type LayaRuntimeStatus = "ready" | "missing-environment" | "missing-model";
-
-/** Files of the model that are absent or have the wrong size. A full hash check happens at download. */
-export function missingModelFiles(manifest: LayaModelManifest, paths: LayaPaths): LayaModelFile[] {
-	return manifest.files.filter((file) => {
-		const path = join(paths.model, ...file.path.split("/"));
-		try {
-			return statSync(path).size !== file.size;
-		} catch {
-			return true;
-		}
-	});
-}
-
-export function runtimeStatus(manifest: LayaModelManifest, paths: LayaPaths): LayaRuntimeStatus {
-	if (!existsSync(paths.venvPython) || !existsSync(paths.serveScript)) return "missing-environment";
-	return missingModelFiles(manifest, paths).length > 0 ? "missing-model" : "ready";
-}
-
-export interface DownloadOptions {
-	fetch?: typeof fetch;
-	signal?: AbortSignal;
-	onProgress?: (file: LayaModelFile, received: number) => void;
-}
-
-/**
- * Downloads the files that are missing or wrong, verifying each against its manifest hash before it
- * becomes visible: a download is written to a `.part` file and renamed only when the hash matches.
- */
-export async function downloadModel(
-	manifest: LayaModelManifest,
-	paths: LayaPaths,
-	options: DownloadOptions = {},
-): Promise<void> {
-	const request = options.fetch ?? globalThis.fetch;
-	for (const file of missingModelFiles(manifest, paths)) {
-		const target = join(paths.model, ...file.path.split("/"));
-		const partial = `${target}.part`;
-		mkdirSync(dirname(target), { recursive: true });
-		const response = await request(new URL(file.asset, manifest.baseUrl), { signal: options.signal });
-		if (!response.ok || !response.body) {
-			throw new Error(`Downloading ${file.asset} failed: HTTP ${response.status}`);
-		}
-		const hash = createHash("sha256");
-		let received = 0;
-		const meter = new Transform({
-			transform(chunk: Buffer, _encoding, callback) {
-				hash.update(chunk);
-				received += chunk.length;
-				options.onProgress?.(file, received);
-				callback(null, chunk);
-			},
-		});
-		try {
-			await pipeline(
-				Readable.fromWeb(response.body as Parameters<typeof Readable.fromWeb>[0]),
-				meter,
-				createWriteStream(partial),
-				{ signal: options.signal },
-			);
-			const digest = hash.digest("hex");
-			if (received !== file.size || digest !== file.sha256) {
-				throw new Error(`${file.asset} does not match the manifest (size ${received}, sha256 ${digest})`);
-			}
-			renameSync(partial, target);
-		} catch (error) {
-			rmSync(partial, { force: true });
-			throw error;
-		}
-	}
-}
-
-const PYTHON_CANDIDATES: Array<[string, string[]]> = [
-	["python3", []],
-	["python", []],
-	["py", ["-3"]],
-];
-
-/** A Python 3.10 to 3.13 interpreter (the range torch publishes wheels for), as command plus leading args. */
-export async function findPython(exec: ExecFunction, override?: string): Promise<[string, string[]] | undefined> {
-	const candidates: Array<[string, string[]]> = override ? [[override, []]] : PYTHON_CANDIDATES;
-	for (const [command, leading] of candidates) {
-		try {
-			const result = await exec(
-				command,
-				[...leading, "-c", "import sys; print(sys.version_info[0], sys.version_info[1])"],
-				{ timeout: 15_000 },
-			);
-			const [major, minor] = result.stdout.trim().split(" ").map(Number);
-			if (result.code === 0 && major === 3 && minor >= 10 && minor <= 13) return [command, leading];
-		} catch {
-			// Not installed.
-		}
-	}
-	return undefined;
-}
-
-export interface SetupOptions {
-	exec: ExecFunction;
-	home: string;
-	manifest: LayaModelManifest;
-	python?: string;
-	fetch?: typeof fetch;
-	signal?: AbortSignal;
-	report: (message: string) => void;
-}
-
-const PIP_TIMEOUT_MS = 30 * 60_000;
-
-async function run(
-	exec: ExecFunction,
-	command: string,
-	args: string[],
-	options: { signal?: AbortSignal; timeout?: number },
-	failure: string,
-): Promise<void> {
-	const result = await exec(command, args, options);
-	if (result.code !== 0) {
-		throw new Error(`${failure}: ${(result.stderr || result.stdout).trim().split("\n").slice(-4).join(" ")}`);
-	}
-}
-
-/** Torch wheel index: a CUDA build only where an NVIDIA GPU exists, the small CPU build otherwise. */
-async function torchArgs(exec: ExecFunction): Promise<string[]> {
-	if (process.platform === "darwin") return ["torch"];
-	let gpu = false;
-	try {
-		gpu = (await exec("nvidia-smi", ["-L"], { timeout: 10_000 })).code === 0;
-	} catch {
-		// No NVIDIA driver.
-	}
-	return ["torch", "--index-url", `https://download.pytorch.org/whl/${gpu ? "cu128" : "cpu"}`];
-}
-
-/** Creates the environment, installs torch and Laya, writes the server script and downloads the model. */
-export async function setupLayaRuntime(options: SetupOptions): Promise<LayaPaths> {
-	const { exec, report, signal } = options;
-	const paths = layaPaths(options.home, options.manifest);
-	mkdirSync(paths.home, { recursive: true });
-
-	const importable = async () =>
-		existsSync(paths.venvPython) &&
-		(await exec(paths.venvPython, ["-c", "import laya, torch, fastapi, uvicorn"], { timeout: 120_000 })).code === 0;
-
-	if (!(await importable())) {
-		const python = await findPython(exec, options.python);
-		if (!python) {
-			throw new Error("Laya needs Python 3.10 to 3.13. Install it, or set laya.python to its path.");
-		}
-		report("Creating the Python environment");
-		await run(
-			exec,
-			python[0],
-			[...python[1], "-m", "venv", paths.venv],
-			{ signal, timeout: 120_000 },
-			"Creating the environment failed",
-		);
-		const pip = [paths.venvPython, "-m", "pip", "install", "-q", "--disable-pip-version-check"] as const;
-		// Distribution pythons seed old pips (Debian 12: 23.0) that reject current wheel metadata on
-		// the torch index and fall back to source builds that cannot finish there.
-		report("Updating pip");
-		await run(
-			exec,
-			pip[0],
-			[...pip.slice(1), "--upgrade", "pip"],
-			{ signal, timeout: PIP_TIMEOUT_MS },
-			"Updating pip failed",
-		);
-		report("Installing torch (large download)");
-		await run(
-			exec,
-			pip[0],
-			[...pip.slice(1), ...(await torchArgs(exec))],
-			{ signal, timeout: PIP_TIMEOUT_MS },
-			"Installing torch failed",
-		);
-		report("Installing Laya");
-		await run(
-			exec,
-			pip[0],
-			[...pip.slice(1), options.manifest.layaPackage, "fastapi", "uvicorn"],
-			{ signal, timeout: PIP_TIMEOUT_MS },
-			"Installing Laya failed",
-		);
-	}
-	writeFileSync(paths.serveScript, SERVE_SCRIPT, "utf8");
-
-	let lastReported = 0;
-	await downloadModel(options.manifest, paths, {
-		fetch: options.fetch,
-		signal,
-		onProgress: (file, received) => {
-			if (file.size < 10_000_000 || received - lastReported < 25_000_000) return;
-			lastReported = received;
-			report(`Downloading the Laya model: ${file.asset} ${Math.round((received / file.size) * 100)}%`);
-		},
-	});
-	return paths;
-}
+const TORCH_INDEX: Record<LayaImageVariant, string> = {
+	cpu: "https://download.pytorch.org/whl/cpu",
+	cuda: "https://download.pytorch.org/whl/cu128",
+};
 
 /** Serves the model with the System One protocol Relay's `typesafe-system-one` classifier speaks. */
 export const SERVE_SCRIPT = `import argparse
@@ -294,3 +86,81 @@ def system_one(body: dict):
 
 uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
 `;
+
+/** Downloads the shipped model while the image is built, checking every file against the manifest. */
+export const FETCH_MODEL_SCRIPT = `import hashlib
+import json
+import pathlib
+import sys
+import urllib.request
+
+manifest = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+target = pathlib.Path(sys.argv[2])
+for file in manifest["files"]:
+    path = target / file["path"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    digest = hashlib.sha256()
+    size = 0
+    with urllib.request.urlopen(manifest["baseUrl"] + file["asset"]) as response, open(path, "wb") as out:
+        while chunk := response.read(1 << 20):
+            digest.update(chunk)
+            size += len(chunk)
+            out.write(chunk)
+    if size != file["size"] or digest.hexdigest() != file["sha256"]:
+        sys.exit(f"{file['asset']} does not match the manifest (size {size}, sha256 {digest.hexdigest()})")
+    print(f"{file['path']} ok", flush=True)
+`;
+
+function dockerfile(manifest: LayaModelManifest, variant: LayaImageVariant): string {
+	const paths = LAYA_IMAGE_PATHS;
+	return `FROM python:3.11-slim
+LABEL org.opencontainers.image.source="https://github.com/eltonssouza/relay-harness"
+LABEL org.opencontainers.image.description="Laya routing model for Relay (${variant})"
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONIOENCODING=utf-8 PIP_NO_CACHE_DIR=1 \\
+    PIP_DISABLE_PIP_VERSION_CHECK=1 USE_TF=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+RUN pip install --upgrade pip && pip install torch --index-url ${TORCH_INDEX[variant]}
+RUN pip install "${manifest.layaPackage}" fastapi uvicorn
+RUN useradd --create-home laya && mkdir -p ${paths.trainedModels} && chown laya ${paths.trainedModels}
+COPY fetch_model.py model.json /opt/laya/
+RUN python /opt/laya/fetch_model.py /opt/laya/model.json ${paths.shippedModel}
+COPY serve.py train.py /opt/laya/
+USER laya
+EXPOSE ${LAYA_CONTAINER_PORT}
+CMD ["python", "${paths.serveScript}", "--model", "${paths.shippedModel}", "--host", "0.0.0.0", "--port", "${LAYA_CONTAINER_PORT}"]
+`;
+}
+
+/** Files of the image's build context, by name. */
+export function layaImageContext(manifest: LayaModelManifest, variant: LayaImageVariant): Record<string, string> {
+	return {
+		Dockerfile: dockerfile(manifest, variant),
+		"fetch_model.py": FETCH_MODEL_SCRIPT,
+		"model.json": `${JSON.stringify({ baseUrl: manifest.baseUrl, files: manifest.files }, null, 2)}\n`,
+		"serve.py": SERVE_SCRIPT,
+		"train.py": TRAIN_SCRIPT,
+	};
+}
+
+/**
+ * Image tag: the model version, the variant and a hash of the build context. Changing a script, a
+ * dependency or the model gives a new tag, so a Relay version always runs the image built from its
+ * own sources, and an unchanged context reuses the published image.
+ */
+export function layaImageTag(manifest: LayaModelManifest, variant: LayaImageVariant): string {
+	const hash = createHash("sha256");
+	for (const [name, content] of Object.entries(layaImageContext(manifest, variant)).sort(([a], [b]) =>
+		a.localeCompare(b),
+	)) {
+		hash.update(`${name}\0${content}\0`);
+	}
+	return `${manifest.version}-${variant}-${hash.digest("hex").slice(0, 12)}`;
+}
+
+export function layaImage(manifest: LayaModelManifest, variant: LayaImageVariant): string {
+	return `${LAYA_IMAGE_REPOSITORY}:${layaImageTag(manifest, variant)}`;
+}
+
+/** Container path of a model trained from sessions. */
+export function trainedModelPath(name: string): string {
+	return `${LAYA_IMAGE_PATHS.trainedModels}/${name}`;
+}

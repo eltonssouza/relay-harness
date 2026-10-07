@@ -24,7 +24,7 @@ Relay normally runs every request on the model you selected. A typo fix then cos
 
 Reasoning effort follows Laya's recommendation up to `xhigh`. Routing never uses `max`. `laya/auto` has no thinking level of its own: a selected level would cap Laya's choice without you noticing. The footer shows the routed model and effort next to the selection, and the status line shows the task type and tier.
 
-When the Laya server is not running, keyword rules in English and Portuguese answer instead, and the status line shows `(rules)`. Laya is retried a minute later.
+When the Laya server is not running (Docker is missing or stopped, or the image is still downloading), keyword rules in English and Portuguese answer instead, and the status line shows `(rules)`. Laya is retried a minute later.
 
 ## Cost profiles
 
@@ -59,20 +59,28 @@ Replace a tier with `laya.models`:
 
 `laya.quota` states how much of each subscription is left. Scarce quota makes a provider's models more expensive in the utility, so an equivalent model of another provider wins.
 
-## Install the trained Laya
+## Laya runs in Docker
 
-The npm package does not contain the trained model (650 MB) or the Python environment it runs in (a few GB with torch). Relay fetches both once, into `~/.relay/agent/laya`:
+Relay itself runs on your machine; Laya and its Python run only in Docker. The npm package contains neither the trained model (650 MB) nor Python with torch. Both come in a Docker image, `ghcr.io/eltonssouza/relay-laya`, built by Relay's release from the same sources as the package:
 
-| Piece | Where it comes from | Size |
+| Image | Used when | Size |
 |---|---|---|
-| Trained model | The public Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya), pinned to one commit, every file checked against the sha256 in the package | about 680 MB |
-| Python environment | A venv created from Python 3.10 to 3.13, with `torch` (a CUDA build only when `nvidia-smi` finds a GPU, the CPU build otherwise), `laya[serve]`, `fastapi` and `uvicorn` | a few GB |
+| `v1-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
+| `v1-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
 
-The first time you send a request with `laya/auto` selected, Relay asks whether to install them. You can also run `/laya setup` at any time. After that, `laya/auto` starts the server on `127.0.0.1:8000` by itself when a request needs it and stops it when the session ends. A server that already answers on that port is used as is, so you can run your own. Until the install finishes, or when it is declined, keyword rules route requests.
+The image holds Python 3.11, `torch`, `laya[serve]`, the shipped model from the Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya) (pinned to one commit, every file checked against the sha256 in the package), and the scripts that serve and train it. The tag ends in a hash of all of that, so each Relay version runs the image built from its own sources.
 
-Relay only starts a server for a local `laya.baseUrl`. Set `"laya": { "autostart": false }` to never start or offer one.
+Install is automatic. Every time Relay starts in interactive mode it makes sure, in the background, that:
 
-Requirements: Python 3.10 to 3.13 (set `laya.python` if it is not on the PATH under `python3`, `python` or `py`), and on Windows a home directory path short enough for torch's DLLs (the default is).
+1. the image is present, pulling it the first time (the status line shows the layers);
+2. a container named `relay-laya` runs it with the active model, published on `127.0.0.1:8737` only (the port of `laya.baseUrl`), with `--restart unless-stopped`;
+3. the server answers.
+
+The container then keeps running between sessions and comes back with Docker, so requests do not wait for the model to load. It serves on the CPU, which keeps the GPU free for training. Models trained from your sessions live in the Docker volume `relay-laya-models`. On the host, `~/.relay/agent/laya` only holds Relay's own data: the training exercises, the list of trained models, and telemetry. A Python environment or model left there by Relay 1.0.2 is deleted.
+
+Until the server answers, and whenever Docker is missing or stopped, keyword rules route requests; Relay says once why Laya is not running. Install [Docker Desktop](https://docs.docker.com/get-started/get-docker/) (Windows, macOS) or Docker Engine (Linux) and start it; the next Relay start installs Laya. `/laya setup` does it right away.
+
+A server that already answers on the port when there is no `relay-laya` container is used as is, so you can run your own; one that announces other questions than Relay's, such as a laya-trainer server of another project, is reported instead of used. Relay manages a container only for a local `laya.baseUrl`. `"laya": { "autostart": false }` leaves Docker alone, and `laya.image` runs another image, for example one you built with `npm run laya:image -- --variant cpu` in a Relay checkout.
 
 ## Teach Laya from your sessions
 
@@ -84,13 +92,13 @@ The shipped model learned from synthetic requests, so it routes your kind of wor
 
 1. **Collect.** Relay lists every request of the current session with the evidence of how it went: the model and effort that ran it, the tools called, the files changed, the commands, the errors of failed tool calls, whether tests and builds passed, what laya/auto planned, and your next message (a correction there means the task was not done right). `/laya learn <session file>` reads another session instead.
 2. **Label.** The agent answers Laya's 18 questions for each task from that evidence, for example "this fix needed the `balanced` tier, not `fast`: it took two failed edits and a correction". When the task taught something, it also writes a lesson: "The label comes from `locales/pt-BR/orders.json`, not the component; run `npm run i18n:check`." It saves them with the `laya_learn` tool and replies with a table of what it labeled. The labels are exercises in `~/.relay/agent/laya/training/data/dataset.jsonl`; a request learned again replaces its old labels.
-3. **Remember.** From the next request on, without waiting for training and without the Laya environment:
+3. **Remember.** From the next request on, without waiting for training and even without Docker:
    - A request close to a learned task is routed with that task's labels instead of Laya's or the keyword rules' answers. The status line shows `(memory)`. "Corrija o texto do botão Salvar na tela de pedidos, está cortado" goes to the tier and effort the learned "Corrija o texto do botão Salvar na tela de pedidos" needed, not to the cheapest tier the words "corrija o texto" suggest.
    - The model that runs a request gets the lessons of similar learned tasks: in the laya/auto plan, or in a hidden `[laya:lessons]` message when you selected a model yourself.
 
    Closeness is the cosine of the requests' word vectors, with words common to every coding request weighted down: routing needs 0.6, a lesson 0.45. Requests in another language than the learned one rarely match; training covers those. Turn the memory off with `"laya": { "memory": false }`.
-4. **Train.** Training starts in the background, from the model that routes today. It mixes the session tasks with a replay sample of the earlier exercises, so Laya learns the new tasks without forgetting the rest. With an 8 GB GPU it takes about 7 minutes; without a GPU Relay asks first, because it can take an hour or more. The memory and keyword rules route requests while it runs, and the status line shows its progress.
-5. **Test and activate.** The new model and the current one answer the same held-out test, exercises neither was trained on. The new model routes requests from then on unless it answers more than 1% fewer test questions; Relay then reports how many answers on the session tasks it now gets right, before and after.
+4. **Train.** Training runs in a Docker container, `relay-laya-train`, from the model that routes today. It mixes the session tasks with a replay sample of the earlier exercises, so Laya learns the new tasks without forgetting the rest. With an 8 GB NVIDIA GPU it takes about 7 minutes; the container gets the GPU when the CUDA image runs and Docker supports GPUs (Docker Desktop with WSL 2 on Windows, the NVIDIA Container Toolkit on Linux). Without one Relay asks first, because it can take an hour or more. The current model keeps routing while it runs, and the status line shows its progress.
+5. **Test and activate.** The new model and the current one answer the same held-out test, exercises neither was trained on. The new model routes requests from then on unless it answers more than 1% fewer test questions: Relay replaces the server container with one serving it, and reports how many answers on the session tasks it now gets right, before and after.
 
 You can also ask in your own words ("learn from this conversation"): with [`tool_search`](cli.md#tools) active, the agent finds `laya_learn` itself.
 
@@ -101,7 +109,7 @@ You can also ask in your own words ("learn from this conversation"): with [`tool
 | `/laya models` | The shipped and trained models, their test scores, the exercises, and training progress |
 | `/laya use <model>` | Route with another model, for example `/laya use v1` to go back to the shipped one |
 
-Trained models live in `~/.relay/agent/laya/training/models` (about 680 MB each). Relay keeps the active one and the two newest others, and deletes older ones. Training needs the Laya environment (`/laya setup`), and stops when Relay quits; it continues across `/new` and `/resume`.
+Trained models live in the Docker volume `relay-laya-models` (about 680 MB each). Relay keeps the active one and the two newest others, and deletes older ones. Training needs Docker and the Laya image (`/laya setup`), and stops when Relay quits; it continues across `/new` and `/resume`.
 
 ## Retrain from scratch
 
@@ -116,7 +124,7 @@ To change the questions or rebuild the model, train with the `laya-trainer` Clau
 
 ### Ship a new model
 
-A retrained model reaches users through a new revision of the Hugging Face repository and a new manifest in the package:
+A retrained model reaches users through a new revision of the Hugging Face repository, a new manifest in the package, and the images the release builds from it:
 
 ```bash
 hf upload eltonssouza/relay-laya .laya/models/v2 . --commit-message "Laya model v2"
@@ -124,15 +132,15 @@ node scripts/package-laya-model.mjs --model .laya/models/v2 --version v2 --out /
 cp /tmp/laya-v2/model-manifest.ts packages/coding-agent/src/extensions/laya/model-manifest.ts
 ```
 
-`hf upload` needs `hf auth login` with a token that can write to the repository. Upload before the npm release that embeds the new manifest. The manifest pins the commit, file sizes and hashes, so a missing or altered file makes the install fail instead of running an unknown model. Installed users get the new version in a new directory on their next `/laya setup`.
+`hf upload` needs `hf auth login` with a token that can write to the repository. Upload before the release that embeds the new manifest: the release workflow builds the images, which download the model files and fail on a missing or altered one, so an unknown model never ships. Users get the new image, and a container serving it, on their next Relay start.
 
 ## Commands
 
 | Command | Effect |
 |---|---|
-| `/laya` | Profile, runtime and server status, the routing model and training progress, models with credentials, quota, and the last plan with its alternatives and escalations |
-| `/laya setup` | Install the Python environment and download the trained model |
-| `/laya start`, `/laya stop` | Start the local server, or stop the one this session started |
+| `/laya` | Profile, container and server status, the routing model and training progress, models with credentials, quota, and the last plan with its alternatives and escalations |
+| `/laya setup`, `/laya start` | Pull the image if needed and start or update the `relay-laya` container now |
+| `/laya stop` | Stop the container; the next Relay start runs it again |
 | `/laya learn [session file]` | Teach Laya the tasks of this session ([details](#teach-laya-from-your-sessions)) |
 | `/laya train` | Train again on the session tasks collected so far |
 | `/laya models`, `/laya use <model>` | List the shipped and trained models, or route with another one |
