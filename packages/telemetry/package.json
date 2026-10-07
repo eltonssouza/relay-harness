@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/telemetry",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Vendor-neutral telemetry contracts and typed schema utilities for relay",
 	"type": "module",
 	"main": "./dist/index.js",

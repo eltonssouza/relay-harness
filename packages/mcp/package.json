@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/mcp",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Standalone Model Context Protocol client for relay and other applications",
 	"type": "module",
 	"main": "./dist/index.js",
