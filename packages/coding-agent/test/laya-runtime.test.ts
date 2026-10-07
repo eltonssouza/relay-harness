@@ -126,11 +126,18 @@ describe("laya server container", () => {
 			[
 				["pull"],
 				(_args, options) => {
+					// Docker Desktop's containerd store, as captured: layers complete their download before
+					// they are extracted, and blobs that are not layers (d6a201bc5117) complete too.
 					for (const line of [
-						"a1: Pulling fs layer",
-						"b2: Pulling fs layer",
-						"a1: Pull complete",
-						"b2: Pull complete",
+						"v1-cpu-abc: Pulling from eltonssouza/relay-laya",
+						"82ceee3231d4: Pulling fs layer",
+						"2c95de37c4a6: Pulling fs layer",
+						"f1244e1e87fe: Already exists",
+						"82ceee3231d4: Download complete",
+						"d6a201bc5117: Download complete",
+						"2c95de37c4a6: Download complete",
+						"2c95de37c4a6: Pull complete",
+						"82ceee3231d4: Pull complete",
 					]) {
 						options?.onLine?.(line, "stdout");
 					}
@@ -152,7 +159,14 @@ describe("laya server container", () => {
 		expect(await laya.install((message) => reports.push(message))).toBe(true);
 
 		expect(laya.state).toBe("ready");
-		expect(reports).toContain("downloading the Laya image: 2/2 layers");
+		// Progress moves while layers download, ignores the config blob, and counts each layer once.
+		expect(reports.filter((message) => message.startsWith("downloading the Laya image:"))).toEqual([
+			"downloading the Laya image: 0/1 layers",
+			"downloading the Laya image: 0/2 layers",
+			"downloading the Laya image: 1/3 layers",
+			"downloading the Laya image: 2/3 layers",
+			"downloading the Laya image: 3/3 layers",
+		]);
 		const run = calls.find((args) => args[0] === "run");
 		expect(run).toEqual(
 			expect.arrayContaining([
