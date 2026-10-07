@@ -2494,8 +2494,7 @@ async function loadModelsDevData(): Promise<Model<any>[]> {
 					baseUrl,
 					reasoning: isKimiK3 || m.reasoning === true,
 					input: m.modalities?.input?.includes("image") ? ["text", "image"] : ["text"],
-					// Kimi K3 always uses Moonshot's official pricing, which has no cache write charge;
-					// models.dev reported a cache write price for it.
+					// models.dev lists a cache-write price for Kimi K3, but Moonshot does not bill cache writes.
 					cost: isKimiK3
 						? { ...KIMI_K3_COST }
 						: {
