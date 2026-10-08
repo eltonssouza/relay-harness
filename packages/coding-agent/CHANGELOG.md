@@ -4,6 +4,19 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### New Features
+
+- New installations use the incrementally trained Laya v3 checkpoint, pinned to its verified Hugging Face revision. See [Laya runs in Docker](docs/laya.md#laya-runs-in-docker).
+- Enable `laya.followProvider` to adapt capability tiers within the selected provider or model family. See [Follow the selected provider](docs/laya.md#follow-the-selected-provider).
+
+### Added
+
+- `laya.followProvider` routes the selected physical model through Laya while keeping model choices, retries and escalations inside its provider. `laya.modelGroups` maps capability tiers within a family when a gateway serves several families; unmapped or insufficient capabilities are reported rather than inferred.
+
+### Changed
+
+- The shipped Laya checkpoint is v3, incrementally trained from v2 with corrected labels and provider-neutral capability exercises. Its Hugging Face revision and all model file hashes are pinned for reproducible images; existing session-trained checkpoints remain separate.
+
 ## [1.0.4] - 2026-10-07
 
 ### Changed
