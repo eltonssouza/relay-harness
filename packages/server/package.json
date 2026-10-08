@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/server",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"description": "experimental server package for relay",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -51,8 +51,8 @@
 		"node": ">=22.19.0"
 	},
 	"dependencies": {
-		"@relay-harness/chord": "^1.0.4",
-		"@relay-harness/protocol": "^1.0.4"
+		"@relay-harness/chord": "^1.0.5",
+		"@relay-harness/protocol": "^1.0.5"
 	},
 	"devDependencies": {
 		"shx": "0.4.0",
