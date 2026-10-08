@@ -59,6 +59,29 @@ Replace a tier with `laya.models`:
 
 `laya.quota` states how much of each subscription is left. Scarce quota makes a provider's models more expensive in the utility, so an equivalent model of another provider wins.
 
+### Follow the selected provider
+
+Set `laya.followProvider` to `true` to route the physical model you select through Laya. Selecting a Claude model restricts subsequent choices to its provider; selecting Codex, a local endpoint, GLM, Kimi or Qwen changes that boundary. Laya still classifies task capability independently of the provider. Direct calls, retries and tool-failure escalations keep the boundary; rate limits do not authorize a switch to another provider.
+
+```json
+{
+  "laya": {
+    "followProvider": true,
+    "modelGroups": {
+      "local-qwen": {
+        "fast": ["lmstudio/qwen2.5-coder-7b-instruct"],
+        "balanced": ["lmstudio/qwen2.5-coder-7b-instruct"],
+        "strong": ["lmstudio/qwen3-coder-30b-a3b-instruct"]
+      }
+    }
+  }
+}
+```
+
+The latest explicit physical model selection on the session branch identifies the provider, including after resume. Default tier maps remain available for their providers alongside `laya.models`. Add a `modelGroups` entry to map the actual model IDs and capabilities of a provider or family. A group is selected by membership of the model you selected; its candidates must also use that model's provider. This keeps Qwen and Kimi separate when both are served by the same gateway. A model must belong to at most one group.
+
+A provider need not offer four distinct models. Missing tiers stay missing: a `frontier` request does not make a smaller local model frontier-capable. If no mapped models are available, Relay keeps the selected model and reports its capability as unclassified. If only a weaker mapped model is available, Relay reports the limitation. Declare capabilities explicitly instead of inferring quality from a model name or price. Set `followProvider` to `false` for fixed physical selections and the normal cross-provider `laya/auto` registry.
+
 ## Laya runs in Docker
 
 Relay itself runs on your machine; Laya and its Python run only in Docker. The npm package contains neither the trained model (650 MB) nor Python with torch. Both come in a Docker image, `ghcr.io/eltonssouza/relay-laya`, built by Relay's release from the same sources as the package:

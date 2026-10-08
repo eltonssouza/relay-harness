@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import {
 	type Api,
 	type ClassifierModel,
+	clampThinkingLevel,
 	createProvider,
 	type Message,
 	type Model,
@@ -16,6 +17,7 @@ import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types
 import { SessionManager } from "../../core/session-manager.ts";
 import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
+import { isVirtualModel } from "../../core/virtual-models.ts";
 import { assessmentFromAnswers, assessmentFromLabels, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
 import { type DockerRun, spawnDocker } from "./docker.ts";
 import {
@@ -33,7 +35,6 @@ import { LAYA_MODEL_MANIFEST } from "./model-manifest.ts";
 import {
 	applyPolicy,
 	type Candidate,
-	DEFAULT_MODEL_REGISTRY,
 	type EscalationReason,
 	nextTier,
 	PerformanceHistory,
@@ -46,6 +47,7 @@ import {
 	type ScoredCandidate,
 	taskKey,
 } from "./policy.ts";
+import { scopedModelRegistry } from "./provider-scope.ts";
 import { CAPABILITY_TIERS, type CapabilityTier, LAYA_QUESTIONS, layaDecisionsFile } from "./questions.ts";
 import { LAYA_PLAN_MESSAGE, renderPlanMessage, selectSkills, unneededTools } from "./routers.ts";
 import { type LayaImageVariant, layaImage } from "./runtime.ts";
@@ -104,6 +106,8 @@ export interface LayaRouterState {
 	attempts: number;
 	/** Top-ranked alternatives at selection time, for `/laya`. */
 	alternatives: string[];
+	/** False for a selected model whose capability has not been mapped to a tier. */
+	capabilityKnown?: boolean;
 }
 
 const layaClassifier: ClassifierModel<"typesafe-system-one"> = {
@@ -247,6 +251,21 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	};
 	const isSelected = (ctx: ExtensionContext) =>
 		ctx.model?.provider === LAYA_PROVIDER_ID && ctx.model.id === LAYA_VIRTUAL_MODEL_ID;
+	/** Read explicit selections, not the physical replies of the router; branch/resume restores the scope. */
+	const selectedModel = (ctx: ExtensionContext): Model<Api> | undefined => {
+		if (ctx.model && !isVirtualModel(ctx.model)) return ctx.model;
+		for (const entry of ctx.sessionManager.getBranch().toReversed()) {
+			if (entry.type === "custom" && entry.customType === "laya.selected-model") {
+				const selected = entry.data as { provider?: string; id?: string } | undefined;
+				const model = selected?.provider && selected.id && ctx.modelRegistry.find(selected.provider, selected.id);
+				if (model && !isVirtualModel(model)) return model;
+			}
+			if (entry.type !== "model_change" || entry.provider === LAYA_PROVIDER_ID) continue;
+			const model = ctx.modelRegistry.find(entry.provider, entry.modelId);
+			if (model && !isVirtualModel(model)) return model;
+		}
+		return undefined;
+	};
 
 	relay.registerFlag("laya-policy", {
 		type: "string",
@@ -315,16 +334,29 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	}
 
 	/** Model registry: configured models whose provider has credentials. */
-	function candidates(ctx: ExtensionContext): Array<Candidate & { model: Model<Api> }> {
-		const registry = { ...DEFAULT_MODEL_REGISTRY, ...settings.models };
-		const result: Array<Candidate & { model: Model<Api> }> = [];
+	function candidates(ctx: ExtensionContext): Array<Candidate & { model: Model<Api>; capabilityKnown: boolean }> {
+		const selected = settings.followProvider ? selectedModel(ctx) : undefined;
+		const { registry } = scopedModelRegistry(settings, selected);
+		const result: Array<Candidate & { model: Model<Api>; capabilityKnown: boolean }> = [];
 		for (const tier of CAPABILITY_TIERS) {
 			for (const ref of registry[tier] ?? []) {
 				const parsed = parseModelRef(ref);
 				const model = parsed && ctx.modelRegistry.find(parsed.provider, parsed.id);
 				if (!model || model.provider === LAYA_PROVIDER_ID || !ctx.modelRegistry.hasConfiguredAuth(model)) continue;
-				result.push({ ref, provider: model.provider, tier, order: result.length, model });
+				if (isVirtualModel(model)) continue;
+				result.push({ ref, provider: model.provider, tier, order: result.length, model, capabilityKnown: true });
 			}
+		}
+		// Unknown providers still work with the selected model; do not invent rankings of their models.
+		if (result.length === 0 && selected && ctx.modelRegistry.hasConfiguredAuth(selected)) {
+			result.push({
+				ref: `${selected.provider}/${selected.id}`,
+				provider: selected.provider,
+				tier: "balanced",
+				order: 0,
+				model: selected,
+				capabilityKnown: false,
+			});
 		}
 		return result;
 	}
@@ -332,14 +364,14 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	function rank(
 		ctx: ExtensionContext,
 		input: { assessment: TaskAssessment; requiredTier: CapabilityTier; minTier: CapabilityTier },
-	): Array<ScoredCandidate & { model: Model<Api> }> {
+	): Array<ScoredCandidate & { model: Model<Api>; capabilityKnown: boolean }> {
 		const available = candidates(ctx);
 		if (available.length === 0) {
 			throw new Error(
 				"laya/auto: no model of the Laya model registry has credentials. Log in to a provider or set laya.models.",
 			);
 		}
-		const byRef = new Map(available.map((candidate) => [candidate.ref, candidate.model]));
+		const byRef = new Map(available.map((candidate) => [candidate.ref, candidate]));
 		const ranked = rankCandidates(available, {
 			requiredTier: input.requiredTier,
 			minTier: input.minTier,
@@ -364,7 +396,11 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 						utility: 0,
 						eligible: false,
 					}));
-		return list.map((candidate) => ({ ...candidate, model: byRef.get(candidate.ref)! }));
+		return list.map((candidate) => ({
+			...candidate,
+			model: byRef.get(candidate.ref)!.model,
+			capabilityKnown: byRef.get(candidate.ref)!.capabilityKnown,
+		}));
 	}
 
 	function select(
@@ -375,17 +411,26 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	): { route: ModelRoute<LayaRouterState>; state: LayaRouterState } {
 		const ranked = rank(ctx, { assessment: base.assessment, requiredTier, minTier });
 		const chosen = ranked[0];
+		const limited =
+			!chosen.capabilityKnown || CAPABILITY_TIERS.indexOf(chosen.tier) < CAPABILITY_TIERS.indexOf(requiredTier);
+		if (settings.followProvider && limited) {
+			ctx.ui.notify(
+				`Laya: ${requiredTier} requested; ${chosen.ref} is ${chosen.capabilityKnown ? chosen.tier : "unclassified"}. Staying with the selected provider; sufficient capability is not confirmed. Configure laya.modelGroups or select a stronger model.`,
+				"warning",
+			);
+		}
 		const state: LayaRouterState = {
 			...base,
 			tier: chosen.tier,
 			model: chosen.ref,
-			thinkingLevel: base.policy.thinkingLevel,
+			thinkingLevel: clampThinkingLevel(chosen.model, base.policy.thinkingLevel),
 			alternatives: ranked.slice(1, 4).map((candidate) => candidate.ref),
+			capabilityKnown: chosen.capabilityKnown,
 		};
 		current = state;
 		ctx.ui.setStatus(
 			"laya",
-			`laya ${profile()}: ${base.assessment.task.type} → ${chosen.tier} ${chosen.model.id} • ${state.thinkingLevel}${
+			`laya ${profile()}: ${base.assessment.task.type} → ${chosen.capabilityKnown ? chosen.tier : "unclassified"} ${chosen.model.id} • ${state.thinkingLevel}${
 				{ laya: "", memory: " (memory)", heuristic: " (rules)" }[base.assessment.source]
 			}`,
 		);
@@ -474,6 +519,8 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 
 		if (request.reason === "retry" && request.failed) {
 			if (QUOTA_ERROR.test(request.failed.message.errorMessage ?? "")) {
+				// Following a provider is a boundary, including on rate limits and overloads.
+				if (settings.followProvider) return sticky(ctx, state);
 				quota.recordPressure(request.failed.model.provider);
 				const route = escalate(ctx, state, "provider_unavailable", state.failuresAtEscalation);
 				if (route) return route;
@@ -537,7 +584,9 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 
 	/** Capability tier of a `provider/model` in the Laya model registry. */
 	const tierOf = (ref: string): CapabilityTier | undefined => {
-		const registry = { ...DEFAULT_MODEL_REGISTRY, ...settings.models };
+		const parsed = parseModelRef(ref);
+		if (!parsed) return undefined;
+		const { registry } = scopedModelRegistry(settings, parsed);
 		return CAPABILITY_TIERS.find((tier) => registry[tier]?.includes(ref));
 	};
 
@@ -642,6 +691,12 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 
 	relay.on("before_agent_start", async (event, ctx) => {
 		refreshSettings();
+		if (settings.followProvider && ctx.model && !isVirtualModel(ctx.model)) {
+			relay.appendEntry("laya.selected-model", { provider: ctx.model.provider, id: ctx.model.id });
+			const auto = ctx.modelRegistry.find(LAYA_PROVIDER_ID, LAYA_VIRTUAL_MODEL_ID);
+			if (!auto || !(await relay.setModel(auto)))
+				throw new Error("Laya could not activate provider-scoped routing.");
+		}
 		const enforce = isSelected(ctx) && settings.toolRouting === "enforce";
 		// Enforcement is off or another model is selected: give the user's tools back.
 		if (toolBaseline && !enforce) {
@@ -898,6 +953,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 					const providers = new Set(candidates(ctx).map((candidate) => candidate.provider));
 					const lines = [
 						`Profile: ${profile()}${isSelected(ctx) ? "" : " (select laya/auto to route with Laya)"}`,
+						`Model scope: ${settings.followProvider ? scopedModelRegistry(settings, selectedModel(ctx)).scope : "all configured providers"}`,
 						`Laya container: ${server.describe()}; server ${(await server.isUp()) ? "answering" : "not answering"} at ${baseUrl()}`,
 						`Laya server: ${lastClassifierError ? `unavailable, using keyword rules (${lastClassifierError})` : "ok or not yet asked"}`,
 						`Models with credentials: ${

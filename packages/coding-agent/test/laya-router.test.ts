@@ -15,6 +15,7 @@ import {
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { ENV_AGENT_DIR } from "../src/config.ts";
+import { getVirtualModelState } from "../src/core/virtual-models.ts";
 import {
 	assessmentFromAnswers,
 	assessmentFromLabels,
@@ -30,6 +31,7 @@ import {
 	QuotaManager,
 	rankCandidates,
 } from "../src/extensions/laya/policy.ts";
+import { scopedModelRegistry } from "../src/extensions/laya/provider-scope.ts";
 import { LAYA_QUESTIONS, layaDecisionsFile } from "../src/extensions/laya/questions.ts";
 import { generateSeed } from "../src/extensions/laya/seed.ts";
 import { datasetFromTelemetry, historyFromTelemetry, type TelemetryRecord } from "../src/extensions/laya/telemetry.ts";
@@ -222,6 +224,50 @@ describe("laya policy", () => {
 	});
 });
 
+describe("provider-scoped model registry", () => {
+	it("retains Claude and Codex defaults when local models were configured", () => {
+		const settings = { followProvider: true, models: { fast: ["lmstudio/qwen-7b"] } };
+		expect(scopedModelRegistry(settings, { provider: "anthropic", id: "claude-sonnet-5-5" }).registry.fast).toEqual([
+			"anthropic/claude-haiku-4-5",
+		]);
+		expect(scopedModelRegistry(settings, { provider: "openai-codex", id: "gpt-6-sol" }).registry.fast).toEqual([
+			"openai-codex/gpt-6-luna",
+		]);
+	});
+
+	it("restricts a mixed gateway to the selected family and provider", () => {
+		const result = scopedModelRegistry(
+			{
+				followProvider: true,
+				modelGroups: {
+					qwen: { fast: ["gateway/qwen-small"], strong: ["gateway/qwen-large", "other/qwen-large"] },
+					kimi: { fast: ["gateway/kimi-small"], strong: ["gateway/kimi-large"] },
+				},
+			},
+			{ provider: "gateway", id: "qwen-small" },
+		);
+		expect(result.scope).toBe("gateway (qwen)");
+		expect(result.registry.strong).toEqual(["gateway/qwen-large"]);
+		expect(result.registry.frontier).toEqual([]);
+	});
+
+	it("does not invent models for an unknown provider or a missing anchor", () => {
+		expect(
+			scopedModelRegistry({ followProvider: true }, { provider: "glm", id: "my-model" }).registry.strong,
+		).toEqual([]);
+		expect(() => scopedModelRegistry({ followProvider: true })).toThrow("select a physical model first");
+	});
+
+	it("rejects ambiguous group membership", () => {
+		expect(() =>
+			scopedModelRegistry(
+				{ followProvider: true, modelGroups: { a: { fast: ["p/m"] }, b: { strong: ["p/m"] } } },
+				{ provider: "p", id: "m" },
+			),
+		).toThrow("multiple laya.modelGroups");
+	});
+});
+
 describe("laya assessment", () => {
 	it("reads classifier answers and rejects unknown options", () => {
 		expect(assessment()).toMatchObject({
@@ -343,7 +389,12 @@ describe("laya/auto router", () => {
 	});
 
 	/** Faux Anthropic models for every tier and a scripted Laya classifier (undefined = server down). */
-	async function setup(script: Script | undefined, tools: AgentTool[], settings: Record<string, unknown> = {}) {
+	async function setup(
+		script: Script | undefined,
+		tools: AgentTool[],
+		settings: Record<string, unknown> = {},
+		extraProviders: Array<ReturnType<typeof fauxProvider>> = [],
+	) {
 		const anthropic = fauxProvider({
 			provider: "anthropic",
 			models: ["claude-haiku-4-5", "claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"].map((id) => ({
@@ -379,6 +430,9 @@ describe("laya/auto router", () => {
 			settings: { harnessCore: { evidence: false }, laya: settings },
 			extensionFactories: [
 				(relay) => relay.registerProvider(anthropic.provider),
+				...extraProviders.map(
+					(provider) => (relay: Parameters<typeof layaExtension>[0]) => relay.registerProvider(provider.provider),
+				),
 				layaExtension,
 				// Replaces the built-in Laya provider with the scripted classifier.
 				(relay) => relay.registerProvider(laya),
@@ -408,6 +462,145 @@ describe("laya/auto router", () => {
 	}
 
 	const call = (tool: string) => fauxAssistantMessage(fauxToolCall(tool, { path: "a.ts" }), { stopReason: "toolUse" });
+
+	it.each(["openai-codex", "lmstudio", "glm", "kimi", "qwen"])(
+		"follows %s across all four tiers despite competing Claude models",
+		async (provider) => {
+			const ids = ["small", "medium", "large", "largest"];
+			const other = fauxProvider({ provider, models: ids.map((id) => ({ id, reasoning: true })) });
+			const models = {
+				fast: [`${provider}/small`],
+				balanced: [`${provider}/medium`],
+				strong: [`${provider}/large`],
+				frontier: [`${provider}/largest`],
+			};
+			const script = { ...SIMPLE_FIX };
+			const { harness, telemetry } = await setup(script, [], { followProvider: true, models }, [other]);
+			await harness.session.setModel(harness.session.modelRuntime.getModel(provider, "large")!);
+			for (const [index, tier] of ["fast", "balanced", "strong", "frontier"].entries()) {
+				script.tier = tier;
+				other.appendResponses([fauxAssistantMessage("done")]);
+				await harness.session.prompt(`Handle task ${index}`);
+				expect(harness.session.model?.provider).toBe("laya");
+				expect(telemetry().at(-1)?.selected).toMatchObject({ provider, model: ids[index], tier });
+			}
+		},
+	);
+
+	it("updates the scope when the user switches from Claude to Codex and keeps it for direct/retry calls", async () => {
+		const codex = fauxProvider({
+			provider: "openai-codex",
+			models: [
+				{ id: "gpt-6-luna", reasoning: true },
+				{ id: "gpt-5.6-terra", reasoning: true },
+			],
+		});
+		const { harness, respond, telemetry } = await setup(SIMPLE_FIX, [], { followProvider: true }, [codex]);
+		const runtime = harness.session.modelRuntime;
+		await harness.session.setModel(runtime.getModel("anthropic", "claude-sonnet-5-5")!);
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Fix the pager");
+		expect(telemetry().at(-1)?.selected.provider).toBe("anthropic");
+		await harness.session.setModel(runtime.getModel("openai-codex", "gpt-6-luna")!);
+		codex.appendResponses([fauxAssistantMessage("done")]);
+		await harness.session.prompt("Fix the pager again");
+		expect(telemetry().at(-1)?.selected.provider).toBe("openai-codex");
+		const auto = runtime.getModel("laya", "auto")!;
+		const direct = await runtime.resolveModel(auto, [], { reason: "direct", thinkingLevel: "off" });
+		expect(direct.model.provider).toBe("openai-codex");
+		const state = getVirtualModelState(harness.session.sessionManager.getBranch(), "laya", "auto");
+		const retry = await runtime.resolveModel(auto, [], {
+			reason: "retry",
+			thinkingLevel: "off",
+			state,
+			failed: {
+				...fauxAssistantMessage("", {
+					stopReason: "error",
+					errorMessage: "429 quota exhausted",
+				}),
+				provider: "openai-codex",
+				model: "gpt-6-luna",
+			},
+		});
+		expect(retry.model.provider).toBe("openai-codex");
+		expect(retry.model.id).toBe("gpt-6-luna");
+	});
+
+	it("keeps an unmapped provider on its selected model without claiming known capability", async () => {
+		const provider = fauxProvider({ provider: "custom", models: [{ id: "only-model" }] });
+		const { harness, telemetry } = await setup({ ...SIMPLE_FIX, tier: "frontier" }, [], { followProvider: true }, [
+			provider,
+		]);
+		await harness.session.setModel(harness.session.modelRuntime.getModel("custom", "only-model")!);
+		provider.appendResponses([fauxAssistantMessage("done")]);
+		await harness.session.prompt("Design a complex system");
+		expect(telemetry().at(-1)?.selected.provider).toBe("custom");
+		expect(getVirtualModelState(harness.session.sessionManager.getBranch(), "laya", "auto")).toMatchObject({
+			capabilityKnown: false,
+			thinkingLevel: "off",
+		});
+	});
+
+	it("persists the initial physical selection even before a model_change entry exists", async () => {
+		const { harness, respond, telemetry } = await setup(SIMPLE_FIX, [], { followProvider: true });
+		// A new SDK/session can supply its initial model without calling setModel.
+		harness.session.agent.state.model = harness.session.modelRuntime.getModel("anthropic", "claude-sonnet-5-5")!;
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Fix the pager");
+		expect(telemetry().at(-1)?.selected.provider).toBe("anthropic");
+		expect(harness.session.sessionManager.getBranch()).toContainEqual(
+			expect.objectContaining({
+				type: "custom",
+				customType: "laya.selected-model",
+				data: { provider: "anthropic", id: "claude-sonnet-5-5" },
+			}),
+		);
+	});
+
+	it("reports the actual local tier when frontier capability is unavailable", async () => {
+		const local = fauxProvider({ provider: "local", models: [{ id: "coder" }] });
+		const { harness, telemetry } = await setup(
+			{ ...SIMPLE_FIX, tier: "frontier" },
+			[],
+			{ followProvider: true, modelGroups: { local: { strong: ["local/coder"] } } },
+			[local],
+		);
+		await harness.session.setModel(harness.session.modelRuntime.getModel("local", "coder")!);
+		local.appendResponses([fauxAssistantMessage("done")]);
+		await harness.session.prompt("Design a complex system");
+		expect(telemetry().at(-1)).toMatchObject({
+			policy: { required_tier: "frontier" },
+			selected: { provider: "local", tier: "strong", thinking_level: "off" },
+		});
+	});
+
+	it("escalates locally without switching to another family in the same gateway", async () => {
+		const gateway = fauxProvider({
+			provider: "gateway",
+			models: ["qwen-small", "qwen-large", "kimi-large"].map((id) => ({ id, reasoning: true })),
+		});
+		const { harness, telemetry } = await setup(
+			SIMPLE_FIX,
+			[createTool("edit", true)],
+			{
+				followProvider: true,
+				escalateAfterFailures: 1,
+				modelGroups: {
+					qwen: { fast: ["gateway/qwen-small"], strong: ["gateway/qwen-large"] },
+					kimi: { strong: ["gateway/kimi-large"] },
+				},
+			},
+			[gateway],
+		);
+		await harness.session.setModel(harness.session.modelRuntime.getModel("gateway", "qwen-small")!);
+		gateway.appendResponses([call("edit"), fauxAssistantMessage("done")]);
+		await harness.session.prompt("Fix the pager");
+		expect(harness.session.messages.filter((m) => m.role === "assistant").map((m) => m.model)).toEqual([
+			"qwen-small",
+			"qwen-large",
+		]);
+		expect(telemetry().at(-1)?.selected.model).toBe("qwen-large");
+	});
 
 	it("routes a simple fix to the fast tier, sends the plan and records telemetry", async () => {
 		const { harness, respond, dispatched, plan, telemetry, requests } = await setup(SIMPLE_FIX, [createTool("edit")]);
