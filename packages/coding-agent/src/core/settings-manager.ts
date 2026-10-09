@@ -142,6 +142,10 @@ export interface LayaSettings {
 	escalateAfterFailures?: number;
 	/** `advise` names unneeded tools in the plan; `enforce` also deactivates them. Default: `advise`. */
 	toolRouting?: "advise" | "enforce";
+	/** Opt-in maximum number of matching deferred tools to activate per request; 0 disables. */
+	toolRetrieval?: number;
+	/** Record aggregate deferred-tool retrieval metrics locally; requires telemetry to be enabled. Default: false. */
+	toolRetrievalTelemetry?: boolean;
 	/** Install Laya in Docker when Relay starts and keep its container running. Default: true. */
 	autostart?: boolean;
 	/** Docker image of Laya. Default: the image built from this Relay version on ghcr.io. */

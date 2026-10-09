@@ -62,6 +62,7 @@ import {
 	TelemetryStore,
 	truncateRequest,
 } from "./telemetry.ts";
+import { evaluateToolRetrieval, retrieveTools } from "./tool-retrieval.ts";
 import {
 	accuracy,
 	describeProgress,
@@ -235,6 +236,8 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	let run: { taskId: string; startedAt: number } | undefined;
 	/** Tools active before enforced tool routing changed them. */
 	let toolBaseline: { tools: string[]; applied: string[] } | undefined;
+	let retrievedTools: { before: string[]; applied: string[] } | undefined;
+	let retrievalTelemetry: { candidateCount: number; retrievedNames: string[] } | undefined;
 	/** Tasks `/laya learn` listed for the agent to label, numbered as the agent saw them. */
 	let learnTasks: { tasks: SessionTask[]; session: string } | undefined;
 	/** This runtime's training listener, while it is the latest one. */
@@ -692,6 +695,17 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 
 	relay.on("before_agent_start", async (event, ctx) => {
 		refreshSettings();
+		const previousRetrieval = retrievedTools;
+		if (previousRetrieval) {
+			const active = relay.getActiveTools();
+			if (
+				active.length === previousRetrieval.applied.length &&
+				active.every((name, i) => name === previousRetrieval.applied[i])
+			) {
+				relay.setActiveTools(previousRetrieval.before);
+			}
+			retrievedTools = undefined;
+		}
 		if (settings.followProvider && ctx.model && !isVirtualModel(ctx.model)) {
 			relay.appendEntry("laya.selected-model", { provider: ctx.model.provider, id: ctx.model.id });
 			const auto = ctx.modelRegistry.find(LAYA_PROVIDER_ID, LAYA_VIRTUAL_MODEL_ID);
@@ -731,6 +745,23 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			toolBaseline = { tools: baseline, applied };
 			relay.setActiveTools(applied);
 		}
+		const limit = settings.toolRetrieval;
+		retrievalTelemetry = undefined;
+		if (typeof limit === "number" && Number.isSafeInteger(limit) && limit > 0) {
+			const active = relay.getActiveTools();
+			const candidates = relay
+				.getAllTools()
+				.filter((tool) => tool.exposure === "deferred" && !active.includes(tool.name));
+			const matches = retrieveTools(event.prompt, candidates, limit);
+			if (settings.toolRetrievalTelemetry && settings.telemetry !== false) {
+				retrievalTelemetry = { candidateCount: candidates.length, retrievedNames: matches };
+			}
+			if (matches.length) {
+				const applied = [...active, ...matches];
+				retrievedTools = { before: active, applied };
+				relay.setActiveTools(applied);
+			}
+		}
 		const lessons = lessonsFor(event.prompt);
 		const plan = renderPlanMessage(assessment, policy, skills, deactivated);
 		const role = loadAgentProfile(assessment.agent, ctx);
@@ -760,6 +791,30 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		if (!isSelected(ctx) || !state || !run || run.taskId !== state.taskId) return;
 		const summary = summarizeRun(event.messages);
 		const success = summary.outcome === "completed" && summary.testsPassed !== false;
+		if (retrievalTelemetry && settings.telemetry !== false && settings.toolRetrievalTelemetry) {
+			const invokedNames = event.messages.flatMap((message) =>
+				message.role === "assistant"
+					? message.content.filter((block) => block.type === "toolCall").map((block) => block.name)
+					: [],
+			);
+			const evaluation = evaluateToolRetrieval(
+				retrievalTelemetry.candidateCount,
+				retrievalTelemetry.retrievedNames,
+				invokedNames,
+			);
+			try {
+				store.appendToolRetrieval({
+					timestamp: new Date().toISOString(),
+					...evaluation,
+				});
+			} catch (error) {
+				ctx.ui.notify(
+					`Laya retrieval telemetry not written: ${error instanceof Error ? error.message : String(error)}`,
+					"warning",
+				);
+			}
+			retrievalTelemetry = undefined;
+		}
 		const [provider, ...rest] = state.model.split("/");
 		if (summary.outcome !== "aborted") history.record(taskKey(state.assessment), state.model, success);
 		if (settings.telemetry === false) return;
