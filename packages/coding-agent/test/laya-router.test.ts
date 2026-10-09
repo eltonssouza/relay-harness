@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AgentTool } from "@relay-harness/agent-core";
@@ -35,6 +35,7 @@ import { scopedModelRegistry } from "../src/extensions/laya/provider-scope.ts";
 import { LAYA_QUESTIONS, layaDecisionsFile } from "../src/extensions/laya/questions.ts";
 import { generateSeed } from "../src/extensions/laya/seed.ts";
 import { datasetFromTelemetry, historyFromTelemetry, type TelemetryRecord } from "../src/extensions/laya/telemetry.ts";
+import { evaluateToolRetrieval, retrieveTools } from "../src/extensions/laya/tool-retrieval.ts";
 import { trainingWorkspace, writeRows } from "../src/extensions/laya/training.ts";
 import { createHarness, type Harness } from "./suite/harness.ts";
 
@@ -391,7 +392,7 @@ describe("laya/auto router", () => {
 	/** Faux Anthropic models for every tier and a scripted Laya classifier (undefined = server down). */
 	async function setup(
 		script: Script | undefined,
-		tools: AgentTool[],
+		tools: Array<AgentTool & { exposure?: "deferred" | "hidden" }>,
 		settings: Record<string, unknown> = {},
 		extraProviders: Array<ReturnType<typeof fauxProvider>> = [],
 	) {
@@ -425,10 +426,15 @@ describe("laya/auto router", () => {
 			},
 		});
 		const harness = await createHarness({
-			tools,
+			tools: tools.filter((tool) => !tool.exposure),
 			// Scenarios end with an unverified "done"; the evidence pillar's extra turn is not under test.
 			settings: { harnessCore: { evidence: false }, laya: settings },
 			extensionFactories: [
+				(relay) => {
+					for (const tool of tools.filter((tool) => tool.exposure)) {
+						relay.registerTool({ ...tool, label: tool.label ?? tool.name, exposure: tool.exposure });
+					}
+				},
 				(relay) => relay.registerProvider(anthropic.provider),
 				...extraProviders.map(
 					(provider) => (relay: Parameters<typeof layaExtension>[0]) => relay.registerProvider(provider.provider),
@@ -645,6 +651,172 @@ describe("laya/auto router", () => {
 			escalations: [{ reason: "repeated_failure", from: "fast", to: "balanced" }],
 		});
 		expect(telemetry()[0].selected).toMatchObject({ tier: "balanced", model: "claude-sonnet-5-5" });
+	});
+
+	it("measures lexical retrieval precision and recall for English and Portuguese prompts", () => {
+		const tools = [
+			{
+				name: "search_issues",
+				label: "Search issues",
+				description: "Search GitHub issues and locate reported problems",
+			},
+			{ name: "search_files", label: "Search files", description: "Search repository files" },
+			{ name: "read_file", label: "Read file", description: "Read and open a configuration file" },
+			{ name: "run_tests", label: "Run tests", description: "Run automated regression tests" },
+			{ name: "deploy_release", label: "Deploy release", description: "Publish a release" },
+			{
+				name: "write_source",
+				label: "Write source",
+				description: "Implement and write CRUD application API source code",
+			},
+		];
+		const cases = [
+			{ language: "en", prompt: "Find the issue about pagination", expected: ["search_issues"] },
+			{ language: "en", prompt: "Search the repository for the timeout handler", expected: ["search_files"] },
+			{ language: "en", prompt: "Open the configuration file", expected: ["read_file"] },
+			{ language: "en", prompt: "Run the regression test", expected: ["run_tests"] },
+			{ language: "en", prompt: "Publish this release", expected: ["deploy_release"] },
+			{ language: "pt", prompt: "Encontre a issue sobre paginação", expected: ["search_issues"] },
+			{ language: "pt", prompt: "Procure no repositório o tratador de timeout", expected: ["search_files"] },
+			{ language: "pt", prompt: "Abra o arquivo de configuração", expected: ["read_file"] },
+			{ language: "pt", prompt: "Execute o teste de regressão", expected: ["run_tests"] },
+			{ language: "pt", prompt: "Publique esta versão", expected: ["deploy_release"] },
+			{ language: "en", prompt: "Can you locate the pagination problem?", expected: ["search_issues"] },
+			{ language: "pt", prompt: "Pode localizar o problema de paginação?", expected: ["search_issues"] },
+			{
+				language: "en",
+				prompt:
+					"Please implement a secure User CRUD API. The User schema requires only name and password. Since it handles passwords, ensure the password is encrypted using bcrypt before saving it to the database, and do not return the password hash in the Read responses. Include all standard CRUD operations.",
+				expected: ["write_source"],
+			},
+		];
+		const metrics = new Map<string, { tp: number; fp: number; fn: number }>();
+		for (const { language, prompt, expected } of cases) {
+			const selected = retrieveTools(prompt, tools, 1);
+			const metric = metrics.get(language) ?? { tp: 0, fp: 0, fn: 0 };
+			metric.tp += selected.filter((name) => expected.includes(name)).length;
+			metric.fp += selected.filter((name) => !expected.includes(name)).length;
+			metric.fn += expected.filter((name) => !selected.includes(name)).length;
+			metrics.set(language, metric);
+		}
+		expect(metrics.get("en")).toEqual({ tp: 7, fp: 0, fn: 0 });
+		expect(metrics.get("pt")).toEqual({ tp: 6, fp: 0, fn: 0 });
+		for (const metric of metrics.values()) {
+			const precision = metric.tp / (metric.tp + metric.fp || 1);
+			const recall = metric.tp / (metric.tp + metric.fn || 1);
+			expect(Number.isFinite(precision)).toBe(true);
+			expect(Number.isFinite(recall)).toBe(true);
+		}
+	});
+
+	it("evaluates retrieval with aggregate counts only", () => {
+		const result = evaluateToolRetrieval(1, ["search_issues"], ["search_issues", "read"]);
+		expect(result).toEqual({
+			candidateCount: 1,
+			retrievedCount: 1,
+			invokedCount: 2,
+			invokedRetrievedCount: 1,
+		});
+		expect(JSON.stringify(result)).not.toContain("paginação");
+		expect(JSON.stringify(result)).not.toContain("search_issues");
+	});
+
+	it("writes opt-in prompt-free retrieval telemetry once per request", async () => {
+		const tool = {
+			...createTool("search_issues"),
+			description: "Search GitHub issues",
+			exposure: "deferred" as const,
+		};
+		const { harness, respond } = await setup(SIMPLE_FIX, [tool], {
+			toolRetrieval: 1,
+			toolRetrievalTelemetry: true,
+		});
+		respond(call("search_issues"), fauxAssistantMessage("done"));
+		await harness.session.prompt("Search GitHub issues for a private regression");
+		const path = join(agentDir, "laya", "tool-retrieval.jsonl");
+		const lines = readFileSync(path, "utf8").trim().split("\n");
+		expect(lines).toHaveLength(1);
+		expect(JSON.parse(lines[0])).toMatchObject({
+			candidateCount: 2,
+			retrievedCount: 1,
+			invokedCount: 1,
+			invokedRetrievedCount: 1,
+		});
+		expect(lines[0]).not.toMatch(/private|search_issues|GitHub/);
+	});
+
+	it.each([{ telemetry: false }, { toolRetrievalTelemetry: false }])(
+		"does not write retrieval telemetry with settings %j",
+		async (overrides) => {
+			const tool = { ...createTool("search_issues"), exposure: "deferred" as const };
+			const { harness, respond } = await setup(SIMPLE_FIX, [tool], {
+				toolRetrieval: 1,
+				toolRetrievalTelemetry: true,
+				...overrides,
+			});
+			respond(fauxAssistantMessage("done"));
+			await harness.session.prompt("Search issues");
+			expect(existsSync(join(agentDir, "laya", "tool-retrieval.jsonl"))).toBe(false);
+		},
+	);
+
+	it("loads matching deferred tools before routing", async () => {
+		const searchIssues = {
+			...createTool("search_issues"),
+			description: "Search GitHub issues",
+			exposure: "deferred" as const,
+		};
+		const { harness, respond } = await setup(SIMPLE_FIX, [searchIssues], { toolRetrieval: 1 });
+
+		respond(call("search_issues"), fauxAssistantMessage("done"));
+		await harness.session.prompt("Search GitHub issues for the pager regression.");
+
+		expect(harness.session.getActiveToolNames()).toContain("search_issues");
+	});
+
+	it("retrieves a deferred tool for a Portuguese request", async () => {
+		const tool = {
+			...createTool("search_issues"),
+			description: "Search GitHub issues and locate reported problems",
+			exposure: "deferred" as const,
+		};
+		const { harness, respond } = await setup(SIMPLE_FIX, [tool], { toolRetrieval: 1 });
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Encontre a issue sobre paginação");
+		expect(harness.session.getActiveToolNames()).toContain("search_issues");
+	});
+
+	it("does not retrieve unrelated tools", () => {
+		expect(
+			retrieveTools(
+				"Explain the answer",
+				[{ name: "deploy_release", label: "Deploy", description: "Publish a release" }],
+				1,
+			),
+		).toEqual([]);
+	});
+
+	it("keeps retrieval disabled by default", async () => {
+		const tool = { ...createTool("search_issues"), exposure: "deferred" as const };
+		const { harness, respond } = await setup(SIMPLE_FIX, [tool]);
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Search issues");
+		expect(harness.session.getActiveToolNames()).not.toContain("search_issues");
+	});
+
+	it("limits retrieval, excludes hidden tools, and restores the next request", async () => {
+		const tools = [
+			{ ...createTool("search_issues"), exposure: "deferred" as const },
+			{ ...createTool("search_releases"), exposure: "deferred" as const },
+			{ ...createTool("search_hidden"), exposure: "hidden" as const },
+		];
+		const { harness, respond } = await setup(SIMPLE_FIX, tools, { toolRetrieval: 1 });
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Search issues");
+		expect(harness.session.getActiveToolNames()).toEqual(["search_issues"]);
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Explain a Date");
+		expect(harness.session.getActiveToolNames()).toEqual([]);
 	});
 
 	it("deactivates unneeded tools when enforcing and restores them for another model", async () => {
