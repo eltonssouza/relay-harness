@@ -15,11 +15,11 @@ Apply this skill when auditing source code for security vulnerabilities, conduct
 
 2. **Source-to-Sink Taint Analysis**:
    - Follow untrusted input data from the source to execution sinks:
-     - SQL/NoSQL sinks $ightarrow$ injection vulnerabilities.
-     - DOM/HTML rendering sinks $ightarrow$ Cross-Site Scripting (XSS).
-     - Command execution sinks $ightarrow$ Remote Code Execution (RCE).
-     - File system sinks $ightarrow$ arbitrary file read/write, path traversal.
-     - Object access sinks $ightarrow$ BOLA / IDOR.
+     - SQL/NoSQL sinks $\rightarrow$ injection vulnerabilities.
+     - DOM/HTML rendering sinks $\rightarrow$ Cross-Site Scripting (XSS).
+     - Command execution sinks $\rightarrow$ Remote Code Execution (RCE).
+     - File system sinks $\rightarrow$ arbitrary file read/write, path traversal.
+     - Object access sinks $\rightarrow$ BOLA / IDOR.
    - Verify whether data is adequately sanitized, validated, or parameterized before reaching the sink.
 
 3. **Develop Proof of Concept (PoC)**:

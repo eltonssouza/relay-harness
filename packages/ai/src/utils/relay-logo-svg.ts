@@ -143,24 +143,24 @@ export const RELAY_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="
     </text>
 
     <!-- Subtitle: HARNESS -->
-    <text x="4" y="38" 
-          font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" 
-          font-size="16" 
-          font-weight="600" 
-          letter-spacing="10" 
-          fill="#8eb6c0" 
+    <text x="4" y="38"
+          font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="16"
+          font-weight="600"
+          letter-spacing="10"
+          fill="#8eb6c0"
           opacity="0.95">HARNESS</text>
   </g>
 
   <!-- Right End Badge / Terminal Tag -->
   <g transform="translate(875, 45)">
     <rect x="-42" y="-12" width="84" height="24" rx="12" fill="#061c24" stroke="#165b67" stroke-width="1.2"/>
-    <text x="0" y="4" 
-          text-anchor="middle" 
-          font-family="Consolas, monospace" 
-          font-size="11" 
-          font-weight="700" 
-          letter-spacing="1.5" 
+    <text x="0" y="4"
+          text-anchor="middle"
+          font-family="Consolas, monospace"
+          font-size="11"
+          font-weight="700"
+          letter-spacing="1.5"
           fill="#3de2d7">v0.1.0</text>
   </g>
 </svg>`;
