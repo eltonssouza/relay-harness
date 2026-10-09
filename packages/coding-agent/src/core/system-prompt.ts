@@ -27,6 +27,8 @@ export interface BuildSystemPromptOptions {
 	cwd: string;
 	/** Pre-loaded context files. */
 	contextFiles?: Array<{ path: string; content: string }>;
+	/** Project AGENTS.md to create and maintain during development tasks. */
+	projectAgentsPath?: string;
 	/** Pre-loaded skills. */
 	skills?: Skill[];
 }
@@ -65,6 +67,7 @@ export function normalizeBuildSystemPromptOptions(input: BuildSystemPromptOption
 		sections: { ...(input.sections ?? {}) },
 		cwd: input.cwd,
 		contextFiles: (input.contextFiles ?? []).map((file) => ({ ...file })),
+		projectAgentsPath: input.projectAgentsPath,
 		skills: (input.skills ?? []).map((skill) => ({ ...skill })),
 	};
 }
@@ -130,6 +133,7 @@ export function buildSystemPromptSections(input: BuildSystemPromptOptions): Syst
 		sections: customSections,
 		cwd,
 		contextFiles,
+		projectAgentsPath,
 		skills,
 	} = options;
 
@@ -162,6 +166,14 @@ export function buildSystemPromptSections(input: BuildSystemPromptOptions): Syst
 
 	if (appendSystemPrompt) promptSections.addendum = appendSystemPrompt;
 	if (contextFiles.length > 0) promptSections.project_context = renderProjectContext(contextFiles);
+	if (projectAgentsPath) {
+		promptSections.project_documentation = `Project development guide: ${projectAgentsPath.replace(/\\/g, "/")}
+- When the user starts a development task that changes project code, ensure this AGENTS.md exists before changing the implementation. Do not create it for questions, read-only reviews, or unrelated tasks.
+- If it is missing, inspect the project's README, dependency manifests, source layout, tests, CI configuration, and existing instruction files, then use the available tools to create a project-specific AGENTS.md. Follow the user's constraints and all applicable existing instructions. If writing is unavailable or forbidden, explain the limitation and continue within the allowed scope.
+- Document verified architecture, technology stack, setup and validation commands, environment variable names and purposes (never secret values), directory layout, services, jobs, data models, design patterns, workflows and schedules where defined, known hurdles with confirmed solutions, and a post-implementation checklist. Omit sections that do not apply; do not invent facts or pad to a fixed length.
+- Read and follow an existing guide; never replace it with a generic template. Preserve CLAUDE.md and AGENTS.override.md instructions when creating AGENTS.md.
+- Keep the guide current as development reveals confirmed hurdles, solutions, or conventions useful in future sessions. Record durable project knowledge, not transient task logs. Relay reloads context files before subsequent model calls.`;
+	}
 	const skillFileReadTool = (["read", "bash"] as const).find((tool) => selectedTools.includes(tool));
 	if (skillFileReadTool && skills.length > 0) {
 		const skillsPrompt = formatSkillsForPrompt(skills, skillFileReadTool).trim();

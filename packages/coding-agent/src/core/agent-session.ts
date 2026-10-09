@@ -458,6 +458,8 @@ export class AgentSession {
 	private _toolPromptGuidelines: Map<string, string[]> = new Map();
 
 	private _baseSystemPromptOptions!: NormalizedBuildSystemPromptOptions;
+	/** Disk snapshot used to distinguish extension edits from instructions awaiting refresh. */
+	private _projectContextSnapshot = new Map<string, string>();
 	/** Prompt options after before_agent_start mutations for the active run. */
 	private _runSystemPromptOptions?: NormalizedBuildSystemPromptOptions;
 
@@ -900,6 +902,7 @@ export class AgentSession {
 				toolSnippets: { ...this._baseSystemPromptOptions.toolSnippets, ...runOptions.toolSnippets },
 				toolGuidelines: { ...this._baseSystemPromptOptions.toolGuidelines, ...runOptions.toolGuidelines },
 			});
+			this._refreshProjectContext(options);
 			const updateMessage = this._preparePromptAndToolLoadout(options, nextContext.messages);
 			// Keep session.systemPrompt and ctx.getSystemPrompt() in step with what the provider sees.
 			this._runSystemPromptOptions = options;
@@ -1679,12 +1682,16 @@ export class AgentSession {
 		const loaderAppendSystemPrompt = this._resourceLoader.getAppendSystemPrompt();
 		const appendSystemPrompt = loaderAppendSystemPrompt.length > 0 ? loaderAppendSystemPrompt.join("\n\n") : "";
 		const loadedSkills = this._resourceLoader.getSkills().skills;
-		const loadedContextFiles = this._resourceLoader.getAgentsFiles().agentsFiles;
+		const { agentsFiles: loadedContextFiles, projectAgentsPath } = this._resourceLoader.getAgentsFiles();
+		if (!this._baseSystemPromptOptions) {
+			this._projectContextSnapshot = new Map(loadedContextFiles.map((file) => [file.path, file.content]));
+		}
 
 		this._baseSystemPromptOptions = normalizeBuildSystemPromptOptions({
 			cwd: this._cwd,
 			skills: loadedSkills,
 			contextFiles: loadedContextFiles,
+			projectAgentsPath,
 			customPrompt: loaderSystemPrompt,
 			appendSystemPrompt,
 			selectedTools: validToolNames,
@@ -1692,6 +1699,36 @@ export class AgentSession {
 			toolGuidelines: Object.fromEntries(this._toolPromptGuidelines),
 			promptGuidelines: this._harnessCore.promptGuidelines(),
 		});
+	}
+
+	/** Refresh disk instructions while preserving context edits made by before_agent_start handlers. */
+	private _refreshProjectContext(options: NormalizedBuildSystemPromptOptions): void {
+		const { agentsFiles, projectAgentsPath } = this._resourceLoader.getAgentsFiles();
+		const previous = this._projectContextSnapshot;
+		const requested = new Map(
+			(options === this._baseSystemPromptOptions ? agentsFiles : options.contextFiles).map((file) => [
+				file.path,
+				file,
+			]),
+		);
+		const refreshedPaths = new Set(agentsFiles.map((file) => file.path));
+		const contextFiles = agentsFiles.flatMap((file) => {
+			const edited = requested.get(file.path);
+			if (previous.has(file.path) && !edited) return [];
+			return [edited && edited.content !== previous.get(file.path) ? edited : { ...file }];
+		});
+		for (const file of requested.values()) {
+			if (!refreshedPaths.has(file.path) && (!previous.has(file.path) || file.content !== previous.get(file.path))) {
+				contextFiles.push(file);
+			}
+		}
+		options.contextFiles = contextFiles;
+		if (options.projectAgentsPath === this._baseSystemPromptOptions.projectAgentsPath) {
+			options.projectAgentsPath = projectAgentsPath;
+		}
+		this._baseSystemPromptOptions.contextFiles = agentsFiles.map((file) => ({ ...file }));
+		this._baseSystemPromptOptions.projectAgentsPath = projectAgentsPath;
+		this._projectContextSnapshot = new Map(agentsFiles.map((file) => [file.path, file.content]));
 	}
 
 	/**
@@ -2029,6 +2066,7 @@ export class AgentSession {
 
 		// Emit before_agent_start before normalizing images so extension-driven model
 		// selection determines the resize profile used for the request and history.
+		this._refreshProjectContext(this._baseSystemPromptOptions);
 		const selectedToolsBefore = this._baseSystemPromptOptions.selectedTools;
 		const result = await this._extensionRunner.emitBeforeAgentStart(
 			expandedText,
