@@ -155,7 +155,7 @@ export interface ResourceLoader {
 	getSkills(): { skills: Skill[]; diagnostics: ResourceDiagnostic[] };
 	getPrompts(): { prompts: PromptTemplate[]; diagnostics: ResourceDiagnostic[] };
 	getThemes(): { themes: Theme[]; diagnostics: ResourceDiagnostic[] };
-	getAgentsFiles(): { agentsFiles: Array<{ path: string; content: string }> };
+	getAgentsFiles(): { agentsFiles: Array<{ path: string; content: string }>; projectAgentsPath?: string };
 	getSystemPrompt(): string | undefined;
 	getSystemPromptSource(): { path: string } | undefined;
 	getAppendSystemPrompt(): string[];
@@ -351,7 +351,6 @@ export class DefaultResourceLoader implements ResourceLoader {
 	private promptDiagnostics: ResourceDiagnostic[];
 	private themes: Theme[];
 	private themeDiagnostics: ResourceDiagnostic[];
-	private agentsFiles: Array<{ path: string; content: string }>;
 	private systemPrompt?: string;
 	private systemPromptSourcePath?: string;
 	private appendSystemPrompt: string[];
@@ -405,7 +404,6 @@ export class DefaultResourceLoader implements ResourceLoader {
 		this.promptDiagnostics = [];
 		this.themes = [];
 		this.themeDiagnostics = [];
-		this.agentsFiles = [];
 		this.appendSystemPrompt = [];
 		this.appendSystemPromptSourcePaths = [];
 		this.lastSkillPaths = [];
@@ -434,8 +432,17 @@ export class DefaultResourceLoader implements ResourceLoader {
 		return { themes: this.themes, diagnostics: this.themeDiagnostics };
 	}
 
-	getAgentsFiles(): { agentsFiles: Array<{ path: string; content: string }> } {
-		return { agentsFiles: this.agentsFiles };
+	getAgentsFiles(): { agentsFiles: Array<{ path: string; content: string }>; projectAgentsPath?: string } {
+		const base = {
+			agentsFiles: this.noContextFiles ? [] : loadProjectContextFiles({ cwd: this.cwd, agentDir: this.agentDir }),
+		};
+		const resolved = this.agentsFilesOverride ? this.agentsFilesOverride(base) : base;
+		return {
+			...resolved,
+			projectAgentsPath: this.noContextFiles
+				? undefined
+				: join(findGitPaths(this.cwd)?.repoDir ?? this.cwd, "AGENTS.md"),
+		};
 	}
 
 	getSystemPrompt(): string | undefined {
@@ -630,17 +637,6 @@ export class DefaultResourceLoader implements ResourceLoader {
 				this.themeDiagnostics.push({ type: "error", message: "Theme path does not exist", path: resolved });
 			}
 		}
-
-		const agentsFiles = {
-			agentsFiles: this.noContextFiles
-				? []
-				: loadProjectContextFiles({
-						cwd: this.cwd,
-						agentDir: this.agentDir,
-					}),
-		};
-		const resolvedAgentsFiles = this.agentsFilesOverride ? this.agentsFilesOverride(agentsFiles) : agentsFiles;
-		this.agentsFiles = resolvedAgentsFiles.agentsFiles;
 
 		const systemPromptSource = this.systemPromptSource ?? this.discoverSystemPromptFile();
 		const baseSystemPrompt = resolvePromptInput(systemPromptSource, "system prompt");

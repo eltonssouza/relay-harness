@@ -2,7 +2,7 @@
 
 Relay supports user-level and project configuration. User-level configuration lives in the agent directory, which defaults to `~/.relay/agent`. Project configuration lives in `.relay` under the working directory and loads after [project trust](security.md#understand-project-trust) is granted. The only exception is `sessionDir`, which Relay reads before resolving trust so it can locate sessions.
 
-In interactive mode, use `/settings` to change common preferences. For other options, ask Relay to update the configuration or edit the relevant files directly. Run `/reload` after manually changing settings, keybindings, instructions, or resources.
+In interactive mode, use `/settings` to change common preferences. For other options, ask Relay to update the configuration or edit the relevant files directly. Run `/reload` after manually changing settings, keybindings, system prompts, or resources. Context files such as `AGENTS.md` refresh automatically before subsequent model calls.
 
 ## Agent directory
 
@@ -45,3 +45,13 @@ Context files are separate from project `.relay` configuration. Relay loads them
 An `AGENTS.override.md` replaces `AGENTS.md` or `CLAUDE.md` only in the same directory. It does not suppress context files from the agent directory or other directories.
 
 Context-file discovery does not require project trust.
+
+### Development guide
+
+When you start a task that changes project code, Relay instructs the selected model to create `AGENTS.md` if it is missing. The target is the Git repository or worktree root, including when you start Relay from a subdirectory. Outside Git, the target is the working directory. A global or parent-directory guide does not replace the project's own guide.
+
+The model inspects the project and writes the guide through the session's available tools before changing the implementation. It documents verified architecture, stack, setup and validation commands, environment variable names and purposes, directory layout, services, jobs, data models, patterns, workflows, confirmed hurdles and solutions, and a post-implementation checklist. Sections that do not apply are omitted, and secret values are never included. Existing guides are preserved and evolve with confirmed project knowledge.
+
+Questions and read-only reviews do not require creating a guide. Creation uses the current model and the normal session permissions; a session without permission or tools to write files cannot create it. No separate model or provider-specific setup is needed, including for compatible Ollama and LM Studio endpoints configured in [`models.json`](models.md#configure-a-compatible-endpoint).
+
+New or edited context files are loaded in full before subsequent model calls, including tool continuations and model switches, without `/reload`. The existing `AGENTS.override.md` precedence still applies. Use `--no-context-files` (`-nc`) to disable both context loading and development-guide instructions. Extensions that supply an exact replacement system prompt control their own instructions.
