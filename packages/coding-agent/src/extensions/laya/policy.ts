@@ -44,7 +44,12 @@ export const DEFAULT_MODEL_REGISTRY: Record<CapabilityTier, string[]> = {
 	fast: ["anthropic/claude-haiku-4-5", "openai-codex/gpt-6-luna", "google/gemini-3.5-flash"],
 	balanced: ["anthropic/claude-sonnet-5-5", "openai-codex/gpt-5.6-terra", "google/gemini-3.8-flash"],
 	strong: ["anthropic/claude-opus-5-5", "openai-codex/gpt-6-sol", "google/gemini-3.1-pro-preview"],
-	frontier: ["anthropic/claude-fable-5-1", "openai-codex/gpt-6.1-sol"],
+	frontier: [
+		"anthropic/claude-fable-5-1",
+		"openai-codex/gpt-6.1-sol",
+		"openai-codex/gpt-6-astra",
+		"anthropic/claude-fable-5",
+	],
 };
 
 /** Relative quota cost and latency per tier, 0..1. */

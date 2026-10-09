@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Changed
+
+- OAuth browser callback pages now display the Relay Harness image and page title.
+
 ## [1.0.5] - 2026-10-08
 
 ## [1.0.4] - 2026-10-07

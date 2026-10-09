@@ -2137,7 +2137,11 @@ export class InteractiveMode {
 		this.bugReportHintShown = true;
 		this.chatContainer.addChild(
 			new ThemedText(
-				() => theme.fg("muted", `If this looks like a ${APP_NAME} bug, /bug sends a report to the developers.`),
+				() =>
+					theme.fg(
+						"muted",
+						`If this looks like a ${APP_NAME} bug, /bug exports a report for you to review and share.`,
+					),
 				this.outputPad,
 				0,
 			),

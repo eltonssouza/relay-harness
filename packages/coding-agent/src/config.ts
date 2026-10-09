@@ -119,6 +119,27 @@ export function getExamplesPath(): string {
 	return resolve(join(getPackageDir(), "examples"));
 }
 
+/** Engineering profiles and skills distributed with npm and standalone releases. */
+export function getEngineeringResourcesPath(): string {
+	return join(getPackageDir(), "resources");
+}
+
+/** Use the pinned installed server, with no runtime npm download. */
+export function getChromeDevtoolsEntrypoint(): string {
+	const bundled = join(
+		getEngineeringResourcesPath(),
+		"chrome-devtools-mcp",
+		"build",
+		"src",
+		"bin",
+		"chrome-devtools-mcp.js",
+	);
+	if (existsSync(bundled)) return bundled;
+	const require = createRequire(join(getPackageDir(), "package.json"));
+	const manifest = require.resolve("chrome-devtools-mcp/package.json");
+	return join(dirname(manifest), "build", "src", "bin", "chrome-devtools-mcp.js");
+}
+
 /** Get path to CHANGELOG.md */
 export function getChangelogPath(): string {
 	return resolve(join(getPackageDir(), "CHANGELOG.md"));

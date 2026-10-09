@@ -18,6 +18,7 @@ import { SessionManager } from "../../core/session-manager.ts";
 import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
 import { isVirtualModel } from "../../core/virtual-models.ts";
+import { loadAgentProfile } from "../engineering/index.ts";
 import { assessmentFromAnswers, assessmentFromLabels, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
 import { type DockerRun, spawnDocker } from "./docker.ts";
 import {
@@ -732,10 +733,11 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		}
 		const lessons = lessonsFor(event.prompt);
 		const plan = renderPlanMessage(assessment, policy, skills, deactivated);
+		const role = loadAgentProfile(assessment.agent, ctx);
 		return {
 			message: {
 				customType: LAYA_PLAN_MESSAGE,
-				content: lessons ? `${plan}\n- ${lessons}` : plan,
+				content: [plan, lessons, role].filter(Boolean).join("\n\n"),
 				display: false,
 				details: { assessment, policy, skills, deactivated },
 			},

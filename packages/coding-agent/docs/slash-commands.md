@@ -38,7 +38,7 @@ Extensions, prompt templates, and skills can add commands. The command menu in R
 | `/copy` | Copy the last assistant message |
 | `/export [path]` | Export the session as HTML or JSONL |
 | `/share` | Upload the session and return its link |
-| `/bug [description]` | Prepare a private bug report for the Relay developers |
+| `/bug [description]` | Export a private bug report ZIP for review and sharing |
 
 Review a session before exporting or sharing it. Sessions can contain prompts, tool arguments, command output, file contents, and credentials exposed during the conversation.
 

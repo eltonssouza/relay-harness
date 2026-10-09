@@ -48,6 +48,16 @@ export type ValidationLevel = (typeof VALIDATION_LEVELS)[number];
 
 export const AGENTS = {
 	"software-engineer": "general implementation tasks that fit no specialist below",
+	"code-reviewer": "read-only review of correctness, specification compliance, security and maintainability",
+	"code-simplifier": "simplify code while preserving its behavior and contracts",
+	"database-administrator": "data architecture, schemas, migrations, query tuning and integrity",
+	"fullstack-engineer": "complete vertical features spanning database, backend and frontend",
+	"principal-engineer": "cross-team technical strategy, RFCs and engineering guardrails",
+	"product-designer": "user journeys, interaction design, visual systems and accessibility",
+	"product-owner": "business requirements, backlog refinement and acceptance criteria",
+	"quality-assurance": "test strategy, regression automation and release quality verification",
+	"site-reliability-engineer": "SLOs, observability, reliability, incidents and error budgets",
+	"tech-lead": "delivery decomposition, technical alignment, reviews and engineering standards",
 	"backend-engineer": "APIs, services, business rules, queues, server-side code",
 	"frontend-engineer": "web UI, components, styling, browser behavior, accessibility",
 	"mobile-engineer": "iOS, Android, React Native or Flutter apps",

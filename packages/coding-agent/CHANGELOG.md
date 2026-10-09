@@ -4,6 +4,16 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Added
+
+- Laya-controlled XP workflow with finite phase decisions, confidence gates, recorded test evidence, branch restoration and explicit user acceptance through `/xp`.
+- Native Chrome DevTools integration through `/browser`, using the pinned installed server and deferred MCP tools.
+- Sixteen engineering profiles and nineteen skills distributed with Relay; Laya loads the selected profile, and `/agent` selects one explicitly.
+
+### Changed
+
+- Laya's frontier registry includes GPT-6 Astra and Claude Fable 5 alongside GPT-6.1 Sol and Claude Fable 5.1.
+
 ## [1.0.5] - 2026-10-08
 
 ### New Features

@@ -130,7 +130,7 @@ Dependency changes are reviewed as code.
 - `.npmrc` sets `save-exact=true` and `min-release-age=2` to avoid same-day releases.
 - `package-lock.json` is the ground truth. Pre-commit blocks lockfile commits unless `RELAY_ALLOW_LOCKFILE_CHANGE=1`.
 - `npm run check` verifies pinned dependencies, native TypeScript import compatibility, and the generated install lock in `packages/coding-agent/install-lock/`.
-- Installs use `--ignore-scripts`, and CI runs `npm ci --ignore-scripts` plus a scheduled `npm audit` and signature check.
+- Installs use `--ignore-scripts`, CI runs `npm ci --ignore-scripts`, and a scheduled dependency audit checks production dependencies for unaccepted moderate-or-higher advisories.
 - The install lock has an explicit allowlist for lifecycle scripts. New ones fail the checks until reviewed.
 
 ## Credits and license

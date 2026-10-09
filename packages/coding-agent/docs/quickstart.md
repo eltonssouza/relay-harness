@@ -26,7 +26,7 @@ npm run build
 With Nix on macOS or Linux, install the latest release from Relay's flake. Nix builds Relay from source:
 
 ```bash
-nix profile add github:eltonssouza/relay-harness/stable
+nix profile add github:eltonssouza/relay-harness
 ```
 
 Older Nix versions use `nix profile install` instead. Update with `nix profile upgrade relay`. To pin a release, use a tag such as `github:eltonssouza/relay-harness/v1.0.0`.

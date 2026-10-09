@@ -124,7 +124,7 @@ export interface CodemodeSettings {
 
 /** Settings of the `laya/auto` router (adaptive execution intelligence). See docs/laya.md. */
 export interface LayaSettings {
-	/** Laya System One server. Default: `LAYA_BASE_URL` or `http://127.0.0.1:8000/v1`. */
+	/** Laya System One server. Default: `LAYA_BASE_URL` or `http://127.0.0.1:8737/v1`. */
 	baseUrl?: string;
 	/** Cost profile. Default: `balanced`. */
 	policy?: "economy" | "balanced" | "quality" | "critical";

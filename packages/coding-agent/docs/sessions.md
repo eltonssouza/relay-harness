@@ -61,6 +61,6 @@ Review exported or shared sessions first. They can contain prompts, model respon
 
 ## Report a bug
 
-Run `/bug [description]` to prepare a bug report for the Relay developers. You can include the session transcript, omit it, or ask the current model to summarize the problem. Review any transcript or generated summary because it can contain sensitive conversation data.
+Run `/bug [description]` to prepare a bug-report ZIP for you to review and share with the Relay developers. You can include the session transcript, omit it, or ask the current model to summarize the problem. Review any transcript or generated summary because it can contain sensitive conversation data.
 
 The report includes environment and provider configuration without credential values, plus recorded error diagnostics. Relay writes the report as a zip archive in the current directory so you can inspect it and share it yourself.

@@ -58,6 +58,8 @@ describe.sequential("OAuth callback server", () => {
 		const wrongState = await page(await nativeFetch(callbackUrl(server.redirectUri, { code: "c", state: "other" })));
 		expect(wrongState).toMatchObject({ status: 400, contentType: "text/html; charset=utf-8" });
 		expect(wrongState.body).toContain("State mismatch.");
+		expect(wrongState.body).toContain("<title>Relay Harness — Authentication failed</title>");
+		expect(wrongState.body).toContain('aria-label="Relay Harness"');
 		const post = await nativeFetch(callbackUrl(server.redirectUri, { code: "c", state: "expected-state" }), {
 			method: "POST",
 		});
@@ -71,9 +73,10 @@ describe.sequential("OAuth callback server", () => {
 		expect(success).toMatchObject({ status: 200, contentType: "text/html; charset=utf-8" });
 		expect(success.body).toContain("Authentication successful");
 		expect(success.body).toContain("Signed in to Example.");
-		expect(success.body).toContain('fill="#F09082"');
-		expect(success.body).toContain('fill="#4D9ABF"');
-		expect(success.body).toContain('fill="#F1BE58"');
+		expect(success.body).toContain("<title>Relay Harness — Authentication successful</title>");
+		expect(success.body).toContain('aria-label="Relay Harness"');
+		expect(success.body).toContain('viewBox="0 0 960 240"');
+		expect(success.body).toContain('fill="#3cf1e6"');
 		await expect(server.wait()).resolves.toBe("completed:the-code");
 	});
 

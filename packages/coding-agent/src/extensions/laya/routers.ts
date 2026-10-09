@@ -13,6 +13,16 @@ import { AGENTS, type AgentId, type ToolRequirement, type ValidationLevel } from
 export const LAYA_PLAN_MESSAGE = "laya.plan";
 
 const AGENT_SKILL_KEYWORDS: Record<AgentId, string[]> = {
+	"code-reviewer": ["quality", "review", "security", "test"],
+	"code-simplifier": ["refactor", "code", "quality", "tdd"],
+	"database-administrator": ["database", "sql", "migration", "schema"],
+	"fullstack-engineer": ["vertical", "feature", "service", "test"],
+	"principal-engineer": ["technical", "direction", "architecture", "platform"],
+	"product-designer": ["design", "ux", "visual", "interface"],
+	"product-owner": ["backlog", "requirements", "acceptance"],
+	"quality-assurance": ["test", "quality", "automation"],
+	"site-reliability-engineer": ["reliability", "incident", "observability"],
+	"tech-lead": ["technical", "direction", "quality", "architecture"],
 	"software-engineer": [
 		"code",
 		"implement",
@@ -76,7 +86,7 @@ const TOOL_PATTERNS: Record<ToolRequirement, RegExp> = {
 	requires_tests: /^bash$/,
 	requires_git: /^bash$/,
 	requires_web: /web|fetch|search_web|http/,
-	requires_browser: /browser|playwright|puppeteer/,
+	requires_browser: /browser|playwright|puppeteer|chrome_devtools/,
 	requires_database: /sql|database|\bdb\b|postgres|mysql/,
 };
 

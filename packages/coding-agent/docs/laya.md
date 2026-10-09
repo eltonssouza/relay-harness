@@ -88,8 +88,8 @@ Relay itself runs on your machine; Laya and its Python run only in Docker. The n
 
 | Image | Used when | Size |
 |---|---|---|
-| `v1-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
-| `v1-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
+| `v3-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
+| `v3-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
 
 The image holds Python 3.11, `torch`, `laya[serve]`, the shipped model from the Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya) (pinned to one commit, every file checked against the sha256 in the package), and the scripts that serve and train it. The tag ends in a hash of all of that, so each Relay version runs the image built from its own sources.
 

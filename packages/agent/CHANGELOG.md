@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Added
+
+- Finite action compiler, risk-based confidence gates and bounded decision loop with cancellation, repetition detection, traces and handoffs.
+
 ## [1.0.5] - 2026-10-08
 
 ## [1.0.4] - 2026-10-07

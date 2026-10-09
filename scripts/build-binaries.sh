@@ -152,6 +152,8 @@ for platform in "${PLATFORMS[@]}"; do
     cp -r dist/core/export-html "$OUTPUT_DIR/$platform/"
     cp -r docs "$OUTPUT_DIR/$platform/"
     cp -r examples "$OUTPUT_DIR/$platform/"
+    cp -r resources "$OUTPUT_DIR/$platform/"
+    cp -r ../../node_modules/chrome-devtools-mcp "$OUTPUT_DIR/$platform/resources/"
 
     # Copy the selected architecture's native platform helpers next to the executable.
     native_platform="${platform/windows-/win32-}"
