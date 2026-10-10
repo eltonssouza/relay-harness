@@ -6,6 +6,7 @@ import intakeExtension from "./intake/index.ts";
 import layaExtension from "./laya/index.ts";
 import llamaExtension from "./llama/index.ts";
 import mcpExtension from "./mcp/index.ts";
+import projectMemoryExtension from "./project-memory/index.ts";
 import toolSearchExtension from "./tool-search/index.ts";
 import xpExtension from "./xp/index.ts";
 
@@ -18,6 +19,7 @@ export const builtInExtensions: InlineExtension[] = [
 	{ name: "xp", factory: xpExtension, builtin: true },
 	// Adds /intake and its deferred intake_questionnaire tool.
 	{ name: "intake", factory: intakeExtension, builtin: true },
+	{ name: "project-memory", factory: projectMemoryExtension, builtin: true },
 	// Replaceable: an extension that registers `codemode`, `tool_search`, or `/mcp` (such as a third-party
 	// MCP extension) takes over instead of running alongside the built-in one.
 	{ name: "codemode", factory: codemodeExtension, replaceable: true, builtin: true },
