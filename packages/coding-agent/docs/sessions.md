@@ -49,6 +49,8 @@ See [Compaction Reference](compaction.md) for thresholds, retained boundaries, b
 
 By default, Relay stores sessions under `~/.relay/agent/sessions/`, grouped by working directory. Use `--session-dir`, `RELAY_CODING_AGENT_SESSION_DIR`, or the `sessionDir` setting to choose another location. The CLI option has highest precedence.
 
+On Windows, the default is under `%USERPROFILE%\.relay\agent\sessions\`. `/init` creates project instructions and graph memory under `.relay/`; it does not move conversation sessions into the project. Run `/session` to see the active session file. For a project-local progress journal independent of the transcript, see [Project development logbook](logbook.md).
+
 Use `--no-session` for an ephemeral run. An ephemeral session cannot be resumed after Relay exits.
 
 Use `--session` when you already know the session path or ID. Use `--fork` to create a new session from an existing session before interactive mode starts.
