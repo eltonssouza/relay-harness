@@ -41,5 +41,6 @@ todo.md
 plans/
 .relay/hf-sessions/
 .relay/hf-sessions-backup/
+.relay/memory/
 collect.sh
 packages/agent/docs/extensions/relay-server-artifact/index.md

@@ -1,11 +1,19 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import type { AgentMessage } from "@relay-harness/agent-core";
 import type { TaskAssessment } from "./assessment.ts";
 import { type EscalationReason, PerformanceHistory, type PolicyProfile } from "./policy.ts";
 import type { CapabilityTier, TaskScope, TaskType } from "./questions.ts";
 
 /** One routed request and its outcome, as written to `telemetry.jsonl`. */
+export interface ToolRetrievalTelemetryRecord {
+	timestamp: string;
+	candidateCount: number;
+	retrievedCount: number;
+	invokedCount: number;
+	invokedRetrievedCount: number;
+}
+
 export interface TelemetryRecord {
 	task_id: string;
 	timestamp: string;
@@ -107,6 +115,12 @@ export class TelemetryStore {
 	append(record: TelemetryRecord): void {
 		mkdirSync(dirname(this.path), { recursive: true });
 		appendFileSync(this.path, `${JSON.stringify(record)}\n`, "utf8");
+	}
+
+	/** Append prompt-free retrieval metrics to a separate local JSONL file. */
+	appendToolRetrieval(record: ToolRetrievalTelemetryRecord): void {
+		mkdirSync(dirname(this.path), { recursive: true });
+		appendFileSync(join(dirname(this.path), "tool-retrieval.jsonl"), `${JSON.stringify(record)}\n`, "utf8");
 	}
 
 	/** The newest `limit` records, oldest first. */
