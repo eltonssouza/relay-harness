@@ -12,6 +12,7 @@ const importOAuthModule = (specifier: string): Promise<unknown> => {
 };
 
 type OAuthFlowLoaders = {
+	googleAntigravity: () => OAuthAuth | Promise<OAuthAuth>;
 	anthropic: () => OAuthAuth | Promise<OAuthAuth>;
 	openaiCodex: () => OAuthAuth | Promise<OAuthAuth>;
 	openaiChatGPT: () => OAuthAuth | Promise<OAuthAuth>;
@@ -67,4 +68,10 @@ export const loadMetaOAuth = async (): Promise<OAuthAuth> => {
 export const loadXaiOAuth = async (): Promise<OAuthAuth> => {
 	if (bundledLoaders) return bundledLoaders.xai();
 	return ((await importOAuthModule("./xai.ts")) as { xaiOAuth: OAuthAuth }).xaiOAuth;
+};
+
+export const loadGoogleAntigravityOAuth = async (): Promise<OAuthAuth> => {
+	if (bundledLoaders) return bundledLoaders.googleAntigravity();
+	return ((await importOAuthModule("./google-antigravity.ts")) as { googleAntigravityOAuth: OAuthAuth })
+		.googleAntigravityOAuth;
 };

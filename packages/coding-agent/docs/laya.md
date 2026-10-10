@@ -97,6 +97,16 @@ Select one with `laya.policy`, `relay --laya-policy economy`, or `/laya policy q
 | `strong` | `anthropic/claude-opus-5-5`, `openai-codex/gpt-6-sol`, `google/gemini-3.1-pro-preview` |
 | `frontier` | `anthropic/claude-fable-5-1`, `openai-codex/gpt-6.1-sol` |
 
+The default registry also includes these Google Antigravity models under the `google-antigravity` provider:
+
+| Tier | Antigravity models |
+|---|---|
+| `fast` | Gemini 3.7 Flash, Gemini 3.6 Flash |
+| `balanced` | Claude Sonnet 5.5, Gemini 3.8 Flash, GPT-OSS 120B (Medium) |
+| `strong` | Claude Opus 5.5, Gemini 3.1 Pro |
+
+Sign in with `/login google-antigravity` to make the account's discovered models available to Laya. The registry recognizes both family IDs and separate `low`, `medium`, and `high` effort IDs (Gemini 3.1 Pro has `low` and `high`). Only IDs present in the account catalog are candidates. These defaults also work with `laya.followProvider`; explicit `laya.models` and `laya.modelGroups` settings still take precedence.
+
 Replace a tier with `laya.models`:
 
 ```json
@@ -139,8 +149,8 @@ Relay itself runs on your machine; Laya and its Python run only in Docker. The n
 
 | Image | Used when | Size |
 |---|---|---|
-| `v3-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
-| `v3-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
+| `v4-library-retry-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
+| `v4-library-retry-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
 
 The image holds Python 3.11, `torch`, `laya[serve]`, the shipped model from the Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya) (pinned to one commit, every file checked against the sha256 in the package), and the scripts that serve and train it. The tag ends in a hash of all of that, so each Relay version runs the image built from its own sources.
 
