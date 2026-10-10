@@ -1,10 +1,10 @@
 {
 	"name": "@relay-harness/coding-agent-install",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"private": true,
 	"description": "Lockfile root used by the Relay installer and updater.",
 	"dependencies": {
-		"@relay-harness/coding-agent": "0.1.7"
+		"@relay-harness/coding-agent": "0.1.8"
 	},
 	"overrides": {
 		"protobufjs": "7.6.6"

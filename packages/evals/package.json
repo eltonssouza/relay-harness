@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/evals",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -11,8 +11,8 @@
 		"test": "vitest run --config vitest.test.config.ts"
 	},
 	"devDependencies": {
-		"@relay-harness/ai": "^0.1.7",
-		"@relay-harness/coding-agent": "^0.1.7",
+		"@relay-harness/ai": "^0.1.8",
+		"@relay-harness/coding-agent": "^0.1.8",
 		"@types/node": "22.19.19",
 		"@vitest-evals/core": "0.15.0",
 		"autoevals": "0.3.0",

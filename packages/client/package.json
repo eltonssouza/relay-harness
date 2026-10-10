@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/client",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"description": "Transport-neutral client for remote relay sessions over framed CBOR bytes",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -51,8 +51,8 @@
 		"node": ">=22.19.0"
 	},
 	"dependencies": {
-		"@relay-harness/chord": "^0.1.7",
-		"@relay-harness/protocol": "^0.1.7"
+		"@relay-harness/chord": "^0.1.8",
+		"@relay-harness/protocol": "^0.1.8"
 	},
 	"devDependencies": {
 		"shx": "0.4.0",

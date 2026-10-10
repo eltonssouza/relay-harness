@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/chord",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"description": "Application composition runtime for services, replicated state, RPC, and plugins",
 	"type": "module",
 	"main": "./dist/index.js",
