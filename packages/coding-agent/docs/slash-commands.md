@@ -47,10 +47,15 @@ Review a session before exporting or sharing it. Sessions can contain prompts, t
 | Command | Description |
 |---|---|
 | `/trust` | Save a project trust decision for future Relay processes |
+| `/init` | Create or enrich AGENTS.md and initialize local repository graph memory |
+| `/graph` | Refresh and open the graph in the browser |
+| `/init refresh` | Manually rebuild the graph without starting a model task |
 | `/reload` | Reload keybindings, extensions, skills, templates, themes, and context files |
 | `/hotkeys` | Show active keyboard shortcuts |
 | `/changelog` | Show changelog entries |
 | `/quit` | Quit Relay |
+
+See [Project initialization and graph memory](project-memory.md) for `/init` behavior, indexing limits, and browser navigation.
 
 ## Commands added by resources
 
