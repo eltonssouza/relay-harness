@@ -53,7 +53,7 @@ const DEFAULT_IMAGE_RESIZE = {
 };
 
 describe("builtin providers", () => {
-	it("builtinModels registers every builtin provider with models", async () => {
+	it("builtinModels registers every provider and loads static catalogs immediately", async () => {
 		const models = builtinModels();
 		const providers = models.getProviders();
 		expect(providers.length).toBe(builtinProviders().length);
@@ -65,11 +65,14 @@ describe("builtin providers", () => {
 		const all = models.getModels();
 		expect(all.length).toBeGreaterThan(500);
 
-		for (const provider of providers) {
-			const list = models.getAllModels(provider.id);
+		for (const providerId of getBuiltinProviders()) {
+			const list = models.getAllModels(providerId);
 			expect(list.length).toBeGreaterThan(0);
-			expect(list.every((m) => m.provider === provider.id)).toBe(true);
+			expect(list.every((m) => m.provider === providerId)).toBe(true);
 		}
+		const dynamic = models.getProvider("google-antigravity");
+		expect(dynamic?.refreshModels).toBeTypeOf("function");
+		expect(dynamic?.getModels()).toEqual([]);
 	});
 
 	it("returns empty results for unknown provider ids", () => {

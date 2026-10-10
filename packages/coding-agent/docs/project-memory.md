@@ -8,6 +8,8 @@ The guide follows a specification that evolves: record durable architecture, con
 
 Relay writes `.relay/memory/graph.json` and an offline `.relay/memory/graph.html` at the Git repository root, or at the working directory for projects without Git. `/graph` refreshes the index and opens the viewer. You can also open the HTML file directly. Search, type filters, node details, relationships, pan and zoom work without a server or an Obsidian installation.
 
+The built-in project development logbook records work separately at `.relay/memory/logbook/`. See [Project development logbook](logbook.md) for its event format, commands, and recovery limits.
+
 The graph indexes files, directories, JavaScript package manifests and dependencies, named declarations, JavaScript/TypeScript static imports and re-exports, literal `require` calls, and relative Markdown links. Workspace package names connect to their local manifests. Other languages appear in the file map with detected declarations; their imports are not resolved. Import extraction is lexical navigation, not a compiler: aliases, generated imports and dynamic module loading require source inspection.
 
 The harness automatically refreshes initialized memory before every model call and at task completion. This includes files created, changed, renamed or deleted during the same task, and edits to `AGENTS.md`. Like project instructions, graph context stays current for subsequent model calls. No manual refresh is required during normal development. Updates scan the repository and reuse unchanged entries; changes made while Relay is idle appear on the next task, graph query or `/graph`.

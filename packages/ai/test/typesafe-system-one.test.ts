@@ -47,6 +47,52 @@ const wireAnswers = {
 };
 
 describe("TypeSafe System One", () => {
+	it("uses Laya's answer probability instead of its entropy confidence when both are returned", async () => {
+		const nativeContext: ClassifierContext = {
+			...context,
+			questions: {
+				...context.questions,
+				category: {
+					type: "choice",
+					instructions: "Which action should run next?",
+					criteria: { success: "Advance", failure: "Continue", escalate: "Hand off" },
+				},
+			},
+		};
+		const result = await classify(model, nativeContext, {
+			apiKey: "local",
+			fetch: async () =>
+				Response.json({
+					answers: {
+						...wireAnswers,
+						category: {
+							...wireAnswers.category,
+							probabilities: { success: 0.8389, failure: 0.131, escalate: 0.0301 },
+							confidence: 0.5274,
+							answer_confidence: 0.8389,
+						},
+						satisfaction: { ...wireAnswers.satisfaction, confidence: 0.12, answer_confidence: 0.92 },
+					},
+				}),
+		});
+		expect(result.stopReason).toBe("stop");
+		expect(result.answers.category).toMatchObject({ confidence: 0.8389 });
+		expect(result.answers.satisfaction).toMatchObject({ confidence: 0.92 });
+	});
+	it.each([null, "high"])("rejects an invalid explicit answer confidence %s", async (answer_confidence) => {
+		const result = await classify(model, context, {
+			apiKey: "local",
+			fetch: async () =>
+				Response.json({
+					answers: {
+						...wireAnswers,
+						category: { ...wireAnswers.category, answer_confidence },
+					},
+				}),
+		});
+		expect(result.stopReason).toBe("error");
+		expect(result.errorMessage).toContain("invalid confidence for category");
+	});
 	it("maps public bool questions and answers to TypeSafe noul values", async () => {
 		const fetch = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
 			const payload = JSON.parse(String(init?.body)) as {

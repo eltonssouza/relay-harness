@@ -162,6 +162,32 @@ export CLOUDFLARE_ACCOUNT_ID=...
 
 The account ID can also be stored in the credential's `env` object.
 
+### Google Antigravity
+
+Google Antigravity login requires an OAuth client configured locally. Set `RELAY_AI_ANTIGRAVITY_CLIENT_ID` and `RELAY_AI_ANTIGRAVITY_CLIENT_SECRET` from your own OAuth client before starting Relay. Configure `http://localhost:51121/oauth-callback` as an authorized redirect URI. Keep the client secret out of source control and logs.
+
+PowerShell:
+
+```powershell
+$env:RELAY_AI_ANTIGRAVITY_CLIENT_ID = "your-client-id"
+$env:RELAY_AI_ANTIGRAVITY_CLIENT_SECRET = "your-client-secret"
+```
+
+macOS/Linux:
+
+```bash
+export RELAY_AI_ANTIGRAVITY_CLIENT_ID=your-client-id
+export RELAY_AI_ANTIGRAVITY_CLIENT_SECRET=your-client-secret
+```
+
+Run `/login google-antigravity` and sign in with the Google account you use for Antigravity. Relay stores the OAuth credential in `auth.json` and refreshes expired access tokens automatically.
+
+Finish account setup in Antigravity before logging in. Relay discovers the models available to your account and caches the catalog locally. After login, use `/model` to select an Antigravity model.
+
+The browser callback uses `http://localhost:51121/oauth-callback`. For remote sessions, paste the complete final redirect URL when prompted. `RELAY_OAUTH_CALLBACK_HOST` controls the callback bind address; the redirect URL stays `localhost`.
+
+If Antigravity requires a newer client version, set `RELAY_AI_ANTIGRAVITY_VERSION` to override the default user-agent version.
+
 ### Google Vertex AI
 
 Use a Google Cloud API key:

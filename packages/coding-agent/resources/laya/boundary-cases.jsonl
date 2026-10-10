@@ -1,0 +1,6 @@
+{"id":"acceptance-01","state":{"request":"Design the REST API for a payments service."},"expected":{"library_category":"web_frontend"},"language":"en","source":"acceptance-boundary","boundary":true}
+{"id":"acceptance-02","state":{"request":"React performance: memo, useMemo and reconciliation."},"expected":{"library_category":"frameworks"},"language":"en","source":"acceptance-boundary","boundary":true}
+{"id":"acceptance-03","state":{"request":"JavaScript closures and the event loop."},"expected":{"library_category":"languages"},"language":"en","source":"acceptance-boundary","boundary":true}
+{"id":"acceptance-04","state":{"request":"How do I rebase a feature branch before a PR?"},"expected":{"library_category":"devops"},"language":"en","source":"acceptance-boundary","boundary":true}
+{"id":"acceptance-05","state":{"request":"Is this SSH tunnel safe to expose publicly?"},"expected":{"library_category":"security"},"language":"en","source":"acceptance-boundary","boundary":true}
+{"id":"acceptance-06","state":{"request":"Orquestrar um fluxo que chama 3 LLMs com o n8n."},"expected":{"library_category":"automation"},"language":"pt","source":"acceptance-boundary","boundary":true}

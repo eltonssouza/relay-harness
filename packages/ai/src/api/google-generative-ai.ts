@@ -1,6 +1,7 @@
 import {
 	type GenerateContentConfig,
 	type GenerateContentParameters,
+	type GenerateContentResponse,
 	GoogleGenAI,
 	type ThinkingConfig,
 } from "@google/genai";
@@ -56,11 +57,23 @@ export interface GoogleOptions extends StreamOptions {
 // Counter for generating unique tool call IDs
 let toolCallCounter = 0;
 
-export const stream: StreamFunction<"google-generative-ai", GoogleOptions> = (
+export const stream: StreamFunction<"google-generative-ai", GoogleOptions> = (model, context, options) =>
+	streamWithGoogleTransport(model, context, options, async (params) => {
+		if (options?.fetch && options.fetch !== globalThis.fetch) {
+			throw new Error("Custom fetch is not supported by the Google Generative AI adapter");
+		}
+		if (!options?.apiKey) throw new Error(`No API key for provider: ${model.provider}`);
+		const client = createClient(model, options.apiKey, options.headers);
+		return retryGoogleRequest(() => client.models.generateContentStream(params), options);
+	});
+
+/** Share Gemini transcript conversion and response decoding with gateway transports. */
+export function streamWithGoogleTransport(
 	model: Model<"google-generative-ai">,
 	context: TranscriptContext,
-	options?: GoogleOptions,
-): AssistantMessageEventStream => {
+	options: GoogleOptions | undefined,
+	generate: (params: GenerateContentParameters) => Promise<AsyncIterable<GenerateContentResponse>>,
+): AssistantMessageEventStream {
 	const stream = new AssistantMessageEventStream();
 	const normalizedContext = collapseSystemMessages(context);
 
@@ -84,20 +97,12 @@ export const stream: StreamFunction<"google-generative-ai", GoogleOptions> = (
 		};
 
 		try {
-			if (options?.fetch && options.fetch !== globalThis.fetch) {
-				throw new Error("Custom fetch is not supported by the Google Generative AI adapter");
-			}
-			const apiKey = options?.apiKey;
-			if (!apiKey) {
-				throw new Error(`No API key for provider: ${model.provider}`);
-			}
-			const client = createClient(model, apiKey, options?.headers);
 			let params = buildParams(model, normalizedContext, options);
 			const nextParams = await options?.onPayload?.(params, model);
 			if (nextParams !== undefined) {
 				params = nextParams as GenerateContentParameters;
 			}
-			const googleStream = await retryGoogleRequest(() => client.models.generateContentStream(params), options);
+			const googleStream = await generate(params);
 
 			stream.push({ type: "start", partial: output });
 			let currentBlock: TextContent | ThinkingContent | null = null;
@@ -300,50 +305,57 @@ export const stream: StreamFunction<"google-generative-ai", GoogleOptions> = (
 	})();
 
 	return stream;
-};
+}
 
-export const streamSimple: StreamFunction<"google-generative-ai", SimpleStreamOptions> = (
-	model: Model<"google-generative-ai">,
-	context: TranscriptContext,
-	options?: SimpleStreamOptions,
-): AssistantMessageEventStream => {
-	const apiKey = options?.apiKey;
-	if (!apiKey) {
-		throw new Error(`No API key for provider: ${model.provider}`);
-	}
+export const streamSimple = createGoogleSimpleStream(stream);
 
-	const base = {
-		...buildBaseOptions(model, context, options, apiKey),
-		toolChoice: options?.toolChoice,
-	} satisfies GoogleOptions;
-	if (!options?.reasoning) {
-		return stream(model, context, { ...base, thinking: { enabled: false } } satisfies GoogleOptions);
-	}
+/** Apply the same provider-neutral reasoning options to both Google transports. */
+export function createGoogleSimpleStream(
+	stream: StreamFunction<"google-generative-ai", GoogleOptions>,
+): StreamFunction<"google-generative-ai", SimpleStreamOptions> {
+	return (
+		model: Model<"google-generative-ai">,
+		context: TranscriptContext,
+		options?: SimpleStreamOptions,
+	): AssistantMessageEventStream => {
+		const apiKey = options?.apiKey;
+		if (!apiKey) {
+			throw new Error(`No API key for provider: ${model.provider}`);
+		}
 
-	const clampedReasoning = clampThinkingLevel(model, options.reasoning);
-	if (clampedReasoning === "off") {
-		return stream(model, context, { ...base, thinking: { enabled: false } } satisfies GoogleOptions);
-	}
-	const resolvedLevel = resolveGoogleThinkingLevel(model, clampedReasoning);
+		const base = {
+			...buildBaseOptions(model, context, options, apiKey),
+			toolChoice: options?.toolChoice,
+		} satisfies GoogleOptions;
+		if (!options?.reasoning) {
+			return stream(model, context, { ...base, thinking: { enabled: false } } satisfies GoogleOptions);
+		}
 
-	if (usesGoogleThinkingLevel(model)) {
+		const clampedReasoning = clampThinkingLevel(model, options.reasoning);
+		if (clampedReasoning === "off") {
+			return stream(model, context, { ...base, thinking: { enabled: false } } satisfies GoogleOptions);
+		}
+		const resolvedLevel = resolveGoogleThinkingLevel(model, clampedReasoning);
+
+		if (usesGoogleThinkingLevel(model)) {
+			return stream(model, context, {
+				...base,
+				thinking: {
+					enabled: true,
+					level: toGoogleThinkingLevel(resolvedLevel),
+				},
+			} satisfies GoogleOptions);
+		}
+
 		return stream(model, context, {
 			...base,
 			thinking: {
 				enabled: true,
-				level: toGoogleThinkingLevel(resolvedLevel),
+				budgetTokens: getGoogleBudget(model, resolvedLevel, options.thinkingBudgets),
 			},
 		} satisfies GoogleOptions);
-	}
-
-	return stream(model, context, {
-		...base,
-		thinking: {
-			enabled: true,
-			budgetTokens: getGoogleBudget(model, resolvedLevel, options.thinkingBudgets),
-		},
-	} satisfies GoogleOptions);
-};
+	};
+}
 
 function createClient(
 	model: Model<"google-generative-ai">,

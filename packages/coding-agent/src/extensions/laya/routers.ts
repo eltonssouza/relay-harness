@@ -1,4 +1,5 @@
 import type { TaskAssessment } from "./assessment.ts";
+import type { LibrarySelection } from "./library.ts";
 import type { PolicyDecision } from "./policy.ts";
 import { AGENTS, type AgentId, type ToolRequirement, type ValidationLevel } from "./questions.ts";
 
@@ -126,6 +127,7 @@ export function renderPlanMessage(
 	policy: PolicyDecision,
 	skills: readonly string[],
 	enforcedTools: readonly string[],
+	library?: LibrarySelection,
 ): string {
 	const percent = (value: number) => `${Math.round(value * 100)}%`;
 	const needed = (Object.keys(TOOL_LABELS) as ToolRequirement[]).filter((id) => assessment.tools[id]);
@@ -137,6 +139,10 @@ export function renderPlanMessage(
 	];
 	if (skills.length > 0)
 		lines.push(`- Skills likely relevant: ${skills.join(", ")}. Load one only when a step needs it.`);
+	if (library)
+		lines.push(
+			`- Library: ${library.category} (${library.guides.map((guide) => guide.title).join(", ") || "no matching guide"}); ${library.injected ? "references included" : "suggestions only"}.`,
+		);
 	lines.push(
 		`- Tools: ${needed.length > 0 ? `needs ${needed.map((id) => TOOL_LABELS[id]).join(", ")}` : "read-only"}${
 			notNeeded.length > 0 ? `; not expected: ${notNeeded.map((id) => TOOL_LABELS[id]).join(", ")}` : ""

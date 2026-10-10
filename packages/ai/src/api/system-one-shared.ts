@@ -77,6 +77,15 @@ function probabilities(label: string, value: unknown, id: string): Record<string
 	);
 }
 
+/** Laya's answer_confidence is answer probability; its confidence field measures entropy. */
+function answerConfidence(label: string, answer: Record<string, unknown>, id: string): number {
+	return requiredNumber(
+		label,
+		answer.answer_confidence !== undefined ? answer.answer_confidence : answer.confidence,
+		`confidence for ${id}`,
+	);
+}
+
 function parseAnswers(label: string, value: unknown, context: ClassifierContext): Record<string, ClassifierAnswer> {
 	if (!isRecord(value)) throw new Error(`${label} returned an unexpected response`);
 	const answers: Array<[string, ClassifierAnswer]> = [];
@@ -93,7 +102,7 @@ function parseAnswers(label: string, value: unknown, context: ClassifierContext)
 					type: "choice",
 					choice: answer.choice,
 					probabilities: probabilities(label, answer.probabilities, id),
-					confidence: requiredNumber(label, answer.confidence, `confidence for ${id}`),
+					confidence: answerConfidence(label, answer, id),
 				},
 			]);
 		} else if (question.type === "score") {
@@ -103,7 +112,7 @@ function parseAnswers(label: string, value: unknown, context: ClassifierContext)
 				{
 					type: "score",
 					score: requiredNumber(label, answer.score, `score for ${id}`),
-					confidence: requiredNumber(label, answer.confidence, `confidence for ${id}`),
+					confidence: answerConfidence(label, answer, id),
 				},
 			]);
 		} else {
