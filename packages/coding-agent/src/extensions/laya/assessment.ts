@@ -7,6 +7,8 @@ import {
 	type CapabilityTier,
 	COMPLEXITY_LEVELS,
 	LAYA_QUESTIONS,
+	LIBRARY_CATEGORY_IDS,
+	type LibraryCategoryId,
 	REASONING_EFFORTS,
 	REASONING_LEVELS,
 	type ReasoningEffort,
@@ -25,6 +27,9 @@ import {
 export interface TaskAssessment {
 	/** Laya's answers, the labels of a similar learned task, or keyword rules. */
 	source: "laya" | "memory" | "heuristic";
+	/** Null means abstention: keyword fallbacks never invent library confidence. */
+	libraryCategory: LibraryCategoryId | null;
+	libraryConfidence: number;
 	task: {
 		type: TaskType;
 		/** Scores normalized to 0..1. */
@@ -68,8 +73,11 @@ export function assessmentFromAnswers(answers: Record<string, ClassifierAnswer>)
 	const type = choice(answers, "task_type", TASK_TYPES);
 	const tier = choice(answers, "capability_tier", CAPABILITY_TIERS);
 	const effort = choice(answers, "reasoning_effort", REASONING_EFFORTS);
+	const library = choice(answers, "library_category", LIBRARY_CATEGORY_IDS);
 	return {
 		source: "laya",
+		libraryCategory: library.value,
+		libraryConfidence: Number.isFinite(library.confidence) ? Math.min(1, Math.max(0, library.confidence)) : 0,
 		task: {
 			type: type.value,
 			complexity: score(answers, "complexity", COMPLEXITY_LEVELS),
@@ -233,6 +241,8 @@ export function heuristicAssessment(request: string): TaskAssessment {
 	const readOnly = type === "question" || type === "research" || type === "architecture";
 	return {
 		source: "heuristic",
+		libraryCategory: null,
+		libraryConfidence: 0,
 		task: {
 			type,
 			complexity: complexity / 4,

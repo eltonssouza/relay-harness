@@ -46,6 +46,21 @@ export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
 export const VALIDATION_LEVELS = ["none", "syntax", "compile", "unit_test", "integration_test", "review"] as const;
 export type ValidationLevel = (typeof VALIDATION_LEVELS)[number];
 
+export const LIBRARY_DIRECTORIES = {
+	languages: "01_programming_languages",
+	algorithms: "02_algorithms_and_data_structures",
+	architecture: "03_design_and_architecture",
+	engineering: "04_engineering_and_practices",
+	databases: "05_databases",
+	web_frontend: "06_web_and_frontend",
+	devops: "07_devops_sre_operations",
+	security: "08_security_and_privacy",
+	automation: "09_automation_and_integration",
+	frameworks: "10_frameworks",
+} as const;
+export type LibraryCategoryId = keyof typeof LIBRARY_DIRECTORIES;
+export const LIBRARY_CATEGORY_IDS = Object.keys(LIBRARY_DIRECTORIES) as LibraryCategoryId[];
+
 export const AGENTS = {
 	"software-engineer": "general implementation tasks that fit no specialist below",
 	"code-reviewer": "read-only review of correctness, specification compliance, security and maintainability",
@@ -111,6 +126,24 @@ const yesNo = (instructions: string, yes: string, no: string): ClassifierQuestio
 });
 
 export const LAYA_QUESTIONS: Record<string, ClassifierQuestion> = {
+	library_category: {
+		type: "choice",
+		instructions: "Which category of the technical library does this request best match?",
+		criteria: {
+			languages: "language syntax, types, ownership, closures, event loop, concurrency and standard libraries",
+			algorithms: "algorithms, graphs, trees, heaps, sorting, searching, data structures and complexity",
+			architecture:
+				"architecture, DDD, domain ownership, design patterns, module boundaries, refactoring and maintainable code",
+			engineering: "testing, TDD, test quality, SOLID, linting, formatting, construction and project practices",
+			databases: "databases, SQL, NoSQL, indexing, transactions, data modeling, stream processing",
+			web_frontend: "REST APIs, HTTP, WebSocket, CSS, forms, accessibility, visual design and web performance",
+			devops: "Git, rebasing, CI/CD, Docker, Kubernetes, cloud, observability, SRE and reliability",
+			security: "SSH, SQL injection, OWASP, threats, authorization, secure review, privacy and GDPR",
+			automation: "n8n, Hermes, LLM agents, agent SDKs, orchestration, workflows and integration",
+			frameworks:
+				"framework APIs and lifecycle: React, Next.js, Angular, Spring, Django, NestJS and similar libraries",
+		},
+	},
 	task_type: {
 		type: "choice",
 		instructions: "What kind of software engineering task does the request ask for?",
