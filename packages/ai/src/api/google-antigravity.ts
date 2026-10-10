@@ -1,4 +1,4 @@
-import { FinishReason, type GenerateContentResponse } from "@google/genai";
+import { FinishReason, type GenerateContentResponse, ThinkingLevel } from "@google/genai";
 import { requestAntigravity } from "../providers/google-antigravity-shared.ts";
 import type { SimpleStreamOptions, StreamFunction } from "../types.ts";
 import { retryProviderRequest } from "../utils/provider-retry.ts";
@@ -63,9 +63,19 @@ export const stream: StreamFunction<"google-generative-ai", GoogleOptions> = (mo
 			toolConfig,
 			...generationConfig
 		} = params.config ?? {};
+		const gemini31ProEffort = /^gemini-3\.1-pro-(low|high)$/.exec(params.model)?.[1];
 		const request = {
 			contents: params.contents,
-			generationConfig,
+			generationConfig: gemini31ProEffort
+				? {
+						...generationConfig,
+						thinkingConfig: {
+							...generationConfig.thinkingConfig,
+							includeThoughts: true,
+							thinkingLevel: gemini31ProEffort === "high" ? ThinkingLevel.HIGH : ThinkingLevel.LOW,
+						},
+					}
+				: generationConfig,
 			...(systemInstruction && { systemInstruction: { role: "user", parts: [{ text: systemInstruction }] } }),
 			tools: convertTools(getCurrentTools(context.messages), true, supportsGoogleStrictToolSampling(model.id)),
 			...(toolConfig && { toolConfig }),
@@ -73,7 +83,7 @@ export const stream: StreamFunction<"google-generative-ai", GoogleOptions> = (mo
 		};
 		let payload: unknown = {
 			project,
-			model: params.model,
+			model: gemini31ProEffort ? "gemini-3.1-pro-low" : params.model,
 			request,
 			userAgent: "antigravity",
 			requestType: "agent",
