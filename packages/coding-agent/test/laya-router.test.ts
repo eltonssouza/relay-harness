@@ -231,10 +231,12 @@ describe("provider-scoped model registry", () => {
 	it("retains Claude and Codex defaults when local models were configured", () => {
 		const settings = { followProvider: true, models: { fast: ["lmstudio/qwen-7b"] } };
 		expect(scopedModelRegistry(settings, { provider: "anthropic", id: "claude-sonnet-5-5" }).registry.fast).toEqual([
+			"anthropic/claude-haiku-5-5",
 			"anthropic/claude-haiku-4-5",
 		]);
 		expect(scopedModelRegistry(settings, { provider: "openai-codex", id: "gpt-6-sol" }).registry.fast).toEqual([
 			"openai-codex/gpt-6-luna",
+			"openai-codex/gpt-5.6-luna",
 		]);
 	});
 

@@ -90,12 +90,14 @@ Select one with `laya.policy`, `relay --laya-policy economy`, or `/laya policy q
 
 ## Model registry
 
-| Tier | Default models, in preference order |
+| Tier | Current examples from the default model registry (2026-10-10) |
 |---|---|
-| `fast` | `anthropic/claude-haiku-4-5`, `openai-codex/gpt-6-luna`, `google/gemini-3.5-flash` |
-| `balanced` | `anthropic/claude-sonnet-5-5`, `openai-codex/gpt-5.6-terra`, `google/gemini-3.8-flash` |
-| `strong` | `anthropic/claude-opus-5-5`, `openai-codex/gpt-6-sol`, `google/gemini-3.1-pro-preview` |
-| `frontier` | `anthropic/claude-fable-5-1`, `openai-codex/gpt-6.1-sol` |
+| `fast` | `anthropic/claude-haiku-5-5`, `openai/gpt-6-luna`, `github-copilot/gpt-5-mini`, `google-antigravity/gemini-3.7-flash` |
+| `balanced` | `anthropic/claude-sonnet-5-5`, `openai/gpt-5.6-terra`, `github-copilot/gemini-3.8-flash`, `github-copilot/grok-4.7` |
+| `strong` | `anthropic/claude-opus-5-5`, `openai/gpt-6-sol`, `github-copilot/kimi-k2.7-code`, `google-antigravity/gemini-3.1-pro` |
+| `frontier` | `anthropic/claude-fable-5-1`, `openai/gpt-6-astra`, `github-copilot/gpt-6.1-sol` |
+
+The registry includes current model IDs from Anthropic, OpenAI API, OpenAI Codex, GitHub Copilot, Google, and Google Antigravity. Each model is ranked only within its selected provider when `laya.followProvider` is enabled. The registry also keeps older still-supported family versions available when the provider exposes them.
 
 The default registry also includes these Google Antigravity models under the `google-antigravity` provider:
 

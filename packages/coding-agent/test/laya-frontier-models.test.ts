@@ -9,6 +9,32 @@ import { scopedModelRegistry } from "../src/extensions/laya/provider-scope.ts";
 import { CAPABILITY_TIERS, type CapabilityTier } from "../src/extensions/laya/questions.ts";
 
 describe("Laya frontier models", () => {
+	it("maps current GitHub Copilot model families to capability tiers", () => {
+		const { registry } = scopedModelRegistry(
+			{ followProvider: true },
+			{ provider: "github-copilot", id: "gpt-6-astra" },
+		);
+		expect(registry.fast).toContain("github-copilot/claude-haiku-5.5");
+		expect(registry.fast).toContain("github-copilot/gpt-5-mini");
+		expect(registry.balanced).toContain("github-copilot/claude-sonnet-5.5");
+		expect(registry.balanced).toContain("github-copilot/gpt-5.6-terra");
+		expect(registry.balanced).toContain("github-copilot/gemini-3.8-flash");
+		expect(registry.strong).toContain("github-copilot/claude-opus-5.5");
+		expect(registry.strong).toContain("github-copilot/gpt-6-sol");
+		expect(registry.frontier).toEqual([
+			"github-copilot/claude-fable-5.1",
+			"github-copilot/claude-fable-5",
+			"github-copilot/gpt-6-astra",
+			"github-copilot/gpt-6.1-sol",
+		]);
+	});
+
+	it("classifies OpenAI API models when following the OpenAI provider", () => {
+		const { registry } = scopedModelRegistry({ followProvider: true }, { provider: "openai", id: "gpt-6.1-sol" });
+		expect(registry.strong).toContain("openai/gpt-6-sol");
+		expect(registry.frontier).toEqual(["openai/gpt-6.1-sol", "openai/gpt-6-astra"]);
+	});
+
 	it("retains Astra and Sol within the selected Codex provider", () => {
 		const { registry } = scopedModelRegistry(
 			{ followProvider: true },
