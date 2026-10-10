@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/coding-agent",
-	"version": "1.0.6",
+	"version": "1.0.7",
 	"description": "Coding agent CLI with read, bash, edit, write tools and session management",
 	"type": "module",
 	"relayConfig": {
@@ -48,12 +48,12 @@
 		"prepublishOnly": "npm run clean && npm run build"
 	},
 	"dependencies": {
-		"@relay-harness/chord": "^1.0.6",
-		"@relay-harness/agent-core": "^1.0.6",
-		"@relay-harness/ai": "^1.0.6",
-		"@relay-harness/codemode": "^1.0.6",
-		"@relay-harness/mcp": "^1.0.6",
-		"@relay-harness/tui": "^1.0.6",
+		"@relay-harness/chord": "^1.0.7",
+		"@relay-harness/agent-core": "^1.0.7",
+		"@relay-harness/ai": "^1.0.7",
+		"@relay-harness/codemode": "^1.0.7",
+		"@relay-harness/mcp": "^1.0.7",
+		"@relay-harness/tui": "^1.0.7",
 		"@silvia-odwyer/photon-node": "0.3.4",
 		"brace-expansion": "5.0.12",
 		"chalk": "6.0.0",
@@ -77,9 +77,9 @@
 		"protobufjs": "7.6.6"
 	},
 	"devDependencies": {
-		"@relay-harness/client": "^1.0.6",
-		"@relay-harness/protocol": "^1.0.6",
-		"@relay-harness/server": "^1.0.6",
+		"@relay-harness/client": "^1.0.7",
+		"@relay-harness/protocol": "^1.0.7",
+		"@relay-harness/server": "^1.0.7",
 		"@types/cross-spawn": "6.0.6",
 		"@types/hosted-git-info": "3.0.5",
 		"@types/node": "22.19.19",
