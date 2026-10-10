@@ -32,6 +32,8 @@ export interface XpState {
 	status: "active" | "handoff" | "completed" | "stopped";
 	steps: number;
 	refusals: number;
+	/** Completed runs without a checkpoint; prevents unbounded automatic retries. */
+	continuationsWithoutCheckpoint?: number;
 	revision: number;
 	accepted: boolean;
 	testsRequired: boolean;

@@ -145,16 +145,90 @@ describe("XP in a real agent session", () => {
 			data: { error: "classifier down", questions: { next_action: expect.any(Object) } },
 		});
 	});
+	it("continues after final responses between phases without another user prompt", async () => {
+		const harness = await setup();
+		harness.setResponses([
+			checkpoint("Acceptance criteria documented"),
+			fauxAssistantMessage("Planning complete"),
+			checkpoint("Design documented"),
+			fauxAssistantMessage("Design complete"),
+			fauxAssistantMessage(fauxToolCall("bash", { command: "node --test red.test.ts" }, { id: "red" }), {
+				stopReason: "toolUse",
+			}),
+			checkpoint("Behavioral assertion fails", ["red"]),
+			fauxAssistantMessage("Ready to implement"),
+			fauxAssistantMessage(fauxToolCall("bash", { command: "node --test green.test.ts" }, { id: "green" }), {
+				stopReason: "toolUse",
+			}),
+			checkpoint("Implementation passes", ["green"]),
+			fauxAssistantMessage("Result and evidence delivered; waiting for acceptance"),
+		]);
+		await harness.session.prompt("/xp start Fix discount");
+		await expect.poll(() => latest(harness).phase, { timeout: 1000 }).toBe("listening");
+		await harness.session.waitForIdle();
+		expect(latest(harness)).toMatchObject({ phase: "listening", status: "active", accepted: false, steps: 4 });
+		expect(
+			harness.sessionManager
+				.getBranch()
+				.filter((entry) => entry.type === "custom_message" && entry.customType === "xp.plan"),
+		).toHaveLength(4);
+	});
 	it("restores phase and evidence when the session is resumed", async () => {
 		const original = await setup();
-		original.setResponses([checkpoint("Criteria documented"), fauxAssistantMessage("Design pending")]);
+		original.setResponses([
+			checkpoint("Criteria documented"),
+			fauxAssistantMessage("Design interrupted", { stopReason: "aborted" }),
+		]);
 		await original.session.prompt("/xp start --no-tests Document discount");
 		await expect.poll(() => latest(original).phase).toBe("design");
 		await original.session.waitForIdle();
 		expect(latest(original).phase).toBe("design");
 		const resumed = await setup(false, original.sessionManager);
-		resumed.setResponses([checkpoint("Design documented"), fauxAssistantMessage("Tests pending")]);
+		resumed.setResponses([
+			checkpoint("Design documented"),
+			fauxAssistantMessage("Design complete"),
+			checkpoint("No executable behavior to test"),
+			checkpoint("Documentation updated"),
+			fauxAssistantMessage("Waiting for acceptance"),
+		]);
 		await resumed.session.prompt("Continue");
-		expect(latest(resumed).phase).toBe("testing");
+		await resumed.session.waitForIdle();
+		expect(latest(resumed)).toMatchObject({ phase: "listening", status: "active", accepted: false });
+	});
+	it("hands off after three completed runs without a checkpoint and can resume", async () => {
+		const harness = await setup();
+		harness.setResponses([
+			fauxAssistantMessage("Planning pending"),
+			fauxAssistantMessage("Still planning"),
+			fauxAssistantMessage("No checkpoint"),
+		]);
+		await harness.session.prompt("/xp start --no-tests Document discount");
+		await expect.poll(() => latest(harness).status).toBe("handoff");
+		await harness.session.waitForIdle();
+		expect(latest(harness)).toMatchObject({ phase: "planning", steps: 0, continuationsWithoutCheckpoint: 3 });
+		expect(harness.faux.state.callCount).toBe(3);
+		harness.setResponses([
+			checkpoint("Criteria documented"),
+			fauxAssistantMessage("Planning complete"),
+			checkpoint("Design documented"),
+			checkpoint("No executable behavior to test"),
+			checkpoint("Documentation updated"),
+			fauxAssistantMessage("Waiting for acceptance"),
+		]);
+		await harness.session.prompt("/xp resume");
+		await expect.poll(() => latest(harness).phase).toBe("listening");
+		await harness.session.waitForIdle();
+		expect(latest(harness)).toMatchObject({ status: "active", continuationsWithoutCheckpoint: 0 });
+		await harness.session.prompt("/xp stop");
+		expect(latest(harness).status).toBe("stopped");
+	});
+	it.each(["aborted", "error"] as const)("does not restart an %s response", async (stopReason) => {
+		const harness = await setup();
+		harness.setResponses([fauxAssistantMessage("Interrupted", { stopReason })]);
+		await harness.session.prompt("/xp start --no-tests Document discount");
+		await expect.poll(() => harness.faux.state.callCount).toBe(1);
+		await harness.session.waitForIdle();
+		expect(harness.faux.state.callCount).toBe(1);
+		expect(latest(harness)).toMatchObject({ phase: "planning", status: "active", continuationsWithoutCheckpoint: 0 });
 	});
 });

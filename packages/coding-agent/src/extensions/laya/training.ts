@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { getEngineeringResourcesPath } from "../../config.ts";
 import { type DockerRun, dockerError } from "./docker.ts";
-import { layaDecisionsFile } from "./questions.ts";
+import { LAYA_QUESTIONS, layaDecisionsFile } from "./questions.ts";
 import {
 	LAYA_IMAGE_PATHS,
 	LAYA_MODELS_VOLUME,
@@ -10,6 +11,7 @@ import {
 	trainedModelPath,
 } from "./runtime.ts";
 import { generateSeed } from "./seed.ts";
+import { TRAIN_SCRIPT } from "./train-script.ts";
 
 /**
  * Training of the routing model, in a Docker container. Exercises live in a workspace in the Laya
@@ -25,6 +27,9 @@ export interface TrainingRow {
 	state: { request: string };
 	expected: Record<string, string | number | boolean>;
 	source: string;
+	language?: "en" | "pt";
+	boundary?: boolean;
+	guide?: string;
 	split?: "train" | "val" | "test";
 	/** Session the task came from. */
 	session?: string;
@@ -40,6 +45,8 @@ export interface TrainingWorkspace {
 	decisions: string;
 	dataset: string;
 	registry: string;
+	script: string;
+	boundaries: string;
 }
 
 /** Exercises labeled from sessions. Training focuses on them; the rest is replayed. */
@@ -58,6 +65,8 @@ export function trainingWorkspace(home: string): TrainingWorkspace {
 		decisions: join(dir, "decisions.json"),
 		dataset: join(dir, "data", "dataset.jsonl"),
 		registry: join(dir, "models.json"),
+		script: join(dir, "train.py"),
+		boundaries: join(dir, "data", "boundary-cases.jsonl"),
 	};
 }
 
@@ -65,10 +74,25 @@ export function trainingWorkspace(home: string): TrainingWorkspace {
 export function ensureWorkspace(workspace: TrainingWorkspace): void {
 	mkdirSync(dirname(workspace.dataset), { recursive: true });
 	writeFileSync(workspace.decisions, `${JSON.stringify(layaDecisionsFile(), null, 2)}\n`, "utf8");
+	writeFileSync(workspace.script, TRAIN_SCRIPT, "utf8");
+	writeFileSync(
+		workspace.boundaries,
+		readFileSync(join(getEngineeringResourcesPath(), "laya", "boundary-cases.jsonl"), "utf8"),
+		"utf8",
+	);
 	if (!existsSync(workspace.dataset)) {
 		const rows = generateSeed(SEED_ROWS).map((row, i) => ({ id: `r${String(i + 1).padStart(5, "0")}`, ...row }));
 		writeRows(workspace.dataset, rows);
 	}
+	const existing = readRows(workspace.dataset);
+	const keys = new Set(existing.map((row) => requestKey(row.state.request)));
+	const incoming = libraryTrainingRows().filter((row) => !keys.has(requestKey(row.state.request)));
+	if (incoming.length > 0) writeRows(workspace.dataset, [...existing, ...incoming]);
+}
+
+/** Library exercises ship as resources, available in source, npm and standalone installations. */
+export function libraryTrainingRows(): TrainingRow[] {
+	return readRows(join(getEngineeringResourcesPath(), "laya", "library.jsonl"));
 }
 
 export function readRows(path: string): TrainingRow[] {
@@ -128,6 +152,14 @@ export interface Score {
 	n: number;
 	correct: number;
 	per_question: Record<string, { n: number; correct: number }>;
+	library?: {
+		accuracy: number;
+		portuguese: { n: number; correct: number };
+		boundary: { n: number; correct: number };
+		/** The six public named acceptance examples, scored separately. */
+		acceptance_boundary?: { n: number; correct: number };
+		ece: number;
+	};
 }
 
 export interface TrainedModel {
@@ -142,6 +174,8 @@ export interface TrainedModel {
 	session: { candidate: Score; current: Score };
 	seconds: number;
 	device: string;
+	/** Derived from this model's validation split, never from its test results. */
+	libraryMinConfidence?: number;
 }
 
 export interface ModelRegistry {
@@ -167,7 +201,32 @@ export function writeRegistry(workspace: TrainingWorkspace, registry: ModelRegis
 export const accuracy = (score: Score): number => (score.n > 0 ? score.correct / score.n : 0);
 
 /** Whether the new model answers the test split well enough to replace the current one. */
-export function passesGate(test: TrainedModel["test"]): boolean {
+export function passesGate(test: TrainedModel["test"], requireLibrary = false): boolean {
+	if (requireLibrary || test.candidate.per_question.library_category || test.current.per_question.library_category) {
+		const library = test.candidate.per_question.library_category;
+		const metrics = test.candidate.library;
+		if (
+			!library ||
+			library.n <= 0 ||
+			library.correct / library.n < 0.9 ||
+			!metrics ||
+			metrics.portuguese.n <= 0 ||
+			metrics.portuguese.correct / metrics.portuguese.n < 0.85 ||
+			metrics.acceptance_boundary?.n !== 6 ||
+			metrics.acceptance_boundary.correct !== 6 ||
+			!Number.isFinite(metrics.ece)
+		)
+			return false;
+		return (
+			Object.keys(LAYA_QUESTIONS)
+				.filter((id) => id !== "library_category")
+				.every((id) => {
+					const current = test.current.per_question[id];
+					const candidate = test.candidate.per_question[id];
+					return current?.n > 0 && candidate?.n === current.n && candidate.correct >= current.correct;
+				}) && Object.keys(test.current.per_question).some((id) => id !== "library_category")
+		);
+	}
 	return accuracy(test.candidate) >= accuracy(test.current) - REGRESSION_TOLERANCE;
 }
 
@@ -211,6 +270,7 @@ type ScriptResult =
 			rows: { focus: number };
 			test: TrainedModel["test"];
 			focus: TrainedModel["session"];
+			library_min_confidence?: number | null;
 	  }
 	| { ok: false; error?: string; message: string };
 
@@ -294,16 +354,34 @@ export class LayaTrainer {
 		return { name: this.options.manifest.version, dir: LAYA_IMAGE_PATHS.shippedModel };
 	}
 
-	/** Selects the model that routes requests; the shipped model's version selects it. */
+	/** Only a model with measured acceptance can enable automatic reference injection. */
+	activeLibraryThreshold(): number | undefined {
+		const registry = readRegistry(this.workspace);
+		const model = registry.models.find((item) => item.name === registry.active);
+		const threshold = model?.libraryMinConfidence;
+		return model &&
+			threshold !== undefined &&
+			Number.isFinite(threshold) &&
+			threshold >= 0 &&
+			threshold <= 1 &&
+			passesGate(model.test, true)
+			? threshold
+			: undefined;
+	}
+
+	/** Selects a registered checkpoint; `shipped` selects the model embedded in the image. */
 	use(name: string): void {
 		const registry = readRegistry(this.workspace);
-		if (name === this.options.manifest.version) {
+		if (
+			name === "shipped" ||
+			(name === this.options.manifest.version && !registry.models.some((model) => model.name === name))
+		) {
 			writeRegistry(this.workspace, { ...registry, active: undefined });
 			return;
 		}
 		if (!registry.models.some((model) => model.name === name)) {
 			throw new Error(
-				`No trained model named ${name}. Models: ${[this.options.manifest.version, ...registry.models.map((model) => model.name)].join(", ")}`,
+				`No trained model named ${name}. Models: ${["shipped", this.options.manifest.version, ...registry.models.map((model) => model.name)].join(", ")}`,
 			);
 		}
 		writeRegistry(this.workspace, { ...registry, active: name });
@@ -385,7 +463,7 @@ export class LayaTrainer {
 			`type=bind,source=${this.workspace.dir},target=${LAYA_IMAGE_PATHS.workspace},readonly`,
 			image,
 			"python",
-			LAYA_IMAGE_PATHS.trainScript,
+			`${LAYA_IMAGE_PATHS.workspace}/train.py`,
 			"learn",
 			"--workspace",
 			LAYA_IMAGE_PATHS.workspace,
@@ -418,8 +496,12 @@ export class LayaTrainer {
 			session: result.focus,
 			seconds: result.seconds,
 			device: result.device,
+			libraryMinConfidence: result.library_min_confidence ?? undefined,
 		};
-		const activated = passesGate(model.test);
+		const activated = passesGate(
+			model.test,
+			readRows(this.workspace.dataset).some((row) => "library_category" in row.expected),
+		);
 		const pruned = pruneModels({ active: activated ? name : registry.active, models: [...registry.models, model] });
 		writeRegistry(this.workspace, pruned.registry);
 		await this.removeModels(image, pruned.removed);

@@ -31,6 +31,7 @@ import {
 	type SessionTask,
 	sessionTasks,
 } from "./learn.ts";
+import { selectLibraryGuides } from "./library.ts";
 import { LAYA_LESSONS_MESSAGE, LESSON_SIMILARITY, ROUTE_SIMILARITY, renderLessons, TaskMemory } from "./memory.ts";
 import { LAYA_MODEL_MANIFEST } from "./model-manifest.ts";
 import {
@@ -183,12 +184,16 @@ export function describeTrainingOutcome({ model, activated, previous }: Training
 	const minutes = Math.max(1, Math.round(model.seconds / 60));
 	return activated
 		? `Laya learned ${model.sessionTasks} session tasks in about ${minutes} min: ${model.name} now routes requests. It gets ${session}; test ${percent(model.test.candidate)} (${previous}: ${percent(model.test.current)}).`
-		: `Laya trained ${model.name}, but ${previous} keeps routing: the test score fell from ${percent(model.test.current)} to ${percent(model.test.candidate)}. It gets ${session}. /laya use ${model.name} activates it anyway.`;
+		: `Laya trained ${model.name}, but ${previous} keeps routing: the acceptance gate failed (test ${percent(model.test.candidate)}, previously ${percent(model.test.current)}). Check the per-question and library scores. It gets ${session}. /laya use ${model.name} activates it anyway.`;
 }
 
 export interface LayaExtensionOptions {
 	/** Docker CLI runner. Default: the `docker` command. */
 	docker?: DockerRun;
+	/** External library root; defaults to LAYA_LIBRARY_DIR or <cwd>/library. */
+	libraryDir?: string;
+	/** Injection is disabled until a validation-calibrated threshold is supplied. */
+	libraryMinConfidence?: number;
 }
 
 /** Files of the Python runtime Relay used to install on the host, before Laya moved to Docker. */
@@ -763,14 +768,34 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			}
 		}
 		const lessons = lessonsFor(event.prompt);
-		const plan = renderPlanMessage(assessment, policy, skills, deactivated);
+		let library: ReturnType<typeof selectLibraryGuides>;
+		const libraryDir = resolve(ctx.cwd, options.libraryDir ?? process.env.LAYA_LIBRARY_DIR ?? "library");
+		if (assessment.libraryCategory && existsSync(join(libraryDir, "LIBRARY_INDEX.json"))) {
+			try {
+				library = selectLibraryGuides(
+					libraryDir,
+					assessment,
+					event.prompt,
+					options.libraryMinConfidence ??
+						(process.env.LAYA_LIBRARY_MIN_CONFIDENCE === undefined
+							? (trainer.activeLibraryThreshold() ?? Number.NaN)
+							: Number(process.env.LAYA_LIBRARY_MIN_CONFIDENCE)),
+				);
+			} catch (error) {
+				ctx.ui.notify(
+					`Laya library unavailable: ${error instanceof Error ? error.message : String(error)}`,
+					"warning",
+				);
+			}
+		}
+		const plan = renderPlanMessage(assessment, policy, skills, deactivated, library);
 		const role = loadAgentProfile(assessment.agent, ctx);
 		return {
 			message: {
 				customType: LAYA_PLAN_MESSAGE,
-				content: [plan, lessons, role].filter(Boolean).join("\n\n"),
+				content: [plan, lessons, role, library?.content].filter(Boolean).join("\n\n"),
 				display: false,
-				details: { assessment, policy, skills, deactivated },
+				details: { assessment, policy, skills, deactivated, library },
 			},
 		};
 	});

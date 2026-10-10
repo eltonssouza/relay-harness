@@ -24,6 +24,7 @@ const PHASE_ROLES = {
 
 export default function xpExtension(relay: ExtensionAPI): void {
 	let state: XpState | undefined;
+	let checkpointInRun = false;
 	const calls = new Map<string, { workflow: string; revision: number }>();
 	const restore = (ctx: ExtensionContext) => {
 		state = undefined;
@@ -48,11 +49,52 @@ export default function xpExtension(relay: ExtensionAPI): void {
 			: "";
 	relay.on("session_start", (_event, ctx) => restore(ctx));
 	relay.on("session_tree", (_event, ctx) => restore(ctx));
+	relay.on("agent_start", () => {
+		checkpointInRun = false;
+	});
 	relay.on("before_agent_start", (_event, ctx) => {
 		if (state?.status !== "active") return;
 		const role = loadAgentProfile(PHASE_ROLES[state.phase], ctx);
 		return {
 			message: { customType: "xp.plan", content: [hint(), role].filter(Boolean).join("\n\n"), display: false },
+		};
+	});
+	relay.on("agent_before_settle", (event, ctx) => {
+		if (
+			state?.status !== "active" ||
+			event.outcome !== "completed" ||
+			ctx.signal?.aborted ||
+			ctx.hasPendingMessages() ||
+			(state.phase === "listening" && !state.accepted)
+		)
+			return;
+		state.continuationsWithoutCheckpoint = checkpointInRun ? 0 : (state.continuationsWithoutCheckpoint ?? 0) + 1;
+		if (state.steps >= 50 || state.continuationsWithoutCheckpoint >= 3) {
+			state.status = "handoff";
+			save();
+			return {
+				entries: [
+					{
+						type: "custom_message",
+						customType: "xp.handoff",
+						content:
+							"XP paused: the decision limit was reached or the agent ended three runs without a checkpoint. Inspect xp.state and xp.decision; /xp resume continues the workflow.",
+						display: true,
+					},
+				],
+			};
+		}
+		save();
+		return {
+			entries: [
+				{
+					type: "custom_message",
+					customType: "xp.plan",
+					content: [hint(), loadAgentProfile(PHASE_ROLES[state.phase], ctx)].filter(Boolean).join("\n\n"),
+					display: false,
+				},
+			],
+			continue: true,
 		};
 	});
 	relay.on("tool_call", (event) => {
@@ -137,6 +179,8 @@ export default function xpExtension(relay: ExtensionAPI): void {
 			)
 				throw new Error("XP workflow changed while Laya was deciding");
 			const verdict = judgeDecision(observation, result.answers);
+			checkpointInRun = true;
+			current.continuationsWithoutCheckpoint = 0;
 			const trace: DecisionTrace = { observation, questions, answers: result.answers, verdict };
 			current.steps++;
 			if (signal?.aborted || result.stopReason !== "stop") {
@@ -203,6 +247,7 @@ export default function xpExtension(relay: ExtensionAPI): void {
 					status: "active",
 					steps: 0,
 					refusals: 0,
+					continuationsWithoutCheckpoint: 0,
 					revision: 0,
 					accepted: false,
 					testsRequired: !noTests,
@@ -221,6 +266,7 @@ export default function xpExtension(relay: ExtensionAPI): void {
 				state.status = "active";
 				state.steps = 0;
 				state.refusals = 0;
+				state.continuationsWithoutCheckpoint = 0;
 				state.lastDecision = undefined;
 				state.repeats = 0;
 				save();

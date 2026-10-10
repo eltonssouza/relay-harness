@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AgentTool } from "@relay-harness/agent-core";
@@ -91,6 +91,7 @@ function answersFor(script: Script): Record<string, ClassifierAnswer> {
 	const score = (value: number): ClassifierAnswer => ({ type: "score", score: value, confidence: 0.9 });
 	const bool = (value: boolean): ClassifierAnswer => ({ type: "bool", probability: value ? 0.9 : 0.1 });
 	return {
+		library_category: choice("library_category", "engineering"),
 		task_type: choice("task_type", script.type),
 		complexity: score(script.complexity),
 		scope: choice("scope", script.scope),
@@ -114,6 +115,7 @@ function answersFor(script: Script): Record<string, ClassifierAnswer> {
 
 /** Labels of SIMPLE_FIX in the dataset format. */
 const assessmentLabels: Record<string, string | number | boolean> = {
+	library_category: "engineering",
 	task_type: "bug_fix",
 	complexity: 1,
 	scope: "single_file",
@@ -284,7 +286,7 @@ describe("laya assessment", () => {
 	});
 
 	it("reads learned labels as a certain assessment", () => {
-		expect(assessmentFromLabels(assessmentLabels)).toEqual({ ...assessment(), confidence: 1 });
+		expect(assessmentFromLabels(assessmentLabels)).toEqual({ ...assessment(), confidence: 1, libraryConfidence: 1 });
 		expect(() => assessmentFromLabels({ ...assessmentLabels, capability_tier: "huge" })).toThrow("capability_tier");
 	});
 
@@ -395,6 +397,7 @@ describe("laya/auto router", () => {
 		tools: Array<AgentTool & { exposure?: "deferred" | "hidden" }>,
 		settings: Record<string, unknown> = {},
 		extraProviders: Array<ReturnType<typeof fauxProvider>> = [],
+		extensionOptions: Parameters<typeof layaExtension>[1] = {},
 	) {
 		const anthropic = fauxProvider({
 			provider: "anthropic",
@@ -439,7 +442,7 @@ describe("laya/auto router", () => {
 				...extraProviders.map(
 					(provider) => (relay: Parameters<typeof layaExtension>[0]) => relay.registerProvider(provider.provider),
 				),
-				layaExtension,
+				(relay) => layaExtension(relay, extensionOptions),
 				// Replaces the built-in Laya provider with the scripted classifier.
 				(relay) => relay.registerProvider(laya),
 			],
@@ -468,6 +471,45 @@ describe("laya/auto router", () => {
 	}
 
 	const call = (tool: string) => fauxAssistantMessage(fauxToolCall(tool, { path: "a.ts" }), { stopReason: "toolUse" });
+
+	it("injects category-filtered references in the plan with one classifier request and suggests on low confidence", async () => {
+		writeFileSync(
+			join(agentDir, "LIBRARY_INDEX.json"),
+			JSON.stringify({
+				categories: [
+					{
+						id: "04_engineering_and_practices",
+						title: "Engineering",
+						files: [{ path: "unit.md", title: "Unit Testing Principles" }],
+					},
+					{
+						id: "08_security_and_privacy",
+						title: "Security",
+						files: [{ path: "other.md", title: "Unit Testing Security" }],
+					},
+				],
+			}),
+		);
+		writeFileSync(join(agentDir, "unit.md"), "Isolate dependencies and assert observable behavior.");
+		writeFileSync(join(agentDir, "other.md"), "Unrelated security reference.");
+		const script = { ...SIMPLE_FIX };
+		const { harness, respond, plan, requests } = await setup(script, [], {}, [], {
+			libraryDir: agentDir,
+			libraryMinConfidence: 0.8,
+		});
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Explain unit testing principles");
+		expect(requests).toHaveLength(1);
+		expect(plan()[0]).toContain("Library: engineering (Unit Testing Principles)");
+		expect(plan()[0]).toContain("Isolate dependencies and assert observable behavior.");
+		expect(plan()[0]).not.toContain("Unrelated security reference.");
+		script.confidence = 0.7;
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Show unit testing principles for another function");
+		expect(requests).toHaveLength(2);
+		expect(plan()[1]).toContain("suggestions only");
+		expect(plan()[1]).not.toContain("Isolate dependencies and assert observable behavior.");
+	});
 
 	it.each(["openai-codex", "lmstudio", "glm", "kimi", "qwen"])(
 		"follows %s across all four tiers despite competing Claude models",

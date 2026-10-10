@@ -11,6 +11,10 @@ tests and code. Laya evaluates the observed state and selects `continue_phase`, 
 
 The workflow starts in Planning and advances through Design, Testing, Coding and Listening.
 The executor calls `xp_checkpoint` with its phase report and observed tool call IDs.
+If the executor ends its response while a phase is still active, Relay starts another
+model request with the current phase instructions. It pauses in Listening for user
+feedback. Cancelled or failed responses are not automatically restarted. Three
+completed runs without a checkpoint trigger a handoff; `/xp resume` resets that limit.
 Testing requires an observed behavioral test failure; Coding requires a successful test
 execution after the latest potentially mutating tool call. Arbitrary successful shell
 commands do not qualify. Test recognition covers common command-line runners; a custom
@@ -25,6 +29,9 @@ work, explicitly use `/xp start --no-tests <goal>`.
 
 Each checkpoint makes one classifier request with a five-second timeout and no retry.
 The thresholds are 0.5 for continuing a phase, 0.7 for transitions and 0.8 for finishing.
+When Laya supplies `answer_confidence`, the client uses that answer probability for
+the gate. Laya's separate `confidence` value measures distribution entropy and is
+not on the probability scale used by these thresholds.
 Three confidence refusals, classifier failure or fifty decisions trigger a handoff.
 Repeated decisions on unchanged observations also trigger a handoff. Reports and tool
 excerpts sent to Laya are bounded; the workflow goal and observed evidence remain in session state.

@@ -24,12 +24,15 @@ import {
 	TaskMemory,
 	words,
 } from "../src/extensions/laya/memory.ts";
+import { LAYA_QUESTIONS } from "../src/extensions/laya/questions.ts";
 import { LAYA_PLAN_MESSAGE } from "../src/extensions/laya/routers.ts";
 import { LAYA_IMAGE_PATHS, type LayaModelManifest } from "../src/extensions/laya/runtime.ts";
 import { generateSeed } from "../src/extensions/laya/seed.ts";
+import { TRAIN_SCRIPT } from "../src/extensions/laya/train-script.ts";
 import {
 	ensureWorkspace,
 	LayaTrainer,
+	libraryTrainingRows,
 	mergeRows,
 	readRegistry,
 	readRows,
@@ -38,10 +41,12 @@ import {
 	type TrainingProgress,
 	type TrainingRow,
 	trainingWorkspace,
+	writeRegistry,
 } from "../src/extensions/laya/training.ts";
 import { createHarness, getAssistantTexts, type Harness } from "./suite/harness.ts";
 
 const LABELS = {
+	library_category: "engineering",
 	task_type: "bug_fix",
 	complexity: 1,
 	scope: "single_file",
@@ -276,13 +281,17 @@ describe("laya training workspace", () => {
 		const workspace = trainingWorkspace(home);
 		ensureWorkspace(workspace);
 		const rows = readRows(workspace.dataset);
-		expect(rows).toHaveLength(SEED_ROWS);
+		expect(rows).toHaveLength(SEED_ROWS + libraryTrainingRows().length);
 		expect(rows[0]).toMatchObject({ id: "r00001", source: "synthetic" });
 		expect(JSON.parse(readFileSync(workspace.decisions, "utf8")).decisions.requires_git.type).toBe("noul");
+		expect(readFileSync(workspace.script, "utf8")).toBe(TRAIN_SCRIPT);
+		expect(readRows(workspace.boundaries)).toHaveLength(6);
 
 		writeFileSync(workspace.dataset, `${JSON.stringify(rows[0])}\n`);
+		writeFileSync(workspace.script, "outdated training script");
 		ensureWorkspace(workspace);
-		expect(readRows(workspace.dataset)).toHaveLength(1);
+		expect(readRows(workspace.dataset)).toHaveLength(1 + libraryTrainingRows().length);
+		expect(readFileSync(workspace.script, "utf8")).toBe(TRAIN_SCRIPT);
 	});
 
 	it("adds new requests and relabels a request it already has", () => {
@@ -311,7 +320,18 @@ const manifest: LayaModelManifest = {
 	files: [{ path: "model.safetensors", asset: "model.safetensors", size: 5, sha256: "x" }],
 };
 
-const score = (correct: number, n = 100): Score => ({ n, correct, per_question: {} });
+const score = (correct: number, n = 100): Score => ({
+	n,
+	correct,
+	per_question: Object.fromEntries(Object.keys(LAYA_QUESTIONS).map((id) => [id, { n, correct }])),
+	library: {
+		accuracy: correct / n,
+		ece: 0.05,
+		portuguese: { n, correct },
+		boundary: { n, correct: n },
+		acceptance_boundary: { n: 6, correct: 6 },
+	},
+});
 
 /**
  * Docker stand-in for training: the training container reports progress and prints the scores,
@@ -345,6 +365,7 @@ function fakeDocker(
 						rows: { focus: 2 },
 						test: { candidate: score(scores.candidate), current: score(scores.current) },
 						focus: { candidate: score(34, 36), current: score(20, 36) },
+						library_min_confidence: 0.91,
 					});
 		return { code: 0, stdout: `${stdout}\n`, stderr: "" };
 	};
@@ -375,7 +396,7 @@ describe("laya trainer", () => {
 
 	it("trains in a container from the active model and activates the new one when the test score holds", async () => {
 		const calls: string[][] = [];
-		const trainer = setup(fakeDocker({ candidate: 97, current: 97.5 }, calls));
+		const trainer = setup(fakeDocker({ candidate: 97, current: 97 }, calls));
 		const progress: TrainingProgress[] = [];
 		const finished: unknown[] = [];
 		trainer.listener = { progress: (value) => progress.push(value), finished: (value) => finished.push(value) };
@@ -388,7 +409,7 @@ describe("laya trainer", () => {
 				"all",
 				`type=bind,source=${trainer.workspace.dir},target=${LAYA_IMAGE_PATHS.workspace},readonly`,
 				"relay-laya:test",
-				LAYA_IMAGE_PATHS.trainScript,
+				`${LAYA_IMAGE_PATHS.workspace}/train.py`,
 				"learn",
 				"--init",
 				LAYA_IMAGE_PATHS.shippedModel,
@@ -402,6 +423,7 @@ describe("laya trainer", () => {
 		expect(outcome).toMatchObject({ activated: true, previous: "v1", model: { name: "local-1", basedOn: "v1" } });
 		expect(finished).toEqual([{ outcome }]);
 		expect(trainer.activeModel()).toEqual({ name: "local-1", dir: "/data/models/local-1" });
+		expect(trainer.activeLibraryThreshold()).toBe(0.91);
 		expect(trainer.running).toBe(false);
 
 		// The next training starts from the trained model.
@@ -427,6 +449,7 @@ describe("laya trainer", () => {
 		expect(trainer.activeModel().name).toBe("local-1");
 		trainer.use("v1");
 		expect(trainer.activeModel().name).toBe("v1");
+		expect(trainer.activeLibraryThreshold()).toBeUndefined();
 		expect(() => trainer.use("local-9")).toThrow("No trained model named local-9");
 	});
 
@@ -435,6 +458,18 @@ describe("laya trainer", () => {
 		await setup(fakeDocker({ candidate: 97, current: 97 }, calls, { failFirst: "out_of_memory" })).train();
 		expect(calls).toHaveLength(2);
 		expect(calls[1]).toEqual(expect.arrayContaining(["--micro-batch", "1", "--low-memory", "on"]));
+	});
+	it("selects a registered checkpoint when its name also matches the shipped version", async () => {
+		const trainer = setup(fakeDocker({ candidate: 97, current: 97 }, []));
+		const outcome = await trainer.train();
+		writeRegistry(trainer.workspace, { active: "v1", models: [{ ...outcome.model, name: "v1" }] });
+		trainer.use("v1");
+		expect(trainer.activeModel()).toEqual({ name: "v1", dir: "/data/models/v1" });
+		trainer.use("shipped");
+		expect(trainer.activeModel()).toEqual({ name: "v1", dir: LAYA_IMAGE_PATHS.shippedModel });
+		expect(trainer.activeLibraryThreshold()).toBeUndefined();
+		trainer.use("v1");
+		expect(trainer.activeModel().dir).toBe("/data/models/v1");
 	});
 
 	it("deletes old inactive models from the volume and keeps the active one", async () => {
@@ -525,7 +560,7 @@ describe("/laya learn", () => {
 		expect(JSON.stringify(toolResult?.content)).toContain("Run /laya setup, then /laya train");
 
 		const rows = readRows(trainingWorkspace(join(agentDir, "laya")).dataset);
-		expect(rows).toHaveLength(SEED_ROWS + 1);
+		expect(rows).toHaveLength(SEED_ROWS + libraryTrainingRows().length + 1);
 		expect(rows.at(-1)).toMatchObject({
 			id: "s00001",
 			state: { request: "Fix the off-by-one in the pager." },
