@@ -4,6 +4,12 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Fixed
+
+- Laya now classifies OpenAI API-key models, including GPT-6.1 Sol and GPT-6 Astra, when following the `openai` provider.
+- Laya's default registry now covers current Claude, OpenAI, Antigravity, and GitHub Copilot model families across all capability tiers.
+- Antigravity requests for Gemini 3.1 Pro now send the supported `-low` model ID and preserve the selected low or high reasoning effort in the request configuration.
+
 ## [0.1.8] - 2026-10-10
 
 ## [1.0.7] - 2026-10-10

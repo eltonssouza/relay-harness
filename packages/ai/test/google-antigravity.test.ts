@@ -344,6 +344,34 @@ describe.sequential("Google Antigravity", () => {
 		expect(events).toHaveLength(2);
 	});
 
+	it.each([
+		["low", "LOW"],
+		["high", "HIGH"],
+	] as const)("routes Gemini 3.1 Pro (%s) through the supported model alias", async (effort, thinkingLevel) => {
+		let payload: Record<string, unknown> | undefined;
+		const selectedModel = { ...model, id: `gemini-3.1-pro-${effort}` };
+		const result = await stream(
+			selectedModel,
+			normalizeContext({ messages: [{ role: "user", content: "hello", timestamp: 0 }] }),
+			{
+				apiKey: "access-token",
+				headers: { "X-Goog-User-Project": "account-project" },
+				thinking: { enabled: true, level: thinkingLevel },
+				fetch: async (_input, init) => {
+					payload = JSON.parse(String(init?.body)) as Record<string, unknown>;
+					return new Response(
+						`data: ${JSON.stringify({ response: { candidates: [{ content: { parts: [{ text: "hello" }] }, finishReason: "STOP" }] } })}\n\n`,
+					);
+				},
+			},
+		).result();
+		expect(result.stopReason).toBe("stop");
+		expect(payload).toMatchObject({
+			model: "gemini-3.1-pro-low",
+			request: { generationConfig: { thinkingConfig: { includeThoughts: true, thinkingLevel } } },
+		});
+	});
+
 	it("reports truncated streams instead of returning an empty success", async () => {
 		const result = await stream(model, normalizeContext({ messages: [] }), {
 			apiKey: "access",
