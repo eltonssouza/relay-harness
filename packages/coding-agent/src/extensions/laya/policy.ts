@@ -36,14 +36,38 @@ export const PROFILES: Record<PolicyProfile, ProfileWeights> = {
 	critical: { quality: 0.7, cost: 0, latency: 0, risk: 0.3, minSuccess: 0.95 },
 };
 
+/** Antigravity catalogs may expose each reasoning effort as a separate model ID. */
+function antigravityModels(id: string, efforts: readonly string[] = []): string[] {
+	return [id, ...efforts.map((effort) => `${id}-${effort}`)].map((model) => `google-antigravity/${model}`);
+}
+
 /**
  * Concrete models per tier as `provider/model`, in preference order. Only models whose provider
  * has credentials are candidates. Override with the `laya.models` setting.
  */
 export const DEFAULT_MODEL_REGISTRY: Record<CapabilityTier, string[]> = {
-	fast: ["anthropic/claude-haiku-4-5", "openai-codex/gpt-6-luna", "google/gemini-3.5-flash"],
-	balanced: ["anthropic/claude-sonnet-5-5", "openai-codex/gpt-5.6-terra", "google/gemini-3.8-flash"],
-	strong: ["anthropic/claude-opus-5-5", "openai-codex/gpt-6-sol", "google/gemini-3.1-pro-preview"],
+	fast: [
+		"anthropic/claude-haiku-4-5",
+		"openai-codex/gpt-6-luna",
+		"google/gemini-3.5-flash",
+		...antigravityModels("gemini-3.7-flash", ["medium", "low", "high"]),
+		...antigravityModels("gemini-3.6-flash", ["medium", "low", "high"]),
+	],
+	balanced: [
+		"anthropic/claude-sonnet-5-5",
+		"openai-codex/gpt-5.6-terra",
+		"google/gemini-3.8-flash",
+		...antigravityModels("claude-sonnet-5-5", ["medium", "low", "high"]),
+		...antigravityModels("gemini-3.8-flash", ["medium", "low", "high"]),
+		...antigravityModels("gpt-oss-120b-medium"),
+	],
+	strong: [
+		"anthropic/claude-opus-5-5",
+		"openai-codex/gpt-6-sol",
+		"google/gemini-3.1-pro-preview",
+		...antigravityModels("claude-opus-5-5", ["medium", "low", "high"]),
+		...antigravityModels("gemini-3.1-pro", ["high", "low"]),
+	],
 	frontier: [
 		"anthropic/claude-fable-5-1",
 		"openai-codex/gpt-6.1-sol",
