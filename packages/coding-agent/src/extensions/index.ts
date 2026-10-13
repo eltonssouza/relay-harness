@@ -2,6 +2,7 @@ import type { InlineExtension } from "../core/extensions/types.ts";
 import browserExtension from "./browser/index.ts";
 import codemodeExtension from "./codemode/index.ts";
 import engineeringExtension from "./engineering/index.ts";
+import goalExtension from "./goal/index.ts";
 import intakeExtension from "./intake/index.ts";
 import layaExtension from "./laya/index.ts";
 import llamaExtension from "./llama/index.ts";
@@ -22,6 +23,7 @@ export const builtInExtensions: InlineExtension[] = [
 	{ name: "intake", factory: intakeExtension, builtin: true },
 	{ name: "project-memory", factory: projectMemoryExtension, builtin: true },
 	{ name: "logbook", factory: logbookExtension, builtin: true },
+	{ name: "goal", factory: goalExtension, builtin: true },
 	// Replaceable: an extension that registers `codemode`, `tool_search`, or `/mcp` (such as a third-party
 	// MCP extension) takes over instead of running alongside the built-in one.
 	{ name: "codemode", factory: codemodeExtension, replaceable: true, builtin: true },
