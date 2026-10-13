@@ -1,11 +1,14 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { lstatSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { compileDecision, type DecisionTrace, judgeDecision } from "@relay-harness/agent-core";
 import type { ClassifierResult } from "@relay-harness/ai";
 import { Type } from "typebox";
 import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types.ts";
 import { loadAgentProfile } from "../engineering/index.ts";
+import { readGoal } from "../goal/state.ts";
 import { LAYA_CLASSIFIER_ID, LAYA_PROVIDER_ID } from "../laya/index.ts";
-import { applyXpAction, XP_PHASE_GUIDANCE, type XpState, xpObservation } from "./workflow.ts";
+import { applyXpAction, XP_PHASE_GUIDANCE, XP_PHASES, type XpPhase, type XpState, xpObservation } from "./workflow.ts";
 
 const STATE_ENTRY = "xp.state";
 const TRACE_ENTRY = "xp.decision";
@@ -13,6 +16,57 @@ const checkpointSchema = Type.Object({
 	summary: Type.String({ minLength: 1, maxLength: 4000 }),
 	evidenceIds: Type.Array(Type.String(), { maxItems: 20 }),
 });
+
+const SPECIFICATION_SECTIONS: Record<XpPhase, string> = {
+	planning: "Problem, requirements, constraints, risks and acceptance criteria",
+	design: "Technical decisions, alternatives and trade-offs",
+	testing: "Test cases derived from acceptance criteria and observed validation",
+	coding: "Implementation and verification against the specification",
+	listening: "Outcome, validation, feedback and follow-up",
+};
+
+/** Resolve only the workflow's own artifact; never trust a model-supplied path. */
+function specificationFile(ctx: ExtensionContext, state: XpState): string {
+	if (!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(state.id))
+		throw new Error("Invalid XP workflow ID");
+	const relayDir = join(ctx.cwd, ".relay");
+	const dir = join(relayDir, "specs");
+	for (const path of [relayDir, dir]) {
+		if (lstatSync(path, { throwIfNoEntry: false })?.isSymbolicLink())
+			throw new Error(`XP specification directory must not be a symlink: ${path}`);
+	}
+	const path = join(dir, `${state.id}.md`);
+	if (lstatSync(path, { throwIfNoEntry: false })?.isSymbolicLink())
+		throw new Error("XP specification must not be a symlink");
+	return path;
+}
+
+/** Store the task's phase reports in one project-local specification. */
+function writeSpecification(ctx: ExtensionContext, state: XpState): void {
+	if (!state.automatic) return;
+	const path = specificationFile(ctx, state);
+	const sections = XP_PHASES.map(
+		(phase) =>
+			`## ${phase[0].toUpperCase()}${phase.slice(1)}\n\n${SPECIFICATION_SECTIONS[phase]}\n\n${state.specificationReports?.[phase] ?? "Pending."}`,
+	);
+	const content = `# Task specification\n\n${state.goal}\n\n${sections.join("\n\n")}\n`;
+	mkdirSync(dirname(path), { recursive: true });
+	writeFileSync(path, content, { encoding: "utf8", mode: 0o600 });
+	state.specificationPath = `.relay/specs/${state.id}.md`;
+	state.specificationDigest = createHash("sha256").update(content).digest("hex");
+}
+
+function specificationMatches(ctx: ExtensionContext, state: XpState): boolean {
+	try {
+		return (
+			createHash("sha256")
+				.update(readFileSync(specificationFile(ctx, state)))
+				.digest("hex") === state.specificationDigest
+		);
+	} catch {
+		return false;
+	}
+}
 
 const PHASE_ROLES = {
 	planning: "product-owner",
@@ -25,6 +79,11 @@ const PHASE_ROLES = {
 export default function xpExtension(relay: ExtensionAPI): void {
 	let state: XpState | undefined;
 	let checkpointInRun = false;
+	let awaitingIntent = false;
+	let intentAttempts = 0;
+	let taskRun = false;
+	let explicitIntent = false;
+	let prompt = "";
 	const calls = new Map<string, { workflow: string; revision: number }>();
 	const restore = (ctx: ExtensionContext) => {
 		state = undefined;
@@ -43,16 +102,37 @@ export default function xpExtension(relay: ExtensionAPI): void {
 	const save = () => {
 		if (state) relay.appendEntry(STATE_ENTRY, structuredClone(state));
 	};
+	const invalidateChangedSpecification = (ctx: ExtensionContext) => {
+		if (state?.automatic && state.specificationApproved && !specificationMatches(ctx, state)) {
+			state.specificationApproved = false;
+			state.phase = "design";
+			state.revision++;
+			state.accepted = false;
+			state.listeningReported = false;
+			save();
+		}
+	};
+	const intentHint =
+		"[harness:xp] Before answering or using other tools, call xp_intent to identify whether this request is a task or only a question. Every task must pass Planning, Design, Testing, Coding and Listening, in order. Questions do not start XP. Use testsRequired=false only for tasks with no executable behavior; Testing still requires a concrete review. Tasks start automatically. When a /goal is active, continue all five phases autonomously without human approval; otherwise pause after Design for human review and /xp approve-spec. Never claim or execute user approval on the user's behalf.";
 	const hint = () =>
 		state
-			? `[harness:xp] ${state.phase}: ${XP_PHASE_GUIDANCE[state.phase]}\nGoal: ${state.goal}\nCall xp_checkpoint with the phase report and actual tool call IDs. Laya selects the transition; do not skip phases or claim completion before user acceptance.`
+			? `[harness:xp] ${state.phase}: ${XP_PHASE_GUIDANCE[state.phase]}\nGoal: ${state.goal}\nCall xp_checkpoint with the phase report and actual tool call IDs. Your report is saved in the single SDD at ${state.specificationPath ?? `.relay/specs/${state.id}.md`}. In Planning specify requirements, constraints, risks and acceptance criteria; in Design record decisions and alternatives; in Testing derive cases from the acceptance criteria; in Coding verify against them; in Listening record feedback. ${state.goalDriven ? "This /goal task proceeds autonomously through all phases; do not wait for /xp approve-spec." : "After Design wait for /xp approve-spec from the user."} Do not skip phases or claim user acceptance.`
 			: "";
 	relay.on("session_start", (_event, ctx) => restore(ctx));
 	relay.on("session_tree", (_event, ctx) => restore(ctx));
 	relay.on("agent_start", () => {
 		checkpointInRun = false;
 	});
-	relay.on("before_agent_start", (_event, ctx) => {
+	relay.on("before_agent_start", (event, ctx) => {
+		prompt = event.prompt;
+		// Only locally dispatched /xp controls establish intent, not user-supplied text.
+		awaitingIntent = !explicitIntent;
+		explicitIntent = false;
+		intentAttempts = 0;
+		taskRun = !awaitingIntent && state?.status === "active";
+		const tools = relay.getActiveTools();
+		relay.setActiveTools([...new Set([...tools, "xp_intent", "xp_checkpoint"])]);
+		if (awaitingIntent) return { message: { customType: "xp.intent", content: intentHint, display: false } };
 		if (state?.status !== "active") return;
 		const role = loadAgentProfile(PHASE_ROLES[state.phase], ctx);
 		return {
@@ -60,12 +140,56 @@ export default function xpExtension(relay: ExtensionAPI): void {
 		};
 	});
 	relay.on("agent_before_settle", (event, ctx) => {
+		if (awaitingIntent && event.outcome === "completed" && !ctx.signal?.aborted && !ctx.hasPendingMessages()) {
+			intentAttempts++;
+			return {
+				entries: [
+					{
+						type: "custom_message",
+						customType: intentAttempts >= 3 ? "xp.handoff" : "xp.intent",
+						content:
+							intentAttempts >= 3
+								? "XP incomplete: the agent did not identify the request intent. No task completion was verified."
+								: intentHint,
+						display: intentAttempts >= 3,
+					},
+				],
+				continue: intentAttempts < 3,
+			};
+		}
+		if (taskRun && state?.status === "active") invalidateChangedSpecification(ctx);
 		if (
+			event.outcome === "completed" &&
+			!ctx.signal?.aborted &&
+			!ctx.hasPendingMessages() &&
+			taskRun &&
+			state?.automatic &&
+			state.status === "active" &&
+			state.phase === "design" &&
+			!state.goalDriven &&
+			state.specificationReports?.design &&
+			!state.specificationApproved
+		) {
+			save();
+			return {
+				entries: [
+					{
+						type: "custom_message",
+						customType: "xp.specification_review",
+						content: `SDD ready for review: ${state.specificationPath}. Review it, then run /xp approve-spec to begin Testing.`,
+						display: true,
+					},
+				],
+				continue: false,
+			};
+		}
+		if (
+			!taskRun ||
 			state?.status !== "active" ||
 			event.outcome !== "completed" ||
 			ctx.signal?.aborted ||
 			ctx.hasPendingMessages() ||
-			(state.phase === "listening" && !state.accepted)
+			(state.phase === "listening" && !state.accepted && (!state.automatic || state.listeningReported))
 		)
 			return;
 		state.continuationsWithoutCheckpoint = checkpointInRun ? 0 : (state.continuationsWithoutCheckpoint ?? 0) + 1;
@@ -97,12 +221,35 @@ export default function xpExtension(relay: ExtensionAPI): void {
 			continue: true,
 		};
 	});
-	relay.on("tool_call", (event) => {
-		if (state?.status !== "active" || event.toolName === "xp_checkpoint") return;
+	relay.on("tool_call", (event, ctx) => {
+		if (event.toolName === "xp_intent") return;
+		if (awaitingIntent) return { block: true, reason: "Call xp_intent before using tools for this request." };
+		if (!taskRun && ["write", "edit"].includes(event.toolName))
+			return { block: true, reason: "A mutation is a task. Call xp_intent with kind=task first." };
+		if (state?.status !== "active" || !taskRun) return;
+		invalidateChangedSpecification(ctx);
+		if (event.toolName === "xp_checkpoint") return;
+		if (
+			state.automatic &&
+			!state.goalDriven &&
+			state.phase === "design" &&
+			state.specificationReports?.design &&
+			!state.specificationApproved &&
+			!["read", "grep", "find", "ls", "tool_search", "get_goal"].includes(event.toolName)
+		)
+			return { block: true, reason: "Review the SDD and run /xp approve-spec before Testing or Coding." };
+		if (state.automatic && ["write", "edit"].includes(event.toolName) && !["testing", "coding"].includes(state.phase))
+			return { block: true, reason: "Write tests during Testing and implementation during Coding." };
+		if (event.toolName === "update_goal" && event.input.status === "complete" && !state.listeningReported)
+			return {
+				block: true,
+				reason: "Complete all five XP checkpoints, including Listening, before completing the goal.",
+			};
 		// Shell and unknown tools can mutate too. Conservatively invalidate prior green evidence.
-		if (!["read", "grep", "find", "ls", "tool_search"].includes(event.toolName)) {
+		if (!["read", "grep", "find", "ls", "tool_search", "get_goal", "update_goal"].includes(event.toolName)) {
 			state.revision++;
 			state.accepted = false;
+			state.listeningReported = false;
 			save();
 		}
 		calls.set(event.toolCallId, { workflow: state.id, revision: state.revision });
@@ -128,10 +275,67 @@ export default function xpExtension(relay: ExtensionAPI): void {
 		save();
 	});
 	relay.registerTool({
+		name: "xp_intent",
+		label: "XP request intent",
+		description:
+			"Required at the start of each user request: identify a task or a question. Tasks automatically enter the five-stage XP workflow. Set continueTask=true only to continue an existing task. Non-executable tasks use testsRequired=false but still perform Testing as a concrete review.",
+		parameters: Type.Object({
+			kind: Type.Union([Type.Literal("task"), Type.Literal("question")]),
+			testsRequired: Type.Optional(Type.Boolean()),
+			continueTask: Type.Optional(Type.Boolean()),
+		}),
+		executionMode: "sequential",
+		async execute(_id, params, _signal, _onUpdate, ctx) {
+			if (!awaitingIntent && taskRun)
+				throw new Error("This request already has task intent; complete its XP phases before reclassifying.");
+			awaitingIntent = false;
+			taskRun = params.kind === "task";
+			if (!taskRun)
+				return {
+					content: [{ type: "text", text: "Question: answer directly; no XP task workflow started." }],
+					details: { kind: params.kind },
+				};
+			if (!params.continueTask || state?.status !== "active") {
+				if (state?.status === "active") {
+					state.status = "stopped";
+					save();
+				}
+				state = {
+					version: 1,
+					id: randomUUID(),
+					goal: prompt,
+					phase: "planning",
+					status: "active",
+					steps: 0,
+					refusals: 0,
+					continuationsWithoutCheckpoint: 0,
+					revision: 0,
+					accepted: false,
+					testsRequired: params.testsRequired ?? true,
+					evidence: [],
+					automatic: true,
+					goalDriven: readGoal(ctx.sessionManager)?.status === "active",
+				};
+				calls.clear();
+				writeSpecification(ctx, state);
+				save();
+			}
+			return {
+				content: [
+					{
+						type: "text",
+						text: [hint(), loadAgentProfile(PHASE_ROLES[state.phase], ctx)].filter(Boolean).join("\n\n"),
+					},
+				],
+				details: { kind: params.kind, phase: state.phase },
+			};
+		},
+	});
+	relay.registerTool({
 		name: "xp_checkpoint",
 		label: "XP checkpoint",
 		description:
-			"Report phase work and observed tool call IDs; Laya gates the next XP transition. Only available after /xp start.",
+			"Report completed XP phase work and observed tool call IDs. The harness enforces all five ordered phases; Laya reviews transitions when available. Call xp_intent to begin tasks automatically.",
 		parameters: checkpointSchema,
 		exposure: "deferred",
 		executionMode: "sequential",
@@ -147,27 +351,59 @@ export default function xpExtension(relay: ExtensionAPI): void {
 			const revision = current.revision;
 			const phase = current.phase;
 			const accepted = current.accepted;
+			if (current.automatic) {
+				if (["planning", "design"].includes(phase)) current.specificationApproved = false;
+				current.specificationReports ??= {};
+				current.specificationReports[phase] = params.summary.trim();
+				current.specificationPhases ??= [];
+				if (!current.specificationPhases.includes(phase)) current.specificationPhases.push(phase);
+				writeSpecification(ctx, current);
+			}
+			if (current.automatic && !current.goalDriven && phase === "design" && !current.specificationApproved) {
+				checkpointInRun = true;
+				save();
+				return {
+					content: [
+						{
+							type: "text",
+							text: `Design recorded in ${current.specificationPath}. Pause for user review; only /xp approve-spec can unlock Testing.`,
+						},
+					],
+					details: { phase: "design", status: "awaiting-spec-approval" },
+				};
+			}
 			const observation = xpObservation(current, params.summary, params.evidenceIds);
 			const questions = compileDecision(observation);
-			const classifier = ctx.modelRegistry.findOfType("classifier", LAYA_PROVIDER_ID, LAYA_CLASSIFIER_ID);
-			let result: ClassifierResult;
+			// Native tasks use deterministic gates and must not depend on a separate Laya service.
+			const classifier = current.automatic
+				? undefined
+				: ctx.modelRegistry.findOfType("classifier", LAYA_PROVIDER_ID, LAYA_CLASSIFIER_ID);
+			let answers: ClassifierResult["answers"] = {};
+			let decisionError: string | undefined;
 			try {
-				if (!classifier) throw new Error("Laya classifier unavailable. Enable Laya and run /laya setup.");
-				result = await ctx.modelRegistry.classify(
-					classifier,
-					{ state: observation.state, questions },
-					{ signal, timeoutMs: 5000, maxRetries: 0 },
-				);
+				if (!classifier) {
+					if (!current.automatic)
+						throw new Error("Laya classifier unavailable. Use /laya setup for manual /xp workflows.");
+					const action = observation.goalReached
+						? "finish"
+						: observation.actions.advance
+							? "advance"
+							: "continue_phase";
+					answers = {
+						next_action: { type: "choice", choice: action, confidence: 1, probabilities: { [action]: 1 } },
+						goal_reached: { type: "bool", probability: observation.goalReached ? 1 : 0 },
+					};
+				} else {
+					const result = await ctx.modelRegistry.classify(
+						classifier,
+						{ state: observation.state, questions },
+						{ signal, timeoutMs: 5000, maxRetries: 0 },
+					);
+					answers = result.answers;
+					if (result.stopReason !== "stop") decisionError = result.errorMessage ?? result.stopReason;
+				}
 			} catch (error) {
-				result = {
-					api: "typesafe-system-one",
-					provider: LAYA_PROVIDER_ID,
-					model: LAYA_CLASSIFIER_ID,
-					answers: {},
-					stopReason: signal?.aborted ? "aborted" : "error",
-					errorMessage: error instanceof Error ? error.message : String(error),
-					timestamp: Date.now(),
-				};
+				decisionError = error instanceof Error ? error.message : String(error);
 			}
 			// Session navigation or a concurrent user command must not mutate an obsolete workflow.
 			if (
@@ -178,13 +414,13 @@ export default function xpExtension(relay: ExtensionAPI): void {
 				current.accepted !== accepted
 			)
 				throw new Error("XP workflow changed while Laya was deciding");
-			const verdict = judgeDecision(observation, result.answers);
+			const verdict = judgeDecision(observation, answers);
 			checkpointInRun = true;
 			current.continuationsWithoutCheckpoint = 0;
-			const trace: DecisionTrace = { observation, questions, answers: result.answers, verdict };
+			const trace: DecisionTrace = { observation, questions, answers, verdict };
 			current.steps++;
-			if (signal?.aborted || result.stopReason !== "stop") {
-				trace.error = result.errorMessage ?? result.stopReason;
+			if (signal?.aborted || decisionError) {
+				trace.error = decisionError ?? "aborted";
 				current.status = "handoff";
 			} else if (verdict.kind === "refused") {
 				if (++current.refusals >= 3) current.status = "handoff";
@@ -196,12 +432,16 @@ export default function xpExtension(relay: ExtensionAPI): void {
 				if (current.repeats >= 3) {
 					current.status = "handoff";
 					trace.error = "Repeated decision on unchanged state";
-				} else applyXpAction(current, verdict.action);
+				} else {
+					if (phase === "listening" && observation.state.ready === true) current.listeningReported = true;
+					applyXpAction(current, verdict.action);
+				}
 			}
 			trace.result = { phase: current.phase, status: current.status, revision: current.revision };
 			relay.appendEntry(TRACE_ENTRY, {
 				version: 1,
 				workflow: current.id,
+				source: classifier ? "laya" : "harness",
 				timestamp: new Date().toISOString(),
 				...trace,
 			});
@@ -218,10 +458,10 @@ export default function xpExtension(relay: ExtensionAPI): void {
 		},
 	});
 	relay.registerCommand("xp", {
-		description: "XP workflow controlled by Laya: start <goal>, status, accept, resume, stop",
+		description: "XP workflow: start <goal>, approve-spec, status, accept, resume, stop",
 		handler: async (args, ctx) => {
 			const [command = "status", ...rest] = args.trim().split(/\s+/);
-			if (["start", "accept", "resume"].includes(command) && !ctx.isIdle()) {
+			if (["start", "accept", "approve-spec", "resume"].includes(command) && !ctx.isIdle()) {
 				ctx.ui.notify("Wait for the current agent run to finish before changing the XP workflow.", "warning");
 				return;
 			}
@@ -254,6 +494,65 @@ export default function xpExtension(relay: ExtensionAPI): void {
 					evidence: [],
 				};
 				save();
+			} else if (
+				command === "approve-spec" &&
+				state?.automatic &&
+				["active", "handoff"].includes(state.status) &&
+				state.phase === "design"
+			) {
+				if (
+					!state.specificationPath ||
+					!state.specificationReports?.planning ||
+					!state.specificationReports.design
+				) {
+					ctx.ui.notify("The SDD needs Planning and Design reports before approval.", "warning");
+					return;
+				}
+				if (!specificationMatches(ctx, state)) {
+					state.specificationApproved = false;
+					save();
+					ctx.ui.notify(
+						"The SDD changed or is unavailable. Record the updated Design checkpoint before approving it.",
+						"warning",
+					);
+					return;
+				}
+				state.specificationApproved = true;
+				state.status = "active";
+				const observation = xpObservation(state, state.specificationReports.design, []);
+				const questions = compileDecision(observation);
+				const answers: ClassifierResult["answers"] = {
+					next_action: { type: "choice", choice: "advance", confidence: 1, probabilities: { advance: 1 } },
+					goal_reached: { type: "bool", probability: 0 },
+				};
+				const verdict = judgeDecision(observation, answers);
+				if (verdict.kind === "refused") {
+					state.specificationApproved = false;
+					save();
+					ctx.ui.notify("The SDD is not ready for approval; complete Planning and Design first.", "warning");
+					return;
+				}
+				applyXpAction(state, verdict.action);
+				state.steps++;
+				const trace: DecisionTrace = {
+					observation,
+					questions,
+					answers,
+					verdict,
+					result: { phase: state.phase, status: state.status, revision: state.revision },
+				};
+				relay.appendEntry(TRACE_ENTRY, {
+					version: 1,
+					workflow: state.id,
+					source: "user",
+					timestamp: new Date().toISOString(),
+					specificationPath: state.specificationPath,
+					...trace,
+				});
+				state.continuationsWithoutCheckpoint = 0;
+				state.lastDecision = undefined;
+				state.repeats = 0;
+				save();
 			} else if (command === "stop" && state) {
 				state.status = "stopped";
 				save();
@@ -279,13 +578,14 @@ export default function xpExtension(relay: ExtensionAPI): void {
 				return;
 			} else {
 				ctx.ui.notify(
-					"Usage: /xp [start <goal>|status|accept (in listening)|resume (after handoff)|stop]",
+					"Usage: /xp [start <goal>|approve-spec (after Design)|status|accept (in Listening)|resume (after handoff)|stop]",
 					"warning",
 				);
 				return;
 			}
 			const tools = relay.getActiveTools();
 			if (!tools.includes("xp_checkpoint")) relay.setActiveTools([...tools, "xp_checkpoint"]);
+			explicitIntent = true;
 			relay.sendUserMessage(hint(), ctx.isIdle() ? undefined : { deliverAs: "followUp" });
 		},
 	});

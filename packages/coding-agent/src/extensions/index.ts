@@ -8,6 +8,8 @@ import layaExtension from "./laya/index.ts";
 import llamaExtension from "./llama/index.ts";
 import logbookExtension from "./logbook/index.ts";
 import mcpExtension from "./mcp/index.ts";
+import nativeMcpExtension from "./native-mcp/index.ts";
+import ollamaExtension from "./ollama/index.ts";
 import projectMemoryExtension from "./project-memory/index.ts";
 import toolSearchExtension from "./tool-search/index.ts";
 import xpExtension from "./xp/index.ts";
@@ -15,7 +17,9 @@ import xpExtension from "./xp/index.ts";
 export const builtInExtensions: InlineExtension[] = [
 	{ name: "engineering", factory: engineeringExtension, builtin: true },
 	{ name: "browser", factory: browserExtension, builtin: true },
+	{ name: "native-mcp", factory: nativeMcpExtension, builtin: true },
 	{ name: "llama.cpp", factory: llamaExtension, builtin: true },
+	{ name: "ollama", factory: ollamaExtension, builtin: true },
 	// Adds the laya/auto virtual model; it routes nothing unless selected.
 	{ name: "laya", factory: layaExtension, builtin: true },
 	{ name: "xp", factory: xpExtension, builtin: true },

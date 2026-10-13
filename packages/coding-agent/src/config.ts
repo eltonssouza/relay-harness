@@ -140,6 +140,18 @@ export function getChromeDevtoolsEntrypoint(): string {
 	return join(dirname(manifest), "build", "src", "bin", "chrome-devtools-mcp.js");
 }
 
+/** Resolve installed local MCP CLIs in source, npm installs and standalone distributions. */
+export function getNativeMcpEntrypoint(server: "context7" | "playwright"): string {
+	const packageName = server === "context7" ? "@upstash/context7-mcp" : "@playwright/mcp";
+	const bundledDir = join(getEngineeringResourcesPath(), "native-mcp");
+	const base = existsSync(join(bundledDir, "node_modules")) ? bundledDir : getPackageDir();
+	const require = createRequire(join(base, "package.json"));
+	const manifest = require.resolve(`${packageName}/package.json`);
+	const entry = join(dirname(manifest), server === "context7" ? "dist/index.js" : "cli.js");
+	if (!existsSync(entry)) throw new Error(`Missing installed ${packageName} entrypoint: ${entry}`);
+	return entry;
+}
+
 /** Get path to CHANGELOG.md */
 export function getChangelogPath(): string {
 	return resolve(join(getPackageDir(), "CHANGELOG.md"));

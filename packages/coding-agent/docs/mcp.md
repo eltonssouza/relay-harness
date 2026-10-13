@@ -2,6 +2,22 @@
 
 Relay connects to [Model Context Protocol](https://modelcontextprotocol.io) servers over stdio or streamable HTTP and makes their tools and resources available to the model.
 
+## Native local servers
+
+Context7, Playwright and Chrome DevTools ship with Relay. They run locally over stdio
+and are not started at session startup. The model discovers `native_mcp` with
+`tool_search`, calls it with `server: "context7" | "playwright" | "chrome-devtools"`
+and `action: "start"`, then discovers the server's tools. `action: "stop"` removes
+its native registration. Use `/mcp` to inspect connection errors and status.
+
+No `npx`, runtime npm downloads, remote MCP endpoint or `mcp.json` setup is needed.
+Context7 accesses external documentation through its local server. Playwright uses
+isolated, headless system Chrome; Chrome DevTools uses the existing isolated browser
+integration. A supported Chrome installation is required for browser operations.
+Standalone Relay distributions ship the servers and require `node` on PATH.
+User or trusted project `mcp.json` entries with the same name take precedence; stopping
+a native registration does not remove those configured servers.
+
 ## Quick setup
 
 Add a local stdio server, check the connection, then start Relay:
