@@ -226,7 +226,13 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		return gpu;
 	};
 	const trainer = sharedTrainer({ home: layaHome, manifest: LAYA_MODEL_MANIFEST, docker, image, gpu: trainingGpu });
-	const server = new LayaServer({ docker, baseUrl, image, model: () => trainer.activeModel().dir });
+	const server = new LayaServer({
+		docker,
+		baseUrl,
+		image,
+		model: () => trainer.activeModel().dir,
+		useShippedModel: () => trainer.use("shipped"),
+	});
 	/** Server problem last reported, so a failing Docker is not reported on every start. */
 	let reportedProblem: string | undefined;
 	let history = new PerformanceHistory();

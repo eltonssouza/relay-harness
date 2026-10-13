@@ -278,4 +278,61 @@ describe("laya server container", () => {
 		expect(await laya.install()).toBe(false);
 		expect(laya.describe()).toBe("failed: The Laya container stopped: RuntimeError: model.safetensors is corrupt");
 	});
+
+	it("falls back to the image's model when a registered checkpoint is missing", async () => {
+		let inspections = 0;
+		let runsStarted = 0;
+		let selectedModel = "/data/models/v4-library-retry";
+		const healthState = { up: false };
+		const reports: string[] = [];
+		const { docker, calls } = fakeDocker([
+			[["version"], () => ok("29.0.0")],
+			[
+				["container", "inspect"],
+				() => {
+					inspections++;
+					return inspections === 1 || inspections === 3
+						? fail("No such container")
+						: ok(`false ${labels(selectedModel)}`);
+				},
+			],
+			[["image", "inspect"], () => ok("sha256:1")],
+			[
+				["run"],
+				() => {
+					if (++runsStarted === 2) healthState.up = true;
+					return ok("container-id");
+				},
+			],
+			[
+				["logs"],
+				() => ({
+					code: 0,
+					stdout: "FileNotFoundError: Local model path not found: '/data/models/v4-library-retry'",
+					stderr: "",
+				}),
+			],
+			[["rm"], () => ok()],
+			[["image", "ls"], () => ok(IMAGE)],
+		]);
+		const laya = new LayaServer({
+			docker,
+			baseUrl: () => "http://127.0.0.1:8000/v1",
+			image: async () => IMAGE,
+			model: () => selectedModel,
+			useShippedModel: () => {
+				selectedModel = LAYA_IMAGE_PATHS.shippedModel;
+			},
+			fetch: health(healthState),
+		});
+
+		expect(await laya.install((message) => reports.push(message))).toBe(true);
+
+		const runs = calls.filter((args) => args[0] === "run");
+		expect(runs).toHaveLength(2);
+		expect(runs[0]).toContain("/data/models/v4-library-retry");
+		expect(runs[1]).toContain(LAYA_IMAGE_PATHS.shippedModel);
+		expect(calls).toContainEqual(["rm", "--force", "relay-laya"]);
+		expect(reports).toContain("trained model is missing; switching to the model bundled in the image");
+	});
 });

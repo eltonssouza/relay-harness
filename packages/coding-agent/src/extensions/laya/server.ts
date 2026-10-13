@@ -37,6 +37,8 @@ export interface LayaServerOptions {
 	image: () => Promise<string>;
 	/** Model to serve, as a path inside the container. */
 	model: () => string;
+	/** Clear a stale trained-model selection after Docker reports its path is missing. */
+	useShippedModel?: () => void;
 	fetch?: typeof fetch;
 }
 
@@ -211,7 +213,20 @@ export class LayaServer {
 			const current = await this.inspect(signal);
 			if (!current?.running) {
 				const logs = await docker(["logs", "--tail", "5", LAYA_CONTAINER], { signal, timeout: COMMAND_TIMEOUT_MS });
-				return this.fail("failed", `The Laya container stopped: ${dockerError(logs)}`);
+				const detail = dockerError(logs);
+				if (
+					detail.includes("Local model path not found") &&
+					this.options.model() !== LAYA_IMAGE_PATHS.shippedModel &&
+					this.options.useShippedModel
+				) {
+					const removed = await docker(["rm", "--force", LAYA_CONTAINER], { signal, timeout: COMMAND_TIMEOUT_MS });
+					if (removed.code !== 0)
+						return this.fail("failed", `Removing the broken Laya container failed: ${dockerError(removed)}`);
+					this.options.useShippedModel();
+					report("trained model is missing; switching to the model bundled in the image");
+					return this.run(report, signal);
+				}
+				return this.fail("failed", `The Laya container stopped: ${detail}`);
 			}
 			await new Promise((resolve) => setTimeout(resolve, POLL_MS));
 		}
