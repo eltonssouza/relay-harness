@@ -4,11 +4,20 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### New Features
+
+- Objetivos persistentes com `/goal`: continuidade automática, pausa e retomada, evidências e orçamento opcional de tokens. See [Persistent goals](docs/goals.md).
+
+### Added
+
+- Added persistent conversation goals with `/goal`, lifecycle commands, automatic continuation, evidence and blocker reports, optional token budgets, and branch-local state that survives compaction and reload ([#60](https://github.com/eltonssouza/relay-harness/issues/60)).
+
 ### Fixed
 
 - Laya now classifies OpenAI API-key models, including GPT-6.1 Sol and GPT-6 Astra, when following the `openai` provider.
 - Laya's default registry now covers current Claude, OpenAI, Antigravity, and GitHub Copilot model families across all capability tiers.
 - Antigravity requests for Gemini 3.1 Pro now send the supported `-low` model ID and preserve the selected low or high reasoning effort in the request configuration.
+- Laya now switches to the shipped model and recreates its container when the selected trained-model path is missing.
 
 ## [0.1.8] - 2026-10-10
 
