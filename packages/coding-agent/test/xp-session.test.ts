@@ -185,6 +185,9 @@ describe("XP in a real agent session", () => {
 		expect(latest(original).phase).toBe("design");
 		const resumed = await setup(false, original.sessionManager);
 		resumed.setResponses([
+			fauxAssistantMessage(fauxToolCall("xp_intent", { kind: "task", continueTask: true }), {
+				stopReason: "toolUse",
+			}),
 			checkpoint("Design documented"),
 			fauxAssistantMessage("Design complete"),
 			checkpoint("No executable behavior to test"),

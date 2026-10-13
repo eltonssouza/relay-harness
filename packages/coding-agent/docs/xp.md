@@ -1,8 +1,57 @@
-# XP development with Laya
+# XP task workflow
 
-Relay uses Laya to choose among finite workflow actions. A coding model writes reports,
-tests and code. Laya evaluates the observed state and selects `continue_phase`, `advance`,
-`replan`, `finish` or `escalate`. No Jev provider or Python harness is introduced.
+XP is the built-in workflow for every task, not an opt-in command. Before answering or
+using tools, the model calls `xp_intent` to identify a task or a read-only question.
+Questions do not start XP. Tasks automatically pass through Planning, Design, Testing,
+Coding and Listening in order, including documentation and other non-code tasks.
+Tasks start without `/xp start` or a Laya server. Tasks started through an active `/goal` run all five phases autonomously. Other tasks pause after Design for human approval.
+
+Each native task creates one project-local specification at `.relay/specs/<workflow-id>.md`.
+Planning records the problem, requirements, constraints, risks and acceptance criteria;
+Design records decisions and alternatives. Both sections exist before Testing and Coding.
+Testing records cases derived from the criteria, Coding records implementation and
+verification, and Listening records the result and feedback. Each `xp_checkpoint` updates
+its phase's section and the session state; phase gates require all previous sections to
+have been recorded. The file is a working SDD owned by the XP workflow: manual edits
+may be replaced at the next checkpoint. Checkpoint presence is enforced, but the
+harness cannot prove that the reports cover every requirement. Manual `/xp` workflows
+continue using session checkpoints only.
+
+### Approving the specification
+
+Outside `/goal`, after the Design report, XP pauses without advancing to Testing. Review
+`.relay/specs/<workflow-id>.md`, then run `/xp approve-spec`. This user command records
+approval in `xp.state` and a Design transition in `xp.decision`, advances to Testing,
+and resumes the same task. It is not a model tool: a model claim of approval cannot
+unlock Testing. Before approval, only inspection tools and Design checkpoints are
+allowed; the goal cannot be completed.
+
+Approval requires both Planning and Design reports and an unchanged, readable artifact.
+Replanning or updating Planning/Design invalidates approval. External edits, deletion
+or replacement of the artifact also invalidate approval when checked before a tool call
+or settlement. XP returns to Design without overwriting the edited file; record the
+updated Design checkpoint and approve again before continuing. Normal Testing, Coding
+and Listening checkpoints update their own sections without requiring another approval.
+
+With `/goal`, XP records Planning and Design in the same SDD and proceeds directly to
+Testing, Coding and Listening. `/xp approve-spec` is not needed; the SDD is not marked
+as human-approved. The goal can be completed only after Listening is reported. Decision
+and continuation limits can still result in a handoff rather than an infinite loop.
+The artifact is data, never executable configuration. Reports may contain project
+information; keep credentials out of them and review what you commit.
+
+Native checkpoints use deterministic gates. Behavior changes require observed failing
+assertions in Testing and successful tests after the latest mutation in Coding and
+Listening. Tasks without executable behavior still report validation in all five phases.
+Writes and edits are allowed during Testing and Coding. The harness prevents settlement
+or goal completion before the Listening report. A task cannot be reclassified as a
+question to bypass the workflow. User acceptance is separate from delivering the result.
+
+## Optional manual control with Laya
+
+`/xp` remains available for explicit control and Laya-reviewed workflows. A coding model
+writes reports, tests and code. Laya evaluates the observed state and selects
+`continue_phase`, `advance`, `replan`, `finish` or `escalate`.
 
 ```text
 /laya setup
@@ -27,7 +76,7 @@ new cycle. `/xp status` shows the current phase, `/xp stop` stops the workflow, 
 `/xp resume` continues a handoff with a fresh decision budget. For documentation-only
 work, explicitly use `/xp start --no-tests <goal>`.
 
-Each checkpoint makes one classifier request with a five-second timeout and no retry.
+In manual Laya workflows, each checkpoint makes one classifier request with a five-second timeout and no retry.
 The thresholds are 0.5 for continuing a phase, 0.7 for transitions and 0.8 for finishing.
 When Laya supplies `answer_confidence`, the client uses that answer probability for
 the gate. Laya's separate `confidence` value measures distribution entropy and is
@@ -35,8 +84,8 @@ not on the probability scale used by these thresholds.
 Three confidence refusals, classifier failure or fifty decisions trigger a handoff.
 Repeated decisions on unchanged observations also trigger a handoff. Reports and tool
 excerpts sent to Laya are bounded; the workflow goal and observed evidence remain in session state.
-There is no heuristic fallback for XP transitions. An unavailable Laya cannot silently
-approve work. The standard Laya model router retains its existing fallback behavior.
+Manual Laya workflows do not fall back when the classifier is unavailable or fails.
+An unavailable Laya cannot silently approve work. Native task transitions do not call Laya. The standard Laya model router retains its existing fallback behavior.
 
 `xp.state` session entries restore the workflow on resume and branch navigation.
 `xp.decision` entries retain the observation, compiled questions, answers, gate verdict

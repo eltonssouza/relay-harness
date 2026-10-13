@@ -36,6 +36,22 @@ export interface XpState {
 	continuationsWithoutCheckpoint?: number;
 	revision: number;
 	accepted: boolean;
+	/** Native tasks are started by request intent, not by a slash command. */
+	automatic?: boolean;
+	/** Delivery and validation were reported during the Listening phase. */
+	listeningReported?: boolean;
+	/** Project-relative single source of truth for native task decisions. */
+	specificationPath?: string;
+	/** Phases whose report has been recorded in the specification. */
+	specificationPhases?: XpPhase[];
+	/** Structured phase reports stored in the single specification artifact. */
+	specificationReports?: Partial<Record<XpPhase, string>>;
+	/** Digest of the last artifact written by the workflow; external edits require review. */
+	specificationDigest?: string;
+	/** Explicit user approval required after Design before native tasks enter Testing. */
+	specificationApproved?: boolean;
+	/** A task created under /goal runs the full XP cycle without an approval pause. */
+	goalDriven?: boolean;
 	testsRequired: boolean;
 	evidence: XpEvidence[];
 	lastDecision?: string;
@@ -56,7 +72,15 @@ export function xpObservation(state: XpState, summary: string, evidenceIds: read
 	const evidence = evidenceIds.map((id) => state.evidence.find((item) => item.id === id));
 	if (evidence.some((item) => !item)) throw new Error("Evidence must reference tool call IDs observed in this XP run");
 	const proofs = evidence.filter((item): item is XpEvidence => item !== undefined);
-	let ready = summary.trim().length > 0;
+	const phaseIndex = XP_PHASES.indexOf(state.phase);
+	const recorded = new Set(state.specificationPhases);
+	let ready =
+		summary.trim().length > 0 &&
+		(!state.automatic ||
+			(Boolean(state.specificationPath) &&
+				XP_PHASES.slice(0, phaseIndex + 1).every((phase) => recorded.has(phase))));
+	if (state.automatic && !state.goalDriven && phaseIndex >= XP_PHASES.indexOf("design"))
+		ready &&= state.specificationApproved === true;
 	if (state.testsRequired && state.phase === "testing") {
 		ready &&= proofs.some(
 			(item) =>
@@ -117,6 +141,8 @@ export function applyXpAction(state: XpState, action: string): void {
 	else if (action === "replan") {
 		state.phase = "planning";
 		state.accepted = false;
+		state.listeningReported = false;
+		state.specificationApproved = false;
 		state.revision++;
 	} else if (action === "finish") state.status = "completed";
 	else if (action === "escalate") state.status = "handoff";

@@ -40,6 +40,13 @@
 - For ad-hoc scripts, `write` them to a temp file (e.g. `/tmp`), run, edit if needed, remove when done. Don't embed multi-line scripts in `bash` commands.
 - Never commit unless the user asks.
 
+## Native Task and Local Runtime Integration
+
+- Built-in extensions are registered in `packages/coding-agent/src/extensions/index.ts`. XP classifies each request with `xp_intent`; tasks use deterministic gates through all five phases, while read-only questions do not start XP. Native tasks must not require a Laya service; explicit `/xp` workflows retain Laya review. Native tasks keep one SDD in `.relay/specs/<workflow-id>.md`. Tasks started with an active `/goal` proceed autonomously through all five phases without human approval; other tasks pause after Design until the user runs `/xp approve-spec`. The model cannot claim user approval through a tool. External artifact edits invalidate approval and require an updated Design checkpoint and another user approval.
+- Ollama discovery uses only `OLLAMA_HOST` (default `http://127.0.0.1:11434`), `/api/tags` and `/api/show`. It must not scan hosts, install or launch the daemon, or invent model IDs. `/ollama` refreshes the catalog; the `ollama` provider uses that same host's `/v1` API.
+- Context7, Playwright and Chrome DevTools are installed stdio MCP servers, registered only on demand through `native_mcp`. Resolve entrypoints through `src/config.ts`; standalone distributions copy the new servers' installed dependency closure with `scripts/copy-native-mcp.mjs`. Keep both binary asset-copy paths updated. Standalone MCP execution requires Node on PATH; browser operations require system Chrome.
+- Validate changes with the focused Ollama, XP and native MCP tests plus `npm run check`. Native MCP handshake tests use an isolated temporary distribution and no provider APIs. On Windows, temporary MCP distribution cleanup uses `rmSync` retries to tolerate observed transient `EPERM` errors after process shutdown.
+
 ## Dependency and Install Security
 
 - Treat npm dep and lockfile changes as reviewed code. Direct external deps stay pinned to exact versions.

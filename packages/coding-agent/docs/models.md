@@ -8,6 +8,7 @@ For a built-in provider, start with `/login`, then choose a model with `/model`.
 |---|---|
 | A supported subscription | Sign in through `/login` |
 | A provider API key | Store it through `/login` or set its environment variable |
+| Models installed in Ollama | Start the local daemon; Relay discovers its installed models |
 | A local GGUF model | Connect Relay to the llama.cpp router |
 | An OpenAI-, Anthropic-, or Google-compatible endpoint | Add it to `models.json` |
 | A provider with a custom protocol or authentication flow | Build or install a provider extension |
@@ -40,7 +41,18 @@ Relay integrates directly with the llama.cpp router. The router discovers GGUF f
 
 Follow [Local Models with llama.cpp](llama-cpp.md) for server startup, model layout, downloads, and connection troubleshooting.
 
-For Ollama, LM Studio, vLLM, SGLang, and other compatible servers, [configure a compatible endpoint](#configure-a-compatible-endpoint) in `models.json`.
+### Ollama
+
+Start Ollama normally. Relay discovers the daemon selected by `OLLAMA_HOST` (default
+`http://127.0.0.1:11434`), queries `/api/tags` and `/api/show`, and lists installed chat
+models under the `ollama` provider in `/model`. Select one with `/model ollama/<tag>`.
+Chat uses that same daemon's OpenAI-compatible `/v1` API; no login or fixed model list
+is required. `/ollama` refreshes and lists all installed tags, including non-chat models.
+An unavailable daemon or malformed catalog does not invent models or disable other providers.
+Discovery is bounded to 1.5 seconds, does not scan other hosts, and does not start or
+install Ollama. Set `OLLAMA_HOST` in the environment that launches Relay.
+
+For LM Studio, vLLM, SGLang, and other compatible servers, [configure a compatible endpoint](#configure-a-compatible-endpoint) in `models.json`.
 
 ## Configure a compatible endpoint
 
