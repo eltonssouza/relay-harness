@@ -18,7 +18,12 @@ function mockDaemon(names: unknown[] = [{ name: "small:latest" }]) {
 		if (url.pathname === "/api/show") {
 			const { model } = JSON.parse(String(init?.body));
 			return Response.json({
-				capabilities: model === "embed:latest" ? ["embedding"] : ["completion", "tools", "vision"],
+				capabilities:
+					model === "embed:latest"
+						? ["embedding"]
+						: model === "small:latest"
+							? ["completion", "tools", "vision"]
+							: ["completion", "vision"],
 				model_info: { "test.context_length": 32768 },
 			});
 		}
@@ -121,5 +126,32 @@ describe("local Ollama discovery", () => {
 		expect(request).toBeDefined();
 		expect(JSON.parse(String(request?.[1]?.body)).model).toBe("small:latest");
 		expect(String(request?.[0])).toBe("http://127.0.0.1:11435/v1/chat/completions");
+	});
+
+	it("does not send tools to an Ollama model that does not support them", async () => {
+		vi.stubEnv("OLLAMA_HOST", "127.0.0.1:11435");
+		const fetch = mockDaemon([{ name: "codegemma:7b-instruct" }]);
+		vi.stubGlobal("fetch", fetch);
+		let registry!: ModelRegistry;
+		harness = await createHarness({
+			extensionFactories: [
+				ollamaExtension,
+				(relay) =>
+					relay.on("session_start", (_event, ctx) => {
+						registry = ctx.modelRegistry;
+					}),
+			],
+			settings: { harnessCore: { evidence: false } },
+		});
+		await harness.session.bindExtensions({});
+		await registry.refresh({ providers: ["ollama"], allowNetwork: true, force: true });
+		const model = registry.find("ollama", "codegemma:7b-instruct");
+		expect(model?.compat).toMatchObject({ supportsTools: false });
+		if (!model) throw new Error("Installed Ollama model missing");
+		await harness.session.setModel(model);
+		await harness.session.prompt("Hello");
+		const request = fetch.mock.calls.find(([input]) => String(input).endsWith("/v1/chat/completions"));
+		expect(request).toBeDefined();
+		expect(JSON.parse(String(request?.[1]?.body))).not.toHaveProperty("tools");
 	});
 });

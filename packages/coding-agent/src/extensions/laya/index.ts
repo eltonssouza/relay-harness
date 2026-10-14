@@ -14,6 +14,7 @@ import {
 import { typesafeSystemOneApi } from "@relay-harness/ai/api/typesafe-system-one.lazy";
 import { getAgentDir } from "../../config.ts";
 import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types.ts";
+import { isEligibleChatModel } from "../../core/model-eligibility.ts";
 import { SessionManager } from "../../core/session-manager.ts";
 import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
@@ -358,12 +359,17 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 				const parsed = parseModelRef(ref);
 				const model = parsed && ctx.modelRegistry.find(parsed.provider, parsed.id);
 				if (!model || model.provider === LAYA_PROVIDER_ID || !ctx.modelRegistry.hasConfiguredAuth(model)) continue;
-				if (isVirtualModel(model)) continue;
+				if (isVirtualModel(model) || !isEligibleChatModel(model.provider, model.id)) continue;
 				result.push({ ref, provider: model.provider, tier, order: result.length, model, capabilityKnown: true });
 			}
 		}
 		// Unknown providers still work with the selected model; do not invent rankings of their models.
-		if (result.length === 0 && selected && ctx.modelRegistry.hasConfiguredAuth(selected)) {
+		if (
+			result.length === 0 &&
+			selected &&
+			isEligibleChatModel(selected.provider, selected.id) &&
+			ctx.modelRegistry.hasConfiguredAuth(selected)
+		) {
 			result.push({
 				ref: `${selected.provider}/${selected.id}`,
 				provider: selected.provider,

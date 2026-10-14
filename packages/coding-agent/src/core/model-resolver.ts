@@ -8,13 +8,14 @@ import chalk from "chalk";
 import { minimatch } from "minimatch";
 import { isValidThinkingLevel } from "../cli/args.ts";
 import { DEFAULT_THINKING_LEVEL } from "./defaults.ts";
+import { isEligibleChatModel } from "./model-eligibility.ts";
 import type { ModelRuntime } from "./model-runtime.ts";
 
 /** Default chat model IDs for providers with built-in chat models. */
 export const defaultModelPerProvider: Partial<Record<KnownProvider, string>> = {
 	"amazon-bedrock": "us.anthropic.claude-opus-4-6-v1",
 	"ant-ling": "Ring-2.6-1T",
-	anthropic: "claude-opus-4-8",
+	anthropic: "claude-opus-5-5",
 	openai: "gpt-5.5",
 	"azure-openai-responses": "gpt-5.4",
 	"openai-codex": "gpt-6.1-sol",
@@ -166,6 +167,7 @@ export interface ParsedModelResult {
 }
 
 function buildFallbackModel(provider: string, modelId: string, availableModels: Model<Api>[]): Model<Api> | undefined {
+	if (!isEligibleChatModel(provider, modelId)) return undefined;
 	const providerModels = availableModels.filter((m) => m.provider === provider);
 	if (providerModels.length === 0) return undefined;
 
@@ -667,6 +669,9 @@ export async function findInitialModel(options: {
 
 	// 3. Try saved default from settings if auth is configured.
 	if (defaultProvider && defaultModelId) {
+		if (!isEligibleChatModel(defaultProvider, defaultModelId)) {
+			throw new Error(`Model "${defaultProvider}/${defaultModelId}" is not permitted by the current model policy`);
+		}
 		const found = modelRuntime.getModel(defaultProvider, defaultModelId);
 		if (found && modelRuntime.hasConfiguredAuth(found.provider)) {
 			model = found;
@@ -711,6 +716,9 @@ export async function restoreModelFromSession(
 	shouldPrintMessages: boolean,
 	modelRuntime: ModelRuntime,
 ): Promise<{ model: Model<Api> | undefined; fallbackMessage: string | undefined }> {
+	if (!isEligibleChatModel(savedProvider, savedModelId)) {
+		throw new Error(`Model "${savedProvider}/${savedModelId}" is not permitted by the current model policy`);
+	}
 	const restoredModel = modelRuntime.getModel(savedProvider, savedModelId);
 
 	// Check if restored model exists and still has auth configured

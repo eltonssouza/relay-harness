@@ -95,9 +95,13 @@ Select one with `laya.policy`, `relay --laya-policy economy`, or `/laya policy q
 | `fast` | `anthropic/claude-haiku-5-5`, `openai/gpt-6-luna`, `github-copilot/gpt-5-mini`, `google-antigravity/gemini-3.7-flash` |
 | `balanced` | `anthropic/claude-sonnet-5-5`, `openai/gpt-5.6-terra`, `github-copilot/gemini-3.8-flash`, `github-copilot/grok-4.7` |
 | `strong` | `anthropic/claude-opus-5-5`, `openai/gpt-6-sol`, `github-copilot/kimi-k2.7-code`, `google-antigravity/gemini-3.1-pro` |
-| `frontier` | `anthropic/claude-fable-5-1`, `openai/gpt-6-astra`, `github-copilot/gpt-6.1-sol` |
+| `frontier` | `openai-codex/gpt-6-astra`, `openai-codex/gpt-6.1-sol`, `github-copilot/gpt-6.1-sol` |
 
-The registry includes current model IDs from Anthropic, OpenAI API, OpenAI Codex, GitHub Copilot, Google, and Google Antigravity. Each model is ranked only within its selected provider when `laya.followProvider` is enabled. The registry also keeps older still-supported family versions available when the provider exposes them.
+The registry includes current model IDs from Anthropic, OpenAI API, OpenAI Codex, GitHub Copilot, Google, and Google Antigravity. Each model is ranked only within its selected provider when `laya.followProvider` is enabled.
+
+The harness permits only Claude Opus, Sonnet, and Haiku 5.5 across providers, including supported gateway IDs and effort variants. Claude Fable and older Claude versions are excluded from manual selection and execution, not just Laya routing. The `openai-codex` provider permits only `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna`, and `gpt-5.6-terra`; this GPT restriction does not apply to OpenAI API or GitHub Copilot. Other model families are unchanged.
+
+Explicit configuration, model groups, restored sessions, and routing fallbacks cannot bypass this policy. If no permitted candidate is available, routing fails rather than using an excluded model. Models must still exist in the provider's catalog and have configured credentials; these rules do not create catalog entries.
 
 The default registry also includes these Google Antigravity models under the `google-antigravity` provider:
 

@@ -115,6 +115,7 @@ import {
 import { emitSessionShutdownEvent } from "./extensions/runner.ts";
 import { CodingHarnessCore } from "./harness-core.ts";
 import { type BashExecutionMessage, type CustomMessage, convertToLlm } from "./messages.ts";
+import { isEligibleChatModel } from "./model-eligibility.ts";
 import { ModelRegistry } from "./model-registry.ts";
 import type { ModelRuntime } from "./model-runtime.ts";
 import { NestedToolCallRunner } from "./nested-tool-calls.ts";
@@ -2484,6 +2485,9 @@ export class AgentSession {
 	 * @throws Error if no auth is configured for the model
 	 */
 	async setModel(model: Model<any>, options: ModelMutationOptions = {}): Promise<void> {
+		if (!isEligibleChatModel(model.provider, model.id)) {
+			throw new Error(`Model ${model.provider}/${model.id} is not permitted by the current model policy`);
+		}
 		if (!(await this._modelRuntime.checkAuth(model.provider))) {
 			throw new Error(`No API key for ${model.provider}/${model.id}`);
 		}
