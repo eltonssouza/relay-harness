@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { AgentTool, DecisionTrace } from "@relay-harness/agent-core";
 import { fauxAssistantMessage, fauxToolCall, type JsonObject } from "@relay-harness/ai";
@@ -12,7 +12,8 @@ import { createHarness, type Harness } from "./suite/harness.ts";
 
 const call = (name: string, args: JsonObject, id?: string) =>
 	fauxAssistantMessage(fauxToolCall(name, args, { id }), { stopReason: "toolUse" });
-const checkpoint = (summary: string, evidenceIds: string[] = []) => call("xp_checkpoint", { summary, evidenceIds });
+const checkpoint = (summary: string, evidenceIds: string[] = [], report: JsonObject = {}) =>
+	call("xp_checkpoint", { summary, evidenceIds, ...report });
 const latest = (harness: Harness): XpState | undefined => {
 	const entry = harness.sessionManager
 		.getBranch()
@@ -25,9 +26,10 @@ describe("XP as the native task workflow", () => {
 	afterEach(() => {
 		for (const harness of harnesses.splice(0)) harness.cleanup();
 	});
-	async function setup(tools: AgentTool[] = []) {
+	async function setup(tools: AgentTool[] = [], sessionManager?: Harness["sessionManager"]) {
 		const harness = await createHarness({
 			tools,
+			sessionManager,
 			settings: { harnessCore: { evidence: false } },
 			extensionFactories: [xpExtension],
 		});
@@ -36,30 +38,27 @@ describe("XP as the native task workflow", () => {
 		return harness;
 	}
 
-	it("starts automatically and completes all five stages after user approval, without a classifier", async () => {
+	it("completes all five stages without approval or a classifier and publishes phase reports", async () => {
 		const harness = await setup();
 		harness.setResponses([
-			call("xp_intent", { kind: "task", testsRequired: false }),
+			call("xp_intent", { kind: "task", testsRequired: false, agents: { coding: "backend-engineer" } }),
 			checkpoint("Planning: criteria and scope for the documentation task"),
 			fauxAssistantMessage("Planning done"),
-			checkpoint("Design: update the existing explanation, no new structure"),
-			fauxAssistantMessage("Review the SDD before Testing"),
-		]);
-		await harness.session.prompt("Review the documentation and propose an improvement.");
-		await harness.session.waitForIdle();
-		expect(latest(harness)).toMatchObject({ phase: "design", specificationApproved: false });
-		harness.setResponses([
+			checkpoint("Design: update the existing explanation, no new structure", [], {
+				skills: ["decide-architecture"],
+			}),
+			fauxAssistantMessage("Design complete; continuing"),
 			checkpoint("Testing: review examples and links; no executable behavior"),
 			checkpoint("Coding: the proposed explanation meets the criteria"),
 			fauxAssistantMessage("Almost done"),
 			checkpoint("Listening: result, validation and open feedback delivered"),
 			fauxAssistantMessage("Ready for your feedback"),
 		]);
-		await harness.session.prompt("/xp approve-spec");
-		await vi.waitFor(() => expect(latest(harness)?.phase).toBe("listening"));
+		await harness.session.prompt("Review the documentation and propose an improvement.");
 		await harness.session.waitForIdle();
 		expect(latest(harness)).toMatchObject({
 			phase: "listening",
+			status: "completed",
 			automatic: true,
 			listeningReported: true,
 			accepted: false,
@@ -70,6 +69,22 @@ describe("XP as the native task workflow", () => {
 		expect(
 			traces.map((entry) => entry.type === "custom" && (entry.data as DecisionTrace).observation.state.phase),
 		).toEqual(["planning", "design", "testing", "coding", "listening"]);
+		const reports = harness.sessionManager
+			.getBranch()
+			.filter((entry) => entry.type === "custom_message" && entry.customType === "xp.progress");
+		expect(reports).toHaveLength(5);
+		expect(reports[1]).toMatchObject({ display: true, content: expect.stringContaining("decide-architecture") });
+		expect(reports[3]).toMatchObject({ display: true, content: expect.stringContaining("backend-engineer") });
+		expect(harness.session.messages).toContainEqual(
+			expect.objectContaining({
+				role: "toolResult",
+				content: expect.arrayContaining([
+					expect.objectContaining({
+						text: expect.stringContaining("[harness:role] backend-engineer"),
+					}),
+				]),
+			}),
+		);
 	});
 
 	it("runs all XP stages autonomously when started through /goal", async () => {
@@ -81,6 +96,7 @@ describe("XP as the native task workflow", () => {
 		try {
 			harness.setResponses([
 				call("xp_intent", { kind: "task", testsRequired: false }),
+				call("update_goal", { status: "complete", report: "Too early" }, "early-completion"),
 				checkpoint("Planning: requirements and acceptance criteria"),
 				checkpoint("Design: approach and alternatives"),
 				checkpoint("Testing: review derived from the criteria"),
@@ -92,8 +108,19 @@ describe("XP as the native task workflow", () => {
 			await harness.session.prompt("/goal Update the task documentation");
 			await vi.waitFor(() => expect(readGoal(harness.sessionManager)?.status).toBe("complete"));
 			await harness.session.waitForIdle();
-			expect(latest(harness)).toMatchObject({ phase: "listening", listeningReported: true, goalDriven: true });
-			expect(latest(harness)?.specificationApproved).not.toBe(true);
+			expect(latest(harness)).toMatchObject({
+				phase: "listening",
+				listeningReported: true,
+				status: "completed",
+				accepted: false,
+			});
+			expect(harness.session.messages).toContainEqual(
+				expect.objectContaining({
+					role: "toolResult",
+					toolCallId: "early-completion",
+					isError: true,
+				}),
+			);
 			expect(
 				harness.sessionManager
 					.getBranch()
@@ -111,19 +138,12 @@ describe("XP as the native task workflow", () => {
 			call("xp_intent", { kind: "task", testsRequired: false }),
 			checkpoint("Planning: requirements, constraints, risks and acceptance criteria"),
 			checkpoint("Design: boundaries, decisions and alternatives"),
-			fauxAssistantMessage("Review the SDD before Testing"),
-		]);
-		await harness.session.prompt("Document the task workflow");
-		await harness.session.waitForIdle();
-		expect(latest(harness)).toMatchObject({ phase: "design", specificationApproved: false });
-		harness.setResponses([
 			checkpoint("Testing: review strategy and validation cases"),
 			checkpoint("Coding: implementation linked to the specified behavior"),
 			checkpoint("Listening: result, validation and feedback channel"),
 			fauxAssistantMessage("Delivered"),
 		]);
-		await harness.session.prompt("/xp approve-spec");
-		await vi.waitFor(() => expect(latest(harness)?.phase).toBe("listening"));
+		await harness.session.prompt("Document the task workflow");
 		await harness.session.waitForIdle();
 		const state = latest(harness);
 		expect(state?.specificationPath).toMatch(/^\.relay\/specs\/[\da-f-]+\.md$/);
@@ -168,12 +188,6 @@ describe("XP as the native task workflow", () => {
 			call("write", { path: "src/fix.ts", content: "too early" }, "early"),
 			checkpoint("Planning: behavioral acceptance criteria"),
 			checkpoint("Design: smallest fix"),
-			fauxAssistantMessage("Review the SDD before Testing"),
-		]);
-		await harness.session.prompt("Fix the failing behavior");
-		await harness.session.waitForIdle();
-		expect(latest(harness)).toMatchObject({ phase: "design", specificationApproved: false });
-		harness.setResponses([
 			call("write", { path: "test/fix.test.ts", content: "failing assertion" }, "test-write"),
 			call("bash", { command: "node --test red.test.ts" }, "red"),
 			checkpoint("Testing: intended assertion fails", ["red"]),
@@ -191,8 +205,7 @@ describe("XP as the native task workflow", () => {
 			checkpoint("Listening: revised result verified", ["final-green"]),
 			fauxAssistantMessage("Ready for feedback"),
 		]);
-		await harness.session.prompt("/xp approve-spec");
-		await vi.waitFor(() => expect(latest(harness)?.phase).toBe("listening"));
+		await harness.session.prompt("Fix the failing behavior");
 		await harness.session.waitForIdle();
 		expect(writes).toBe(2);
 		expect(harness.session.messages).toContainEqual(
@@ -200,6 +213,7 @@ describe("XP as the native task workflow", () => {
 		);
 		expect(latest(harness)).toMatchObject({
 			phase: "listening",
+			status: "completed",
 			automatic: true,
 			listeningReported: true,
 			testsRequired: true,
@@ -219,19 +233,12 @@ describe("XP as the native task workflow", () => {
 			call("xp_intent", { kind: "question" }, "bypass"),
 			checkpoint("Planning"),
 			checkpoint("Design"),
-			fauxAssistantMessage("Review the SDD before Testing"),
-		]);
-		await harness.session.prompt("Improve the documentation");
-		await harness.session.waitForIdle();
-		expect(latest(harness)).toMatchObject({ phase: "design", specificationApproved: false });
-		harness.setResponses([
 			checkpoint("Testing: no executable behavior"),
 			checkpoint("Coding"),
 			checkpoint("Listening"),
 			fauxAssistantMessage("Delivered"),
 		]);
-		await harness.session.prompt("/xp approve-spec");
-		await vi.waitFor(() => expect(latest(harness)?.phase).toBe("listening"));
+		await harness.session.prompt("Improve the documentation");
 		await harness.session.waitForIdle();
 		expect(harness.session.messages).toContainEqual(
 			expect.objectContaining({ role: "toolResult", toolCallId: "bypass", isError: true }),
@@ -239,7 +246,7 @@ describe("XP as the native task workflow", () => {
 		expect(latest(harness)).toMatchObject({ phase: "listening", listeningReported: true });
 	});
 
-	it("pauses for human approval and refuses model claims and test execution before approval", async () => {
+	it("allows a concrete test plan in Testing and requires fresh successful execution in Coding", async () => {
 		const schema = Type.Object({ command: Type.String() });
 		let executions = 0;
 		const bash: AgentTool<typeof schema> = {
@@ -253,37 +260,38 @@ describe("XP as the native task workflow", () => {
 			},
 		};
 		const harness = await setup([bash]);
-		await harness.session.prompt("/xp approve-spec");
-		expect(latest(harness)).toBeUndefined();
-		expect(harness.faux.state.callCount).toBe(0);
 		harness.setResponses([
-			call("xp_intent", { kind: "task", testsRequired: false }),
+			call("xp_intent", { kind: "task" }),
 			checkpoint("Planning: acceptance criteria"),
 			checkpoint("Design: approach and alternatives"),
-			call("bash", { command: "node --test validation.test.ts" }, "before-approval"),
-			call("xp_approve_spec", {}, "model-approval"),
-			checkpoint("The model claims the specification is approved"),
-			fauxAssistantMessage("Review required"),
+			checkpoint("Testing: incomplete strategy"),
+			checkpoint("Testing: cases derived from the criteria", [], {
+				testPlan:
+					"Run validation.test.ts for the normal transition, missing input and stale evidence after implementation.",
+			}),
+			checkpoint("Coding: cannot claim success before execution"),
+			call("bash", { command: "node --test validation.test.ts" }, "green"),
+			checkpoint("Coding: criteria verified", ["green"]),
+			checkpoint("Listening: validation complete", ["green"]),
+			fauxAssistantMessage("Delivered"),
 		]);
-		await harness.session.prompt("Change the documented behavior");
+		await harness.session.prompt("Change the behavior and validate the acceptance criteria");
 		await harness.session.waitForIdle();
-		expect(executions).toBe(0);
-		expect(latest(harness)).toMatchObject({ phase: "design", status: "active", specificationApproved: false });
-		for (const id of ["before-approval", "model-approval"])
-			expect(harness.session.messages).toContainEqual(
-				expect.objectContaining({ role: "toolResult", toolCallId: id, isError: true }),
-			);
+		expect(executions).toBe(1);
+		expect(latest(harness)).toMatchObject({ phase: "listening", status: "completed", accepted: false });
+		const traces = harness.sessionManager
+			.getBranch()
+			.filter((entry) => entry.type === "custom" && entry.customType === "xp.decision");
 		expect(
-			harness.sessionManager
-				.getBranch()
-				.filter((entry) => entry.type === "custom" && entry.customType === "xp.decision"),
-		).toHaveLength(1);
+			traces.map((entry) => entry.type === "custom" && (entry.data as DecisionTrace).observation.state.ready),
+		).toEqual([true, true, false, true, false, true, true]);
 	});
 
-	it("invalidates approval after external SDD edits and refuses approval until Design is recorded again", async () => {
+	it("reconciles external SDD edits through Design and repeats downstream validation without human approval", async () => {
 		const schema = Type.Object({ path: Type.String(), content: Type.String() });
 		let directory = "";
 		let writes = 0;
+		let inspected = "";
 		const write: AgentTool<typeof schema> = {
 			name: "write",
 			label: "Offline writer",
@@ -291,63 +299,204 @@ describe("XP as the native task workflow", () => {
 			parameters: schema,
 			execute: async (_id, args) => {
 				writes++;
-				writeFileSync(join(directory, args.path), args.content, "utf8");
+				const path = args.path === "specification" ? latest(harness)?.specificationPath : args.path;
+				if (!path) throw new Error("Missing SDD");
+				writeFileSync(join(directory, path), args.content, "utf8");
 				return { content: [{ type: "text", text: "Written" }], details: {} };
 			},
 		};
-		const harness = await setup([write]);
+		const readSchema = Type.Object({ path: Type.String() });
+		const read: AgentTool<typeof readSchema> = {
+			name: "read",
+			label: "Offline reader",
+			description: "Inspects the changed artifact",
+			parameters: readSchema,
+			execute: async () => {
+				const path = latest(harness)?.specificationPath;
+				if (!path) throw new Error("Missing SDD");
+				inspected = readFileSync(join(directory, path), "utf8");
+				return { content: [{ type: "text", text: inspected }], details: {} };
+			},
+		};
+		const harness = await setup([write, read]);
 		directory = harness.tempDir;
 		harness.setResponses([
 			call("xp_intent", { kind: "task", testsRequired: false }),
 			checkpoint("Planning: original criteria"),
 			checkpoint("Design: original approach"),
-			fauxAssistantMessage("Review the SDD"),
-		]);
-		await harness.session.prompt("Update the documentation");
-		await harness.session.waitForIdle();
-		const path = latest(harness)?.specificationPath;
-		if (!path) throw new Error("Missing SDD");
-		harness.setResponses([
-			call("write", { path, content: "Externally changed Design" }, "external-edit"),
-			call("write", { path: "unapproved.txt", content: "Must not be written" }, "after-edit"),
-			fauxAssistantMessage("Updated SDD requires review"),
-		]);
-		await harness.session.prompt("/xp approve-spec");
-		await vi.waitFor(() =>
-			expect(harness.session.messages).toContainEqual(
-				expect.objectContaining({ role: "toolResult", toolCallId: "after-edit" }),
-			),
-		);
-		await harness.session.waitForIdle();
-		expect(writes).toBe(1);
-		expect(harness.session.messages).toContainEqual(
-			expect.objectContaining({ role: "toolResult", toolCallId: "after-edit", isError: true }),
-		);
-		expect(latest(harness)).toMatchObject({ phase: "design", specificationApproved: false });
-		expect(readFileSync(join(directory, path), "utf8")).toBe("Externally changed Design");
-		expect(existsSync(join(directory, "unapproved.txt"))).toBe(false);
-		const calls = harness.faux.state.callCount;
-		await harness.session.prompt("/xp approve-spec");
-		expect(harness.faux.state.callCount).toBe(calls);
-		expect(latest(harness)?.specificationApproved).toBe(false);
-		harness.setResponses([
-			call("xp_intent", { kind: "task", continueTask: true }),
+			checkpoint("Testing: original validation"),
+			call("write", { path: "specification", content: "Externally changed Design" }, "external-edit"),
+			checkpoint("Stale Coding report must not overwrite changed Design"),
+			call("write", { path: "unreviewed.txt", content: "Must not be written" }, "after-edit"),
+			call("read", { path: "specification" }, "inspect-sdd"),
+			fauxAssistantMessage("Reconciling the changed SDD"),
 			checkpoint("Design: revised approach"),
-			fauxAssistantMessage("Review the revised SDD"),
-		]);
-		await harness.session.prompt("Record the revised Design for the same task");
-		await harness.session.waitForIdle();
-		harness.setResponses([
 			checkpoint("Testing: validation"),
 			checkpoint("Coding: matches the revised Design"),
 			checkpoint("Listening: verified result"),
 			fauxAssistantMessage("Delivered"),
 		]);
-		await harness.session.prompt("/xp approve-spec");
-		await vi.waitFor(() => expect(latest(harness)?.phase).toBe("listening"));
+		await harness.session.prompt("Update the documentation");
 		await harness.session.waitForIdle();
-		expect(latest(harness)).toMatchObject({ specificationApproved: true, listeningReported: true });
+		expect(writes).toBe(1);
+		expect(inspected).toBe("Externally changed Design");
+		expect(existsSync(join(directory, "unreviewed.txt"))).toBe(false);
+		expect(harness.session.messages).toContainEqual(
+			expect.objectContaining({ role: "toolResult", toolCallId: "after-edit", isError: true }),
+		);
+		expect(latest(harness)).toMatchObject({
+			status: "completed",
+			listeningReported: true,
+			specificationReviewRequired: false,
+		});
+		const path = latest(harness)?.specificationPath;
+		if (!path) throw new Error("Missing SDD");
 		expect(readFileSync(join(directory, path), "utf8")).toContain("Design: revised approach");
+		expect(readFileSync(join(directory, path), "utf8")).not.toContain("Stale Coding report");
+		expect(harness.sessionManager.getBranch()).toContainEqual(
+			expect.objectContaining({
+				type: "custom_message",
+				customType: "xp.specification_review",
+				display: true,
+			}),
+		);
+	});
+
+	it("replans corrections from Listening and requires a new validation plan and fresh tests", async () => {
+		const schema = Type.Object({ command: Type.String() });
+		const bash: AgentTool<typeof schema> = {
+			name: "bash",
+			label: "Offline runner",
+			description: "Scripted validation",
+			parameters: schema,
+			execute: async () => ({ content: [{ type: "text", text: "tests 1, pass 1, fail 0" }], details: {} }),
+		};
+		const harness = await setup([bash]);
+		harness.setResponses([
+			call("xp_intent", { kind: "task" }),
+			checkpoint("Planning: original criteria"),
+			checkpoint("Design: original approach"),
+			checkpoint("Testing: original cases", [], { testPlan: "Run normal and boundary assertions" }),
+			call("bash", { command: "node --test behavior.test.ts" }, "original-green"),
+			checkpoint("Coding: implementation verified", ["original-green"]),
+			checkpoint("Listening: review found a missing negative case within scope", ["original-green"], {
+				replan: true,
+			}),
+			checkpoint("Planning: original criteria including the negative case"),
+			checkpoint("Design: account for the negative case"),
+			checkpoint("Testing: stale plan must not carry over"),
+			checkpoint("Testing: revised cases", [], { testPlan: "Run normal, boundary and negative assertions" }),
+			checkpoint("Coding: old evidence must not carry over", ["original-green"]),
+			call("bash", { command: "node --test behavior.test.ts" }, "revised-green"),
+			checkpoint("Coding: revised implementation verified", ["revised-green"]),
+			checkpoint("Listening: all criteria and feedback verified", ["revised-green"]),
+			fauxAssistantMessage("Delivered"),
+		]);
+		await harness.session.prompt("Fix the behavior");
+		await harness.session.waitForIdle();
+		expect(latest(harness)).toMatchObject({ phase: "listening", status: "completed", accepted: false });
+		const traces = harness.sessionManager
+			.getBranch()
+			.filter((entry) => entry.type === "custom" && entry.customType === "xp.decision");
+		expect(traces[4]).toMatchObject({ data: { verdict: { action: "replan" }, result: { phase: "planning" } } });
+		expect(traces[7]).toMatchObject({ data: { observation: { state: { phase: "testing", ready: false } } } });
+		expect(traces[9]).toMatchObject({ data: { observation: { state: { phase: "coding", ready: false } } } });
+	});
+
+	it("hands off after three runs without a checkpoint instead of retrying indefinitely", async () => {
+		const harness = await setup();
+		harness.setResponses([
+			call("xp_intent", { kind: "task", testsRequired: false }),
+			fauxAssistantMessage("Planning pending"),
+			fauxAssistantMessage("Still planning"),
+			fauxAssistantMessage("No checkpoint"),
+		]);
+		await harness.session.prompt("Update documentation");
+		await harness.session.waitForIdle();
+		expect(latest(harness)).toMatchObject({
+			phase: "planning",
+			status: "handoff",
+			continuationsWithoutCheckpoint: 3,
+		});
+		expect(harness.faux.state.callCount).toBe(4);
+	});
+
+	it("resumes an interrupted native Design and continues automatically", async () => {
+		const original = await setup();
+		original.setResponses([
+			call("xp_intent", { kind: "task", testsRequired: false }),
+			checkpoint("Planning: criteria"),
+			fauxAssistantMessage("Interrupted", { stopReason: "aborted" }),
+		]);
+		await original.session.prompt("Update documentation");
+		await original.session.waitForIdle();
+		expect(latest(original)).toMatchObject({ phase: "design", status: "active" });
+		const resumed = await setup([], original.sessionManager);
+		cpSync(join(original.tempDir, ".relay"), join(resumed.tempDir, ".relay"), { recursive: true });
+		resumed.setResponses([
+			call("xp_intent", { kind: "task", continueTask: true }),
+			checkpoint("Design: minimal update"),
+			checkpoint("Testing: examples reviewed"),
+			checkpoint("Coding: documentation updated"),
+			checkpoint("Listening: result reviewed"),
+			fauxAssistantMessage("Delivered"),
+		]);
+		await resumed.session.prompt("Continue");
+		await resumed.session.waitForIdle();
+		expect(latest(resumed)).toMatchObject({ id: latest(original)?.id, status: "completed", accepted: false });
+	});
+
+	it("waits only for a justified intervention without completing the phase, then resumes the same task", async () => {
+		const schema = Type.Object({ path: Type.String(), content: Type.String() });
+		let writes = 0;
+		const write: AgentTool<typeof schema> = {
+			name: "write",
+			label: "Offline writer",
+			description: "Records attempted mutations",
+			parameters: schema,
+			execute: async () => {
+				writes++;
+				return { content: [{ type: "text", text: "Written" }], details: {} };
+			},
+		};
+		const harness = await setup([write]);
+		harness.setResponses([
+			call("xp_intent", { kind: "task", testsRequired: false }),
+			checkpoint("Planning: safe independent investigation completed"),
+			checkpoint("Design: a business choice is missing", [], {
+				intervention: {
+					reason: "business_decision",
+					question: "Should the export contain archived records?",
+				},
+			}),
+			call("write", { path: "decision.txt", content: "Assumed yes" }, "blocked-action"),
+			fauxAssistantMessage("Should the export contain archived records?"),
+		]);
+		await harness.session.prompt("Document the export policy");
+		await harness.session.waitForIdle();
+		const id = latest(harness)?.id;
+		expect(latest(harness)).toMatchObject({
+			phase: "design",
+			status: "handoff",
+			intervention: {
+				reason: "business_decision",
+			},
+		});
+		expect(latest(harness)?.specificationReports?.design).toBeUndefined();
+		expect(writes).toBe(0);
+		expect(harness.faux.state.callCount).toBe(5);
+		harness.setResponses([
+			call("xp_intent", { kind: "task", continueTask: true }),
+			checkpoint("Design: exclude archived records as requested"),
+			checkpoint("Testing: review both archived and current record examples"),
+			checkpoint("Coding: policy documented"),
+			checkpoint("Listening: examples match the selected policy"),
+			fauxAssistantMessage("Delivered"),
+		]);
+		await harness.session.prompt("Exclude archived records");
+		await harness.session.waitForIdle();
+		expect(latest(harness)).toMatchObject({ id, phase: "listening", status: "completed", accepted: false });
+		expect(latest(harness)?.intervention).toBeUndefined();
 	});
 
 	it("does not trust a user-supplied internal control prefix", async () => {

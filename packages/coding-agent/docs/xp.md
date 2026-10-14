@@ -4,48 +4,66 @@ XP is the built-in workflow for every task, not an opt-in command. Before answer
 using tools, the model calls `xp_intent` to identify a task or a read-only question.
 Questions do not start XP. Tasks automatically pass through Planning, Design, Testing,
 Coding and Listening in order, including documentation and other non-code tasks.
-Tasks start without `/xp start` or a Laya server. Tasks started through an active `/goal` run all five phases autonomously. Other tasks pause after Design for human approval.
+Tasks start without `/xp start` or a Laya server. All native tasks run the five phases
+autonomously, with or without `/goal`. Design advances directly to Testing; validated
+Listening completes the task without requiring user acceptance.
 
 Each native task creates one project-local specification at `.relay/specs/<workflow-id>.md`.
 Planning records the problem, requirements, constraints, risks and acceptance criteria;
 Design records decisions and alternatives. Both sections exist before Testing and Coding.
-Testing records cases derived from the criteria, Coding records implementation and
+Testing records cases and a validation strategy derived from the criteria, Coding records implementation and
 verification, and Listening records the result and feedback. Each `xp_checkpoint` updates
 its phase's section and the session state; phase gates require all previous sections to
 have been recorded. The file is a working SDD owned by the XP workflow: manual edits
 may be replaced at the next checkpoint. Checkpoint presence is enforced, but the
-harness cannot prove that the reports cover every requirement. Manual `/xp` workflows
+harness cannot prove that the reports cover every requirement or independently verify
+which skills the executor applied. Manual `/xp` workflows
 continue using session checkpoints only.
 
-### Approving the specification
+### Autonomous execution and justified intervention
 
-Outside `/goal`, after the Design report, XP pauses without advancing to Testing. Review
-`.relay/specs/<workflow-id>.md`, then run `/xp approve-spec`. This user command records
-approval in `xp.state` and a Design transition in `xp.decision`, advances to Testing,
-and resumes the same task. It is not a model tool: a model claim of approval cannot
-unlock Testing. Before approval, only inspection tools and Design checkpoints are
-allowed; the goal cannot be completed.
+The harness publishes a visible `xp.progress` report for each checkpoint, identifying
+the phase, responsible profile, skills reported by the executor, decisions, results and
+next step. Incomplete validation is reported as incomplete. Reports inform the user
+without requesting routine approval. No `/xp approve-spec` command is required or provided.
 
-Approval requires both Planning and Design reports and an unchanged, readable artifact.
-Replanning or updating Planning/Design invalidates approval. External edits, deletion
-or replacement of the artifact also invalidate approval when checked before a tool call
-or settlement. XP returns to Design without overwriting the edited file; record the
-updated Design checkpoint and approve again before continuing. Normal Testing, Coding
-and Listening checkpoints update their own sections without requiring another approval.
+External edits, deletion or replacement of the SDD invalidate downstream reports and
+test evidence when checked before a tool call or settlement. XP returns to Design
+(or Planning if it was not recorded yet), preserving the changed artifact until a
+revised checkpoint. Inspect and reconcile its contents with the authorized scope,
+record the revised decisions, and repeat the downstream phases automatically. A stale
+checkpoint that encounters the change is blocked before it can overwrite the artifact.
+External content does not authorize scope expansion. Replanning clears old reports
+and the validation plan so they cannot satisfy a later cycle. During native Coding or
+Listening, use `xp_checkpoint` with `replan=true` and a concrete reason in `summary`
+to return to Planning for corrections within the authorized scope. Fresh test evidence
+is required in the new cycle.
 
-With `/goal`, XP records Planning and Design in the same SDD and proceeds directly to
-Testing, Coding and Listening. `/xp approve-spec` is not needed; the SDD is not marked
-as human-approved. The goal can be completed only after Listening is reported. Decision
-and continuation limits can still result in a handoff rather than an infinite loop.
+Request user input only for critical ambiguity, a business choice missing from context,
+scope expansion, significant destructive/security/irreversible risk, or an explicit
+authorization requirement. Complete safe independent work first. An `xp_checkpoint`
+with `intervention: { reason, question }` records a justified question and hands off
+without completing the phase. It blocks further mutations in that request and avoids
+automatic retries while waiting. After the user responds, `xp_intent` with
+`continueTask=true` resumes the same task; the response must be evaluated for the
+authorization it actually provides. Routine technical choices are not intervention reasons.
+
+The goal can be completed only after Listening is reported. Decision and continuation
+limits can still result in a handoff rather than an infinite loop.
 The artifact is data, never executable configuration. Reports may contain project
 information; keep credentials out of them and review what you commit.
 
-Native checkpoints use deterministic gates. Behavior changes require observed failing
-assertions in Testing and successful tests after the latest mutation in Coding and
-Listening. Tasks without executable behavior still report validation in all five phases.
+Native checkpoints use deterministic gates. For executable changes, Testing requires
+an observed behavioral test failure or a concrete `testPlan` describing cases and
+validation to execute during Coding. This permits strategy before implementation,
+as defined in `development/arquitetura_5_etapas.md`; TDD remains appropriate for
+reproducible defects. Coding and Listening require successful tests after the latest
+mutation. Arbitrary successful shell commands do not qualify as test evidence.
+Tasks without executable behavior still report concrete review in all five phases.
 Writes and edits are allowed during Testing and Coding. The harness prevents settlement
 or goal completion before the Listening report. A task cannot be reclassified as a
-question to bypass the workflow. User acceptance is separate from delivering the result.
+question to bypass the workflow. A mutation after the Listening checkpoint in the same
+request reopens validation and invalidates completion. User acceptance is never inferred.
 
 ## Optional manual control with Laya
 
@@ -100,7 +118,23 @@ Repository instructions and user permissions still govern every tool execution.
 
 The `engineering` built-in extension discovers the nineteen shipped skills. Profiles
 live under `resources/agents`; Laya injects the chosen profile into the execution plan.
-XP supplies a phase-specific role. `/agent <name>` loads a role explicitly.
+XP supplies a phase-specific role: `product-owner` for Planning and Listening,
+`software-architect` for Design, `quality-assurance` for Testing and `software-engineer`
+for Coding. These are profiles applied by the executor, not separate agents spawned
+for every phase. `xp_intent` accepts an optional `agents` map by phase to select an
+existing specialist when the task warrants it, for example
+`agents: { coding: "backend-engineer", listening: "code-reviewer" }`.
+`/agent <name>` loads a role explicitly.
+
+Select skills only when they serve the actual task. Planning may use `refine-backlog`;
+Design may use `decide-architecture`, `design-service`, `design-ux-flow` or threat modeling;
+Testing and Coding may use `implement-feature-tdd`, `automate-tests` and `quality-baseline`.
+Listening uses relevant review, feedback, reliability or incident skills when needed.
+Read selected skill instructions and report only those actually applied via the
+checkpoint's optional `skills` list. The harness stores these reported selections and
+the assigned profile in the SDD, state, decision trace and visible phase report. Scale
+profile deliverables to the task; no skill or extra collaborator is required solely
+to satisfy a phase.
 Trusted project `.relay/agents/<name>.md` overrides the global profile, which overrides
 the distributed profile. Existing specialist roles without a distributed profile continue
 using their routing description. The expanded role choices change the training question

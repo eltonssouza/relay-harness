@@ -47,6 +47,37 @@ describe("XP phase evidence", () => {
 		current.revision++;
 		expect(xpObservation(current, "Done", ["test-1"]).goalReached).toBe(false);
 	});
+	it("finishes native tasks without acceptance only after every phase and fresh validation", () => {
+		const current: XpState = {
+			...state(),
+			phase: "listening",
+			automatic: true,
+			specificationPath: ".relay/specs/run.md",
+			specificationPhases: ["planning", "design", "testing", "coding", "listening"],
+			evidence: [proof(false)],
+		};
+		expect(xpObservation(current, "Validated outcome", ["test-1"]).goalReached).toBe(true);
+		current.revision++;
+		expect(xpObservation(current, "Validated outcome", ["test-1"]).goalReached).toBe(false);
+		current.revision--;
+		current.specificationPhases = ["planning", "design", "coding", "listening"];
+		expect(xpObservation(current, "Validated outcome", ["test-1"]).goalReached).toBe(false);
+	});
+	it("accepts a native testing strategy without weakening the manual behavioral failure gate", () => {
+		const current: XpState = {
+			...state(),
+			phase: "testing",
+			testPlan: "Verify normal, boundary and rejection cases during Coding",
+		};
+		expect(xpObservation(current, "Tests planned", []).actions.advance).toBeUndefined();
+		current.automatic = true;
+		current.specificationPath = ".relay/specs/run.md";
+		current.specificationPhases = ["planning", "design", "testing"];
+		expect(xpObservation(current, "Tests planned", []).actions.advance).toBeDefined();
+		current.phase = "coding";
+		current.specificationPhases.push("coding");
+		expect(xpObservation(current, "Tests planned", []).actions.advance).toBeUndefined();
+	});
 	it("advances in order and clears acceptance on replanning", () => {
 		const current = state();
 		for (const phase of ["design", "testing", "coding", "listening"]) {
@@ -54,7 +85,13 @@ describe("XP phase evidence", () => {
 			expect(current.phase).toBe(phase);
 		}
 		current.accepted = true;
+		current.specificationPhases = ["planning", "design", "testing", "coding", "listening"];
+		current.specificationReports = { planning: "Old scope", design: "Old design" };
+		current.testPlan = "Old validation";
 		applyXpAction(current, "replan");
 		expect(current).toMatchObject({ phase: "planning", accepted: false, revision: 2 });
+		expect(current.specificationPhases).toEqual([]);
+		expect(current.specificationReports).toEqual({});
+		expect(current.testPlan).toBeUndefined();
 	});
 });
