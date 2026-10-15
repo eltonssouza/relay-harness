@@ -11,7 +11,11 @@ import type { LayaModelManifest } from "../src/extensions/laya/runtime.ts";
 
 vi.mock("node:child_process", async (original) => {
 	const actual = await original<typeof ChildProcessModule>();
-	return { ...actual, spawn: vi.fn() };
+	// These processes are never spawned. Mock termination in every test scenario.
+	class MockChildProcess extends actual.ChildProcess {
+		override kill = vi.fn(() => false);
+	}
+	return { ...actual, ChildProcess: MockChildProcess, spawn: vi.fn() };
 });
 
 const manifest: LayaModelManifest = {

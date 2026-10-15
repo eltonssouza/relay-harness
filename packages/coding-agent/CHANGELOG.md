@@ -4,6 +4,18 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-10-13
+
+### Added
+
+- Added local Ollama model discovery through `OLLAMA_HOST`, including `/ollama` catalog refresh and selection of installed chat models.
+- Added bundled, on-demand local Context7 and Playwright MCP servers alongside Chrome DevTools.
+- Added a project-local SDD for native XP tasks at `.relay/specs/<workflow-id>.md`.
+
+### Changed
+
+- Changed native task execution to use Planning, Design, Testing, Coding and Listening by default. Tasks started with `/goal` complete those phases autonomously; other tasks require `/xp approve-spec` after Design.
+
 ## [0.1.10] - 2026-10-13
 
 ### New Features
