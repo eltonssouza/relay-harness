@@ -135,6 +135,7 @@ export interface Harness {
 	setResponses: (responses: FauxResponseStep[]) => void;
 	appendResponses: (responses: FauxResponseStep[]) => void;
 	getPendingResponseCount: () => number;
+	getRegisteredCommands: () => ReturnType<ExtensionRunner["getRegisteredCommands"]>;
 	events: AgentSessionEvent[];
 	eventsOfType<T extends AgentSessionEvent["type"]>(type: T): Extract<AgentSessionEvent, { type: T }>[];
 	tempDir: string;
@@ -259,6 +260,7 @@ export async function createHarness(options: HarnessOptions = {}): Promise<Harne
 		setResponses: fauxProvider.setResponses,
 		appendResponses: fauxProvider.appendResponses,
 		getPendingResponseCount: fauxProvider.getPendingResponseCount,
+		getRegisteredCommands: () => extensionRunnerRef.current?.getRegisteredCommands() ?? [],
 		events,
 		eventsOfType<T extends AgentSessionEvent["type"]>(type: T) {
 			return events.filter((event): event is Extract<AgentSessionEvent, { type: T }> => event.type === type);

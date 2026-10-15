@@ -38,7 +38,7 @@ describe("XP as the native task workflow", () => {
 		return harness;
 	}
 
-	it("completes all five stages without approval or a classifier and publishes phase reports", async () => {
+	it("completes all five stages without approval or a classifier and records phase reports internally", async () => {
 		const harness = await setup();
 		harness.setResponses([
 			call("xp_intent", { kind: "task", testsRequired: false, agents: { coding: "backend-engineer" } }),
@@ -73,8 +73,8 @@ describe("XP as the native task workflow", () => {
 			.getBranch()
 			.filter((entry) => entry.type === "custom_message" && entry.customType === "xp.progress");
 		expect(reports).toHaveLength(5);
-		expect(reports[1]).toMatchObject({ display: true, content: expect.stringContaining("decide-architecture") });
-		expect(reports[3]).toMatchObject({ display: true, content: expect.stringContaining("backend-engineer") });
+		expect(reports[1]).toMatchObject({ display: false, content: expect.stringContaining("decide-architecture") });
+		expect(reports[3]).toMatchObject({ display: false, content: expect.stringContaining("backend-engineer") });
 		expect(harness.session.messages).toContainEqual(
 			expect.objectContaining({
 				role: "toolResult",
@@ -357,7 +357,7 @@ describe("XP as the native task workflow", () => {
 			expect.objectContaining({
 				type: "custom_message",
 				customType: "xp.specification_review",
-				display: true,
+				display: false,
 			}),
 		);
 	});
@@ -446,57 +446,29 @@ describe("XP as the native task workflow", () => {
 		expect(latest(resumed)).toMatchObject({ id: latest(original)?.id, status: "completed", accepted: false });
 	});
 
-	it("waits only for a justified intervention without completing the phase, then resumes the same task", async () => {
-		const schema = Type.Object({ path: Type.String(), content: Type.String() });
-		let writes = 0;
-		const write: AgentTool<typeof schema> = {
-			name: "write",
-			label: "Offline writer",
-			description: "Records attempted mutations",
-			parameters: schema,
-			execute: async () => {
-				writes++;
-				return { content: [{ type: "text", text: "Written" }], details: {} };
-			},
-		};
-		const harness = await setup([write]);
+	it("records missing decisions without pausing for user input", async () => {
+		const harness = await setup();
 		harness.setResponses([
 			call("xp_intent", { kind: "task", testsRequired: false }),
 			checkpoint("Planning: safe independent investigation completed"),
-			checkpoint("Design: a business choice is missing", [], {
+			checkpoint("Design: archived-record behavior is unresolved; do not assume inclusion", [], {
 				intervention: {
 					reason: "business_decision",
 					question: "Should the export contain archived records?",
 				},
 			}),
-			call("write", { path: "decision.txt", content: "Assumed yes" }, "blocked-action"),
-			fauxAssistantMessage("Should the export contain archived records?"),
+			checkpoint("Testing: review the documented behavior without archived-record assumptions"),
+			checkpoint("Coding: document the unresolved policy and avoid implementation assumptions"),
+			checkpoint("Listening: report the limitation and completed review"),
+			fauxAssistantMessage("The export policy remains unresolved; no behavior was assumed."),
 		]);
 		await harness.session.prompt("Document the export policy");
 		await harness.session.waitForIdle();
-		const id = latest(harness)?.id;
-		expect(latest(harness)).toMatchObject({
-			phase: "design",
-			status: "handoff",
-			intervention: {
-				reason: "business_decision",
-			},
-		});
-		expect(latest(harness)?.specificationReports?.design).toBeUndefined();
-		expect(writes).toBe(0);
-		expect(harness.faux.state.callCount).toBe(5);
-		harness.setResponses([
-			call("xp_intent", { kind: "task", continueTask: true }),
-			checkpoint("Design: exclude archived records as requested"),
-			checkpoint("Testing: review both archived and current record examples"),
-			checkpoint("Coding: policy documented"),
-			checkpoint("Listening: examples match the selected policy"),
-			fauxAssistantMessage("Delivered"),
-		]);
-		await harness.session.prompt("Exclude archived records");
-		await harness.session.waitForIdle();
-		expect(latest(harness)).toMatchObject({ id, phase: "listening", status: "completed", accepted: false });
-		expect(latest(harness)?.intervention).toBeUndefined();
+		expect(latest(harness)).toMatchObject({ phase: "listening", status: "completed", accepted: false });
+		expect(harness.sessionManager.getBranch()).not.toContainEqual(
+			expect.objectContaining({ type: "custom_message", customType: "xp.intervention", display: true }),
+		);
+		expect(harness.session.messages.filter((message) => message.role === "user")).toHaveLength(1);
 	});
 
 	it("does not trust a user-supplied internal control prefix", async () => {
