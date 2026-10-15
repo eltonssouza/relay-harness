@@ -9,6 +9,7 @@ import { readGoal } from "../src/extensions/goal/state.ts";
 import xpExtension from "../src/extensions/xp/index.ts";
 import type { XpState } from "../src/extensions/xp/workflow.ts";
 import { createHarness, type Harness } from "./suite/harness.ts";
+import { xpTestProvider } from "./xp-test-support.ts";
 
 const call = (name: string, args: JsonObject, id?: string) =>
 	fauxAssistantMessage(fauxToolCall(name, args, { id }), { stopReason: "toolUse" });
@@ -25,28 +26,35 @@ describe("XP as the native task workflow", () => {
 	const harnesses: Harness[] = [];
 	afterEach(() => {
 		for (const harness of harnesses.splice(0)) harness.cleanup();
+		vi.restoreAllMocks();
 	});
 	async function setup(tools: AgentTool[] = [], sessionManager?: Harness["sessionManager"]) {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(JSON.stringify({ ok: true, version: "relay-laya-v4" })),
+		);
+		// Each health check consumes its body, so return a fresh response.
+		vi.mocked(fetch).mockImplementation(
+			async () => new Response(JSON.stringify({ ok: true, version: "relay-laya-v4" })),
+		);
 		const harness = await createHarness({
 			tools,
 			sessionManager,
 			settings: { harnessCore: { evidence: false } },
-			extensionFactories: [xpExtension],
+			extensionFactories: [xpTestProvider(), xpExtension],
 		});
 		harnesses.push(harness);
+		await harness.session.modelRuntime.refresh({ allowNetwork: false });
 		await harness.session.bindExtensions({});
 		return harness;
 	}
 
-	it("completes all five stages without approval or a classifier and publishes phase reports", async () => {
+	it("completes all five stages under Laya decisions without human phase approval and publishes reports", async () => {
 		const harness = await setup();
 		harness.setResponses([
-			call("xp_intent", { kind: "task", testsRequired: false, agents: { coding: "backend-engineer" } }),
+			call("xp_intent", { kind: "task", testsRequired: false }),
 			checkpoint("Planning: criteria and scope for the documentation task"),
 			fauxAssistantMessage("Planning done"),
-			checkpoint("Design: update the existing explanation, no new structure", [], {
-				skills: ["decide-architecture"],
-			}),
+			checkpoint("Design: update the existing explanation, no new structure"),
 			fauxAssistantMessage("Design complete; continuing"),
 			checkpoint("Testing: review examples and links; no executable behavior"),
 			checkpoint("Coding: the proposed explanation meets the criteria"),
@@ -73,7 +81,7 @@ describe("XP as the native task workflow", () => {
 			.getBranch()
 			.filter((entry) => entry.type === "custom_message" && entry.customType === "xp.progress");
 		expect(reports).toHaveLength(5);
-		expect(reports[1]).toMatchObject({ display: true, content: expect.stringContaining("decide-architecture") });
+		expect(reports[1]).toMatchObject({ display: true, content: expect.stringContaining("relay-laya-v4") });
 		expect(reports[3]).toMatchObject({ display: true, content: expect.stringContaining("backend-engineer") });
 		expect(harness.session.messages).toContainEqual(
 			expect.objectContaining({
@@ -88,12 +96,16 @@ describe("XP as the native task workflow", () => {
 	});
 
 	it("runs all XP stages autonomously when started through /goal", async () => {
+		vi.spyOn(globalThis, "fetch").mockImplementation(
+			async () => new Response(JSON.stringify({ ok: true, version: "relay-laya-v4" })),
+		);
 		const harness = await createHarness({
 			tools: [],
-			extensionFactories: [xpExtension, goalExtension],
+			extensionFactories: [xpTestProvider(), xpExtension, goalExtension],
 			settings: { harnessCore: { evidence: false } },
 		});
 		try {
+			await harness.session.modelRuntime.refresh({ allowNetwork: false });
 			harness.setResponses([
 				call("xp_intent", { kind: "task", testsRequired: false }),
 				call("update_goal", { status: "complete", report: "Too early" }, "early-completion"),

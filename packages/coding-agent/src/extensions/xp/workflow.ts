@@ -1,5 +1,6 @@
 import type { DecisionObservation } from "@relay-harness/agent-core";
 import type { AgentId } from "../laya/questions.ts";
+import type { XpPhasePlan } from "./decisions.ts";
 
 export const XP_PHASES = ["planning", "design", "testing", "coding", "listening"] as const;
 export type XpPhase = (typeof XP_PHASES)[number];
@@ -10,11 +11,11 @@ export const XP_PHASE_GUIDANCE: Record<XpPhase, string> = {
 	design:
 		"Choose a simple design tied to the acceptance criteria. State boundaries, contracts and risks. Use decide-architecture or design-service as needed.",
 	testing:
-		"Derive test cases and a validation strategy from the acceptance criteria. For native tasks, record a concrete testPlan to execute during Coding, or report an observed behavioral test failure. Manual /xp workflows require the observed failure. Use implement-feature-tdd or automate-tests when applicable.",
+		"Derive test cases and a validation strategy from the acceptance criteria. Record a concrete testPlan to execute during Coding, or report an observed behavioral test failure. Apply only the skills selected by Laya.",
 	coding:
 		"Implement the minimum solution and the planned tests, verify the acceptance criteria, then refactor while tests stay green. Report a successful test call ID after the latest mutation. Use implement-feature-tdd and quality-baseline when applicable.",
 	listening:
-		"Evaluate the result, fresh validation evidence, errors and available feedback. Report adjustments and lessons without inventing feedback. Native tasks finish after validation; do not wait for acceptance. Only explicit manual /xp workflows wait for /xp accept. Incorporate changed requirements in a new planning cycle.",
+		"Evaluate the result, fresh validation evidence, errors and available feedback. Report adjustments and lessons without inventing feedback. Finish after Laya's decision and validation; do not wait for acceptance. Incorporate changed requirements in a new planning cycle.",
 };
 
 export interface XpEvidence {
@@ -24,10 +25,11 @@ export interface XpEvidence {
 	isError: boolean;
 	text: string;
 	revision: number;
+	phase?: XpPhase;
 }
 
 export interface XpState {
-	version: 1;
+	version: 2;
 	id: string;
 	goal: string;
 	phase: XpPhase;
@@ -42,8 +44,10 @@ export interface XpState {
 	automatic?: boolean;
 	/** Delivery and validation were reported during the Listening phase. */
 	listeningReported?: boolean;
-	/** Optional specialists selected for this task; other phases use the default role. */
-	agents?: Partial<Record<XpPhase, AgentId>>;
+	/** Laya-selected resources; missing plans never authorize execution. */
+	phasePlans?: Partial<Record<XpPhase, XpPhasePlan>>;
+	availableAgents?: AgentId[];
+	decisionError?: string;
 	/** Skills the executor reports actually applying in each phase. */
 	phaseSkills?: Partial<Record<XpPhase, string[]>>;
 	/** Acceptance-derived validation to implement and execute during Coding. */
@@ -84,12 +88,11 @@ export function xpObservation(state: XpState, summary: string, evidenceIds: read
 	const recorded = new Set(state.specificationPhases);
 	let ready =
 		summary.trim().length > 0 &&
-		(!state.automatic ||
-			(Boolean(state.specificationPath) &&
-				XP_PHASES.slice(0, phaseIndex + 1).every((phase) => recorded.has(phase))));
+		Boolean(state.specificationPath) &&
+		XP_PHASES.slice(0, phaseIndex + 1).every((phase) => recorded.has(phase));
 	if (state.testsRequired && state.phase === "testing") {
 		ready &&=
-			Boolean(state.automatic && state.testPlan?.trim()) ||
+			Boolean(state.testPlan?.trim()) ||
 			proofs.some(
 				(item) =>
 					isTestEvidence(item) &&
@@ -102,7 +105,7 @@ export function xpObservation(state: XpState, summary: string, evidenceIds: read
 	if (state.testsRequired && (state.phase === "coding" || state.phase === "listening")) {
 		ready &&= proofs.some((item) => isTestEvidence(item) && !item.isError && item.revision === state.revision);
 	}
-	const goalReached = ready && state.phase === "listening" && (state.automatic === true || state.accepted);
+	const goalReached = ready && state.phase === "listening";
 	return {
 		state: {
 			goal: state.goal.slice(0, 500),
@@ -112,6 +115,9 @@ export function xpObservation(state: XpState, summary: string, evidenceIds: read
 			ready,
 			accepted: state.accepted,
 			revision: state.revision,
+			reports: Object.fromEntries(
+				Object.entries(state.specificationReports ?? {}).map(([phase, report]) => [phase, report.slice(0, 300)]),
+			),
 			evidence: proofs.slice(-5).map((item) => ({
 				id: item.id,
 				tool: item.tool,
@@ -131,7 +137,7 @@ export function xpObservation(state: XpState, summary: string, evidenceIds: read
 						},
 					}
 				: {}),
-			...(state.phase === "coding" || state.phase === "listening"
+			...(state.phase !== "planning"
 				? {
 						replan: {
 							description: "Requirements or design must change; return to planning and invalidate acceptance.",
@@ -153,6 +159,7 @@ export function applyXpAction(state: XpState, action: string): void {
 		state.specificationPhases = [];
 		state.specificationReports = {};
 		state.phaseSkills = {};
+		state.phasePlans = {};
 		state.testPlan = undefined;
 		state.revision++;
 	} else if (action === "finish") state.status = "completed";

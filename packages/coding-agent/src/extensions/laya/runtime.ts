@@ -2,10 +2,8 @@ import { createHash } from "node:crypto";
 import { TRAIN_SCRIPT } from "./train-script.ts";
 
 /**
- * Laya runs in Docker, never on the host: an image carries Python, torch, the `laya` package, the
- * shipped model and the scripts that serve and train it. Relay pulls the image, keeps one server
- * container running and starts a short-lived container for each training. The host only keeps
- * Relay's own data (training exercises, the model registry, telemetry).
+ * Docker runtime assets for optional container inference and training. Default shipped-model
+ * inference uses native-server.ts and the same pinned model manifest on the host.
  */
 
 export interface LayaModelFile {
@@ -56,6 +54,8 @@ const TORCH_INDEX: Record<LayaImageVariant, string> = {
 
 /** Serves the model with the System One protocol Relay's `typesafe-system-one` classifier speaks. */
 export const SERVE_SCRIPT = `import argparse
+import json
+from pathlib import Path
 
 import laya
 import torch
@@ -67,6 +67,8 @@ parser.add_argument("--model", required=True)
 parser.add_argument("--host", default="127.0.0.1")
 parser.add_argument("--port", type=int, default=8000)
 args = parser.parse_args()
+manifest = json.loads(Path("/opt/laya/model.json").read_text(encoding="utf-8"))
+version = manifest.get("version") if args.model == "/opt/laya/model" else None
 
 agent = laya.load(args.model, device="cuda" if torch.cuda.is_available() else "cpu")
 app = FastAPI(title="relay-laya")
@@ -74,13 +76,17 @@ app = FastAPI(title="relay-laya")
 
 @app.get("/health")
 def health():
-    return {"ok": True, "model": args.model}
+    return {"ok": True, "model": args.model, "version": version}
 
 
 @app.post("/v1/systemone")
 def system_one(body: dict):
     if "state" not in body or not body.get("questions"):
         raise HTTPException(422, "send 'state' and 'questions'")
+    state = body["state"]
+    required = state.get("required_model") if isinstance(state, dict) else None
+    if required and required != version:
+        raise HTTPException(409, "The requested XP checkpoint is not active")
     return agent.predict(body["state"], body["questions"])
 
 
@@ -135,7 +141,7 @@ export function layaImageContext(manifest: LayaModelManifest, variant: LayaImage
 	return {
 		Dockerfile: dockerfile(manifest, variant),
 		"fetch_model.py": FETCH_MODEL_SCRIPT,
-		"model.json": `${JSON.stringify({ baseUrl: manifest.baseUrl, files: manifest.files }, null, 2)}\n`,
+		"model.json": `${JSON.stringify({ version: manifest.version, baseUrl: manifest.baseUrl, files: manifest.files }, null, 2)}\n`,
 		"serve.py": SERVE_SCRIPT,
 		"train.py": TRAIN_SCRIPT,
 	};

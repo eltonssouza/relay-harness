@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyXpAction, type XpEvidence, type XpState, xpObservation } from "../src/extensions/xp/workflow.ts";
 
 const state = (): XpState => ({
-	version: 1,
+	version: 2,
 	id: "run",
 	goal: "Fix discount",
 	phase: "planning",
@@ -11,6 +11,9 @@ const state = (): XpState => ({
 	refusals: 0,
 	revision: 1,
 	accepted: false,
+	automatic: true,
+	specificationPath: ".relay/specs/run.md",
+	specificationPhases: ["planning", "design", "testing", "coding", "listening"],
 	testsRequired: true,
 	evidence: [],
 });
@@ -39,10 +42,8 @@ describe("XP phase evidence", () => {
 		const current = { ...state(), phase: "coding" as const, evidence: [{ ...proof(false), command: "echo passed" }] };
 		expect(xpObservation(current, "Done", ["test-1"]).actions.advance).toBeUndefined();
 	});
-	it("invalidates green evidence after mutations and requires user acceptance", () => {
+	it("invalidates green evidence after mutations without requiring user acceptance", () => {
 		const current = { ...state(), phase: "listening" as const, evidence: [proof(false)] };
-		expect(xpObservation(current, "Done", ["test-1"]).goalReached).toBe(false);
-		current.accepted = true;
 		expect(xpObservation(current, "Done", ["test-1"]).goalReached).toBe(true);
 		current.revision++;
 		expect(xpObservation(current, "Done", ["test-1"]).goalReached).toBe(false);
@@ -63,11 +64,12 @@ describe("XP phase evidence", () => {
 		current.specificationPhases = ["planning", "design", "coding", "listening"];
 		expect(xpObservation(current, "Validated outcome", ["test-1"]).goalReached).toBe(false);
 	});
-	it("accepts a native testing strategy without weakening the manual behavioral failure gate", () => {
+	it("requires the recorded Testing report for a strategy and fresh execution during Coding", () => {
 		const current: XpState = {
 			...state(),
 			phase: "testing",
 			testPlan: "Verify normal, boundary and rejection cases during Coding",
+			specificationPhases: ["planning", "design"],
 		};
 		expect(xpObservation(current, "Tests planned", []).actions.advance).toBeUndefined();
 		current.automatic = true;
