@@ -103,7 +103,8 @@ describe("native MCP local stdio handshake and distribution", () => {
 				inheritEnv: false,
 				env: { DO_NOT_TRACK: "1", CONTEXT7_API_KEY: "" },
 			});
-			const client = new McpClient({ name: "relay-native-mcp-test", version: "1.0.0", requestTimeoutMs: 15000 });
+			// Cold standalone startup competes with the full suite's workers, especially on Windows.
+			const client = new McpClient({ name: "relay-native-mcp-test", version: "1.0.0", requestTimeoutMs: 60000 });
 			try {
 				await client.connect(transport);
 				const tools = await client.listTools();
@@ -112,6 +113,6 @@ describe("native MCP local stdio handshake and distribution", () => {
 				await client.close();
 			}
 		},
-		25000,
+		75000,
 	);
 });

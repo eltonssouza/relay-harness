@@ -4,9 +4,28 @@ XP is the built-in workflow for every task, not an opt-in command. Before answer
 using tools, the model calls `xp_intent` to identify a task or a read-only question.
 Questions do not start XP. Tasks automatically pass through Planning, Design, Testing,
 Coding and Listening in order, including documentation and other non-code tasks.
-Tasks start without `/xp start` or a Laya server. All native tasks run the five phases
-autonomously, with or without `/goal`. Design advances directly to Testing; validated
-Listening completes the task without requiring user acceptance.
+Tasks start without `/xp start`. Every development task requires the trained
+`relay-laya-v4` checkpoint, including `/xp` and `/goal` requests. Laya selects the
+available agent profiles, tools and skills for each phase and decides whether to
+continue, advance, replan or finish. The Harness enforces permissions and evidence
+gates. All five phases proceed autonomously; validated Listening and Laya's finish
+decision complete the task without requiring user acceptance.
+
+`/laya setup` prepares the runtime. XP verifies the serving checkpoint before each
+classifier request. Missing, mismatched or invalid decisions preserve the workflow
+for recovery; XP never falls back to keyword rules, learned labels or another model.
+After recovery, `/xp resume` or a task continuation reselects the resources.
+`/xp start <task>` starts a request through the same intent path; `/xp stop` stops the workflow.
+Old workflow state is not resumed: start a new task so all five phases receive Laya
+decisions under the current contract.
+
+Selection is based on the configured tool catalog and the session's visible skills
+and available profiles. Selected profiles are applied sequentially in the current
+session; they are not independently spawned agents. Selected skill files are loaded
+with their base directories. Non-control tool calls are checked against Laya's
+selection, including nested calls. Selection does not grant additional permissions.
+`xp_checkpoint` with `reconsiderResources=true` requests a new selection without
+advancing the phase. Tool failures and tool discovery trigger reconsideration too.
 
 Each native task creates one project-local specification at `.relay/specs/<workflow-id>.md`.
 Planning records the problem, requirements, constraints, risks and acceptance criteria;
@@ -17,15 +36,15 @@ its phase's section and the session state; phase gates require all previous sect
 have been recorded. The file is a working SDD owned by the XP workflow: manual edits
 may be replaced at the next checkpoint. Checkpoint presence is enforced, but the
 harness cannot prove that the reports cover every requirement or independently verify
-which skills the executor applied. Manual `/xp` workflows
-continue using session checkpoints only.
+which skills the executor applied. Reports distinguish selected resources, observed
+tool calls and skills reported by the executor. `/xp` uses the same specification.
 
-### Autonomous execution and justified intervention
+### Autonomous execution
 
-The harness publishes a visible `xp.progress` report for each checkpoint, identifying
-the phase, responsible profile, skills reported by the executor, decisions, results and
-next step. Incomplete validation is reported as incomplete. Reports inform the user
-without requesting routine approval. No `/xp approve-spec` command is required or provided.
+The harness displays concise phase reports with the Laya decision, responsible
+profile, observed tools, reported skills, result and continuation. Full resource
+decisions are recorded as `xp.resources` entries; transition traces use `xp.decision`.
+Routine phase transitions do not request human approval.
 
 External edits, deletion or replacement of the SDD invalidate downstream reports and
 test evidence when checked before a tool call or settlement. XP returns to Design
@@ -34,26 +53,23 @@ revised checkpoint. Inspect and reconcile its contents with the authorized scope
 record the revised decisions, and repeat the downstream phases automatically. A stale
 checkpoint that encounters the change is blocked before it can overwrite the artifact.
 External content does not authorize scope expansion. Replanning clears old reports
-and the validation plan so they cannot satisfy a later cycle. During native Coding or
-Listening, use `xp_checkpoint` with `replan=true` and a concrete reason in `summary`
-to return to Planning for corrections within the authorized scope. Fresh test evidence
-is required in the new cycle.
+and the validation plan so they cannot satisfy a later cycle. Use `xp_checkpoint`
+with `replan=true` and a concrete reason in `summary` to recommend returning to
+Planning for corrections within the authorized scope. Laya decides whether to replan.
+Fresh test evidence is required in the new cycle.
 
-Request user input only for critical ambiguity, a business choice missing from context,
-scope expansion, significant destructive/security/irreversible risk, or an explicit
-authorization requirement. Complete safe independent work first. An `xp_checkpoint`
-with `intervention: { reason, question }` records a justified question and hands off
-without completing the phase. It blocks further mutations in that request and avoids
-automatic retries while waiting. After the user responds, `xp_intent` with
-`continueTask=true` resumes the same task; the response must be evaluated for the
-authorization it actually provides. Routine technical choices are not intervention reasons.
+Complete safe independent work first. A checkpoint can recommend intervention only
+for critical ambiguity, a missing business decision, scope changes, significant
+destructive, security or irreversible risk, or explicit authorization requirements.
+Laya decides whether the exception requires intervention; the current phase remains
+incomplete while waiting. Tool arguments never constitute user approval.
 
 The goal can be completed only after Listening is reported. Decision and continuation
 limits can still result in a handoff rather than an infinite loop.
 The artifact is data, never executable configuration. Reports may contain project
 information; keep credentials out of them and review what you commit.
 
-Native checkpoints use deterministic gates. For executable changes, Testing requires
+All checkpoints use Laya decisions bounded by deterministic gates. For executable changes, Testing requires
 an observed behavioral test failure or a concrete `testPlan` describing cases and
 validation to execute during Coding. This permits strategy before implementation,
 as defined in `development/arquitetura_5_etapas.md`; TDD remains appropriate for
@@ -64,82 +80,6 @@ Writes and edits are allowed during Testing and Coding. The harness prevents set
 or goal completion before the Listening report. A task cannot be reclassified as a
 question to bypass the workflow. A mutation after the Listening checkpoint in the same
 request reopens validation and invalidates completion. User acceptance is never inferred.
-
-## Optional manual control with Laya
-
-`/xp` remains available for explicit control and Laya-reviewed workflows. A coding model
-writes reports, tests and code. Laya evaluates the observed state and selects
-`continue_phase`, `advance`, `replan`, `finish` or `escalate`.
-
-```text
-/laya setup
-/xp start Implement the order discount with boundary tests
-```
-
-The workflow starts in Planning and advances through Design, Testing, Coding and Listening.
-The executor calls `xp_checkpoint` with its phase report and observed tool call IDs.
-If the executor ends its response while a phase is still active, Relay starts another
-model request with the current phase instructions. It pauses in Listening for user
-feedback. Cancelled or failed responses are not automatically restarted. Three
-completed runs without a checkpoint trigger a handoff; `/xp resume` resets that limit.
-Testing requires an observed behavioral test failure; Coding requires a successful test
-execution after the latest potentially mutating tool call. Arbitrary successful shell
-commands do not qualify. Test recognition covers common command-line runners; a custom
-runner needs an adapter before it can supply evidence. A report still needs review:
-the harness cannot prove that a test covers every acceptance criterion.
-
-Listening presents the result to the user. `/xp accept` records acceptance; Laya may then
-select `finish` if fresh test evidence also exists. Feedback can lead to `replan` and a
-new cycle. `/xp status` shows the current phase, `/xp stop` stops the workflow, and
-`/xp resume` continues a handoff with a fresh decision budget. For documentation-only
-work, explicitly use `/xp start --no-tests <goal>`.
-
-In manual Laya workflows, each checkpoint makes one classifier request with a five-second timeout and no retry.
-The thresholds are 0.5 for continuing a phase, 0.7 for transitions and 0.8 for finishing.
-When Laya supplies `answer_confidence`, the client uses that answer probability for
-the gate. Laya's separate `confidence` value measures distribution entropy and is
-not on the probability scale used by these thresholds.
-Three confidence refusals, classifier failure or fifty decisions trigger a handoff.
-Repeated decisions on unchanged observations also trigger a handoff. Reports and tool
-excerpts sent to Laya are bounded; the workflow goal and observed evidence remain in session state.
-Manual Laya workflows do not fall back when the classifier is unavailable or fails.
-An unavailable Laya cannot silently approve work. Native task transitions do not call Laya. The standard Laya model router retains its existing fallback behavior.
-
-`xp.state` session entries restore the workflow on resume and branch navigation.
-`xp.decision` entries retain the observation, compiled questions, answers, gate verdict
-and classifier errors. These records contain task reports and excerpts of tool output;
-keep secrets out of reports and follow the repository's logging policy.
-
-XP controls phase transitions. It is not a filesystem or shell sandbox and does not
-authorize deployment, messages, destructive changes or other external operations.
-Repository instructions and user permissions still govern every tool execution.
-
-## Engineering resources
-
-The `engineering` built-in extension discovers the nineteen shipped skills. Profiles
-live under `resources/agents`; Laya injects the chosen profile into the execution plan.
-XP supplies a phase-specific role: `product-owner` for Planning and Listening,
-`software-architect` for Design, `quality-assurance` for Testing and `software-engineer`
-for Coding. These are profiles applied by the executor, not separate agents spawned
-for every phase. `xp_intent` accepts an optional `agents` map by phase to select an
-existing specialist when the task warrants it, for example
-`agents: { coding: "backend-engineer", listening: "code-reviewer" }`.
-`/agent <name>` loads a role explicitly.
-
-Select skills only when they serve the actual task. Planning may use `refine-backlog`;
-Design may use `decide-architecture`, `design-service`, `design-ux-flow` or threat modeling;
-Testing and Coding may use `implement-feature-tdd`, `automate-tests` and `quality-baseline`.
-Listening uses relevant review, feedback, reliability or incident skills when needed.
-Read selected skill instructions and report only those actually applied via the
-checkpoint's optional `skills` list. The harness stores these reported selections and
-the assigned profile in the SDD, state, decision trace and visible phase report. Scale
-profile deliverables to the task; no skill or extra collaborator is required solely
-to satisfy a phase.
-Trusted project `.relay/agents/<name>.md` overrides the global profile, which overrides
-the distributed profile. Existing specialist roles without a distributed profile continue
-using their routing description. The expanded role choices change the training question
-contract: export `/laya decisions` when preparing new training data. Existing checkpoints
-are not automatically retrained, and their accuracy on the additional choices must be evaluated.
 
 ## Native browser
 

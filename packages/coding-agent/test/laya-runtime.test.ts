@@ -73,7 +73,13 @@ describe("laya image", () => {
 		expect(cpu.Dockerfile).toContain('pip install "laya[serve]==0.0.0"');
 		expect(cpu.Dockerfile).toContain(`fetch_model.py /opt/laya/model.json ${LAYA_IMAGE_PATHS.shippedModel}`);
 		expect(layaImageContext(manifest, "cuda").Dockerfile).toContain("https://download.pytorch.org/whl/cu128");
-		expect(JSON.parse(cpu["model.json"])).toEqual({ baseUrl: manifest.baseUrl, files: manifest.files });
+		expect(JSON.parse(cpu["model.json"])).toEqual({
+			version: manifest.version,
+			baseUrl: manifest.baseUrl,
+			files: manifest.files,
+		});
+		expect(cpu["serve.py"]).toContain('"version": version');
+		expect(cpu["serve.py"]).toContain("required != version");
 		expect(cpu["train.py"]).toContain("def cmd_learn(a):");
 		expect(cpu["serve.py"]).toContain('@app.post("/v1/systemone")');
 	});

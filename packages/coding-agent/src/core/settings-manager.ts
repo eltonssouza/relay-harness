@@ -146,15 +146,19 @@ export interface LayaSettings {
 	toolRetrieval?: number;
 	/** Record aggregate deferred-tool retrieval metrics locally; requires telemetry to be enabled. Default: false. */
 	toolRetrievalTelemetry?: boolean;
-	/** Install Laya in Docker when Relay starts and keep its container running. Default: true. */
+	/** Install and start Laya when Relay starts interactively. Default: true. */
 	autostart?: boolean;
+	/** Inference runtime. Default: native CPU; image overrides and volume checkpoints use Docker. */
+	runtime?: "native" | "docker";
+	/** Existing Python 3.10–3.13 executable for the isolated native CPU runtime. */
+	python?: string;
 	/** Docker image of Laya. Default: the image built from this Relay version on ghcr.io. */
 	image?: string;
 	/** Write routing telemetry to the agent directory. Default: true. */
 	telemetry?: boolean;
 	/** Route requests similar to tasks learned with `/laya learn` by their labels, and show their lessons. Default: true. */
 	memory?: boolean;
-	/** Classifier request timeout in milliseconds before falling back to keyword rules. Default: 5000. */
+	/** Classifier timeout before keyword fallback. Default: 60000 for native CPU, 5000 for Docker. */
 	timeoutMs?: number;
 }
 
