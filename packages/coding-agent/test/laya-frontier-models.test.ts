@@ -21,12 +21,7 @@ describe("Laya frontier models", () => {
 		expect(registry.balanced).toContain("github-copilot/gemini-3.8-flash");
 		expect(registry.strong).toContain("github-copilot/claude-opus-5.5");
 		expect(registry.strong).toContain("github-copilot/gpt-6-sol");
-		expect(registry.frontier).toEqual([
-			"github-copilot/claude-fable-5.1",
-			"github-copilot/claude-fable-5",
-			"github-copilot/gpt-6-astra",
-			"github-copilot/gpt-6.1-sol",
-		]);
+		expect(registry.frontier).toEqual(["github-copilot/gpt-6-astra", "github-copilot/gpt-6.1-sol"]);
 	});
 
 	it("classifies OpenAI API models when following the OpenAI provider", () => {
@@ -43,12 +38,12 @@ describe("Laya frontier models", () => {
 		expect(registry.frontier).toEqual(["openai-codex/gpt-6.1-sol", "openai-codex/gpt-6-astra"]);
 	});
 
-	it("retains both Fable generations within the selected Anthropic provider", () => {
+	it("never offers Fable when following the selected Anthropic provider", () => {
 		const { registry } = scopedModelRegistry(
 			{ followProvider: true },
 			{ provider: "anthropic", id: "claude-fable-5" },
 		);
-		expect(registry.frontier).toEqual(["anthropic/claude-fable-5-1", "anthropic/claude-fable-5"]);
+		expect(registry.frontier).toEqual([]);
 	});
 
 	it("does not leak cloud models into an explicitly mapped local group", () => {

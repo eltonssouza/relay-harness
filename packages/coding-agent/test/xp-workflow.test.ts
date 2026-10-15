@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyXpAction, type XpEvidence, type XpState, xpObservation } from "../src/extensions/xp/workflow.ts";
 
 const state = (): XpState => ({
-	version: 1,
+	version: 2,
 	id: "run",
 	goal: "Fix discount",
 	phase: "planning",
@@ -11,6 +11,9 @@ const state = (): XpState => ({
 	refusals: 0,
 	revision: 1,
 	accepted: false,
+	automatic: true,
+	specificationPath: ".relay/specs/run.md",
+	specificationPhases: ["planning", "design", "testing", "coding", "listening"],
 	testsRequired: true,
 	evidence: [],
 });
@@ -39,13 +42,43 @@ describe("XP phase evidence", () => {
 		const current = { ...state(), phase: "coding" as const, evidence: [{ ...proof(false), command: "echo passed" }] };
 		expect(xpObservation(current, "Done", ["test-1"]).actions.advance).toBeUndefined();
 	});
-	it("invalidates green evidence after mutations and requires user acceptance", () => {
+	it("invalidates green evidence after mutations without requiring user acceptance", () => {
 		const current = { ...state(), phase: "listening" as const, evidence: [proof(false)] };
-		expect(xpObservation(current, "Done", ["test-1"]).goalReached).toBe(false);
-		current.accepted = true;
 		expect(xpObservation(current, "Done", ["test-1"]).goalReached).toBe(true);
 		current.revision++;
 		expect(xpObservation(current, "Done", ["test-1"]).goalReached).toBe(false);
+	});
+	it("finishes native tasks without acceptance only after every phase and fresh validation", () => {
+		const current: XpState = {
+			...state(),
+			phase: "listening",
+			automatic: true,
+			specificationPath: ".relay/specs/run.md",
+			specificationPhases: ["planning", "design", "testing", "coding", "listening"],
+			evidence: [proof(false)],
+		};
+		expect(xpObservation(current, "Validated outcome", ["test-1"]).goalReached).toBe(true);
+		current.revision++;
+		expect(xpObservation(current, "Validated outcome", ["test-1"]).goalReached).toBe(false);
+		current.revision--;
+		current.specificationPhases = ["planning", "design", "coding", "listening"];
+		expect(xpObservation(current, "Validated outcome", ["test-1"]).goalReached).toBe(false);
+	});
+	it("requires the recorded Testing report for a strategy and fresh execution during Coding", () => {
+		const current: XpState = {
+			...state(),
+			phase: "testing",
+			testPlan: "Verify normal, boundary and rejection cases during Coding",
+			specificationPhases: ["planning", "design"],
+		};
+		expect(xpObservation(current, "Tests planned", []).actions.advance).toBeUndefined();
+		current.automatic = true;
+		current.specificationPath = ".relay/specs/run.md";
+		current.specificationPhases = ["planning", "design", "testing"];
+		expect(xpObservation(current, "Tests planned", []).actions.advance).toBeDefined();
+		current.phase = "coding";
+		current.specificationPhases.push("coding");
+		expect(xpObservation(current, "Tests planned", []).actions.advance).toBeUndefined();
 	});
 	it("advances in order and clears acceptance on replanning", () => {
 		const current = state();
@@ -54,7 +87,13 @@ describe("XP phase evidence", () => {
 			expect(current.phase).toBe(phase);
 		}
 		current.accepted = true;
+		current.specificationPhases = ["planning", "design", "testing", "coding", "listening"];
+		current.specificationReports = { planning: "Old scope", design: "Old design" };
+		current.testPlan = "Old validation";
 		applyXpAction(current, "replan");
 		expect(current).toMatchObject({ phase: "planning", accepted: false, revision: 2 });
+		expect(current.specificationPhases).toEqual([]);
+		expect(current.specificationReports).toEqual({});
+		expect(current.testPlan).toBeUndefined();
 	});
 });

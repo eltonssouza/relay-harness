@@ -5,7 +5,7 @@ import type { LayaModelManifest } from "./runtime.ts";
  * do not edit by hand. The files live at `https://huggingface.co/eltonssouza/relay-laya/resolve/94cfb67024e9538729686085e1a63c26301520cb/`.
  */
 export const LAYA_MODEL_MANIFEST: LayaModelManifest = {
-	version: "v4-library-retry",
+	version: "relay-laya-v4",
 	layaPackage: "laya[serve]==0.3.27",
 	baseUrl: "https://huggingface.co/eltonssouza/relay-laya/resolve/94cfb67024e9538729686085e1a63c26301520cb/",
 	files: [

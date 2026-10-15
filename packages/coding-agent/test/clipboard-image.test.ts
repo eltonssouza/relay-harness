@@ -11,6 +11,11 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("../src/utils/clipboard-command.ts", () => ({ runClipboardCommand: mocks.command }));
 vi.mock("@relay-harness/tui", () => ({ getNativeClipboard: mocks.getNativeClipboard }));
+// PR #65: simulated clipboard platforms must not inherit the host's WSL kernel.
+// Kernel detection itself is covered in wsl.test.ts.
+vi.mock("../src/utils/wsl.ts", () => ({
+	isWSL: (env: NodeJS.ProcessEnv) => Boolean(env.WSL_DISTRO_NAME || env.WSLENV),
+}));
 
 function commandResult(stdout: Buffer, status = 0): Buffer | undefined {
 	return status === 0 ? stdout : undefined;

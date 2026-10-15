@@ -788,6 +788,8 @@ export type AssistantMessageEvent =
  * Use this to override URL-based auto-detection for custom providers.
  */
 export interface OpenAICompletionsCompat {
+	/** Whether the exact model accepts function tools. Default: true. */
+	supportsTools?: boolean;
 	/** Whether the provider supports the `store` field. Default: auto-detected from URL. */
 	supportsStore?: boolean;
 	/** Whether the provider supports the `developer` role (vs `system`). Default: auto-detected from URL. */

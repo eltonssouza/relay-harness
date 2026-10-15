@@ -170,6 +170,7 @@ interface OpenAICompatCacheControl {
 type ResolvedOpenAICompletionsCompat = Omit<
 	Required<OpenAICompletionsCompat>,
 	| "cacheControlFormat"
+	| "supportsTools"
 	| "supportsThinkingTokenBudget"
 	| "thinkingTokenBudgetField"
 	| "supportsMidConvoSystemMessages"
@@ -177,6 +178,7 @@ type ResolvedOpenAICompletionsCompat = Omit<
 	| "vllmPriority"
 > & {
 	cacheControlFormat?: OpenAICompletionsCompat["cacheControlFormat"];
+	supportsTools?: OpenAICompletionsCompat["supportsTools"];
 	supportsThinkingTokenBudget?: OpenAICompletionsCompat["supportsThinkingTokenBudget"];
 	thinkingTokenBudgetField?: OpenAICompletionsCompat["thinkingTokenBudgetField"];
 	supportsMidConvoSystemMessages?: OpenAICompletionsCompat["supportsMidConvoSystemMessages"];
@@ -852,7 +854,9 @@ function buildParams(
 		params.temperature = options.temperature;
 	}
 
-	if (transcriptTools.requestTools.length > 0) {
+	if (compat.supportsTools === false) {
+		// Some OpenAI-compatible endpoints reject requests that include tools.
+	} else if (transcriptTools.requestTools.length > 0) {
 		params.tools = convertTools(transcriptTools.requestTools, compat);
 		if (compat.zaiToolStream) {
 			(params as any).tool_stream = true;
@@ -1698,6 +1702,7 @@ function getCompat(model: Model<"openai-completions">): ResolvedOpenAICompletion
 	if (!model.compat) return detected;
 
 	return {
+		supportsTools: model.compat.supportsTools,
 		supportsStore: model.compat.supportsStore ?? detected.supportsStore,
 		supportsDeveloperRole: model.compat.supportsDeveloperRole ?? detected.supportsDeveloperRole,
 		supportsReasoningEffort: model.compat.supportsReasoningEffort ?? detected.supportsReasoningEffort,

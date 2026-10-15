@@ -10,6 +10,7 @@ import { CacheWarmer } from "./cache-warmer.ts";
 import { DEFAULT_THINKING_LEVEL } from "./defaults.ts";
 import type { ExtensionRunner, LoadExtensionsResult, SessionStartEvent, ToolDefinition } from "./extensions/index.ts";
 import { convertToLlm } from "./messages.ts";
+import { isEligibleChatModel } from "./model-eligibility.ts";
 import { findInitialModel } from "./model-resolver.ts";
 import { ModelRuntime } from "./model-runtime.ts";
 import { mergeProviderAttributionHeaders } from "./provider-attribution.ts";
@@ -206,6 +207,11 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 
 	// If session has data, try to restore model from it
 	if (!model && hasExistingSession && sessionModel) {
+		if (!isEligibleChatModel(sessionModel.provider, sessionModel.modelId)) {
+			throw new Error(
+				`Model ${sessionModel.provider}/${sessionModel.modelId} is not permitted by the current model policy`,
+			);
+		}
 		const restoredModel = modelRuntime.getModel(sessionModel.provider, sessionModel.modelId);
 		if (restoredModel && modelRuntime.hasConfiguredAuth(restoredModel.provider)) {
 			model = restoredModel;
@@ -232,6 +238,9 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 		} else if (modelFallbackMessage) {
 			modelFallbackMessage += `. Using ${model.provider}/${model.id}`;
 		}
+	}
+	if (model && !isEligibleChatModel(model.provider, model.id)) {
+		throw new Error(`Model ${model.provider}/${model.id} is not permitted by the current model policy`);
 	}
 
 	let thinkingLevel = options.thinkingLevel;

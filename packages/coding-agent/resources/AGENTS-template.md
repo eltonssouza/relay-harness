@@ -27,3 +27,9 @@ To ensure consistency, accuracy, and reliability, agents must **NEVER** engage i
 ### 4. Never Assume a Task Is Finished Without Double-Checking
 * **Directive:** Do not consider a task complete without thoroughly reviewing the output against requirements and validating for errors[cite: 1].
 * **Rule:** Always perform a final double-check (verification, build test, or output review) before marking the task as done[cite: 1].
+
+---
+
+### 5. Never Mention AI or LLM Usage in Commits
+* **Directive:** Never mention AI, LLM usage, Claude, GPT, Copilot, Gemini, or any other model or assistant used to perform the work in commit messages. This prohibition applies to commit subjects, bodies, and trailers.
+* **Rule:** Describe only the technical changes. Never add model-use disclosures, generated-by notes, or assistant/model attribution, including `Co-Authored-By` trailers that credit an assistant or model.

@@ -15,6 +15,7 @@ import {
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { ENV_AGENT_DIR } from "../src/config.ts";
+import type { LayaSettings } from "../src/core/settings-manager.ts";
 import { getVirtualModelState } from "../src/core/virtual-models.ts";
 import {
 	assessmentFromAnswers,
@@ -232,11 +233,9 @@ describe("provider-scoped model registry", () => {
 		const settings = { followProvider: true, models: { fast: ["lmstudio/qwen-7b"] } };
 		expect(scopedModelRegistry(settings, { provider: "anthropic", id: "claude-sonnet-5-5" }).registry.fast).toEqual([
 			"anthropic/claude-haiku-5-5",
-			"anthropic/claude-haiku-4-5",
 		]);
-		expect(scopedModelRegistry(settings, { provider: "openai-codex", id: "gpt-6-sol" }).registry.fast).toEqual([
+		expect(scopedModelRegistry(settings, { provider: "openai-codex", id: "gpt-6.1-sol" }).registry.fast).toEqual([
 			"openai-codex/gpt-6-luna",
-			"openai-codex/gpt-5.6-luna",
 		]);
 	});
 
@@ -397,13 +396,13 @@ describe("laya/auto router", () => {
 	async function setup(
 		script: Script | undefined,
 		tools: Array<AgentTool & { exposure?: "deferred" | "hidden" }>,
-		settings: Record<string, unknown> = {},
+		settings: LayaSettings = {},
 		extraProviders: Array<ReturnType<typeof fauxProvider>> = [],
 		extensionOptions: Parameters<typeof layaExtension>[1] = {},
 	) {
 		const anthropic = fauxProvider({
 			provider: "anthropic",
-			models: ["claude-haiku-4-5", "claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"].map((id) => ({
+			models: ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"].map((id) => ({
 				id,
 				reasoning: true,
 			})),
@@ -469,7 +468,7 @@ describe("laya/auto router", () => {
 				.trim()
 				.split("\n")
 				.map((line) => JSON.parse(line) as TelemetryRecord);
-		return { harness, respond, dispatched, plan, telemetry, requests };
+		return { harness, respond, dispatched, plan, telemetry, requests, models: anthropic.models };
 	}
 
 	const call = (tool: string) => fauxAssistantMessage(fauxToolCall(tool, { path: "a.ts" }), { stopReason: "toolUse" });
@@ -513,20 +512,82 @@ describe("laya/auto router", () => {
 		expect(plan()[1]).not.toContain("Isolate dependencies and assert observable behavior.");
 	});
 
+	it.each(["models", "modelGroups"] as const)(
+		"never dispatches Fable from explicit %s, even on frontier fallback",
+		async (source) => {
+			const modelRefs = {
+				fast: ["anthropic/claude-haiku-5-5"],
+				balanced: [],
+				strong: [],
+				frontier: ["anthropic/claude-fable-5-1"],
+			};
+			const settings: LayaSettings =
+				source === "models"
+					? { followProvider: false, models: modelRefs }
+					: {
+							followProvider: true,
+							models: { fast: [], balanced: [], strong: [], frontier: [] },
+							modelGroups: { restricted: modelRefs },
+						};
+			const { harness, respond, dispatched, telemetry } = await setup(
+				{ ...SIMPLE_FIX, tier: "frontier" },
+				[],
+				settings,
+			);
+			if (source === "modelGroups") {
+				await harness.session.setModel(harness.session.modelRuntime.getModel("anthropic", "claude-haiku-5-5")!);
+				await harness.session.setModel(harness.session.modelRuntime.getModel("laya", "auto")!);
+			}
+			respond(fauxAssistantMessage("done"));
+			await harness.session.prompt("Handle a frontier task");
+			expect(telemetry().at(-1)?.selected.model).toBe("claude-haiku-5-5");
+			expect(dispatched()).toEqual(["haiku-5-5:low"]);
+		},
+	);
+
+	it("fails routing instead of dispatching Fable when no eligible candidate exists", async () => {
+		const { harness } = await setup({ ...SIMPLE_FIX, tier: "frontier" }, [], {
+			followProvider: false,
+			models: { fast: [], balanced: [], strong: [], frontier: ["anthropic/claude-fable-5-1"] },
+		});
+		await harness.session.prompt("Handle a frontier task");
+		const reply = harness.session.messages.filter((message) => message.role === "assistant").at(-1);
+		expect(reply?.stopReason).toBe("error");
+		expect(reply?.errorMessage).toContain("no model of the Laya model registry");
+		expect(reply?.model).toBe("auto");
+	});
+
+	it("rejects manual selection of a raw Fable model without changing the current model", async () => {
+		const { harness, models } = await setup(SIMPLE_FIX, []);
+		const current = harness.session.model;
+		const fable = models.find((model) => model.id === "claude-fable-5-1")!;
+		expect(fable).toBeDefined();
+		await expect(harness.session.setModel(fable)).rejects.toThrow("not permitted by the current model policy");
+		expect(harness.session.model).toEqual(current);
+	});
+
 	it.each(["openai-codex", "lmstudio", "glm", "kimi", "qwen"])(
 		"follows %s across all four tiers despite competing Claude models",
 		async (provider) => {
-			const ids = ["small", "medium", "large", "largest"];
+			const ids =
+				provider === "openai-codex"
+					? ["gpt-6-luna", "gpt-5.6-terra", "gpt-6-astra", "gpt-6.1-sol"]
+					: ["small", "medium", "large", "largest"];
 			const other = fauxProvider({ provider, models: ids.map((id) => ({ id, reasoning: true })) });
 			const models = {
-				fast: [`${provider}/small`],
-				balanced: [`${provider}/medium`],
-				strong: [`${provider}/large`],
-				frontier: [`${provider}/largest`],
+				fast: [`${provider}/${ids[0]}`],
+				balanced: [`${provider}/${ids[1]}`],
+				strong: [`${provider}/${ids[2]}`],
+				frontier: [`${provider}/${ids[3]}`],
 			};
 			const script = { ...SIMPLE_FIX };
-			const { harness, telemetry } = await setup(script, [], { followProvider: true, models }, [other]);
-			await harness.session.setModel(harness.session.modelRuntime.getModel(provider, "large")!);
+			const { harness, telemetry } = await setup(
+				script,
+				[],
+				{ followProvider: true, modelGroups: { test: models } },
+				[other],
+			);
+			await harness.session.setModel(harness.session.modelRuntime.getModel(provider, ids[2])!);
 			for (const [index, tier] of ["fast", "balanced", "strong", "frontier"].entries()) {
 				script.tier = tier;
 				other.appendResponses([fauxAssistantMessage("done")]);
@@ -659,13 +720,13 @@ describe("laya/auto router", () => {
 		await harness.session.prompt("Fix the off-by-one in the pager.");
 
 		expect(requests).toEqual(["Fix the off-by-one in the pager."]);
-		expect(dispatched()).toEqual(["haiku-4-5:low", "haiku-4-5:low"]);
+		expect(dispatched()).toEqual(["haiku-5-5:low", "haiku-5-5:low"]);
 		expect(plan()[0]).toContain("Role: act as software-engineer");
 		expect(plan()[0]).toContain("Validation (required): run the unit tests");
 		expect(telemetry()).toMatchObject([
 			{
 				classification: { source: "laya", type: "bug_fix" },
-				selected: { provider: "anthropic", model: "claude-haiku-4-5", tier: "fast", thinking_level: "low" },
+				selected: { provider: "anthropic", model: "claude-haiku-5-5", tier: "fast", thinking_level: "low" },
 				result: { success: true, outcome: "completed", attempts: 1, escalations: [] },
 			},
 		]);
@@ -689,7 +750,7 @@ describe("laya/auto router", () => {
 		respond(call("edit"), call("edit"), fauxAssistantMessage("done"));
 		await harness.session.prompt("Fix the off-by-one in the pager.");
 
-		expect(dispatched()).toEqual(["haiku-4-5:low", "haiku-4-5:low", "sonnet-5-5:low"]);
+		expect(dispatched()).toEqual(["haiku-5-5:low", "haiku-5-5:low", "sonnet-5-5:low"]);
 		expect(telemetry()[0].result).toMatchObject({
 			attempts: 2,
 			escalations: [{ reason: "repeated_failure", from: "fast", to: "balanced" }],
@@ -875,7 +936,7 @@ describe("laya/auto router", () => {
 		expect(harness.session.getActiveToolNames()).toEqual(["read"]);
 		expect(plan()[0]).toContain("Deactivated for this request: edit");
 
-		await harness.session.setModel(harness.session.modelRuntime.getModel("anthropic", "claude-haiku-4-5")!);
+		await harness.session.setModel(harness.session.modelRuntime.getModel("anthropic", "claude-haiku-5-5")!);
 		respond(fauxAssistantMessage("done"));
 		await harness.session.prompt("Now rename it.");
 		expect(harness.session.getActiveToolNames()).toEqual(["read", "edit"]);
@@ -888,7 +949,7 @@ describe("laya/auto router", () => {
 		await harness.session.prompt("Corrija o texto deste botão para 'Salvar'.");
 		await harness.session.prompt("Corrija o texto deste botão para 'Enviar'.");
 
-		expect(dispatched()).toEqual(["haiku-4-5:minimal", "haiku-4-5:minimal"]);
+		expect(dispatched()).toEqual(["haiku-5-5:minimal", "haiku-5-5:minimal"]);
 		expect(telemetry().map((record) => record.classification.source)).toEqual(["heuristic", "heuristic"]);
 	});
 
@@ -930,7 +991,7 @@ describe("laya/auto router", () => {
 	it("gives the lessons of similar tasks to a model laya/auto does not route", async () => {
 		learnTask();
 		const { harness, respond } = await setup(undefined, []);
-		await harness.session.setModel(harness.session.modelRuntime.getModel("anthropic", "claude-haiku-4-5")!);
+		await harness.session.setModel(harness.session.modelRuntime.getModel("anthropic", "claude-haiku-5-5")!);
 
 		respond(fauxAssistantMessage("done"), fauxAssistantMessage("ok"));
 		await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos");

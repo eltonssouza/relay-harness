@@ -29,6 +29,7 @@ import {
 	type ImageModel,
 	type ImagesContext,
 	type ImagesOptions,
+	isModelType,
 	type LoginOptions,
 	lazyStream,
 	type Message,
@@ -68,6 +69,7 @@ import { getAgentDir } from "../config.ts";
 import { operationSignal, raceWithAbortSignal } from "../utils/abort.ts";
 import { AuthStorage as DefaultAuthStorage } from "./auth-storage.ts";
 import { ModelConfig } from "./model-config.ts";
+import { isEligibleChatModel } from "./model-eligibility.ts";
 import { FileModelsStore, InMemoryCodingAgentModelsStore } from "./models-store.ts";
 import {
 	type AuthStatus,
@@ -293,7 +295,7 @@ export class ModelRuntime implements Models {
 	}
 
 	private updateModelSnapshot(): void {
-		const all = [...this.models.getModels()];
+		const all = [...this.getModels()];
 		this.snapshot = {
 			...this.snapshot,
 			all,
@@ -323,8 +325,8 @@ export class ModelRuntime implements Models {
 				.map(([providerId]) => providerId),
 		);
 		this.snapshot = {
-			all: [...this.models.getModels()],
-			available: [...available],
+			all: [...this.getModels()],
+			available: available.filter((model) => isEligibleChatModel(model.provider, model.id)),
 			configuredProviders,
 			storedProviders: new Set(credentials.map((entry) => entry.providerId)),
 			auth,
@@ -373,12 +375,12 @@ export class ModelRuntime implements Models {
 			}
 			if (credential) storedProviders.add(providerId);
 			else storedProviders.delete(providerId);
-			const all = [...this.models.getModels()];
+			const all = [...this.getModels()];
 			const availableById = new Map(
-				[...this.snapshot.available.filter((model) => model.provider !== providerId), ...available].map((model) => [
-					`${model.provider}\0${model.id}`,
-					model,
-				]),
+				[
+					...this.snapshot.available.filter((model) => model.provider !== providerId),
+					...available.filter((model) => isEligibleChatModel(model.provider, model.id)),
+				].map((model) => [`${model.provider}\0${model.id}`, model]),
 			);
 			this.snapshot = {
 				all,
@@ -409,15 +411,17 @@ export class ModelRuntime implements Models {
 	}
 
 	getModels(providerId?: string): readonly Model<Api>[] {
-		return this.models.getModels(providerId);
+		return this.models.getModels(providerId).filter((model) => isEligibleChatModel(model.provider, model.id));
 	}
 
 	getModel(providerId: string, modelId: string): Model<Api> | undefined {
-		return this.models.getModel(providerId, modelId);
+		return isEligibleChatModel(providerId, modelId) ? this.models.getModel(providerId, modelId) : undefined;
 	}
 
 	getModelsOfType<TType extends ModelType>(type: TType, providerId?: string): readonly ModelTypeMap[TType][] {
-		return this.models.getModelsOfType(type, providerId);
+		return this.models
+			.getModelsOfType(type, providerId)
+			.filter((model) => type !== "chat" || isEligibleChatModel(model.provider, model.id));
 	}
 
 	getModelOfType<TType extends ModelType>(
@@ -425,11 +429,15 @@ export class ModelRuntime implements Models {
 		providerId: string,
 		modelId: string,
 	): ModelTypeMap[TType] | undefined {
-		return this.models.getModelOfType(type, providerId, modelId);
+		return type !== "chat" || isEligibleChatModel(providerId, modelId)
+			? this.models.getModelOfType(type, providerId, modelId)
+			: undefined;
 	}
 
 	getAllModels(providerId?: string): readonly AnyModel[] {
-		return this.models.getAllModels(providerId);
+		return this.models
+			.getAllModels(providerId)
+			.filter((model) => !isModelType(model, "chat") || isEligibleChatModel(model.provider, model.id));
 	}
 
 	getAvailableOfType<TType extends ModelType>(
@@ -437,11 +445,15 @@ export class ModelRuntime implements Models {
 		providerId?: string,
 		options?: AuthOperationOptions,
 	): Promise<readonly ModelTypeMap[TType][]> {
-		return this.models.getAvailableOfType(type, providerId, options);
+		return this.models
+			.getAvailableOfType(type, providerId, options)
+			.then((models) => models.filter((model) => type !== "chat" || isEligibleChatModel(model.provider, model.id)));
 	}
 
-	getAllAvailable(providerId?: string, options?: AuthOperationOptions): Promise<readonly AnyModel[]> {
-		return this.models.getAllAvailable(providerId, options);
+	async getAllAvailable(providerId?: string, options?: AuthOperationOptions): Promise<readonly AnyModel[]> {
+		return (await this.models.getAllAvailable(providerId, options)).filter(
+			(model) => !isModelType(model, "chat") || isEligibleChatModel(model.provider, model.id),
+		);
 	}
 
 	async checkAuth(providerId: string, options?: AuthOperationOptions): Promise<AuthCheck | undefined> {
@@ -454,7 +466,7 @@ export class ModelRuntime implements Models {
 			try {
 				const available = await this.models.getAvailable(providerId, options);
 				if (errorSeq === this.availabilityErrorSeq) this.availabilityError = undefined;
-				return available;
+				return available.filter((model) => isEligibleChatModel(model.provider, model.id));
 			} catch (error) {
 				if (errorSeq === this.availabilityErrorSeq && !options?.signal?.aborted) {
 					this.availabilityError = error instanceof Error ? error.message : String(error);
@@ -628,6 +640,12 @@ export class ModelRuntime implements Models {
 		model: TModel;
 		options: Omit<TOptions, "transformHeaders"> & ProviderRequestOptions<TModel>;
 	}> {
+		if (isModelType(model, "chat") && !isEligibleChatModel(model.provider, model.id)) {
+			throw new ModelsError(
+				"model_validation",
+				`Model ${model.provider}/${model.id} is not permitted by the current model policy`,
+			);
+		}
 		const provider = this.models.getProvider(model.provider);
 		if (!provider) throw new ModelsError("provider", `Unknown provider: ${model.provider}`);
 		const resolution = await this.getAuth(model, {
@@ -995,7 +1013,7 @@ export class ModelRuntime implements Models {
 
 	/** A catalog chat model that is not virtual. */
 	getPhysicalModel(providerId: string, modelId: string): Model<Api> | undefined {
-		const model = this.models.getModel(providerId, modelId);
+		const model = this.getModel(providerId, modelId);
 		return model && !isVirtualModel(model) ? model : undefined;
 	}
 }

@@ -1,3 +1,4 @@
+import { isEligibleChatModel } from "../../core/model-eligibility.ts";
 import type { LayaSettings } from "../../core/settings-manager.ts";
 import { DEFAULT_MODEL_REGISTRY, parseModelRef } from "./policy.ts";
 import { CAPABILITY_TIERS, type CapabilityTier } from "./questions.ts";
@@ -9,7 +10,16 @@ export function scopedModelRegistry(
 	settings: LayaSettings,
 	selected?: { provider: string; id: string },
 ): { registry: TierRegistry; scope?: string } {
-	if (!settings.followProvider) return { registry: { ...DEFAULT_MODEL_REGISTRY, ...settings.models } };
+	if (!settings.followProvider) {
+		const registry: TierRegistry = {};
+		for (const tier of CAPABILITY_TIERS) {
+			registry[tier] = (settings.models?.[tier] ?? DEFAULT_MODEL_REGISTRY[tier]).filter((ref) => {
+				const model = parseModelRef(ref);
+				return model && isEligibleChatModel(model.provider, model.id);
+			});
+		}
+		return { registry };
+	}
 	if (!selected) {
 		throw new Error("laya/auto: select a physical model first so Laya knows which provider to follow.");
 	}
@@ -24,9 +34,10 @@ export function scopedModelRegistry(
 		const refs = group
 			? (group[1][tier] ?? [])
 			: [...DEFAULT_MODEL_REGISTRY[tier], ...(settings.models?.[tier] ?? [])];
-		registry[tier] = [...new Set(refs)].filter(
-			(candidate) => parseModelRef(candidate)?.provider === selected.provider,
-		);
+		registry[tier] = [...new Set(refs)].filter((candidate) => {
+			const model = parseModelRef(candidate);
+			return model?.provider === selected.provider && isEligibleChatModel(model.provider, model.id);
+		});
 	}
 	return { registry, scope: group ? `${selected.provider} (${group[0]})` : selected.provider };
 }

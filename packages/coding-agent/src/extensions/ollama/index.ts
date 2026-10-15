@@ -71,6 +71,7 @@ export async function discoverOllamaModels(url: URL, signal?: AbortSignal): Prom
 					input: info.capabilities.includes("vision") ? ["text", "image"] : ["text"],
 					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 					compat: {
+						supportsTools: info.capabilities.includes("tools"),
 						supportsStore: false,
 						supportsDeveloperRole: false,
 						supportsReasoningEffort: false,
