@@ -39,6 +39,7 @@
 - When regressions tests for fixing a github issue, add a comment with the github issue number next to the test.
 - For ad-hoc scripts, `write` them to a temp file (e.g. `/tmp`), run, edit if needed, remove when done. Don't embed multi-line scripts in `bash` commands.
 - Never commit unless the user asks.
+- For local CI parity on Windows, run Linux-only socket/process tests in a Linux container with Node 22 as a non-root user. Use an init/subreaper (`docker run --init` or `tini -s`) so orphaned worker processes are reaped. The `find` tests need `fd` supporting `--no-require-git` (10.2.0 works; Debian Bookworm's 8.6.0 does not). Docker Desktop shares the WSL kernel: platform unit tests must isolate WSL detection instead of inheriting the host's `/proc/version`.
 
 ## Native Task and Local Runtime Integration
 

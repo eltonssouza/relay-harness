@@ -3,9 +3,9 @@
  *
  * Registers `jev/auto`, which routes between three OpenAI Codex models:
  *
- * - Planning: GPT-5.6 Sol for complex work, GPT-5.6 Terra otherwise. The Jev classifier rates the
+ * - Planning: GPT-6.1 Sol for complex work, GPT-5.6 Terra otherwise. The Jev classifier rates the
  *   first user message; planning stays on the chosen model.
- * - Implementation: GPT-5.6 Luna.
+ * - Implementation: GPT-6 Luna.
  *
  * The planning model explores, plans, and makes the first edit. After the first successful `edit`
  * or `write` tool call, the next request of the same turn goes to Luna, and the session stays
@@ -23,9 +23,9 @@ import type { Message } from "@relay-harness/ai";
 import type { ExtensionAPI, ExtensionContext, ModelRoute, ModelRouteRequest } from "@relay-harness/coding-agent";
 
 const PROVIDER = "openai-codex";
-const SOL = "gpt-5.6-sol";
+const SOL = "gpt-6.1-sol";
 const TERRA = "gpt-5.6-terra";
-const LUNA = "gpt-5.6-luna";
+const LUNA = "gpt-6-luna";
 
 /** Tools whose successful result means implementation has started. */
 const EDIT_TOOLS = new Set(["edit", "write"]);

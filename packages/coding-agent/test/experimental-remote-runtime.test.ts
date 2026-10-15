@@ -123,10 +123,11 @@ describe("experimental durable server composition", () => {
 		await expect(startServer({ directory, provider: "anthropic" })).rejects.toThrow("provider requires a model");
 	});
 
+	// PR #65: use an eligible alternate model so persistence is exercised, not selection rejection.
 	serverTest("preserves an existing Session model when the server default changes", async () => {
 		await writeFile(
 			join(agentDir, "settings.json"),
-			JSON.stringify({ defaultProvider: "anthropic", defaultModel: "claude-opus-4-6" }),
+			JSON.stringify({ defaultProvider: "anthropic", defaultModel: "claude-opus-5-5" }),
 		);
 		const directory = await mkdtemp(join(tempRoot, "pes-"));
 		directories.add(directory);
@@ -145,12 +146,12 @@ describe("experimental durable server composition", () => {
 		clients.delete(secondClient);
 		await expect.poll(() => second.workerPids.has("demo-1")).toBe(false);
 		const state = await readExperimentalSessionState(second.sessionDir, "demo-1");
-		expect(state.model).toEqual({ provider: "anthropic", modelId: "claude-opus-4-6" });
+		expect(state.model).toEqual({ provider: "anthropic", modelId: "claude-opus-5-5" });
 	});
 
 	serverTest("rejects model options when discovery selects an existing server", async () => {
 		const { directory } = await makeServer();
-		await expect(runClient({ command: "client", model: "anthropic/claude-opus-4-6" }, { directory })).rejects.toThrow(
+		await expect(runClient({ command: "client", model: "anthropic/claude-opus-5-5" }, { directory })).rejects.toThrow(
 			"Model selection is only valid when automatically activating a new server",
 		);
 	});
@@ -444,7 +445,7 @@ describe("experimental durable server composition", () => {
 		const firstServices = createSessionServiceBinding(firstClient, { services: [Models] });
 		const firstModels = firstServices.use(Models);
 		await firstServices.ready(BACKGROUND_CONTEXT);
-		await firstModels.select({ provider: "anthropic", modelId: "claude-opus-4-6" }, BACKGROUND_CONTEXT);
+		await firstModels.select({ provider: "anthropic", modelId: "claude-opus-5-5" }, BACKGROUND_CONTEXT);
 		await firstServices.dispose(BACKGROUND_CONTEXT);
 		await firstClient.dispose();
 		clients.delete(firstClient);
@@ -456,7 +457,7 @@ describe("experimental durable server composition", () => {
 		await secondServices.ready(BACKGROUND_CONTEXT);
 		expect(secondModels.state.value?.configuration.model).toEqual({
 			provider: "anthropic",
-			modelId: "claude-opus-4-6",
+			modelId: "claude-opus-5-5",
 		});
 		await secondServices.dispose(BACKGROUND_CONTEXT);
 	});
