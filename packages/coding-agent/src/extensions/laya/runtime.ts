@@ -83,11 +83,12 @@ def health():
 def system_one(body: dict):
     if "state" not in body or not body.get("questions"):
         raise HTTPException(422, "send 'state' and 'questions'")
-    state = body["state"]
-    required = state.get("required_model") if isinstance(state, dict) else None
+    state = dict(body["state"]) if isinstance(body["state"], dict) else body["state"]
+    # Checkpoint enforcement is transport metadata, not task content for inference.
+    required = state.pop("required_model", None) if isinstance(state, dict) else None
     if required and required != version:
         raise HTTPException(409, "The requested XP checkpoint is not active")
-    return agent.predict(body["state"], body["questions"])
+    return agent.predict(state, body["questions"])
 
 
 uvicorn.run(app, host=args.host, port=args.port, log_level="warning")

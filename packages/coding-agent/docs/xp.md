@@ -15,6 +15,15 @@ decision complete the task without requiring user acceptance.
 classifier request. Missing, mismatched or invalid decisions preserve the workflow
 for recovery; XP never falls back to keyword rules, learned labels or another model.
 After recovery, `/xp resume` or a task continuation reselects the resources.
+An uncertain resource selection receives one focused reassessment by the same Laya
+checkpoint, with explicit criteria for needing or omitting that resource. Both
+attempts are recorded in `xp.resource_decision`. The confidence threshold remains
+0.7; malformed answers or persistent uncertainty preserve the workflow for recovery.
+Resource selection uses batches of at most eight questions so local CPU inference
+can finish within the request deadline without omitting catalog resources.
+Each decision includes the phase responsibilities and validation requirements.
+The server checks the required checkpoint before excluding that control field from
+the task content passed to inference.
 `/xp start <task>` starts a request through the same intent path; `/xp stop` stops the workflow.
 Old workflow state is not resumed: start a new task so all five phases receive Laya
 decisions under the current contract.
