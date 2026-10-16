@@ -1,6 +1,7 @@
 import type { InlineExtension } from "../core/extensions/types.ts";
 import browserExtension from "./browser/index.ts";
 import codemodeExtension from "./codemode/index.ts";
+import delegationExtension from "./delegation/index.ts";
 import engineeringExtension from "./engineering/index.ts";
 import goalExtension from "./goal/index.ts";
 import intakeExtension from "./intake/index.ts";
@@ -12,7 +13,6 @@ import nativeMcpExtension from "./native-mcp/index.ts";
 import ollamaExtension from "./ollama/index.ts";
 import projectMemoryExtension from "./project-memory/index.ts";
 import toolSearchExtension from "./tool-search/index.ts";
-import xpExtension from "./xp/index.ts";
 
 export const builtInExtensions: InlineExtension[] = [
 	{ name: "engineering", factory: engineeringExtension, builtin: true },
@@ -22,7 +22,7 @@ export const builtInExtensions: InlineExtension[] = [
 	{ name: "ollama", factory: ollamaExtension, builtin: true },
 	// Adds the laya/auto virtual model; it routes nothing unless selected.
 	{ name: "laya", factory: layaExtension, builtin: true },
-	{ name: "xp", factory: xpExtension, builtin: true },
+	{ name: "delegation", factory: delegationExtension, builtin: true },
 	// Adds /intake and its deferred intake_questionnaire tool.
 	{ name: "intake", factory: intakeExtension, builtin: true },
 	{ name: "project-memory", factory: projectMemoryExtension, builtin: true },

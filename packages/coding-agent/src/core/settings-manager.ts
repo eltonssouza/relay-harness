@@ -13,6 +13,7 @@ import lockfile from "proper-lockfile";
 import { CONFIG_DIR_NAME, getAgentDir } from "../config.ts";
 import { normalizePath, resolvePath } from "../utils/paths.ts";
 import { stripBom } from "../utils/text.ts";
+import type { DelegationLimits } from "./delegation/limits.ts";
 import { DEFAULT_HTTP_IDLE_TIMEOUT_MS, parseHttpIdleTimeoutMs } from "./http-dispatcher.ts";
 
 export interface CompactionModelOverride {
@@ -233,6 +234,8 @@ export interface Settings {
 	warnings?: WarningSettings;
 	codemode?: CodemodeSettings;
 	laya?: LayaSettings;
+	/** Budgets for Laya-approved subordinate workers. */
+	delegation?: Partial<DelegationLimits>;
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)
 	httpProxy?: string; // Proxy URL applied as HTTP_PROXY and HTTPS_PROXY for Relay-managed HTTP clients
 	httpIdleTimeoutMs?: number; // HTTP header/body idle timeout in milliseconds; 0 disables it
