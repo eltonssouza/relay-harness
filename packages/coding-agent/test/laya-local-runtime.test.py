@@ -86,6 +86,7 @@ class LocalRuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "requirements"):
             runtime.setup(self.root, {**self.manifest, "layaPackage": "laya[serve]==99.0.0"})
 
+    # Regression #70: checkpoint enforcement must not contaminate task content for inference.
     def test_server_rejects_another_xp_checkpoint_before_inference(self):
         # Exercise the actual endpoint functions without loading weights or opening a port.
         class HttpError(Exception):
@@ -100,18 +101,30 @@ class LocalRuntimeTests(unittest.TestCase):
         laya = MagicMock()
         manifest_path = self.root / "manifest.json"
         manifest_path.write_text(json.dumps({**self.manifest, "version": "relay-laya-v4"}))
-        argv = ["local-serve.py", "serve", "--root", str(self.root), "--manifest", str(manifest_path)]
-        with patch.dict(sys.modules, {"laya": laya, "torch": MagicMock(), "uvicorn": MagicMock(), "fastapi": fastapi}), patch.object(sys, "argv", argv), patch.dict(runtime.os.environ):
-            endpoints = runpy.run_path(str(Path(__file__).resolve().parents[1] / "resources/laya/local-serve.py"))
-            self.assertEqual(endpoints["health"]()["version"], "relay-laya-v4")
-            body = {"state": {"required_model": "relay-laya-v3"}, "questions": {"decision": {"type": "bool"}}}
-            with self.assertRaises(HttpError) as rejected:
+        package = Path(__file__).resolve().parents[1]
+        docker_source = (package / "src/extensions/laya/runtime.ts").read_text(encoding="utf-8")
+        docker_script = self.root / "docker-serve.py"
+        docker_script.write_text(docker_source.split("export const SERVE_SCRIPT = `", 1)[1].split("`;", 1)[0], encoding="utf-8")
+        scripts = [
+            (package / "resources/laya/local-serve.py", ["serve", "--root", str(self.root), "--manifest", str(manifest_path)]),
+            (docker_script, ["--model", "/opt/laya/model"]),
+        ]
+        for script, arguments in scripts:
+            with self.subTest(server=script.name), patch.dict(sys.modules, {"laya": laya, "torch": MagicMock(), "uvicorn": MagicMock(), "fastapi": fastapi}), patch.object(sys, "argv", [str(script), *arguments]), patch.dict(runtime.os.environ), patch.object(Path, "read_text", return_value=manifest_path.read_text()):
+                laya.reset_mock()
+                endpoints = runpy.run_path(str(script))
+                self.assertEqual(endpoints["health"]()["version"], "relay-laya-v4")
+                body = {"state": {"required_model": "relay-laya-v3", "goal": "Document release notes", "nested": {"required_model": "semantic-data"}}, "questions": {"decision": {"type": "bool"}}}
+                with self.assertRaises(HttpError) as rejected:
+                    endpoints["system_one"](body)
+                self.assertEqual(rejected.exception.status_code, 409)
+                laya.load.return_value.predict.assert_not_called()
+                body["state"]["required_model"] = "relay-laya-v4"
                 endpoints["system_one"](body)
-            self.assertEqual(rejected.exception.status_code, 409)
-            laya.load.return_value.predict.assert_not_called()
-            body["state"]["required_model"] = "relay-laya-v4"
-            endpoints["system_one"](body)
-            laya.load.return_value.predict.assert_called_once_with(body["state"], body["questions"])
+                laya.load.return_value.predict.assert_called_once_with(
+                    {"goal": "Document release notes", "nested": {"required_model": "semantic-data"}}, body["questions"]
+                )
+                self.assertEqual(body["state"]["required_model"], "relay-laya-v4")
 
 
 if __name__ == "__main__":

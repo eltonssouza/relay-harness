@@ -3,8 +3,8 @@ import type { ClassifierQuestion, ClassifierResult, JsonObject } from "@relay-ha
 import type { ExtensionAPI, ExtensionContext, ToolInfo } from "../../core/extensions/types.ts";
 import type { Skill } from "../../core/skills.ts";
 import { DEFAULT_LAYA_BASE_URL, LAYA_CLASSIFIER_ID, LAYA_PROVIDER_ID } from "../laya/index.ts";
-import { AGENTS, type AgentId } from "../laya/questions.ts";
-import type { XpPhase, XpState } from "./workflow.ts";
+import { AGENTS, type AgentId, LAYA_QUESTIONS } from "../laya/questions.ts";
+import { XP_PHASE_GUIDANCE, type XpPhase, type XpState } from "./workflow.ts";
 
 export const XP_DECISION_MODEL = "relay-laya-v4";
 export const XP_CONTROL_TOOLS = ["xp_intent", "xp_checkpoint", "update_goal", "get_goal"];
@@ -104,7 +104,7 @@ export async function selectXpResources(
 		},
 		agent: {
 			type: "choice",
-			instructions: "Which available specialist should lead this XP phase?",
+			instructions: LAYA_QUESTIONS.agent.instructions,
 			criteria: agents,
 		},
 	};
@@ -117,6 +117,8 @@ export async function selectXpResources(
 	const context: JsonObject = {
 		goal: state.goal.slice(0, 1000),
 		phase: state.phase,
+		phaseGuidance: XP_PHASE_GUIDANCE[state.phase],
+		testsRequired: state.testsRequired,
 		reports: Object.fromEntries(
 			Object.entries(state.specificationReports ?? {}).map(([phase, report]) => [phase, report.slice(0, 300)]),
 		),
@@ -128,10 +130,10 @@ export async function selectXpResources(
 			.map((item) => ({ tool: item.tool, isError: item.isError, text: item.text.slice(-300) })),
 	};
 	const answers: ClassifierResult["answers"] = {};
-	// Bound each classifier batch instead of silently dropping resources from large MCP catalogs.
+	// Keep CPU inference within the request deadline without dropping catalog resources.
 	const entries = Object.entries(questions);
-	for (let offset = 0; offset < entries.length; offset += 24) {
-		const batch = Object.fromEntries(entries.slice(offset, offset + 24));
+	for (let offset = 0; offset < entries.length; offset += 8) {
+		let batch = Object.fromEntries(entries.slice(offset, offset + 8));
 		const batchTools = tools.filter((tool) =>
 			Object.values(batch).some((question) => question.instructions.includes(`tool ${tool.name}?`)),
 		);
@@ -144,16 +146,49 @@ export async function selectXpResources(
 				guidelines: tool.promptGuidelines ?? [],
 			})),
 		};
-		const result = await classifyXp(relay, ctx, batchContext, batch, signal);
-		relay.appendEntry("xp.resource_decision", {
-			workflow: state.id,
-			phase: state.phase,
-			model: XP_DECISION_MODEL,
-			context: batchContext,
-			questions: batch,
-			answers: result.answers,
-		});
-		Object.assign(answers, result.answers);
+		// Give uncertain resources one focused Laya reassessment; never infer a selection locally.
+		for (let attempt = 0; attempt < 2 && Object.keys(batch).length; attempt++) {
+			const result = await classifyXp(relay, ctx, batchContext, batch, signal);
+			relay.appendEntry("xp.resource_decision", {
+				workflow: state.id,
+				phase: state.phase,
+				model: XP_DECISION_MODEL,
+				attempt: attempt + 1,
+				context: batchContext,
+				questions: batch,
+				answers: result.answers,
+			});
+			Object.assign(questions, batch);
+			Object.assign(answers, result.answers);
+			batch = Object.fromEntries(
+				candidates.flatMap((resource, index): Array<[string, ClassifierQuestion]> => {
+					const id = `resource_${index}`;
+					const answer = result.answers[id];
+					if (
+						!Object.hasOwn(batch, id) ||
+						answer?.type !== "bool" ||
+						!Number.isFinite(answer.probability) ||
+						answer.probability < 0 ||
+						answer.probability > 1 ||
+						Math.max(answer.probability, 1 - answer.probability) >= 0.7
+					)
+						return [];
+					return [
+						[
+							id,
+							{
+								type: "bool",
+								instructions: `Is ${resource.kind} ${resource.name} necessary to complete the ${state.phase} phase for the stated goal?`,
+								criteria: {
+									true: `Yes. The phase requires these capabilities: ${resource.description.slice(0, 220)}`,
+									false: `No. The phase does not require these capabilities: ${resource.description.slice(0, 220)}`,
+								},
+							},
+						],
+					];
+				}),
+			);
+		}
 	}
 	const answer = answers.agent;
 	if (
