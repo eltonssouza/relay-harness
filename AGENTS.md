@@ -30,7 +30,9 @@
 ## Commands
 
 - After code changes (not docs): `npm run check` (full output, no tail). Fix all errors, warnings, and infos before committing. Does not run tests.
-- Never run `npm run build` or `npm test` unless requested by the user.
+- Before every commit and before opening or updating a PR, run `bash ./ci.sh` locally and require every gate to pass: `npm ci --ignore-scripts`, `npm run build`, `npm run check`, `node scripts/publish.mjs --dry-run`, `./test.sh`, and `npm run check:package-install`. On Windows use Git Bash, not the WSL launcher. This requirement authorizes the build and tests below. Never substitute `npm test` for `./test.sh`. If any gate fails, do not commit, push PR updates or open the PR; fix the cause and rerun the entire local CI. Any subsequent source change requires a new complete run.
+- GitHub Actions does not execute PR or branch CI. Record the validated commit, operating system, Node version and local result in the PR. Publish the required `local/verify` status only for a commit whose complete local CI passed. A Windows pass does not establish Linux validation or approve a Laya checkpoint; preserve those separate gates.
+- Outside the required local CI run, never run `npm run build` or `npm test` unless requested by the user.
 - Never run the full vitest suite directly: it includes e2e tests that activate when endpoint/auth env vars are present. For all non-e2e tests, run `./test.sh` from the repo root. Otherwise run specific tests from the package root:
   - Vitest: `node "$(git rev-parse --show-toplevel)/node_modules/vitest/dist/cli.js" --run test/specific.test.ts`
   - `packages/tui` (`node:test`): `node --test test/specific.test.ts`
