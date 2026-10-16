@@ -54,6 +54,7 @@ const TORCH_INDEX: Record<LayaImageVariant, string> = {
 
 /** Serves the model with the System One protocol Relay's `typesafe-system-one` classifier speaks. */
 export const SERVE_SCRIPT = `import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -69,14 +70,41 @@ parser.add_argument("--port", type=int, default=8000)
 args = parser.parse_args()
 manifest = json.loads(Path("/opt/laya/model.json").read_text(encoding="utf-8"))
 version = manifest.get("version") if args.model == "/opt/laya/model" else None
+def verify_checkpoint():
+    if not version:
+        return None, None
+    verified = {}
+    for entry in manifest["files"]:
+        path = (Path(args.model) / entry["path"]).resolve()
+        if not path.is_relative_to(Path(args.model).resolve()):
+            raise ValueError("Model path escapes checkpoint directory")
+        digest = hashlib.sha256()
+        size = 0
+        with path.open("rb") as source:
+            for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                digest.update(chunk)
+                size += len(chunk)
+        if size != entry["size"] or digest.hexdigest() != entry["sha256"]:
+            raise ValueError(f"{entry['path']} does not match the pinned manifest")
+        verified[entry["path"]] = digest.hexdigest()
+    checkpoint = verified.get("model.safetensors")
+    if not checkpoint:
+        raise ValueError("The pinned manifest does not identify model.safetensors")
+    artifact_digest = hashlib.sha256()
+    for entry in sorted(manifest["files"], key=lambda item: item["path"]):
+        artifact_digest.update((chr(0).join((entry["path"], str(entry["size"]), verified[entry["path"]])) + chr(10)).encode("utf-8"))
+    return checkpoint, artifact_digest.hexdigest()
 
+checkpoint_sha256, artifact_sha256 = verify_checkpoint()
 agent = laya.load(args.model, device="cuda" if torch.cuda.is_available() else "cpu")
+if verify_checkpoint() != (checkpoint_sha256, artifact_sha256):
+    raise ValueError("Checkpoint files changed while loading")
 app = FastAPI(title="relay-laya")
 
 
 @app.get("/health")
 def health():
-    return {"ok": True, "model": args.model, "version": version}
+    return {"ok": True, "model": args.model, "version": version, "sha256": checkpoint_sha256, "artifact_sha256": artifact_sha256}
 
 
 @app.post("/v1/systemone")
@@ -86,9 +114,18 @@ def system_one(body: dict):
     state = dict(body["state"]) if isinstance(body["state"], dict) else body["state"]
     # Checkpoint enforcement is transport metadata, not task content for inference.
     required = state.pop("required_model", None) if isinstance(state, dict) else None
+    required_sha256 = state.pop("required_checkpoint_sha256", None) if isinstance(state, dict) else None
+    required_artifact = state.pop("required_artifact_sha256", None) if isinstance(state, dict) else None
     if required and required != version:
-        raise HTTPException(409, "The requested XP checkpoint is not active")
-    return agent.predict(state, body["questions"])
+        raise HTTPException(409, "The requested Laya checkpoint is not active")
+    if required_sha256 and required_sha256 != checkpoint_sha256:
+        raise HTTPException(409, "The requested Laya checkpoint weights are not active")
+    if required_artifact and required_artifact != artifact_sha256:
+        raise HTTPException(409, "The requested Laya checkpoint configuration is not active")
+    result = agent.predict(state, body["questions"])
+    if (required or required_sha256 or required_artifact) and result.get("usage", {}).get("truncated"):
+        raise HTTPException(422, "The Laya decision context was truncated")
+    return result
 
 
 uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
