@@ -4,6 +4,41 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-15
+
+### Breaking Changes
+
+- XP tasks now require a server that confirms the `relay-laya-v4` checkpoint. Missing, uncertain, or invalid decisions preserve the workflow for recovery instead of falling back to keyword rules or another model. Restart workflows stored in the previous XP state format. See [XP workflow](docs/xp.md).
+- Model selection, restored sessions, SDK requests, and Laya routing now enforce the same Claude and OpenAI Codex model eligibility policy; configurations using excluded models must select a permitted model. Claude Sonnet 4.5 remains permitted.
+
+### Added
+
+- Added a local CPU runtime for the shipped Laya checkpoint, with an isolated Python environment, resumable downloads, and file size and SHA-256 verification. Docker remains available when explicitly configured or serving a registered checkpoint. See [Local CPU runtime](docs/laya.md#local-cpu-runtime).
+
+### Changed
+
+- Native tasks, `/xp`, and `/goal` now share one autonomous five-phase workflow and one SDD. `relay-laya-v4` selects agent profiles, tools, and skills and decides continuation; the harness enforces permissions and validation evidence. Testing can record a concrete validation plan, while Coding and Listening require fresh successful tests for executable changes. See [XP workflow](docs/xp.md).
+- Removed routine phase approval from XP execution. External artifact edits invalidate downstream reports and evidence and require reconciliation before continuation.
+- Renamed the shipped checkpoint to `relay-laya-v4`, preserving its pinned Hugging Face revision and verified weights. This does not represent new training or a new evaluation of XP decision quality.
+
+### Fixed
+
+- Fixed Google models on OpenCode Go by registering the Google Generative AI adapter and preserving the OpenCode session header.
+- OpenAI-compatible endpoints configured with `supportsTools: false` no longer receive function tool declarations.
+- Ollama discovery now respects each model's reported tool capability, so models without tool support do not receive unsupported function tool declarations.
+
+## [0.1.12] - 2026-10-13
+
+### Added
+
+- Added local Ollama model discovery through `OLLAMA_HOST`, including `/ollama` catalog refresh and selection of installed chat models.
+- Added bundled, on-demand local Context7 and Playwright MCP servers alongside Chrome DevTools.
+- Added a project-local SDD for native XP tasks at `.relay/specs/<workflow-id>.md`.
+
+### Changed
+
+- Changed native task execution to use Planning, Design, Testing, Coding and Listening by default. Tasks started with `/goal` complete those phases autonomously; other tasks require `/xp approve-spec` after Design.
+
 ## [0.1.10] - 2026-10-13
 
 ### New Features

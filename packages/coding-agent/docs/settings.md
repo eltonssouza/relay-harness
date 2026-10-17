@@ -115,6 +115,24 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 | `laya.memory` | boolean | `true` | Route requests similar to tasks learned with `/laya learn` by their labels, and give the running model their lessons. See [laya.md](laya.md#teach-laya-from-your-sessions). |
 | `laya.timeoutMs` | number | `5000` | Classifier timeout before keyword rules answer instead. |
 
+### Delegation budgets
+
+These limits bound [subordinate workers](delegation.md). They do not enable the gated
+feature or expand an approved plan. Changing effective settings requires a new Laya
+proposal and cancels workers bound to the previous limits.
+
+| Setting | Default | Maximum |
+|---|---|---|
+| `delegation.maxConcurrent` | `3` | `16` |
+| `delegation.maxTasks` | `8` | `32` |
+| `delegation.maxAttempts` | `2` | `10` |
+| `delegation.maxDurationMs` | `300000` | `3600000` |
+| `delegation.maxSteps` | `40` | `1000` |
+| `delegation.maxOutputBytes` | `64000` | `4194304` |
+
+Values must be positive integers; unknown fields are rejected. `maxConcurrent` cannot
+exceed `maxTasks`. Global and trusted project settings merge normally.
+
 ### Branch summaries
 
 | Setting | Type | Default | Description |

@@ -18,6 +18,31 @@ Standalone Relay distributions ship the servers and require `node` on PATH.
 User or trusted project `mcp.json` entries with the same name take precedence; stopping
 a native registration does not remove those configured servers.
 
+## Native browser
+
+```text
+/browser start
+/mcp
+```
+
+`/browser start` registers the pinned `chrome-devtools-mcp@1.10.1` server with isolated,
+headless Chrome. `/browser visible` uses a visible isolated browser. Browser tools are
+discovered through `tool_search`; Chrome starts when a browser tool first needs it.
+Usage statistics, CrUX requests, update checks and automatic config discovery are disabled.
+An existing `chrome-devtools` entry in `mcp.json` takes precedence over native registration.
+`/browser stop` removes the extension's registration; configured servers remain managed by `/mcp`.
+Registration does not imply the connection succeeded: inspect `/mcp` for the actual state.
+
+Node.js and a supported Chrome installation are required. Standalone Relay binaries
+ship the server files and invoke `node` from PATH. Npm installations use their Node
+runtime and installed dependency; no `npx` download is performed at activation.
+The published package is used rather than building the sibling source checkout:
+the local snapshot identifies itself as 1.10.1 but contains different development dependency
+versions. Its unpublished changes are not included in the pinned integration.
+
+The browser server is the upstream [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp)
+implementation, licensed under Apache-2.0.
+
 ## Quick setup
 
 Add a local stdio server, check the connection, then start Relay:

@@ -24,7 +24,7 @@ Relay normally runs every request on the model you selected. A typo fix then cos
 
 Reasoning effort follows Laya's recommendation up to `xhigh`. Routing never uses `max`. `laya/auto` has no thinking level of its own: a selected level would cap Laya's choice without you noticing. The footer shows the routed model and effort next to the selection, and the status line shows the task type and tier.
 
-When the Laya server is not running (Docker is missing or stopped, or the image is still downloading), keyword rules in English and Portuguese answer instead, and the status line shows `(rules)`. Laya is retried a minute later.
+When the Laya server is not running (Python is missing, installation is in progress, or the selected Docker runtime is unavailable), keyword rules in English and Portuguese answer instead, and the status line shows `(rules)`. Laya is retried a minute later.
 
 ## Technical library routing
 
@@ -149,18 +149,41 @@ The latest explicit physical model selection on the session branch identifies th
 
 A provider need not offer four distinct models. Missing tiers stay missing: a `frontier` request does not make a smaller local model frontier-capable. If no mapped models are available, Relay keeps the selected model and reports its capability as unclassified. If only a weaker mapped model is available, Relay reports the limitation. Declare capabilities explicitly instead of inferring quality from a model name or price. Set `followProvider` to `false` for fixed physical selections and the normal cross-provider `laya/auto` registry.
 
+## Local CPU runtime
+
+The shipped, already-trained `relay-laya-v4` checkpoint runs locally on CPU by default. Docker, CUDA and Ollama are not required. Install Python 3.10 through 3.13 first; Relay discovers an existing interpreter and creates its own isolated environment under `~/.relay/agent/laya/local-runtime`. It never changes your global Python packages or installs Python itself.
+
+Interactive startup prepares the environment in the background. `/laya setup` starts it explicitly. Relay installs CPU-only PyTorch and pinned Laya/server dependencies, then downloads the six files from the package's pinned Hugging Face revision. The checkpoint and tokenizer total **678,203,281 bytes (678 MB)**; Python dependencies are additional and vary by platform. Cached files are checked by size and SHA-256 and reused; interrupted or corrupt downloads never replace a validated file. No retraining or weight conversion is involved.
+
+The server exposes the same `/health` and `/v1/systemone` endpoints, bound to loopback only. It stays available across sessions in the same Relay process and stops when that process exits. The checkpoint and environment stay cached for the next launch. Print/SDK sessions do not install it automatically. `autostart: false` disables automatic setup; an existing compatible server can still answer requests.
+
+A Windows x64 / Python 3.13 validation resolved **173,814,022 bytes of dependency wheels**, for **852,017,303 bytes (852 MB)** including the pinned checkpoint. This excludes Python itself, package-index metadata and transport overhead; other platforms or dependency resolutions can differ. CPU smoke requests in Portuguese and English returned all 19 answers in about 11 seconds in isolation and up to 38 seconds during concurrent validation. Native inference therefore defaults to a 60-second request timeout; `laya.timeoutMs` overrides it.
+
+An interpreter outside PATH can be selected by executable path:
+
+```json
+{
+  "laya": {
+    "runtime": "native",
+    "python": "C:/Python313/python.exe"
+  }
+}
+```
+
+Optional `/laya train` continues to use Docker and its GPU/CPU training pipeline. Existing trained checkpoints remain in their Docker volume and selecting one uses Docker. An explicit `laya.image` also selects Docker. `/laya use shipped` returns to native inference unless Docker was explicitly configured. Checkpoints and Docker volumes are not migrated or deleted by native setup.
+
 ## Laya runs in Docker
 
-Relay itself runs on your machine; Laya and its Python run only in Docker. The npm package contains neither the trained model (650 MB) nor Python with torch. Both come in a Docker image, `ghcr.io/eltonssouza/relay-laya`, built by Relay's release from the same sources as the package:
+Docker remains available with `"laya": { "runtime": "docker" }`, an explicit `laya.image`, or a selected checkpoint stored in the Docker volume. In this mode, Laya and Python run in `ghcr.io/eltonssouza/relay-laya`, built by Relay's release from the same sources as the package:
 
 | Image | Used when | Size |
 |---|---|---|
-| `v4-library-retry-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
-| `v4-library-retry-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
+| `relay-laya-v4-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
+| `relay-laya-v4-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
 
 The image holds Python 3.11, `torch`, `laya[serve]`, the shipped model from the Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya) (pinned to one commit, every file checked against the sha256 in the package), and the scripts that serve and train it. The tag ends in a hash of all of that, so each Relay version runs the image built from its own sources.
 
-Install is automatic. Every time Relay starts in interactive mode it makes sure, in the background, that:
+When Docker inference is selected, every interactive Relay start makes sure, in the background, that:
 
 1. the image is present, pulling it the first time (the status line shows the layers);
 2. a container named `relay-laya` runs it with the active model, published on `127.0.0.1:8737` only (the port of `laya.baseUrl`), with `--restart unless-stopped`;
@@ -228,9 +251,9 @@ cp /tmp/laya-v2/model-manifest.ts packages/coding-agent/src/extensions/laya/mode
 
 | Command | Effect |
 |---|---|
-| `/laya` | Profile, container and server status, the routing model and training progress, models with credentials, quota, and the last plan with its alternatives and escalations |
-| `/laya setup`, `/laya start` | Pull the image if needed and start or update the `relay-laya` container now |
-| `/laya stop` | Stop the container; the next Relay start runs it again |
+| `/laya` | Profile, runtime and server status, the routing model and training progress, models with credentials, quota, and the last plan with its alternatives and escalations |
+| `/laya setup`, `/laya start` | Install and start the selected local CPU or Docker runtime |
+| `/laya stop` | Stop this process's local server or the managed Docker container |
 | `/laya learn [session file]` | Teach Laya the tasks of this session ([details](#teach-laya-from-your-sessions)) |
 | `/laya train` | Train again on the session tasks collected so far |
 | `/laya models`, `/laya use <model>` | List the shipped and trained models, or route with another one |

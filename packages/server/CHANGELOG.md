@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-15
+
+## [0.1.12] - 2026-10-13
+
 ## [0.1.10] - 2026-10-13
 
 ## [0.1.8] - 2026-10-10

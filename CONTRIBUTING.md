@@ -46,14 +46,31 @@ If you send a large volume of issues through automation, your GitHub account wil
 
 Open pull requests against `develop`, the default branch. `main` only receives `develop` when a release is made; a pull request to `main` from any other branch is closed automatically.
 
-Before submitting a PR:
+Before every commit and before opening or updating a PR, run the complete CI locally:
 
 ```bash
-npm run check
-./test.sh
+bash ./ci.sh
 ```
 
-Both must pass.
+The runner installs dependencies with `npm ci --ignore-scripts`, builds, runs
+`npm run check`, validates publication with `node scripts/publish.mjs --dry-run`,
+runs the isolated `./test.sh` suite, and checks packed SDK/CLI installation with
+`npm run check:package-install`. It stops at the first failure. Fix any failure and
+rerun the entire runner before committing, pushing PR updates or submitting a PR.
+Source changes after a successful run require another complete run.
+
+Use Node 22.19 or newer, Git, Bash, ripgrep and fd. On Linux, install the native
+build prerequisites (`libcairo2-dev`, `libpango1.0-dev`, `libjpeg-dev`, `libgif-dev`,
+`librsvg2-dev`) and use fd supporting `--no-require-git` (10.2.0 works). On Windows,
+run in Git Bash; from PowerShell use `& 'C:\Program Files\Git\bin\bash.exe' ./ci.sh`
+when Git is installed at that location. A Windows run does not validate Linux-only
+tests; Linux validation remains a separate requirement when applicable.
+
+GitHub Actions no longer runs CI for PRs or branch pushes. Include the validated
+commit, operating system, Node version and local result in the PR description.
+The required `local/verify` status may report success only after the full local
+runner passes for that commit. Local CI does not approve a Laya model or enable
+distribution or automatic delegation.
 
 Do not edit `CHANGELOG.md`. Changelog entries are added by maintainers.
 

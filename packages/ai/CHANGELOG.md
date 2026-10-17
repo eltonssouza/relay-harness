@@ -4,6 +4,18 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-15
+
+### Added
+
+- Added `OpenAICompletionsCompat.supportsTools` to omit function tools from requests to endpoints that explicitly reject them.
+
+### Fixed
+
+- Fixed Google models on OpenCode Go by registering the Google Generative AI adapter and preserving the OpenCode session header.
+
+## [0.1.12] - 2026-10-13
+
 ## [0.1.10] - 2026-10-13
 
 ### Fixed

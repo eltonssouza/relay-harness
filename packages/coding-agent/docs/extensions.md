@@ -149,6 +149,12 @@ A tool can run other tools with `ctx.executeTool(name, args, { signal, onUpdate 
 
 See [`hello.ts`](../examples/extensions/hello.ts), [`todo.ts`](../examples/extensions/todo.ts), [`dynamic-tools.ts`](../examples/extensions/dynamic-tools.ts), and [`truncated-tool.ts`](../examples/extensions/truncated-tool.ts).
 
+When [subordinate workers](delegation.md) are explicitly enabled for evaluation,
+their calls use the principal tool pipeline. Authorize every nested call independently;
+authorizing `execute_work` does not authorize its children's operations. Workers use
+separate SDK histories, while the principal owns the plan and result review. Correlate
+concurrent observations by `toolCallId` and `parentToolCallId`, and propagate cancellation.
+
 ### Tool exposure
 
 `exposure` controls how the model reaches a tool. "Callable" means callable from other tools through `ctx.executeTool()` (`ctx.tools`), as the `codemode` tool's scripts do:

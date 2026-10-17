@@ -117,6 +117,15 @@ The CLI loads `codemode`, `tool_search`, and MCP as built-in extensions. SDK ses
 
 See the focused examples for [models](../examples/sdk/02-custom-model.ts), [tools](../examples/sdk/05-tools.ts), [extensions](../examples/sdk/06-extensions.ts), and [full control](../examples/sdk/12-full-control.ts).
 
+## Subordinate workers
+
+`createDelegationExtension()` supplies optional worker coordination without a mandatory
+phase workflow. Production activation remains gated by real-checkpoint evaluation;
+ordinary SDK sessions and persistent goals work independently. `DelegationLimits`
+configures the `delegation` settings object. See [Subordinate Workers](delegation.md)
+for the execution, recovery, evidence and evaluation contracts. The `enabled` factory
+option is an explicit test/evaluation boundary; it does not certify model quality.
+
 ## Examples
 
 | Example | Purpose |
