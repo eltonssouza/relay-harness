@@ -1,7 +1,7 @@
 import { layaCheckpointIdentity } from "../laya/model-identity.ts";
 import { LAYA_MODEL_MANIFEST } from "../laya/model-manifest.ts";
 
-export const DELEGATION_MODEL = "relay-laya-v4";
+export const DELEGATION_MODEL = "relay-laya-v5";
 
 /** Evaluation tests replace this boundary explicitly; production always uses the shipped manifest. */
 export function delegationCheckpoint() {

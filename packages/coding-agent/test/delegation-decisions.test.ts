@@ -108,7 +108,7 @@ describe("Laya work-plan decisions", () => {
 		expect(decision).toMatchObject({
 			kind: "delegated",
 			plan: {
-				model: "relay-laya-v4",
+				model: "relay-laya-v5",
 				maxConcurrent: 2,
 				selections: [
 					{ taskId: "api", profile: "engineer", tools: ["read"], skills: ["review"], executionMode: "parallel" },
@@ -386,7 +386,7 @@ describe("Laya work-plan decisions", () => {
 		expect(decision).toBeUndefined();
 		expect(toolResult).toMatchObject({
 			isError: true,
-			content: [{ type: "text", text: expect.stringContaining("relay-laya-v4") }],
+			content: [{ type: "text", text: expect.stringContaining("relay-laya-v5") }],
 		});
 		expect(observed).toHaveLength(0);
 	});

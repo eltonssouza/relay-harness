@@ -37,7 +37,7 @@ function fixture(): { plan: ApprovedWorkPlan; catalog: WorkResourceCatalog; cont
 	const plan: ApprovedWorkPlan = {
 		proposal: { workflowId: "workflow-1", version: 1, workspaceRevision: 0, tasks },
 		decisionId: "decision-1",
-		model: "relay-laya-v4",
+		model: "relay-laya-v5",
 		checkpoint: delegationCheckpoint(),
 		maxConcurrent: 3,
 		limits: { ...DEFAULT_DELEGATION_LIMITS },

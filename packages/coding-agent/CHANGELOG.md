@@ -4,6 +4,23 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### New Features
+
+- Optional subordinate-worker delegation through `/work`, with bounded task proposals, resource scopes, review and recovery, and observed test evidence. Production activation remains gated on real Laya evaluations. See [Subordinate workers](delegation.md).
+
+### Breaking Changes
+
+- Replaced the mandatory XP phase workflow with optional subordinate-worker coordination. Existing XP workflow state is no longer restored; use direct requests for ordinary work and `/work` to coordinate workers. See [Subordinate workers](delegation.md).
+
+### Changed
+
+- Updated the shipped Laya reference to `relay-laya-v5`, a versioned alias for the existing Candidate20 weights; this does not represent new training or evaluation. See [Adaptive Execution with Laya](docs/laya.md).
+
+### Fixed
+
+- Hardened Laya resource decisions and runtime inputs against missing, invalid, or inconsistent checkpoint responses.
+- Bound delegated plans to the exact checkpoint artifact and current resource snapshots so stale approvals are rejected.
+
 ## [0.2.0] - 2026-10-15
 
 ### Breaking Changes

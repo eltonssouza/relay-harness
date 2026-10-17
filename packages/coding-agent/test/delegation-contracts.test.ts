@@ -54,7 +54,7 @@ function plan(): ApprovedWorkPlan {
 	return {
 		proposal: proposal(),
 		decisionId: "decision-1",
-		model: "relay-laya-v4",
+		model: "relay-laya-v5",
 		checkpoint: delegationCheckpoint(),
 		maxConcurrent: 3,
 		limits: { ...DEFAULT_DELEGATION_LIMITS },
