@@ -8,8 +8,11 @@ import { Client, ServerError as ClientServerError } from "@relay-harness/client"
 import { createUnixTransportFactory } from "@relay-harness/client/unix";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ExampleFacetService } from "../examples/plugins/relay-example-plugin/src/contract.ts";
+import { ModelRuntime } from "../src/core/model-runtime.ts";
+import { SettingsManager } from "../src/core/settings-manager.ts";
 import { runClient } from "../src/experimental/client.ts";
 import { activateBuiltinClientServices, openClientRuntime } from "../src/experimental/client-runtime.ts";
+import { findInitialAgentModel } from "../src/experimental/durable/harness-setup.ts";
 import { createPresentationFacetLoaders } from "../src/experimental/plugins/bundled.ts";
 import * as processRuntime from "../src/experimental/process.ts";
 import { type RunningServer, startServer } from "../src/experimental/server.ts";
@@ -32,7 +35,8 @@ const clients = new Set<Client>();
 const directories = new Set<string>();
 const fauxWorkerEntryUrl = new URL("fixtures/faux-session-worker.ts", import.meta.url);
 const realSpawnInternalProcess = processRuntime.spawnInternalProcess;
-const sessionWorkerModel = { provider: "anthropic", model: "claude-sonnet-4-5" } as const;
+const sessionWorkerModel = { provider: "anthropic", model: "claude-sonnet-5-5" } as const;
+const alternateSessionModel = { provider: "anthropic", model: "claude-opus-5-5" } as const;
 const SecondPluginService = defineService<{ read(context: Context): Promise<string> }>("test.second-plugin");
 // /tmp keeps Unix socket paths short; Windows has no /tmp, so use the OS temp directory there.
 const tempRoot = process.platform === "win32" ? tmpdir() : "/tmp";
@@ -87,6 +91,21 @@ afterEach(async () => {
 });
 
 describe("experimental durable server composition", () => {
+	// #78: validate real worker model resolution even where Unix server tests are skipped.
+	test.each([sessionWorkerModel, alternateSessionModel])(
+		"resolves the worker fixture $provider/$model as an explicit model and saved default",
+		async (model) => {
+			const runtime = await ModelRuntime.create({
+				authPath: join(agentDir, "auth.json"),
+				modelsPath: null,
+				allowModelNetwork: false,
+			});
+			const settings = SettingsManager.inMemory({ defaultProvider: model.provider, defaultModel: model.model });
+			const expected = { model: { provider: model.provider, modelId: model.model } };
+			await expect(findInitialAgentModel(settings, runtime, model)).resolves.toMatchObject(expected);
+			await expect(findInitialAgentModel(settings, runtime)).resolves.toMatchObject(expected);
+		},
+	);
 	serverTest("uses RELAY_SERVER_DIR and RELAY_SERVER_ID", async () => {
 		const directory = await mkdtemp(join(tempRoot, "relay-server-dir-"));
 		directories.add(directory);
@@ -126,7 +145,7 @@ describe("experimental durable server composition", () => {
 	serverTest("preserves an existing Session model when the server default changes", async () => {
 		await writeFile(
 			join(agentDir, "settings.json"),
-			JSON.stringify({ defaultProvider: "anthropic", defaultModel: "claude-opus-4-6" }),
+			JSON.stringify({ defaultProvider: "anthropic", defaultModel: alternateSessionModel.model }),
 		);
 		const directory = await mkdtemp(join(tempRoot, "pes-"));
 		directories.add(directory);
@@ -145,14 +164,17 @@ describe("experimental durable server composition", () => {
 		clients.delete(secondClient);
 		await expect.poll(() => second.workerPids.has("demo-1")).toBe(false);
 		const state = await readExperimentalSessionState(second.sessionDir, "demo-1");
-		expect(state.model).toEqual({ provider: "anthropic", modelId: "claude-opus-4-6" });
+		expect(state.model).toEqual({ provider: "anthropic", modelId: alternateSessionModel.model });
 	});
 
 	serverTest("rejects model options when discovery selects an existing server", async () => {
 		const { directory } = await makeServer();
-		await expect(runClient({ command: "client", model: "anthropic/claude-opus-4-6" }, { directory })).rejects.toThrow(
-			"Model selection is only valid when automatically activating a new server",
-		);
+		await expect(
+			runClient(
+				{ command: "client", model: `${alternateSessionModel.provider}/${alternateSessionModel.model}` },
+				{ directory },
+			),
+		).rejects.toThrow("Model selection is only valid when automatically activating a new server");
 	});
 
 	serverTest("rechecks an auto-discovered server after a version mismatch", async () => {
@@ -372,7 +394,7 @@ describe("experimental durable server composition", () => {
 		expect(secondServices.attachment.value).toEqual({ status: "attached", sessionId: "demo-1" });
 		expect(firstModels.state.value?.configuration.model).toEqual({
 			provider: "anthropic",
-			modelId: "claude-sonnet-4-5",
+			modelId: sessionWorkerModel.model,
 		});
 		expect(secondModels.state.value).toEqual(firstModels.state.value);
 		const previousThinking = firstModels.state.value!.configuration.thinkingLevel;
@@ -444,7 +466,7 @@ describe("experimental durable server composition", () => {
 		const firstServices = createSessionServiceBinding(firstClient, { services: [Models] });
 		const firstModels = firstServices.use(Models);
 		await firstServices.ready(BACKGROUND_CONTEXT);
-		await firstModels.select({ provider: "anthropic", modelId: "claude-opus-4-6" }, BACKGROUND_CONTEXT);
+		await firstModels.select({ provider: "anthropic", modelId: alternateSessionModel.model }, BACKGROUND_CONTEXT);
 		await firstServices.dispose(BACKGROUND_CONTEXT);
 		await firstClient.dispose();
 		clients.delete(firstClient);
@@ -456,7 +478,7 @@ describe("experimental durable server composition", () => {
 		await secondServices.ready(BACKGROUND_CONTEXT);
 		expect(secondModels.state.value?.configuration.model).toEqual({
 			provider: "anthropic",
-			modelId: "claude-opus-4-6",
+			modelId: alternateSessionModel.model,
 		});
 		await secondServices.dispose(BACKGROUND_CONTEXT);
 	});
@@ -475,7 +497,7 @@ describe("experimental durable server composition", () => {
 			expect(server.session.attachment.value).toEqual({ status: "attached", sessionId: "demo-1" });
 			expect(server.models.state.value?.configuration.model).toEqual({
 				provider: "anthropic",
-				modelId: "claude-sonnet-4-5",
+				modelId: sessionWorkerModel.model,
 			});
 		} finally {
 			await clientRuntime.dispose();
@@ -521,7 +543,7 @@ describe("experimental durable server composition", () => {
 			expect(services.attachment.value).toEqual({ status: "attached", sessionId: "demo-1" });
 			expect(models.state.value?.configuration.model).toEqual({
 				provider: "anthropic",
-				modelId: "claude-sonnet-4-5",
+				modelId: sessionWorkerModel.model,
 			});
 		} finally {
 			releaseDelay();
