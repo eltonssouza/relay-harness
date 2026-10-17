@@ -73,7 +73,7 @@ class LocalRuntimeTests(unittest.TestCase):
     def test_renaming_model_reuses_cached_weights_without_network(self):
         with patch.object(runtime.urllib.request, "urlopen", return_value=io.BytesIO(self.data)):
             model, _ = runtime.download_model(self.root, self.manifest)
-        renamed = {**self.manifest, "version": "relay-laya-v4"}
+        renamed = {**self.manifest, "version": "relay-laya-v5"}
         with patch.object(runtime.urllib.request, "urlopen", side_effect=AssertionError("network")):
             self.assertEqual(runtime.download_model(self.root, renamed), (model, 0))
 
@@ -100,7 +100,7 @@ class LocalRuntimeTests(unittest.TestCase):
         fastapi = MagicMock(FastAPI=MagicMock(return_value=app), HTTPException=HttpError)
         laya = MagicMock()
         manifest_path = self.root / "manifest.json"
-        server_manifest = {**self.manifest, "version": "relay-laya-v4", "files": [
+        server_manifest = {**self.manifest, "version": "relay-laya-v5", "files": [
             *self.manifest["files"],
             {"path": "model.safetensors", "asset": "model.safetensors",
              "size": len(self.data), "sha256": hashlib.sha256(self.data).hexdigest()},
@@ -129,7 +129,7 @@ class LocalRuntimeTests(unittest.TestCase):
                 laya.reset_mock()
                 laya.load.return_value.predict.return_value = {"answers": {}, "usage": {"truncated": False}}
                 endpoints = runpy.run_path(str(script))
-                self.assertEqual(endpoints["health"]()["version"], "relay-laya-v4")
+                self.assertEqual(endpoints["health"]()["version"], "relay-laya-v5")
                 self.assertEqual(endpoints["health"]()["sha256"], hashlib.sha256(self.data).hexdigest())
                 self.assertEqual(endpoints["health"]()["artifact_sha256"], artifact_sha256)
                 body = {"state": {"required_model": "relay-laya-v3", "goal": "Document release notes", "nested": {"required_model": "semantic-data"}}, "questions": {"decision": {"type": "noul"}}}
@@ -137,7 +137,7 @@ class LocalRuntimeTests(unittest.TestCase):
                     endpoints["system_one"](body)
                 self.assertEqual(rejected.exception.status_code, 409)
                 laya.load.return_value.predict.assert_not_called()
-                body["state"]["required_model"] = "relay-laya-v4"
+                body["state"]["required_model"] = "relay-laya-v5"
                 body["state"]["required_checkpoint_sha256"] = "0" * 64
                 with self.assertRaises(HttpError) as wrong_weights:
                     endpoints["system_one"](body)
@@ -154,7 +154,7 @@ class LocalRuntimeTests(unittest.TestCase):
                 laya.load.return_value.predict.assert_called_once_with(
                     {"goal": "Document release notes", "nested": {"required_model": "semantic-data"}}, body["questions"]
                 )
-                self.assertEqual(body["state"]["required_model"], "relay-laya-v4")
+                self.assertEqual(body["state"]["required_model"], "relay-laya-v5")
                 self.assertEqual(body["state"]["required_checkpoint_sha256"], hashlib.sha256(self.data).hexdigest())
                 self.assertEqual(body["state"]["required_artifact_sha256"], artifact_sha256)
                 laya.load.return_value.predict.return_value = {"answers": {}, "usage": {"truncated": True}}

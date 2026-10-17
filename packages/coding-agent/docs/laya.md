@@ -151,7 +151,7 @@ A provider need not offer four distinct models. Missing tiers stay missing: a `f
 
 ## Local CPU runtime
 
-The shipped, already-trained `relay-laya-v4` checkpoint runs locally on CPU by default. Docker, CUDA and Ollama are not required. Install Python 3.10 through 3.13 first; Relay discovers an existing interpreter and creates its own isolated environment under `~/.relay/agent/laya/local-runtime`. It never changes your global Python packages or installs Python itself.
+The shipped, already-trained `relay-laya-v5` checkpoint runs locally on CPU by default. It is a versioned alias for the existing Candidate20 weights; it does not contain newly trained weights. Docker, CUDA and Ollama are not required. Install Python 3.10 through 3.13 first; Relay discovers an existing interpreter and creates its own isolated environment under `~/.relay/agent/laya/local-runtime`. It never changes your global Python packages or installs Python itself.
 
 Interactive startup prepares the environment in the background. `/laya setup` starts it explicitly. Relay installs CPU-only PyTorch and pinned Laya/server dependencies, then downloads the six files from the package's pinned Hugging Face revision. The checkpoint and tokenizer total **678,203,281 bytes (678 MB)**; Python dependencies are additional and vary by platform. Cached files are checked by size and SHA-256 and reused; interrupted or corrupt downloads never replace a validated file. No retraining or weight conversion is involved.
 
@@ -178,8 +178,8 @@ Docker remains available with `"laya": { "runtime": "docker" }`, an explicit `la
 
 | Image | Used when | Size |
 |---|---|---|
-| `relay-laya-v4-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
-| `relay-laya-v4-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
+| `relay-laya-v5-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
+| `relay-laya-v5-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
 
 The image holds Python 3.11, `torch`, `laya[serve]`, the shipped model from the Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya) (pinned to one commit, every file checked against the sha256 in the package), and the scripts that serve and train it. The tag ends in a hash of all of that, so each Relay version runs the image built from its own sources.
 

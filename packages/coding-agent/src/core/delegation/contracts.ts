@@ -74,7 +74,7 @@ export interface WorkerSelection {
 export interface ApprovedWorkPlan {
 	proposal: WorkProposal;
 	decisionId: string;
-	model: "relay-laya-v4";
+	model: "relay-laya-v5";
 	checkpoint: LayaCheckpointIdentity;
 	selections: WorkerSelection[];
 	maxConcurrent: number;
@@ -209,7 +209,7 @@ export function validateApprovedWorkPlan(plan: ApprovedWorkPlan, catalog: WorkRe
 	)
 		throw new Error("Delegation limits changed; submit a new proposal for Laya evaluation");
 	const proposal = validateWorkProposal(plan.proposal, catalog);
-	if (plan.model !== "relay-laya-v4" || !plan.decisionId?.trim()) throw new Error("Missing Laya work decision");
+	if (plan.model !== "relay-laya-v5" || !plan.decisionId?.trim()) throw new Error("Missing Laya work decision");
 	if (!Number.isInteger(plan.maxConcurrent) || plan.maxConcurrent < 1 || plan.maxConcurrent > limits.maxConcurrent)
 		throw new Error("Invalid worker concurrency limit");
 	if (!plan.selections.length || plan.selections.length > proposal.tasks.length)
