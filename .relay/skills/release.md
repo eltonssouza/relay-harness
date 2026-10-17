@@ -7,6 +7,16 @@ description: Prepare, publish, verify, and recover relay releases. Use for relea
 
 Run repository commands from the repo root (two directories above this skill), unless instructed otherwise.
 
+## Required local CI
+
+Always run the complete local CI before every commit and before opening or updating a pull request:
+
+```bash
+bash ./ci.sh
+```
+
+On Windows, run it from Git Bash, not the WSL launcher. Require all gates to pass: `npm ci --ignore-scripts`, `npm run build`, `npm run check`, `node scripts/publish.mjs --dry-run`, `./test.sh`, and `npm run check:package-install`. If any gate fails, do not commit or open/update the pull request; fix the cause and rerun the entire CI. Any later source change requires a new complete run. Never substitute `npm test` for `./test.sh`.
+
 **Lockstep versioning**: all packages share one version; every release updates all together. `patch` = fixes + additions, `minor` = breaking changes. No major releases.
 
 1. **Update CHANGELOGs**: ask the user whether they ran the `/cl` prompt on the latest commit on `main`. If not, they must run `/cl` first to audit and update each package's `[Unreleased]` section before releasing.

@@ -103,7 +103,9 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 | Setting | Type | Default | Description |
 |---|---|---|---|
 | `laya.baseUrl` | string | `LAYA_BASE_URL` or `http://127.0.0.1:8737/v1` | Laya System One server. |
-| `laya.autostart` | boolean | `true` | Install Laya in Docker when Relay starts and keep its container running. See [laya.md](laya.md#laya-runs-in-docker). |
+| `laya.autostart` | boolean | `true` | Prepare and start Laya during interactive startup. See [local CPU runtime](laya.md#local-cpu-runtime). |
+| `laya.runtime` | `"native" \| "docker"` | `"native"` | Shipped-model inference runs locally on CPU. Explicit image overrides and registered Docker-volume checkpoints select Docker. |
+| `laya.python` | string | Discover an existing interpreter | Python 3.10–3.13 executable path for the isolated local runtime. Python itself is not downloaded. |
 | `laya.image` | string | The image built from this Relay version | Docker image of Laya, for example one built locally with `npm run laya:image`. |
 | `laya.policy` | string | `balanced` | Cost profile: `economy`, `balanced`, `quality` or `critical`. `--laya-policy` and `/laya policy` override it. |
 | `laya.models` | object | See [laya.md](laya.md#model-registry) | Models per tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order. A tier you set replaces that tier's default list. |
@@ -113,7 +115,25 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 | `laya.toolRouting` | string | `advise` | `advise` names unneeded tools in the plan; `enforce` also deactivates them for the request. |
 | `laya.telemetry` | boolean | `true` | Record each routed request in `~/.relay/agent/laya/telemetry.jsonl`. |
 | `laya.memory` | boolean | `true` | Route requests similar to tasks learned with `/laya learn` by their labels, and give the running model their lessons. See [laya.md](laya.md#teach-laya-from-your-sessions). |
-| `laya.timeoutMs` | number | `5000` | Classifier timeout before keyword rules answer instead. |
+| `laya.timeoutMs` | number | `60000` native, `5000` Docker | Classifier timeout before keyword rules answer instead. |
+
+### Delegation budgets
+
+These limits bound [subordinate workers](delegation.md). They do not enable the gated
+feature or expand an approved plan. Changing effective settings requires a new Laya
+proposal and cancels workers bound to the previous limits.
+
+| Setting | Default | Maximum |
+|---|---|---|
+| `delegation.maxConcurrent` | `3` | `16` |
+| `delegation.maxTasks` | `8` | `32` |
+| `delegation.maxAttempts` | `2` | `10` |
+| `delegation.maxDurationMs` | `300000` | `3600000` |
+| `delegation.maxSteps` | `40` | `1000` |
+| `delegation.maxOutputBytes` | `64000` | `4194304` |
+
+Values must be positive integers; unknown fields are rejected. `maxConcurrent` cannot
+exceed `maxTasks`. Global and trusted project settings merge normally.
 
 ### Branch summaries
 

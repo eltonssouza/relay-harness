@@ -5,11 +5,19 @@ import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types
 import { parseFrontmatter } from "../../utils/frontmatter.ts";
 import { AGENT_IDS, type AgentId } from "../laya/questions.ts";
 
+export interface AgentProfile {
+	name: AgentId;
+	path: string;
+	content: string;
+	/** Missing metadata imposes no additional restriction on the phase's selected tools. */
+	tools?: string[];
+}
+
 /** Local profiles with the same name replace the shipped profile, only in trusted projects. */
-export function loadAgentProfile(
+export function loadStructuredAgentProfile(
 	agent: AgentId,
 	ctx: Pick<ExtensionContext, "cwd" | "isProjectTrusted">,
-): string | undefined {
+): AgentProfile | undefined {
 	const paths = [
 		...(ctx.isProjectTrusted() ? [join(ctx.cwd, CONFIG_DIR_NAME, "agents", `${agent}.md`)] : []),
 		join(getAgentDir(), "agents", `${agent}.md`),
@@ -17,8 +25,27 @@ export function loadAgentProfile(
 	];
 	const path = paths.find(existsSync);
 	if (!path) return undefined;
-	const { body } = parseFrontmatter(readFileSync(path, "utf8"));
-	return `[harness:role] ${agent}\nApply this role to the current task. Repository instructions and user requirements take precedence. Context placeholders refer to the actual conversation and repository; do not invent their contents.\n${body}`;
+	const { body, frontmatter } = parseFrontmatter(readFileSync(path, "utf8"));
+	const tools = frontmatter.tools;
+	if (
+		tools !== undefined &&
+		(!Array.isArray(tools) || tools.some((tool: unknown) => typeof tool !== "string" || !tool.trim()))
+	)
+		throw new Error(`Invalid tool restrictions in profile ${path}`);
+	const allowedTools = tools === undefined ? undefined : [...new Set(tools as string[])];
+	return {
+		name: agent,
+		path,
+		content: `[harness:role] ${agent}\nApply this role to the current task. Repository instructions and user requirements take precedence. Context placeholders refer to the actual conversation and repository; do not invent their contents.\n${allowedTools === undefined ? "" : `Delegated worker tool restrictions (also limited by Laya and the Harness): ${allowedTools.join(", ") || "none"}.\n`}${body}`,
+		tools: allowedTools,
+	};
+}
+
+export function loadAgentProfile(
+	agent: AgentId,
+	ctx: Pick<ExtensionContext, "cwd" | "isProjectTrusted">,
+): string | undefined {
+	return loadStructuredAgentProfile(agent, ctx)?.content;
 }
 
 export default function engineeringExtension(relay: ExtensionAPI): void {

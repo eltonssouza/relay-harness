@@ -344,6 +344,14 @@ function loadSkillFromFile(
 	};
 }
 
+/** Re-read registered files without discovering new paths or silently accepting renamed resources. */
+export function refreshRegisteredSkills(skills: readonly Skill[]): Skill[] {
+	return skills.flatMap((registered) => {
+		const { skill } = loadSkillFromFile(registered.filePath, "path");
+		return skill && skill.name === registered.name ? [{ ...skill, sourceInfo: registered.sourceInfo }] : [];
+	});
+}
+
 /**
  * Format skills for inclusion in a system prompt.
  * Uses XML format per Agent Skills standard.

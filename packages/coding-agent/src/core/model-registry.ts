@@ -52,6 +52,11 @@ export class ModelRegistry {
 		this.runtime = runtime;
 	}
 
+	/** Share the configured provider/auth runtime with internal SDK worker sessions. */
+	get modelRuntime(): ModelRuntime {
+		return this.runtime;
+	}
+
 	/** Reload models.json asynchronously. Await before making synchronous registry reads. */
 	refresh(options?: ModelsRefreshOptions): Promise<ModelsRefreshResult> {
 		return this.runtime.refresh(options);

@@ -86,7 +86,8 @@ class LocalRuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "requirements"):
             runtime.setup(self.root, {**self.manifest, "layaPackage": "laya[serve]==99.0.0"})
 
-    def test_server_rejects_another_xp_checkpoint_before_inference(self):
+    # Regression #70: checkpoint enforcement must not contaminate task content for inference.
+    def test_server_rejects_another_checkpoint_before_inference(self):
         # Exercise the actual endpoint functions without loading weights or opening a port.
         class HttpError(Exception):
             def __init__(self, status, detail):
@@ -99,19 +100,110 @@ class LocalRuntimeTests(unittest.TestCase):
         fastapi = MagicMock(FastAPI=MagicMock(return_value=app), HTTPException=HttpError)
         laya = MagicMock()
         manifest_path = self.root / "manifest.json"
-        manifest_path.write_text(json.dumps({**self.manifest, "version": "relay-laya-v4"}))
-        argv = ["local-serve.py", "serve", "--root", str(self.root), "--manifest", str(manifest_path)]
-        with patch.dict(sys.modules, {"laya": laya, "torch": MagicMock(), "uvicorn": MagicMock(), "fastapi": fastapi}), patch.object(sys, "argv", argv), patch.dict(runtime.os.environ):
-            endpoints = runpy.run_path(str(Path(__file__).resolve().parents[1] / "resources/laya/local-serve.py"))
-            self.assertEqual(endpoints["health"]()["version"], "relay-laya-v4")
-            body = {"state": {"required_model": "relay-laya-v3"}, "questions": {"decision": {"type": "bool"}}}
-            with self.assertRaises(HttpError) as rejected:
+        server_manifest = {**self.manifest, "version": "relay-laya-v4", "files": [
+            *self.manifest["files"],
+            {"path": "model.safetensors", "asset": "model.safetensors",
+             "size": len(self.data), "sha256": hashlib.sha256(self.data).hexdigest()},
+        ]}
+        manifest_path.write_text(json.dumps(server_manifest))
+        artifact_input = "".join(chr(0).join((entry["path"], str(entry["size"]), entry["sha256"])) + chr(10)
+                                 for entry in sorted(server_manifest["files"], key=lambda item: item["path"]))
+        artifact_sha256 = hashlib.sha256(artifact_input.encode("utf-8")).hexdigest()
+        package = Path(__file__).resolve().parents[1]
+        docker_source = (package / "src/extensions/laya/runtime.ts").read_text(encoding="utf-8")
+        docker_script = self.root / "docker-serve.py"
+        docker_script.write_text(docker_source.split("export const SERVE_SCRIPT = `", 1)[1].split("`;", 1)[0], encoding="utf-8")
+        scripts = [
+            (package / "resources/laya/local-serve.py", ["serve", "--root", str(self.root), "--manifest", str(manifest_path)]),
+            (docker_script, ["--model", "/opt/laya/model"]),
+        ]
+        real_open = Path.open
+
+        def checkpoint_open(path, *arguments, **keywords):
+            if path.name in ("model", "model.safetensors"):
+                return io.BytesIO(self.data)
+            return real_open(path, *arguments, **keywords)
+
+        for script, arguments in scripts:
+            with self.subTest(server=script.name), patch.dict(sys.modules, {"laya": laya, "torch": MagicMock(), "uvicorn": MagicMock(), "fastapi": fastapi}), patch.object(sys, "argv", [str(script), *arguments]), patch.dict(runtime.os.environ), patch.object(Path, "read_text", return_value=manifest_path.read_text()), patch.object(Path, "open", checkpoint_open):
+                laya.reset_mock()
+                laya.load.return_value.predict.return_value = {"answers": {}, "usage": {"truncated": False}}
+                endpoints = runpy.run_path(str(script))
+                self.assertEqual(endpoints["health"]()["version"], "relay-laya-v4")
+                self.assertEqual(endpoints["health"]()["sha256"], hashlib.sha256(self.data).hexdigest())
+                self.assertEqual(endpoints["health"]()["artifact_sha256"], artifact_sha256)
+                body = {"state": {"required_model": "relay-laya-v3", "goal": "Document release notes", "nested": {"required_model": "semantic-data"}}, "questions": {"decision": {"type": "noul"}}}
+                with self.assertRaises(HttpError) as rejected:
+                    endpoints["system_one"](body)
+                self.assertEqual(rejected.exception.status_code, 409)
+                laya.load.return_value.predict.assert_not_called()
+                body["state"]["required_model"] = "relay-laya-v4"
+                body["state"]["required_checkpoint_sha256"] = "0" * 64
+                with self.assertRaises(HttpError) as wrong_weights:
+                    endpoints["system_one"](body)
+                self.assertEqual(wrong_weights.exception.status_code, 409)
+                laya.load.return_value.predict.assert_not_called()
+                body["state"]["required_checkpoint_sha256"] = hashlib.sha256(self.data).hexdigest()
+                body["state"]["required_artifact_sha256"] = "0" * 64
+                with self.assertRaises(HttpError) as wrong_configuration:
+                    endpoints["system_one"](body)
+                self.assertEqual(wrong_configuration.exception.status_code, 409)
+                laya.load.return_value.predict.assert_not_called()
+                body["state"]["required_artifact_sha256"] = artifact_sha256
                 endpoints["system_one"](body)
-            self.assertEqual(rejected.exception.status_code, 409)
-            laya.load.return_value.predict.assert_not_called()
-            body["state"]["required_model"] = "relay-laya-v4"
-            endpoints["system_one"](body)
-            laya.load.return_value.predict.assert_called_once_with(body["state"], body["questions"])
+                laya.load.return_value.predict.assert_called_once_with(
+                    {"goal": "Document release notes", "nested": {"required_model": "semantic-data"}}, body["questions"]
+                )
+                self.assertEqual(body["state"]["required_model"], "relay-laya-v4")
+                self.assertEqual(body["state"]["required_checkpoint_sha256"], hashlib.sha256(self.data).hexdigest())
+                self.assertEqual(body["state"]["required_artifact_sha256"], artifact_sha256)
+                laya.load.return_value.predict.return_value = {"answers": {}, "usage": {"truncated": True}}
+                with self.assertRaises(HttpError) as truncated:
+                    endpoints["system_one"](body)
+                self.assertEqual(truncated.exception.status_code, 422)
+                # Requests pinned to a checkpoint require the full observation; ordinary routing permits truncation.
+                ordinary = {**body, "state": {"goal": "Document release notes"}}
+                self.assertTrue(endpoints["system_one"](ordinary)["usage"]["truncated"])
+                for damaged in ("model", "model.safetensors"):
+                    def corrupt_open(path, *arguments, **keywords):
+                        if path.name == damaged:
+                            return io.BytesIO(b"x" * len(self.data))
+                        return checkpoint_open(path, *arguments, **keywords)
+
+                    with self.subTest(corrupt=damaged), patch.object(Path, "open", corrupt_open):
+                        laya.reset_mock()
+                        with self.assertRaisesRegex(ValueError, "pinned manifest"):
+                            runpy.run_path(str(script))
+                        laya.load.assert_not_called()
+                for missing_file in ("model", "model.safetensors"):
+                    def missing_open(path, *arguments, **keywords):
+                        if path.name == missing_file:
+                            raise FileNotFoundError(path)
+                        return checkpoint_open(path, *arguments, **keywords)
+
+                    with self.subTest(missing=missing_file), patch.object(Path, "open", missing_open):
+                        laya.reset_mock()
+                        with self.assertRaises(FileNotFoundError):
+                            runpy.run_path(str(script))
+                        laya.load.assert_not_called()
+                missing = {**server_manifest, "files": self.manifest["files"]}
+                with patch.object(Path, "read_text", return_value=json.dumps(missing)):
+                    laya.reset_mock()
+                    with self.assertRaisesRegex(ValueError, "does not identify model.safetensors"):
+                        runpy.run_path(str(script))
+                    laya.load.assert_not_called()
+                for changed_during_load in ("model", "model.safetensors"):
+                    def changed_after_load_open(path, *arguments, **keywords):
+                        if laya.load.called and path.name == changed_during_load:
+                            return io.BytesIO(b"x" * len(self.data))
+                        return checkpoint_open(path, *arguments, **keywords)
+
+                    with self.subTest(changed_during_load=changed_during_load), patch.object(Path, "open", changed_after_load_open):
+                        laya.reset_mock()
+                        sys.modules["uvicorn"].reset_mock()
+                        with self.assertRaisesRegex(ValueError, "pinned manifest"):
+                            runpy.run_path(str(script))
+                        sys.modules["uvicorn"].run.assert_not_called()
 
 
 if __name__ == "__main__":
