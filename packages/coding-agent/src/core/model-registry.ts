@@ -52,7 +52,7 @@ export class ModelRegistry {
 		this.runtime = runtime;
 	}
 
-	/** Reuse the principal's configured runtime for subordinate SDK sessions. */
+	/** Share the configured provider/auth runtime with internal SDK worker sessions. */
 	get modelRuntime(): ModelRuntime {
 		return this.runtime;
 	}

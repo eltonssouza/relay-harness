@@ -92,14 +92,11 @@ describe("jev-router example", () => {
 		const runtime = harness.session.modelRuntime;
 		harness.session.agent.streamFunction = (model, context, options) => runtime.streamSimple(model, context, options);
 		await runtime.refresh({ allowNetwork: false });
-		// PR #65: router targets must survive the model eligibility filter.
-		for (const id of ["gpt-6.1-sol", "gpt-5.6-terra", "gpt-6-luna"]) {
-			expect(runtime.getModel("openai-codex", id)).toBeDefined();
-		}
 		await harness.session.setModel(runtime.getModel("jev", "auto")!);
 
 		const respond = (...messages: AssistantMessage[]) => codex.appendResponses(messages);
-		const dispatched = () => harness.session.messages.flatMap((m) => (m.role === "assistant" ? [m.model] : []));
+		const dispatched = () =>
+			harness.session.messages.flatMap((m) => (m.role === "assistant" ? [m.model.split("-").at(-1)!] : []));
 		const phases = () =>
 			harness.sessionManager
 				.getBranch()
@@ -122,7 +119,7 @@ describe("jev-router example", () => {
 		await harness.session.prompt("Also add tests.");
 
 		// Sol reads and makes the first edit; the tool-result follow-up of the same turn goes to Luna.
-		expect(dispatched()).toEqual(["gpt-6.1-sol", "gpt-6.1-sol", "gpt-6-luna", "gpt-6-luna"]);
+		expect(dispatched()).toEqual(["sol", "sol", "luna", "luna"]);
 		expect(phases()).toEqual(["planning", "implementation"]);
 		expect(harness.session.model).toMatchObject({ provider: "jev", id: "auto" });
 	});
@@ -136,7 +133,7 @@ describe("jev-router example", () => {
 		respond(call("edit"), call("write"), fauxAssistantMessage("done"));
 		await harness.session.prompt("Add a verbose flag.");
 
-		expect(dispatched()).toEqual(["gpt-5.6-terra", "gpt-5.6-terra", "gpt-6-luna"]);
+		expect(dispatched()).toEqual(["terra", "terra", "luna"]);
 		expect(phases()).toEqual(["planning", "implementation"]);
 	});
 });

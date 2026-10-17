@@ -9,7 +9,7 @@ export interface AgentProfile {
 	name: AgentId;
 	path: string;
 	content: string;
-	/** Missing metadata imposes no additional restriction on the worker's selected tools. */
+	/** Missing metadata imposes no additional restriction on the phase's selected tools. */
 	tools?: string[];
 }
 

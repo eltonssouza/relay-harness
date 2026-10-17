@@ -1,4 +1,6 @@
 import {
+	appendFileSync,
+	linkSync,
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
@@ -90,6 +92,22 @@ describe("workspace content snapshots", () => {
 		expect(restored.baseline().controlFiles).toEqual(["sessions/first.jsonl", "sessions/second.jsonl"]);
 		writeFileSync(join(directory, "sessions/source.ts"), "export const input = true;\n");
 		expect(restored.inspect(true)?.files).toEqual(["sessions/source.ts"]);
+	});
+	it("ignores runtime appends through hard-linked history aliases but tracks a replacement source", () => {
+		const history = join(directory, "history.jsonl");
+		const alias = join(directory, "history-alias.jsonl");
+		writeFileSync(history, "Initial runtime event\n");
+		linkSync(history, alias);
+		const tracker = new WorkspaceTracker(directory, undefined, [history]);
+		appendFileSync(history, "Another runtime event\n");
+		expect(tracker.inspect(true)).toBeUndefined();
+		const restored = new WorkspaceTracker(directory, tracker.baseline());
+		appendFileSync(history, "Restored runtime event\n");
+		expect(restored.inspect(true)).toBeUndefined();
+		const source = join(directory, "replacement.jsonl");
+		writeFileSync(source, "Source input\n");
+		renameSync(source, alias);
+		expect(restored.inspect(true)?.files).toEqual(["history-alias.jsonl"]);
 	});
 	it("detects same-size changes even when the old modification time is restored", () => {
 		const path = join(directory, "src/code.ts");

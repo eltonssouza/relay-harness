@@ -51,6 +51,12 @@ export function captureWorkspace(
 			return [path, canonical].map((name) => (process.platform === "win32" ? name.toLowerCase() : name));
 		}),
 	);
+	const controlIdentities = new Set(
+		(options.controlFiles ?? []).flatMap((file) => {
+			const identity = statSync(resolve(root, file), { bigint: true, throwIfNoEntry: false });
+			return identity?.isFile() ? [`${identity.dev}:${identity.ino}`] : [];
+		}),
+	);
 	const hashFile = (path: string): string => {
 		const metadata = statSync(path, { bigint: true });
 		const identity = `${metadata.dev}:${metadata.ino}:${metadata.size}:${metadata.mtimeNs}:${metadata.ctimeNs}`;
@@ -87,14 +93,18 @@ export function captureWorkspace(
 	};
 	const record = (path: string, name: string): void => {
 		if (controlFiles.has(process.platform === "win32" ? path.toLowerCase() : path)) return;
-		const entry = lstatSync(path, { throwIfNoEntry: false });
+		const entry = lstatSync(path, { bigint: true, throwIfNoEntry: false });
 		if (!entry) {
 			files.set(name, "missing");
 			return;
 		}
-		const target = entry.isSymbolicLink() ? statSync(path, { throwIfNoEntry: false }) : undefined;
+		const target = entry.isSymbolicLink() ? statSync(path, { bigint: true, throwIfNoEntry: false }) : undefined;
 		const canonical = !entry.isSymbolicLink() || target ? realpathSync(path) : undefined;
-		if (canonical && controlFiles.has(process.platform === "win32" ? canonical.toLowerCase() : canonical))
+		const identity = target ?? entry;
+		if (
+			(canonical && controlFiles.has(process.platform === "win32" ? canonical.toLowerCase() : canonical)) ||
+			(identity.isFile() && controlIdentities.has(`${identity.dev}:${identity.ino}`))
+		)
 			files.set(name, "session-artifact");
 		else if (entry.isSymbolicLink()) {
 			files.set(

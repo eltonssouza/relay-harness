@@ -108,7 +108,7 @@ async function createRuntimeHost(options: {
 	const tempDir = join(tmpdir(), `relay-rpc-prompt-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 	mkdirSync(tempDir, { recursive: true });
 
-	const model = options.model ?? getModel("anthropic", "claude-sonnet-4-5");
+	const model = options.model ?? getModel("anthropic", "claude-sonnet-5-5");
 	if (!model) {
 		throw new Error("Test model not found");
 	}

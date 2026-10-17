@@ -132,7 +132,7 @@ class LocalRuntimeTests(unittest.TestCase):
                 self.assertEqual(endpoints["health"]()["version"], "relay-laya-v4")
                 self.assertEqual(endpoints["health"]()["sha256"], hashlib.sha256(self.data).hexdigest())
                 self.assertEqual(endpoints["health"]()["artifact_sha256"], artifact_sha256)
-                body = {"state": {"required_model": "relay-laya-v3", "goal": "Document release notes", "nested": {"required_model": "semantic-data"}}, "questions": {"decision": {"type": "bool"}}}
+                body = {"state": {"required_model": "relay-laya-v3", "goal": "Document release notes", "nested": {"required_model": "semantic-data"}}, "questions": {"decision": {"type": "noul"}}}
                 with self.assertRaises(HttpError) as rejected:
                     endpoints["system_one"](body)
                 self.assertEqual(rejected.exception.status_code, 409)
