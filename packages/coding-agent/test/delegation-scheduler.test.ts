@@ -28,7 +28,7 @@ function fixture(count = 4, maxConcurrent = 3) {
 			})),
 		},
 		decisionId: "decision",
-		model: "relay-laya-v4",
+		model: "relay-laya-v5",
 		checkpoint: delegationCheckpoint(),
 		maxConcurrent,
 		limits: { ...DEFAULT_DELEGATION_LIMITS, maxConcurrent: Math.max(3, maxConcurrent) },

@@ -70,7 +70,7 @@ const scenarios = [
 	},
 ];
 
-describe.skipIf(!enabled)("real relay-laya-v4 delegation evaluation", () => {
+describe.skipIf(!enabled)("real relay-laya-v5 delegation evaluation", () => {
 	it("evaluates the production questions on representative proposals and preserves all traces", async () => {
 		vi.stubEnv("RELAY_OFFLINE", undefined);
 		useCandidateCheckpoint();
@@ -216,7 +216,7 @@ describe.skipIf(!enabled)("real relay-laya-v4 delegation evaluation", () => {
 			mkdirSync(resolve(destination, ".."), { recursive: true });
 			writeFileSync(
 				destination,
-				`${JSON.stringify({ version: 2, evaluatedAt: new Date().toISOString(), model: "relay-laya-v4", checkpointIdentity, baseUrl, passed: rows.every((row) => row.passed), paidProviderCalls: 0, workerExecution: "Covered separately by suite/delegation.test.ts using the faux provider and real Node tests", rows }, null, 2)}\n`,
+				`${JSON.stringify({ version: 2, evaluatedAt: new Date().toISOString(), model: "relay-laya-v5", checkpointIdentity, baseUrl, passed: rows.every((row) => row.passed), paidProviderCalls: 0, workerExecution: "Covered separately by suite/delegation.test.ts using the faux provider and real Node tests", rows }, null, 2)}\n`,
 			);
 			expect(
 				rows

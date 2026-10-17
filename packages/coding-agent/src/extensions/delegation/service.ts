@@ -535,7 +535,7 @@ export class WorkDelegation {
 			}),
 			execute: async (_id, params, signal, _onUpdate, ctx) => {
 				if (!this.enabled)
-					throw new Error("Automatic delegation awaits validation of the relay-laya-v4 checkpoint");
+					throw new Error("Automatic delegation awaits validation of the relay-laya-v5 checkpoint");
 				const state = this.getState();
 				if (!state || state.status !== "active") throw new Error("No active delegation task");
 				const store = this.ensure(ctx);
