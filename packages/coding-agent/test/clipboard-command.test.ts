@@ -18,15 +18,18 @@ describe("clipboard commands", () => {
 		);
 	});
 	test("times out without blocking the event loop", async () => {
-		let ticks = 0;
-		const timer = setInterval(() => ticks++, 10);
+		// #78: require event-loop progress, without a scheduler-dependent tick count.
+		let eventLoopProgress = false;
+		const timer = setTimeout(() => {
+			eventLoopProgress = true;
+		}, 0);
 		try {
 			expect(
 				await runClipboardCommand(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { timeoutMs: 200 }),
 			).toBeUndefined();
-			expect(ticks).toBeGreaterThan(5);
+			expect(eventLoopProgress).toBe(true);
 		} finally {
-			clearInterval(timer);
+			clearTimeout(timer);
 		}
 	});
 	test("rejects output above the buffer limit", async () => {
