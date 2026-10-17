@@ -602,7 +602,7 @@ describe("limits and lifetime", () => {
 		const empty = await sandbox.execute(`for (;;) text("");`);
 		expect(empty).toMatchObject({ ok: false, error: { name: "RangeError" } });
 		expect(empty.output).toHaveLength(MAX_OUTPUT_ITEMS);
-	}, 15_000); // Four output-limit executions can exceed Vitest's default under full-suite load.
+	});
 
 	it("rejects execute after close", async () => {
 		const sandbox = createSandbox();

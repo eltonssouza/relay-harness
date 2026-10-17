@@ -147,11 +147,22 @@ export async function createDelegationHarness(
 export async function runDelegationScenario(harness: Harness): Promise<void> {
 	let arrivals = 0;
 	let release = () => {};
-	const barrier = new Promise<void>((resolve) => {
+	let rejectBarrier = (_error: Error) => {};
+	let barrierTimeout: ReturnType<typeof setTimeout> | undefined;
+	const barrier = new Promise<void>((resolve, reject) => {
 		release = resolve;
+		rejectBarrier = (error) => reject(error);
 	});
 	const investigate = async (context: TranscriptContext) => {
-		if (++arrivals === 2) release();
+		if (++arrivals === 1) {
+			barrierTimeout = setTimeout(
+				() => rejectBarrier(new Error("Timed out waiting for both independent investigations")),
+				30_000,
+			);
+		} else if (arrivals === 2) {
+			if (barrierTimeout) clearTimeout(barrierTimeout);
+			release();
+		}
 		await barrier;
 		expect(JSON.stringify(context)).not.toContain('"name":"propose_work"');
 		return call("read", { path: "input.txt" }, "same-child-id");
