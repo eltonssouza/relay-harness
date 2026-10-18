@@ -6,6 +6,7 @@ import { type Context, createFacetHost, defineFacet, defineService } from "@rela
 import { BACKGROUND_CONTEXT } from "@relay-harness/chord/context";
 import { Client, ServerError as ClientServerError } from "@relay-harness/client";
 import { createUnixTransportFactory } from "@relay-harness/client/unix";
+import { ROOT_CONVERSATION_ID } from "@relay-harness/durable";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ExampleFacetService } from "../examples/plugins/relay-example-plugin/src/contract.ts";
 import { ModelRuntime } from "../src/core/model-runtime.ts";
@@ -22,21 +23,23 @@ import { Models } from "../src/experimental/services/models.ts";
 import { PresentationPlugins, SessionPlugins } from "../src/experimental/services/plugins.ts";
 import { SessionDirectory, SessionManagement } from "../src/experimental/services/sessions.ts";
 import { Transcript } from "../src/experimental/services/transcript.ts";
+import { sessionStoragePath } from "../src/experimental/session-catalog.ts";
 import { createServerServiceBinding, createSessionServiceBinding } from "./experimental-service-binding.ts";
 import {
 	configureExperimentalWorkerModel,
 	createExperimentalSessions,
 	readExperimentalSessionState,
 } from "./experimental-session-support.ts";
+import { createFauxSessionWorkerHarness } from "./fixtures/faux-session-worker.ts";
 import { KeyedProbe } from "./fixtures/keyed-service.ts";
+import { alternateSessionModel, sessionWorkerModel } from "./fixtures/session-worker-models.ts";
 
 const servers = new Set<RunningServer>();
 const clients = new Set<Client>();
 const directories = new Set<string>();
 const fauxWorkerEntryUrl = new URL("fixtures/faux-session-worker.ts", import.meta.url);
 const realSpawnInternalProcess = processRuntime.spawnInternalProcess;
-const sessionWorkerModel = { provider: "anthropic", model: "claude-sonnet-5-5" } as const;
-const alternateSessionModel = { provider: "anthropic", model: "claude-opus-5-5" } as const;
+
 const SecondPluginService = defineService<{ read(context: Context): Promise<string> }>("test.second-plugin");
 // /tmp keeps Unix socket paths short; Windows has no /tmp, so use the OS temp directory there.
 const tempRoot = process.platform === "win32" ? tmpdir() : "/tmp";
@@ -106,6 +109,23 @@ describe("experimental durable server composition", () => {
 			await expect(findInitialAgentModel(settings, runtime)).resolves.toMatchObject(expected);
 		},
 	);
+	// #78: opening the actual faux harness catches model mismatches even without Unix sockets.
+	test("opens the faux worker harness with the server model fixture", async () => {
+		const sessionDir = join(agentDir, "experimental", "sessions");
+		const [metadata] = await createExperimentalSessions(sessionDir, ["faux-startup"]);
+		const runtime = await createFauxSessionWorkerHarness(sessionStoragePath(metadata!), {
+			...sessionWorkerModel,
+			sessionDir,
+			metadata: metadata!,
+			pluginManifestPaths: [],
+		});
+		try {
+			await expect(runtime.harness.conversation(ROOT_CONVERSATION_ID, BACKGROUND_CONTEXT)).resolves.toBeDefined();
+		} finally {
+			await runtime.harness.close(BACKGROUND_CONTEXT);
+		}
+	});
+
 	serverTest("uses RELAY_SERVER_DIR and RELAY_SERVER_ID", async () => {
 		const directory = await mkdtemp(join(tempRoot, "relay-server-dir-"));
 		directories.add(directory);
