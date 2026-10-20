@@ -124,6 +124,11 @@ export function getEngineeringResourcesPath(): string {
 	return join(getPackageDir(), "resources");
 }
 
+/** Versioned audit protocol resources, shared by source, npm and standalone builds. */
+export function getAuditResourcesPath(): string {
+	return join(getEngineeringResourcesPath(), "audit");
+}
+
 /** Use the pinned installed server, with no runtime npm download. */
 export function getChromeDevtoolsEntrypoint(): string {
 	const bundled = join(

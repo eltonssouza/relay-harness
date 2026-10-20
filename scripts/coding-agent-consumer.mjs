@@ -104,6 +104,12 @@ export function smokeTestCodingAgentConsumer(directory, runtime = process.execPa
 	try {
 		writeFileSync(entry, `import assert from "node:assert/strict";
 import { createAgentSession, SessionManager, ModelRuntime } from "${codingAgentName}";
+import { loadResources } from "./node_modules/${codingAgentName}/dist/core/audit/contracts.js";
+const audit = loadResources();
+assert.equal(Object.keys(audit.routing.routing).length, 20);
+assert.equal(new Set(Object.values(audit.routing.routing).map(route => route.primary)).size, 6);
+assert.equal(typeof audit.prompt("validator"), "string");
+assert.equal(typeof audit.prompt("reporter"), "string");
 assert.equal(typeof createAgentSession, "function");
 assert.equal(typeof SessionManager.inMemory, "function");
 assert.equal(typeof ModelRuntime.create, "function");

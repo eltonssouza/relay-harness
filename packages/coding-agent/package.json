@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/coding-agent",
-	"version": "0.3.2",
+	"version": "0.4.0",
 	"description": "Coding agent CLI with read, bash, edit, write tools and session management",
 	"type": "module",
 	"relayConfig": {
@@ -50,13 +50,15 @@
 	"dependencies": {
 		"@playwright/mcp": "0.0.83",
 		"@upstash/context7-mcp": "4.3.0",
-		"@relay-harness/chord": "^0.3.2",
-		"@relay-harness/agent-core": "^0.3.2",
-		"@relay-harness/ai": "^0.3.2",
-		"@relay-harness/codemode": "^0.3.2",
-		"@relay-harness/mcp": "^0.3.2",
-		"@relay-harness/tui": "^0.3.2",
+		"@relay-harness/chord": "^0.4.0",
+		"@relay-harness/agent-core": "^0.4.0",
+		"@relay-harness/ai": "^0.4.0",
+		"@relay-harness/codemode": "^0.4.0",
+		"@relay-harness/mcp": "^0.4.0",
+		"@relay-harness/tui": "^0.4.0",
 		"@silvia-odwyer/photon-node": "0.3.4",
+		"ajv": "8.20.0",
+		"ajv-formats": "3.0.1",
 		"brace-expansion": "5.0.12",
 		"chalk": "6.0.0",
 		"chrome-devtools-mcp": "1.10.1",
@@ -79,9 +81,9 @@
 		"protobufjs": "7.6.6"
 	},
 	"devDependencies": {
-		"@relay-harness/client": "^0.3.2",
-		"@relay-harness/protocol": "^0.3.2",
-		"@relay-harness/server": "^0.3.2",
+		"@relay-harness/client": "^0.4.0",
+		"@relay-harness/protocol": "^0.4.0",
+		"@relay-harness/server": "^0.4.0",
 		"@types/cross-spawn": "6.0.6",
 		"@types/hosted-git-info": "3.0.5",
 		"@types/node": "22.19.19",
