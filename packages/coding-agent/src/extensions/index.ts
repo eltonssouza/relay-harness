@@ -1,4 +1,5 @@
 import type { InlineExtension } from "../core/extensions/types.ts";
+import auditExtension from "./audit/index.ts";
 import browserExtension from "./browser/index.ts";
 import codemodeExtension from "./codemode/index.ts";
 import delegationExtension from "./delegation/index.ts";
@@ -15,6 +16,16 @@ import projectMemoryExtension from "./project-memory/index.ts";
 import toolSearchExtension from "./tool-search/index.ts";
 
 export const builtInExtensions: InlineExtension[] = [
+	// No audit registration or source inspection when disabled. Experimental delegation is unchanged.
+	...(process.env.RELAY_AUDIT_ENABLED === "1"
+		? [
+				{
+					name: "audit",
+					factory: auditExtension,
+					builtin: true,
+				},
+			]
+		: []),
 	{ name: "engineering", factory: engineeringExtension, builtin: true },
 	{ name: "browser", factory: browserExtension, builtin: true },
 	{ name: "native-mcp", factory: nativeMcpExtension, builtin: true },

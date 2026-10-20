@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Added
+
+- Added an opt-in local static security audit across 20 domains, with explicit model-egress consent, snapshot-only analysis, independently reviewed evidence, resumable checkpoints, and local reports. Enable it with `RELAY_AUDIT_ENABLED=1`. See [Universal static audit](docs/audit.md).
+
 ## [0.3.2] - 2026-10-18
 
 ## [0.3.1] - 2026-10-17
