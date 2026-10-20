@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.example/security-audit/agent-result.schema.json",
+  "title": "Resposta de um especialista por escopo",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "task_id", "scope_id", "repository_revision", "specialist_id", "coverage", "candidates", "strengths", "limitations", "handoff_refs"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "scope_id": {"type": "string", "minLength": 1},
+    "repository_revision": {"type": "string", "minLength": 1},
+    "specialist_id": {"enum": ["security", "malware", "privacy", "supply-chain", "infrastructure", "ai-security"]},
+    "coverage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["discovered", "examined", "not_verified", "not_applicable", "assets"],
+      "properties": {
+        "discovered": {"type": "integer", "minimum": 0},
+        "examined": {"type": "integer", "minimum": 0},
+        "not_verified": {"type": "integer", "minimum": 0},
+        "not_applicable": {"type": "integer", "minimum": 0},
+        "assets": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["id", "kind", "locator", "status"], "properties": {"id": {"type": "string"}, "kind": {"type": "string"}, "locator": {"type": "string"}, "status": {"enum": ["EXAMINADO", "NAO_VERIFICADO", "NAO_APLICAVEL"]}, "notes": {"type": "string"}}}}
+      }
+    },
+    "candidates": {"type": "array", "items": {"$ref": "finding.schema.json"}},
+    "strengths": {"type": "array", "items": {"type": "object", "required": ["id", "description", "scope", "evidence_refs"], "properties": {"id": {"type": "string"}, "description": {"type": "string"}, "scope": {"type": "string"}, "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "limitations": {"type": "array", "items": {"type": "string"}}}}},
+    "limitations": {"type": "array", "items": {"type": "string"}},
+    "handoff_refs": {"type": "array", "items": {"type": "string"}},
+    "metadata": {"type": "object"}
+  }
+}

@@ -1,0 +1,41 @@
+version: '3.0'
+roles:
+  orchestrator: prompts/01-orchestrator.md
+  security: prompts/02-security-auditor.md
+  malware: prompts/03-malware-analyst.md
+  privacy: prompts/04-privacy-compliance.md
+  supply-chain: prompts/05-supply-chain.md
+  infrastructure: prompts/06-infrastructure.md
+  ai-security: prompts/07-ai-security.md
+  validator: prompts/08-evidence-validator.md
+  reporter: prompts/09-report-generator.md
+shared_policy: prompts/00-shared-policy.md
+routing:
+  '01': {primary: security, consult: [infrastructure]}
+  '02': {primary: security, consult: []}
+  '03': {primary: security, consult: [privacy]}
+  '04': {primary: security, consult: [malware]}
+  '05': {primary: security, consult: []}
+  '06': {primary: security, consult: [supply-chain, infrastructure]}
+  '07': {primary: security, consult: [privacy, infrastructure]}
+  '08': {primary: security, consult: []}
+  '09': {primary: security, consult: [malware]}
+  '10': {primary: supply-chain, consult: [malware]}
+  '11': {primary: malware, consult: [supply-chain]}
+  '12': {primary: infrastructure, consult: [security]}
+  '13': {primary: infrastructure, consult: []}
+  '14': {primary: infrastructure, consult: [supply-chain, malware]}
+  '15': {primary: infrastructure, consult: [privacy]}
+  '16': {primary: privacy, consult: [security]}
+  '17': {primary: privacy, consult: []}
+  '18': {primary: security, consult: []}
+  '19': {primary: security, consult: [infrastructure]}
+  '20': {primary: ai-security, consult: [security, privacy]}
+activation:
+  always: [security, malware]
+  supply-chain: 'se houver dependências, build, release ou software distribuído'
+  infrastructure: 'se houver infraestrutura, rede, cloud, deploy, containers ou CI/CD'
+  privacy: 'se houver tratamento de dados pessoais, jurisdição/atividade regulada ou aplicabilidade incerta'
+  ai-security: 'se houver LLM, agente, modelo, RAG, ferramentas de IA, MCP ou memória de IA'
+  validator: 'para todos os candidatos de todos os especialistas'
+  reporter: 'somente após o gate de validação'

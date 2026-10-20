@@ -8,7 +8,7 @@ import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentCo
 const codingAgentName = "@relay-harness/coding-agent";
 const devPackages = ["client", "protocol", "server"].map((name) => `@relay-harness/${name}`);
 
-function createFixture(t, { importServer = false, declareServer = false } = {}) {
+function createFixture(t, { importServer = false, declareServer = false, auditResources = true } = {}) {
 	const root = mkdtempSync(join(tmpdir(), "relay-consumer-test-"));
 	t.after(() => rmSync(root, { recursive: true, force: true }));
 	const packages = [codingAgentName, "@relay-harness/chord", ...devPackages].map((name) => ({
@@ -48,6 +48,12 @@ export class ModelRuntime { static create() {} }
 			...(isAgent ? {
 				"dist/cli.js": 'console.log("1.0.0");',
 				"dist/bundle/cli.js": 'console.log("1.0.0");',
+				...(auditResources ? {
+					"dist/core/audit/contracts.js": `export function loadResources() {
+const roles = ["security", "malware", "privacy", "supply-chain", "infrastructure", "ai-security"];
+return { routing: { routing: Object.fromEntries(Array.from({ length: 20 }, (_, i) => [String(i + 1), { primary: roles[i % 6] }])) }, prompt: () => "fixture protocol" };
+}`,
+				} : {}),
 			} : {}),
 		};
 		for (const [path, content] of Object.entries(files)) {
@@ -81,6 +87,11 @@ test("installs only coding-agent directly and uses overrides only for declared r
 	const experimental = join(directory, "node_modules", codingAgentName, "dist/experimental");
 	mkdirSync(experimental);
 	assert.throws(() => smokeTestCodingAgentConsumer(directory), /contains development-only code/);
+});
+
+test("fails when an otherwise working SDK/CLI omits the audit runtime resources entry", (t) => {
+	const directory = createFixture(t, { auditResources: false });
+	assert.throws(() => smokeTestCodingAgentConsumer(directory), /dist[\\/]core[\\/]audit[\\/]contracts\.js/);
 });
 
 // #9132: smoke-test the public SDK, not just a bundled CLI that hides missing imports.

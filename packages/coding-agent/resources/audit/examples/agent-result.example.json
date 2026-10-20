@@ -1,0 +1,21 @@
+{
+  "run_id": "RUN-DEMO",
+  "task_id": "TASK-DEMO-SEC-03",
+  "scope_id": "SCOPE-DEMO",
+  "repository_revision": "snapshot-demonstracao-sem-repositorio",
+  "specialist_id": "security",
+  "coverage": {
+    "discovered": 1,
+    "examined": 0,
+    "not_verified": 1,
+    "not_applicable": 0,
+    "assets": [
+      {"id": "A-DEMO", "kind": "synthetic_route", "locator": "EXEMPLO-NAO-REAL", "status": "NAO_VERIFICADO", "notes": "Nenhum repositório foi auditado; apenas validação de contrato."}
+    ]
+  },
+  "candidates": [],
+  "strengths": [],
+  "limitations": ["Exemplo sintético; não representa resultado de auditoria."],
+  "handoff_refs": [],
+  "metadata": {"example_only": true}
+}

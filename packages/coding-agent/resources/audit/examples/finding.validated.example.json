@@ -1,0 +1,27 @@
+{
+  "id": "AUD-DEMO-001",
+  "run_id": "RUN-DEMO",
+  "repository_revision": "snapshot-demonstracao-sem-repositorio",
+  "origin_specialist": "security",
+  "domain": "03",
+  "title": "Exemplo sintético de autorização por objeto ausente",
+  "status": "POTENCIAL",
+  "suggested_status": "POTENCIAL",
+  "severity": "ALTA",
+  "priority": "P1",
+  "confidence": "BAIXA",
+  "description": "Exemplo fictício de formato. NÃO REPRESENTA ACHADO REAL.",
+  "root_cause": null,
+  "exploit_conditions": "Dados sintéticos; nenhuma condição foi verificada.",
+  "impact": "Não determinado; demonstração de schema somente.",
+  "evidence": [
+    {"id": "EV-DEMO-001", "source_kind": "external_reference", "locator": "synthetic-example-only", "method": "Exemplo de contrato", "summary": "Não contém evidência de repositório real"}
+  ],
+  "remediation": "Não aplicável: exemplo sintético.",
+  "acceptance_criteria": ["O exemplo não aparece como finding confirmado em auditorias reais."],
+  "cvss_score": null,
+  "cvss_vector": null,
+  "cve": null,
+  "cwe": null,
+  "validation": null
+}
