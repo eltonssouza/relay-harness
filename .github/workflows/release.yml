@@ -115,7 +115,7 @@ jobs:
           fi
 
       - name: Build
-        run: npm run build
+        run: npm run build:offline
 
       - name: Check
         run: npm run check
