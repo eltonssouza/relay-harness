@@ -8,7 +8,7 @@ export CI=true
 node --version
 npm --version
 npm ci --ignore-scripts
-npm run build
+npm run build:offline
 npm run check
 node scripts/publish.mjs --dry-run
 ./test.sh
