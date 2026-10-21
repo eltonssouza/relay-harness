@@ -19,19 +19,24 @@ describe("Baseten models", () => {
 		expect(getModel("baseten", "zai-org/GLM-5.2-Fast").input).toEqual(["text"]);
 	});
 
-	it("models Kimi K2.6 reasoning as an explicit off/on toggle", async () => {
-		const model = getModel("baseten", "moonshotai/Kimi-K2.6");
+	it("sends an explicit off/on reasoning toggle without reasoning_effort", async () => {
+		// The catalog has no model with this shape since Kimi K2.6 was removed, so derive it from GLM 5.2.
+		const base = getModel("baseten", "zai-org/GLM-5.2");
+		const model = {
+			...base,
+			thinkingLevelMap: {
+				off: "off",
+				minimal: null,
+				low: null,
+				medium: null,
+				high: "high",
+				xhigh: null,
+				max: null,
+			},
+			compat: { ...base.compat, supportsReasoningEffort: false },
+		};
 		let payload: Record<string, unknown> | undefined;
 
-		expect(model.thinkingLevelMap).toEqual({
-			off: "off",
-			minimal: null,
-			low: null,
-			medium: null,
-			high: "high",
-			xhigh: null,
-			max: null,
-		});
 		expect(model.compat).toMatchObject({
 			supportsReasoningEffort: false,
 			thinkingFormat: "baseten",
