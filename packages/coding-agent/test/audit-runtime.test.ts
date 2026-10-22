@@ -34,10 +34,10 @@ describe("audit SDK isolation", () => {
 			on = vi.fn();
 		auditExtension({ registerCommand, registerTool, on } as unknown as ExtensionAPI);
 		expect(registerCommand.mock.calls.map((c) => c[0])).toEqual([
-			"audit",
-			"audit-resume",
-			"audit-status",
-			"audit-cancel",
+			"audit-app",
+			"audit-app-resume",
+			"audit-app-status",
+			"audit-app-cancel",
 		]);
 		expect(registerTool).not.toHaveBeenCalled();
 	});

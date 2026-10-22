@@ -1,10 +1,41 @@
-# Opt-in universal static audit
+# Universal static audit
 
-The universal-audit protocol is integrated as a **local, opt-in, static analysis workflow**, not as a generic multi-agent shell executor. Read the [Portuguese user manual](auditoria-manual.pt-BR.md) or [Portuguese technical reference](auditoria-tecnica.pt-BR.md). It does not enable experimental delegation or change normal coding-agent tools.
+The universal-audit protocol is integrated as a **local, on-demand, static analysis workflow**, not as a generic multi-agent shell executor. Read the [Portuguese user manual](auditoria-manual.pt-BR.md) or [Portuguese technical reference](auditoria-tecnica.pt-BR.md). It does not enable experimental delegation or change normal coding-agent tools.
 
 ## Use
 
-Set `RELAY_AUDIT_ENABLED=1` **before starting Relay** (PowerShell: `$env:RELAY_AUDIT_ENABLED = '1'`). Select the model you intend to authorize. Create a config outside the target, for example `audit.yaml`:
+Start Relay in the repository to audit, select a model with `/model`, then run:
+
+```text
+/audit-app
+```
+
+The Harness configures the audit itself, without a config file:
+
+| Setting | Automatic value |
+| --- | --- |
+| Target | Current working directory |
+| Model | The selected provider/model; a single confirmation dialog shows target, model, report directory and cost cap before any file is read or sent |
+| Snapshot | `working-tree`; Git HEAD identity only when `.git` exists |
+| Exclusions | Dependency, cache and build-output directories (`node_modules`, `.venv`, `venv`, `__pycache__`, `dist`, `coverage`, `.next`, `target`, ...), still listed as excluded in the inventory; credential files and Git metadata are always excluded |
+| Reports | `~/.relay/agent/audits/<target>-<hash>/audit-<uuid>/`, outside the target; `report.md` is announced when the run finishes |
+| Budgets | Within the preflight bounds: 10 min per task, 4 h per run, 200k tokens per task, 2M tokens per run, cost cap 10 |
+
+Declining the confirmation reads and sends nothing. Follow-up commands also need no config:
+
+```text
+/audit-app-status
+/audit-app-status audit-<uuid>
+/audit-app-cancel
+/audit-app-resume audit-<uuid>
+/audit-app-resume audit-<uuid> --recover-stale-lock
+```
+
+The commands are registered by default and only read the target after `/audit-app` is confirmed. Set `RELAY_AUDIT_ENABLED=0` before starting Relay to remove them.
+
+### Advanced: config file
+
+To audit another directory or change scope, budgets or context, pass a config file outside the target, for example `audit.yaml`:
 
 ```yaml
 version: '3.0'
@@ -50,20 +81,18 @@ execution:
   generate_issues_drafts: false
 ```
 
-Commands accept quoted paths with spaces:
+Config-file commands accept quoted paths with spaces:
 
 ```text
-/audit "audit.yaml"
-/audit-status
-/audit-cancel
-/audit-status "audit.yaml" audit-<uuid>
-/audit-resume "audit.yaml" audit-<uuid>
-/audit-resume "audit.yaml" audit-<uuid> --recover-stale-lock
+/audit-app "audit.yaml"
+/audit-app-status "audit.yaml" audit-<uuid>
+/audit-app-resume "audit.yaml" audit-<uuid>
+/audit-app-resume "audit.yaml" audit-<uuid> --recover-stale-lock
 ```
 
 Execution runs in the background so status/cancel remain usable. There is one active audit per host and a per-run exclusive filesystem lock. Shutdown cancels active work. A stale-lock recovery request only removes a lock whose recorded PID is demonstrably absent; it never overrides an active/unknown process. No approval prompts or manual review gates are added to ordinary execution.
 
-A config must explicitly authorize the exact provider/model currently selected. No automatic model fallback or external metadata lookup occurs. Egress to that provider is distinct from network tools: `external_network_access: true` is unsupported. Host-registered providers, credentials, transport security and existing host telemetry remain trusted host responsibilities; the audit does not add telemetry exports.
+A config must explicitly authorize the exact provider/model currently selected; automatic `/audit-app` obtains the same authorization through its confirmation dialog for the selected model only. No automatic model fallback or external metadata lookup occurs. Egress to that provider is distinct from network tools: `external_network_access: true` is unsupported. Host-registered providers, credentials, transport security and existing host telemetry remain trusted host responsibilities; the audit does not add telemetry exports.
 
 All unsupported capabilities fail in preflight, before source inspection: runtime tests, sandbox execution, Git history, network tools, remote issue publication, arbitrary target writes and PDF generation. Unknown config keys also fail. The upstream example config is a protocol reference, **not** an executable Harness default: it enables unsupported history/PDF flags. Use the example above instead.
 
@@ -86,7 +115,7 @@ Priorities: least authority, grounded evidence, honest coverage, recoverable fai
 **Components:**
 
 ```text
-/audit commands -> preflight -> bounded immutable snapshot
+/audit-app commands -> preflight -> bounded immutable snapshot
                               -> coordinator / budget ledger / checkpoints
                                  -> discovery and threat-model sessions
                                  -> 20 domain tasks / six routed specialist roles
@@ -96,7 +125,7 @@ Priorities: least authority, grounded evidence, honest coverage, recoverable fai
                                  -> deterministic JSON/Markdown renderer + local issue drafts
 ```
 
-`src/core/audit/` owns policy, contracts, snapshot tools, orchestration, persistence and deterministic rendering. `src/extensions/audit/` is only the opt-in command adapter. `resources/audit/` holds approved protocol snapshots. It does not depend on `core/delegation/` or activate `DELEGATION_VALIDATED`.
+`src/core/audit/` owns policy, contracts, snapshot tools, orchestration, persistence and deterministic rendering. `src/extensions/audit/` is only the command adapter; it derives the automatic config through `automaticConfig` in `src/core/audit/config.ts`, which still passes `preflight`. `resources/audit/` holds approved protocol snapshots. It does not depend on `core/delegation/` or activate `DELEGATION_VALIDATED`.
 
 ### 3. Flow and consistency
 
@@ -124,7 +153,7 @@ There is no project-wide numeric security grade. Reports do not certify security
 
 ### 5. Rollout and evolution
 
-The initial release stays disabled by default. Start with small controlled repositories, inspect evidence/coverage/usage, and tune explicit budgets. No automatic global enablement or promotion of experimental delegation occurs. Runtime testing, publication and additional renderers are future adapters, not silently accepted config switches.
+Commands are registered by default but never read the target before `/audit-app` consent; `RELAY_AUDIT_ENABLED=0` removes them. Start with small controlled repositories, inspect evidence/coverage/usage, and tune explicit budgets. No automatic global enablement or promotion of experimental delegation occurs. Runtime testing, publication and additional renderers are future adapters, not silently accepted config switches.
 
 ## Snapshot and scope details
 
@@ -174,7 +203,7 @@ The maintenance script is not part of runtime execution. Upstream docs may descr
 
 ## Verification and quality baseline
 
-Offline test modules: `test/audit-boundaries.test.ts`, `audit-contracts.test.ts`, `audit-coordinator.test.ts`, `audit-runtime.test.ts`. Run with the repository's allowlisted environment and isolated home/config/cache/temp policy (as in `test.sh`), never a developer credential-inheriting model evaluation. Coverage includes all 20 routing entries/six roles, upstream schemas/examples, malicious paths/instructions, scope/identity/hash/range/coverage poisoning, independent confirmation and protected-route false positives, malformed output, cancellation, budgets, immutable candidates, consultations, resume and partial rendering. Real SDK sessions use the faux provider, not network API keys.
+Offline test modules: `test/audit-automatic.test.ts` (argument-less `/audit-app` end to end with a scripted model, consent decline, opt-out), `audit-boundaries.test.ts`, `audit-contracts.test.ts`, `audit-coordinator.test.ts`, `audit-runtime.test.ts`. Run with the repository's allowlisted environment and isolated home/config/cache/temp policy (as in `test.sh`), never a developer credential-inheriting model evaluation. Coverage includes all 20 routing entries/six roles, upstream schemas/examples, malicious paths/instructions, scope/identity/hash/range/coverage poisoning, independent confirmation and protected-route false positives, malformed output, cancellation, budgets, immutable candidates, consultations, resume and partial rendering. Real SDK sessions use the faux provider, not network API keys.
 
 Packaging gates (from the Harness repository root):
 
@@ -194,7 +223,7 @@ Synthetic fixtures measure confirmed true positives/false positives, coverage de
 | Input validation | Strict preflight; upstream JSON Schema 2020-12 plus semantic/ref/coverage gates. |
 | Error handling | Bounded correction, partial siblings, crash-safe checkpoints, per-format failure handling. |
 | Tests | Boundary/contract/coordinator/native-SDK offline regression modules. |
-| Configuration | Disabled default, explicit model and working-tree consent, no hardcoded provider IDs or source paths. |
+| Configuration | No target IO before consent, explicit model and working-tree consent, no hardcoded provider IDs or source paths. |
 | Security | Snapshot-only tools, no general execution/write/network/delegation tools, no inherited discovery. |
 | Observability | Local phase events, accepted/rejected task artifacts, budgets, metrics and integrity manifest; no raw transcript logs. |
 

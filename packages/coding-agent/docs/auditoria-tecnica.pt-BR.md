@@ -4,7 +4,7 @@ Esta página descreve a arquitetura implementada para a auditoria estática univ
 
 ## 1. Escopo e propriedades
 
-A auditoria é um subsistema local e opcional do pacote `@relay-harness/coding-agent`. O executor realiza análise estática assistida por modelo sobre um snapshot, valida estruturas e evidências e persiste relatórios locais. A ativação exige `RELAY_AUDIT_ENABLED=1` antes da inicialização do host.
+A auditoria é um subsistema local e sob demanda do pacote `@relay-harness/coding-agent`. O executor realiza análise estática assistida por modelo sobre um snapshot, valida estruturas e evidências e persiste relatórios locais. Os comandos ficam registrados por padrão (`RELAY_AUDIT_ENABLED=0` antes da inicialização do host os remove) e não leem o alvo antes de `/audit-app`. Sem argumentos, `/audit-app` usa `automaticConfig()` (`src/core/audit/config.ts`): alvo = diretório atual, modelo = provedor/modelo selecionado, snapshot `working-tree` (HEAD Git só se `.git` existir), exclusões de dependências/caches/builds (`AUTOMATIC_EXCLUDES`), saída em `~/.relay/agent/audits/<alvo>-<hash>/` fora do alvo e orçamentos ampliados dentro dos limites do preflight. A configuração derivada passa pelo mesmo `preflight()`; o consentimento de egress é obtido por uma única confirmação que mostra alvo, modelo, saída e teto de custo, e a recusa não lê nem envia nada. Um arquivo de configuração continua disponível como opção avançada.
 
 **A implementação não fornece** sandbox de sistema operacional, execução de testes, acesso ao histórico Git, busca de CVEs atuais, avaliação de conformidade, certificação, geração PDF, publicação remota ou uma garantia de encontrar todas as vulnerabilidades. O uso do SDK e dos fornecedores já existentes não altera as propriedades de segurança desses componentes.
 
@@ -70,7 +70,7 @@ schemas, gates semânticos   sessões SDK       lock/checkpoint/artifacts
 
 `packages/coding-agent/resources/audit/` contém cópias aprovadas de schemas, papéis, roteamento, políticas, exemplos e documentação do protocolo. `getAuditResourcesPath()` resolve o recurso através do caminho de recursos já distribuído pelo pacote. O manifesto SHA-256 detecta drift acidental; a atualização é explícita e revisada.
 
-O ponto de composição em `src/extensions/index.ts` mantém o recurso inativo por padrão. A integração **não** importa ou ativa o subsistema experimental de delegação validada.
+O ponto de composição em `src/extensions/index.ts` registra apenas os comandos `/audit-app*` (removíveis com `RELAY_AUDIT_ENABLED=0`); nenhum alvo é lido antes da confirmação. A integração **não** importa ou ativa o subsistema experimental de delegação validada.
 
 ## 3. Configuração e preflight
 
@@ -136,7 +136,7 @@ A retomada requer snapshot/configuração/recursos idênticos; valida tarefas, r
 
 Falha de especialista preserva irmãos bem-sucedidos; erro de limite, cancelamento, falha de persistência/revisão ou arquivos não verificados deixa a execução `PARTIAL`/`FAILED`. Artefatos válidos em outros formatos permanecem disponíveis se a geração de Markdown/JSON falhar. Não se deve interpretar ausência de `report.md` como ausência de resultados: consulte `audit-run.json`, checkpoint e `artifact-manifest.json`.
 
-`/audit-status` durante uma execução mostra a memória do processo; status persistido requer arquivo de configuração e ID. Lock stale só pode ser removido explicitamente quando o PID registrado é comprovadamente inexistente; processos ativos/estado indeterminado falham fechados.
+`/audit-app-status` durante uma execução mostra a memória do processo; status persistido requer o ID (`/audit-app-status audit-<uuid>` no mesmo diretório, para execuções automáticas) ou arquivo de configuração e ID. `/audit-app-resume audit-<uuid>` retoma uma execução automática com o mesmo diretório e modelo. Lock stale só pode ser removido explicitamente quando o PID registrado é comprovadamente inexistente; processos ativos/estado indeterminado falham fechados.
 
 ## 7. Relatórios e dados
 
@@ -169,7 +169,7 @@ node scripts/update-audit-resources.mjs /caminho/da/origem-autorizada --authoriz
 
 Após atualizar, revise o diff de recursos, manifesto e contratos antes de aceitar a atualização. Runs existentes com hash/versão de recursos incompatíveis não são retomados.
 
-A matriz de regressão está em `packages/coding-agent/test/audit-boundaries.test.ts`, `audit-contracts.test.ts`, `audit-coordinator.test.ts` e `audit-runtime.test.ts`; inclui sessão SDK real com provider faux. Para gates de pacote e standalone, veja `scripts/coding-agent-consumer.test.mjs` e `scripts/audit-standalone.test.mjs`. Comandos de validação do repositório estão documentados em `AGENTS.md` e `package.json`; avaliações com modelos reais exigiriam consentimento e credenciais próprios e não são substituídas por testes sintéticos.
+A matriz de regressão está em `packages/coding-agent/test/audit-automatic.test.ts` (`/audit-app` sem argumentos de ponta a ponta com modelo roteirizado, recusa de consentimento e opt-out), `audit-boundaries.test.ts`, `audit-contracts.test.ts`, `audit-coordinator.test.ts` e `audit-runtime.test.ts`; inclui sessão SDK real com provider faux. Para gates de pacote e standalone, veja `scripts/coding-agent-consumer.test.mjs` e `scripts/audit-standalone.test.mjs`. Comandos de validação do repositório estão documentados em `AGENTS.md` e `package.json`; avaliações com modelos reais exigiriam consentimento e credenciais próprios e não são substituídas por testes sintéticos.
 
 ## 10. ADRs
 
