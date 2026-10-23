@@ -21,6 +21,7 @@ import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts
 import { isVirtualModel } from "../../core/virtual-models.ts";
 import { loadAgentProfile } from "../engineering/index.ts";
 import { assessmentFromAnswers, assessmentFromLabels, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
+import { assertDecisionSchema, decisionRecord } from "./decision-schema.ts";
 import { type DockerRun, spawnDocker } from "./docker.ts";
 import {
 	buildLearnPrompt,
@@ -291,6 +292,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			validation: decided.validation.level,
 			rules: decided.rules,
 			escalations: decided.escalations,
+			decision: decisionRecord(assessment, decided),
 		});
 	};
 	const refreshSettings = () => {
@@ -368,7 +370,9 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			if (Date.now() < layaUnavailableUntil || onnxServer.state !== "ready") return heuristicAssessment(request);
 			try {
 				const answers = await onnxServer.classify(truncateRequest(request), LAYA_QUESTIONS, signal);
-				const assessment = assessmentFromAnswers(toClassifierAnswers(answers));
+				const converted = toClassifierAnswers(answers);
+				assertDecisionSchema(converted);
+				const assessment = assessmentFromAnswers(converted);
 				lastClassifierError = undefined;
 				return assessment;
 			} catch (error) {
@@ -394,6 +398,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		);
 		try {
 			if (result.stopReason !== "stop") throw new Error(result.errorMessage ?? "Laya did not answer");
+			assertDecisionSchema(result.answers);
 			const assessment = assessmentFromAnswers(result.answers);
 			lastClassifierError = undefined;
 			return assessment;
