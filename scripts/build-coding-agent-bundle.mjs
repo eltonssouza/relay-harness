@@ -16,6 +16,8 @@ const banner = {
 	js: 'import { createRequire as __piCreateRequire } from "node:module"; const require = __piCreateRequire(import.meta.url);',
 };
 const allowedExternalPackages = new Set([
+	// Transformers resolves native ONNX/Sharp binaries and assets from its installed dependency tree.
+	"@huggingface/transformers",
 	"@relay-harness/chord",
 	"@relay-harness/chord/bundler",
 	"@relay-harness/chord/context",
@@ -86,7 +88,7 @@ function commonBuildOptions() {
 		banner,
 		bundle: true,
 		define: { RELAY_BUNDLED_NODE: "true" },
-		external: ["@relay-harness/chord", "@silvia-odwyer/photon-node"],
+		external: ["@huggingface/transformers", "@relay-harness/chord", "@silvia-odwyer/photon-node"],
 		format: "esm",
 		legalComments: "none",
 		logLevel: "warning",

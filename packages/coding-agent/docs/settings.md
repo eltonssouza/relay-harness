@@ -111,7 +111,7 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 | `laya.models` | object | See [laya.md](laya.md#model-registry) | Models per tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order. A tier you set replaces that tier's default list. |
 | `laya.quota` | object | `1` per provider | Share of each provider's quota still available, 0 to 1, e.g. `{ "openai-codex": 0.25 }`. |
 | `laya.minConfidence` | number | `0.5` | Laya answers below this confidence raise the tier by one. |
-| `laya.heuristicFirst` | boolean | `false` | Opt-in adaptive-mode latency optimization. Clear, small, low-risk tasks use keyword assessment without ONNX. Ambiguous, risky, broad, security-sensitive or tool-heavy tasks still run Laya. `observe`, `assist`, `strict` and an unset ACI mode always run Laya as before. |
+| `laya.heuristicFirst` | boolean | `false` | Opt-in adaptive-mode latency optimization; requires the boolean `true`. Only clear, zero-risk, zero-ambiguity keyword assessments of complexity ≤0.25 and single-line/file scope skip ONNX. Other ACI modes retain their existing assessment path, including learned-memory lookup. |
 | `laya.escalateAfterFailures` | number | `3` | Failed tool calls in one turn before moving to the next tier. `0` disables. |
 | `laya.budget.maxAttempts` | number | none | Model attempts per task, counting the first choice and each escalation. When reached, Laya stops escalating and keeps the current model. |
 | `laya.budget.maxCostPerTask` | number | none | Provider cost already spent on the task (catalog currency, USD) at which Laya stops escalating and keeps the current model. |

@@ -412,10 +412,10 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			}
 		}
 
-		// This is deliberately limited to ACI adaptive mode. Observe/assist need a real Laya decision to expose,
+		// This shortcut is limited to ACI adaptive mode. Observe/assist keep their existing assessment path,
 		// strict must fail rather than use rules, and an unset mode preserves existing laya/auto behavior.
 		// Learned task memory remains first because it is local and more specific than keyword rules.
-		if (settings.heuristicFirst && aciMode() === "adaptive") {
+		if (settings.heuristicFirst === true && aciMode() === "adaptive") {
 			const heuristic = heuristicAssessment(request);
 			if (canUseHeuristicFastPath(request, heuristic)) return { ...heuristic, heuristicFastPath: true };
 		}

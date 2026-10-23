@@ -21,7 +21,11 @@ Add this to `settings.json` (global or project):
 | --- | --- | --- |
 | `adaptiveCognition.enabled` | `false` | Turns ACI on. |
 | `adaptiveCognition.mode` | `observe` | `observe`, `assist`, `adaptive` or `strict`. |
-| `laya.heuristicFirst` | `false` | In `adaptive` mode only, skips ONNX for a clear, small, low-risk request. Security-sensitive, ambiguous, broad or tool-heavy requests still run Laya. Other ACI modes retain full Laya inference. |
+| `laya.heuristicFirst` | `false` | In `adaptive` mode only, skips ONNX for a clear, small, low-risk request. Security-sensitive, ambiguous, broad or tool-heavy requests still run Laya. Other modes retain the existing assessment path, including learned-memory lookup. |
+
+The experimental shortcut requires the boolean `true` (not a string). It accepts only keyword assessments with complexity at most 0.25, zero detected risk and ambiguity, and single-line or single-file scope. Long requests and explicit module/repository scope signals are excluded even when another keyword suggests a small change. Learned task memory keeps precedence. These are conservative routing hints, not a security authorization mechanism: permissions, model restrictions and host budget guards remain authoritative.
+
+Telemetry marks intentional skips with `classification.heuristic_fast_path: true`. A missing flag is not evidence that inference ran: learned memory and classifier failures remain separate assessment paths. Measure quality, cost, classifier calls and end-to-end latency together before enabling the shortcut broadly.
 
 | Mode | With another model selected | With `laya/auto` selected |
 | --- | --- | --- |

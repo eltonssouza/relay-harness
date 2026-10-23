@@ -274,6 +274,10 @@ export function heuristicAssessment(request: string): TaskAssessment {
 }
 
 const HEURISTIC_FAST_PATH_MAX_CHARS = 1000;
+// A label/typo keyword can make the legacy rules report single_line even when the rest of the request is broad.
+// Keep those rules unchanged for fallback parity; reject conflicting breadth signals only in this opt-in gate.
+const HEURISTIC_FAST_PATH_BROAD_SCOPE =
+	/\b(?:module|modules|repository|repositories|repo|repos|codebase|workspace|project|projeto|projetos|reposit[oó]rio|reposit[oó]rios|m[oó]dulo|m[oó]dulos)\b/iu;
 const HEURISTIC_FAST_PATH_UNSAFE_TYPES: readonly TaskType[] = ["architecture", "debugging", "research", "security"];
 const HEURISTIC_FAST_PATH_TOOL_REQUIREMENTS: readonly ToolRequirement[] = [
 	"requires_shell",
@@ -285,22 +289,27 @@ const HEURISTIC_FAST_PATH_TOOL_REQUIREMENTS: readonly ToolRequirement[] = [
 
 /**
  * Returns true only when keyword rules identify a short, unambiguous, low-risk request.
- * The caller must still honor strict, observe, and assist modes, which require Laya inference.
+ * The caller must preserve the existing assessment path for strict, observe, and assist modes.
  */
 export function canUseHeuristicFastPath(request: string, assessment: TaskAssessment): boolean {
-	if (typeof request !== "string" || request.trim().length === 0 || request.length > HEURISTIC_FAST_PATH_MAX_CHARS)
+	if (
+		typeof request !== "string" ||
+		request.trim().length === 0 ||
+		request.length > HEURISTIC_FAST_PATH_MAX_CHARS ||
+		HEURISTIC_FAST_PATH_BROAD_SCOPE.test(request)
+	)
 		return false;
 
 	const { task, tools } = assessment;
 	return (
+		assessment.source === "heuristic" &&
 		!assessment.securitySensitive &&
 		!HEURISTIC_FAST_PATH_UNSAFE_TYPES.includes(task.type) &&
-		task.complexity < 0.75 &&
-		task.risk < 2 / 3 &&
+		task.complexity >= 0 &&
+		task.complexity <= 0.25 &&
+		task.risk === 0 &&
 		task.ambiguity === 0 &&
-		task.scope !== "multi_module" &&
-		task.scope !== "repository" &&
-		task.scope !== "multi_repository" &&
+		(task.scope === "single_line" || task.scope === "single_file") &&
 		!HEURISTIC_FAST_PATH_TOOL_REQUIREMENTS.some((requirement) => tools[requirement])
 	);
 }

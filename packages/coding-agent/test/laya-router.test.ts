@@ -13,10 +13,13 @@ import {
 	fauxToolCall,
 } from "@relay-harness/ai";
 import { Type } from "typebox";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ENV_AGENT_DIR } from "../src/config.ts";
+import type { ExtensionFactory } from "../src/core/extensions/types.ts";
 import type { LayaSettings } from "../src/core/settings-manager.ts";
 import { getVirtualModelState } from "../src/core/virtual-models.ts";
+import goalExtension from "../src/extensions/goal/index.ts";
+import { GOAL_ENTRY, newGoal, readGoal } from "../src/extensions/goal/state.ts";
 import {
 	assessmentFromAnswers,
 	assessmentFromLabels,
@@ -306,6 +309,41 @@ describe("laya assessment", () => {
 		}
 	});
 
+	it.each([
+		"Implement a reusable pagination component with configurable sorting.",
+		"Rename the button label in every module across the whole repository.",
+		"Corrija o texto do botão em todo o repositório.",
+	])("does not fast-path a medium or broad task: %s", (request) => {
+		expect(canUseHeuristicFastPath(request, heuristicAssessment(request))).toBe(false);
+	});
+
+	it("bounds the fast path and rejects non-heuristic or uncertain assessments", () => {
+		const simple = "Please change the button label from Submit to Save in the settings page.";
+		const low = heuristicAssessment(simple);
+		for (const request of ["", " ", "x".repeat(1001)]) {
+			expect(canUseHeuristicFastPath(request, low)).toBe(false);
+		}
+		for (const overrides of [
+			{ complexity: 0.5 },
+			{ complexity: Number.NaN },
+			{ risk: 1 / 3 },
+			{ ambiguity: 1 / 3 },
+			{ scope: "module" as const },
+		]) {
+			expect(canUseHeuristicFastPath(simple, { ...low, task: { ...low.task, ...overrides } })).toBe(false);
+		}
+		expect(canUseHeuristicFastPath(simple, { ...low, source: "laya" })).toBe(false);
+		for (const requirement of [
+			"requires_shell",
+			"requires_web",
+			"requires_browser",
+			"requires_database",
+			"requires_git",
+		] as const) {
+			expect(canUseHeuristicFastPath(simple, { ...low, tools: { ...low.tools, [requirement]: true } })).toBe(false);
+		}
+	});
+
 	it("falls back to keyword rules in English and Portuguese", () => {
 		expect(heuristicAssessment("Corrija o texto deste botão para 'Salvar'.")).toMatchObject({
 			source: "heuristic",
@@ -415,6 +453,7 @@ describe("laya/auto router", () => {
 		extraProviders: Array<ReturnType<typeof fauxProvider>> = [],
 		extensionOptions: Parameters<typeof layaExtension>[1] = {},
 		harnessSettings: Record<string, unknown> = {},
+		extraExtensions: ExtensionFactory[] = [],
 	) {
 		const anthropic = fauxProvider({
 			provider: "anthropic",
@@ -467,6 +506,7 @@ describe("laya/auto router", () => {
 				(relay) => layaExtension(relay, extensionOptions),
 				// Replaces the built-in Laya provider with the scripted classifier.
 				(relay) => relay.registerProvider(laya),
+				...extraExtensions,
 			],
 		});
 		harnesses.push(harness);
@@ -804,11 +844,62 @@ describe("laya/auto router", () => {
 		expect(telemetry()[0].classification.heuristic_fast_path).toBeUndefined();
 	});
 
+	it.each([
+		{ enabled: true, mode: "adaptive" as const, heuristicFirst: false },
+		{ enabled: true, mode: "adaptive" as const, heuristicFirst: "false" as unknown as boolean },
+		{ enabled: true, mode: "observe" as const, heuristicFirst: true },
+		{ enabled: true, mode: "assist" as const, heuristicFirst: true },
+		{ enabled: true, mode: "strict" as const, heuristicFirst: true },
+		{ enabled: false, mode: "adaptive" as const, heuristicFirst: true },
+		{ enabled: true, mode: undefined, heuristicFirst: true },
+	])("keeps full classification for non-opted-in mode %j", async ({ enabled, mode, heuristicFirst }) => {
+		const { harness, respond, requests, telemetry } = await setup(
+			SIMPLE_FIX,
+			[],
+			{ heuristicFirst },
+			[],
+			{},
+			{ adaptiveCognition: { enabled, ...(mode ? { mode } : {}) } },
+		);
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Please change the button label from Submit to Save in the settings page.");
+		expect(requests).toHaveLength(1);
+		expect(telemetry()[0].classification.source).toBe("laya");
+		expect(telemetry()[0].classification.heuristic_fast_path).toBeUndefined();
+	});
+
+	it.each([false, true])("respects the host goal token budget with heuristicFirst=%s", async (heuristicFirst) => {
+		const edit = createTool("edit");
+		const execute = vi.spyOn(edit, "execute");
+		const { harness, respond, dispatched } = await setup(
+			SIMPLE_FIX,
+			[edit],
+			{ heuristicFirst },
+			[],
+			{},
+			{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
+			[goalExtension],
+		);
+		harness.sessionManager.appendCustomEntry(
+			GOAL_ENTRY,
+			newGoal("Verify that routing cannot bypass the token budget", 1),
+		);
+		const response = call("edit");
+		response.usage = { ...response.usage, totalTokens: 2 };
+		respond(response, fauxAssistantMessage("must not run"));
+
+		await harness.session.prompt("Please change the button label from Submit to Save in the settings page.");
+
+		expect(readGoal(harness.sessionManager)?.status).toBe("budget_exhausted");
+		expect(execute).not.toHaveBeenCalled();
+		expect(dispatched()).toHaveLength(1);
+	});
+
 	it("ACI strict mode fails instead of routing on a low-confidence Laya answer", async () => {
 		const { harness, dispatched } = await setup(
 			{ ...SIMPLE_FIX, confidence: 0.3 },
 			[],
-			{ minConfidence: 0.6 },
+			{ minConfidence: 0.6, heuristicFirst: true },
 			[],
 			{},
 			{
@@ -1103,19 +1194,31 @@ describe("laya/auto router", () => {
 		]);
 	}
 
-	it("routes a request like a learned task by its labels, at once and without the Laya server", async () => {
-		learnTask();
-		const { harness, respond, dispatched, plan, telemetry } = await setup(undefined, []);
+	it.each([false, true])(
+		"keeps learned labels before keyword routing with heuristicFirst=%s",
+		async (heuristicFirst) => {
+			learnTask();
+			const { harness, respond, dispatched, plan, telemetry, requests } = await setup(
+				undefined,
+				[],
+				{ heuristicFirst },
+				[],
+				{},
+				{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
+			);
 
-		respond(fauxAssistantMessage("done"));
-		await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos, está cortado");
+			respond(fauxAssistantMessage("done"));
+			await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos, está cortado");
 
-		// Keyword rules would route this text fix to haiku with minimal effort.
-		expect(dispatched()).toEqual(["opus-5-5:high"]);
-		expect(plan()[0]).toContain("Lessons from similar tasks done before");
-		expect(plan()[0]).toContain("locales/pt-BR/orders.json");
-		expect(telemetry()[0].classification.source).toBe("memory");
-	});
+			// Keyword rules would route this text fix to haiku with minimal effort.
+			expect(dispatched()).toEqual(["opus-5-5:high"]);
+			expect(plan()[0]).toContain("Lessons from similar tasks done before");
+			expect(plan()[0]).toContain("locales/pt-BR/orders.json");
+			expect(telemetry()[0].classification.source).toBe("memory");
+			expect(telemetry()[0].classification.heuristic_fast_path).toBeUndefined();
+			expect(requests).toEqual([]);
+		},
+	);
 
 	it("gives the lessons of similar tasks to a model laya/auto does not route", async () => {
 		learnTask();
