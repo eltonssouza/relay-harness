@@ -60,6 +60,7 @@ import { LAYA_PLAN_MESSAGE, renderPlanMessage, selectSkills, unneededTools } fro
 import { LAYA_IMAGE_PATHS, type LayaImageVariant, layaImage } from "./runtime.ts";
 import { generateSeed } from "./seed.ts";
 import { isLocalUrl, LayaServer } from "./server.ts";
+import { selectStrategy } from "./strategy.ts";
 import {
 	datasetFromTelemetry,
 	HARNESS_MESSAGE,
@@ -309,6 +310,13 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			rules: decided.rules,
 			escalations: decided.escalations,
 			decision: decisionRecord(assessment, decided),
+			strategy: selectStrategy(
+				request,
+				assessment,
+				decided,
+				{ activeTools: relay.getActiveTools() },
+				settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE,
+			),
 		});
 		return decided;
 	};

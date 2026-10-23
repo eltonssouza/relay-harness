@@ -81,7 +81,8 @@ export function selectSkills(skills: readonly SkillInfo[], agent: AgentId, reque
 }
 
 /** Tool name patterns per requirement. Tools matching none of them are never deactivated. */
-const TOOL_PATTERNS: Record<ToolRequirement, RegExp> = {
+/** Tool names that serve each `requires_*` capability. */
+export const TOOL_PATTERNS: Record<ToolRequirement, RegExp> = {
 	requires_write: /^(edit|write|multi_?edit|apply_patch)$/,
 	requires_shell: /^bash$/,
 	requires_tests: /^bash$/,
