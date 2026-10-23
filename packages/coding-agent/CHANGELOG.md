@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed the static audit commands to `/audit-app`, `/audit-app-status`, `/audit-app-resume` and `/audit-app-cancel`. They are registered by default, and `/audit-app` with no arguments now configures itself for the current repository and selected model after one consent dialog; no repository content is read before consent. Set `RELAY_AUDIT_ENABLED=0` to remove them. See [Universal static audit](docs/audit.md).
+
 ## [0.4.1] - 2026-10-21
 
 ### Added

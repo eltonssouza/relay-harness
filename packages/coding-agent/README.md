@@ -37,7 +37,7 @@ For a built-in AI provider, run `/login` inside Relay to connect a subscription 
 
 See the [documentation](docs/index.md) for full setup and usage instructions.
 
-For opt-in, read-only security review across 20 domains, see [Universal static audit](docs/audit.md). It requires explicit model egress consent and does not enable experimental delegation. Portuguese documentation: [user manual](docs/auditoria-manual.pt-BR.md) and [technical reference](docs/auditoria-tecnica.pt-BR.md).
+For a read-only security review across 20 domains, run `/audit-app` in the repository; it configures itself, asks once for model egress consent and writes a local report. See [Universal static audit](docs/audit.md). It does not enable experimental delegation. Portuguese documentation: [user manual](docs/auditoria-manual.pt-BR.md) and [technical reference](docs/auditoria-tecnica.pt-BR.md).
 
 ## Share your OSS coding agent sessions
 
