@@ -123,6 +123,18 @@ export interface CodemodeSettings {
 	inlineBudget?: number;
 }
 
+/**
+ * Adaptive Cognitive Intelligence (ACI) rollout switch. Disabled by default; `observe` only records the
+ * decision Laya would make as a session entry and never changes model, effort, tools or prompts.
+ * See docs/adaptive-cognition.md.
+ */
+export interface AdaptiveCognitionSettings {
+	/** Default: false. */
+	enabled?: boolean;
+	/** Only `observe` exists until the native runtime passes parity. Default: `observe`. */
+	mode?: "observe";
+}
+
 /** Settings of the `laya/auto` router (adaptive execution intelligence). See docs/laya.md. */
 export interface LayaSettings {
 	/** Laya System One server. Default: `LAYA_BASE_URL` or `http://127.0.0.1:8737/v1`. */
@@ -234,6 +246,7 @@ export interface Settings {
 	warnings?: WarningSettings;
 	codemode?: CodemodeSettings;
 	laya?: LayaSettings;
+	adaptiveCognition?: AdaptiveCognitionSettings;
 	/** Budgets for Laya-approved subordinate workers. */
 	delegation?: Partial<DelegationLimits>;
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)

@@ -181,6 +181,10 @@
           "path": "laya.md"
         },
         {
+          "title": "Adaptive Cognition (Observe Mode)",
+          "path": "adaptive-cognition.md"
+        },
+        {
           "title": "Subordinate Workers",
           "path": "delegation.md"
         },

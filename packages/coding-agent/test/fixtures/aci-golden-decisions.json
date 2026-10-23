@@ -1,0 +1,168 @@
+{
+	"description": "Frozen Laya heuristic+policy decisions (balanced profile, minConfidence 0.6) captured from develop 429bb68 for ACI parity tests. Regenerate only with an intentional, reviewed policy change.",
+	"cases": [
+		{
+			"request": "what does this function return?",
+			"expected": {
+				"type": "question",
+				"requiredTier": "balanced",
+				"minTier": "fast",
+				"effort": "low",
+				"thinkingLevel": "low",
+				"validation": "none",
+				"rules": [],
+				"escalations": [
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "fix the typo in README",
+			"expected": {
+				"type": "bug_fix",
+				"requiredTier": "balanced",
+				"minTier": "fast",
+				"effort": "minimal",
+				"thinkingLevel": "minimal",
+				"validation": "unit_test",
+				"rules": [],
+				"escalations": [
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "fix the failing login test",
+			"expected": {
+				"type": "test",
+				"requiredTier": "frontier",
+				"minTier": "strong",
+				"effort": "medium",
+				"thinkingLevel": "medium",
+				"validation": "review",
+				"rules": [
+					"authentication"
+				],
+				"escalations": [
+					"security_sensitive",
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "add a CSV export endpoint with tests",
+			"expected": {
+				"type": "test",
+				"requiredTier": "balanced",
+				"minTier": "fast",
+				"effort": "low",
+				"thinkingLevel": "low",
+				"validation": "unit_test",
+				"rules": [],
+				"escalations": [
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "design the module boundaries for the billing service",
+			"expected": {
+				"type": "code_edit",
+				"requiredTier": "frontier",
+				"minTier": "strong",
+				"effort": "medium",
+				"thinkingLevel": "medium",
+				"validation": "review",
+				"rules": [
+					"payment-processing"
+				],
+				"escalations": [
+					"security_sensitive",
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "rotate the API keys and update auth middleware",
+			"expected": {
+				"type": "code_edit",
+				"requiredTier": "frontier",
+				"minTier": "strong",
+				"effort": "medium",
+				"thinkingLevel": "medium",
+				"validation": "review",
+				"rules": [
+					"authentication"
+				],
+				"escalations": [
+					"security_sensitive",
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "refactor the parser into smaller modules",
+			"expected": {
+				"type": "refactor",
+				"requiredTier": "strong",
+				"minTier": "fast",
+				"effort": "medium",
+				"thinkingLevel": "medium",
+				"validation": "unit_test",
+				"rules": [],
+				"escalations": [
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "explique como funciona o cache de sessões",
+			"expected": {
+				"type": "code_edit",
+				"requiredTier": "balanced",
+				"minTier": "fast",
+				"effort": "low",
+				"thinkingLevel": "low",
+				"validation": "compile",
+				"rules": [],
+				"escalations": [
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "corrija o bug de vazamento de memória no worker",
+			"expected": {
+				"type": "bug_fix",
+				"requiredTier": "frontier",
+				"minTier": "strong",
+				"effort": "high",
+				"thinkingLevel": "high",
+				"validation": "review",
+				"rules": [],
+				"escalations": [
+					"high_risk",
+					"insufficient_confidence"
+				]
+			}
+		},
+		{
+			"request": "drop the users table in production",
+			"expected": {
+				"type": "code_edit",
+				"requiredTier": "frontier",
+				"minTier": "strong",
+				"effort": "medium",
+				"thinkingLevel": "medium",
+				"validation": "review",
+				"rules": [
+					"production-database-migration"
+				],
+				"escalations": [
+					"security_sensitive",
+					"insufficient_confidence"
+				]
+			}
+		}
+	]
+}

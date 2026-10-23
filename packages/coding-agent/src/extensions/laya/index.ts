@@ -89,6 +89,8 @@ export const DEFAULT_LAYA_BASE_URL = "http://127.0.0.1:8737/v1";
 
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MIN_CONFIDENCE = 0.5;
+/** Session entry recorded by ACI observe mode (`adaptiveCognition.enabled`). */
+export const ACI_OBSERVE_ENTRY = "aci.observe";
 const DEFAULT_ESCALATE_AFTER_FAILURES = 3;
 /** After a failed classifier call, keyword rules answer for this long before Laya is tried again. */
 const LAYA_RETRY_AFTER_MS = 60_000;
@@ -268,6 +270,25 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	let listener: TrainingListener | undefined;
 	let memoryCache: { version: string; memory: TaskMemory } | undefined;
 
+	/** ACI phase 0 observe mode: persist the decision Laya would make, without acting on it. */
+	const observeDecision = (request: string, assessment: TaskAssessment, policy?: PolicyDecision) => {
+		const decided =
+			policy ??
+			applyPolicy(assessment, request, { minConfidence: settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE });
+		relay.appendEntry(ACI_OBSERVE_ENTRY, {
+			mode: "observe",
+			source: assessment.source,
+			taskType: assessment.task.type,
+			confidence: assessment.confidence,
+			requiredTier: decided.requiredTier,
+			minTier: decided.minTier,
+			effort: decided.effort,
+			thinkingLevel: decided.thinkingLevel,
+			validation: decided.validation.level,
+			rules: decided.rules,
+			escalations: decided.escalations,
+		});
+	};
 	const refreshSettings = () => {
 		settings = relay.getSettings().laya ?? {};
 		quota.configure(settings.quota);
@@ -753,7 +774,10 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			relay.setActiveTools(userTools());
 			toolBaseline = undefined;
 		}
+		const observing = relay.getSettings().adaptiveCognition?.enabled === true;
 		if (!isSelected(ctx)) {
+			// ACI observe mode: record the heuristic decision only; nothing below changes.
+			if (observing) observeDecision(event.prompt, heuristicAssessment(event.prompt));
 			// Lessons help whichever model runs the request.
 			const lessons = lessonsFor(event.prompt);
 			if (!lessons) return;
@@ -770,6 +794,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const policy = applyPolicy(assessment, event.prompt, {
 			minConfidence: settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE,
 		});
+		if (observing) observeDecision(event.prompt, assessment, policy);
 		const skills = selectSkills(event.systemPromptOptions.skills, assessment.agent, event.prompt);
 
 		let deactivated: string[] = [];
