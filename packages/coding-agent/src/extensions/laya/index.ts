@@ -55,6 +55,7 @@ import {
 } from "./policy.ts";
 import { scopedModelRegistry } from "./provider-scope.ts";
 import { CAPABILITY_TIERS, type CapabilityTier, LAYA_QUESTIONS, layaDecisionsFile } from "./questions.ts";
+import { type ReasoningControl, reasoningControl } from "./reasoning-control.ts";
 import { LAYA_PLAN_MESSAGE, renderPlanMessage, selectSkills, unneededTools } from "./routers.ts";
 import { LAYA_IMAGE_PATHS, type LayaImageVariant, layaImage } from "./runtime.ts";
 import { generateSeed } from "./seed.ts";
@@ -117,6 +118,8 @@ export interface LayaRouterState {
 	alternatives: string[];
 	/** False for a selected model whose capability has not been mapped to a tier. */
 	capabilityKnown?: boolean;
+	/** How the policy effort maps onto the chosen model, and whether that support is declared or assumed. */
+	reasoning?: ReasoningControl;
 }
 
 const layaClassifier: ClassifierModel<"typesafe-system-one"> = {
@@ -508,6 +511,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			thinkingLevel: clampThinkingLevel(chosen.model, base.policy.thinkingLevel),
 			alternatives: ranked.slice(1, 4).map((candidate) => candidate.ref),
 			capabilityKnown: chosen.capabilityKnown,
+			reasoning: reasoningControl(chosen.model, base.policy.thinkingLevel),
 		};
 		current = state;
 		ctx.ui.setStatus(
