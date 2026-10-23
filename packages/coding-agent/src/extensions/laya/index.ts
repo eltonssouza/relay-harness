@@ -989,7 +989,19 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 					recommended_effort: state.assessment.recommendation.effort,
 				},
 				policy: { profile: state.profile, required_tier: state.policy.requiredTier, rules: state.policy.rules },
-				selected: { provider, model: rest.join("/"), tier: state.tier, thinking_level: state.thinkingLevel },
+				selected: {
+					provider,
+					model: rest.join("/"),
+					tier: state.tier,
+					thinking_level: state.thinkingLevel,
+					...(state.reasoning
+						? {
+								requested_thinking_level: state.reasoning.requested,
+								reasoning_adjustment: state.reasoning.adjustment,
+								reasoning_evidence: state.reasoning.evidence,
+							}
+						: {}),
+				},
 				result: {
 					success,
 					outcome: summary.outcome,
