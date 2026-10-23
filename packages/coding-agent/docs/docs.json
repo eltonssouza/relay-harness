@@ -177,6 +177,10 @@
           "path": "goals.md"
         },
         {
+          "title": "Native Memory",
+          "path": "native-memory.md"
+        },
+        {
           "title": "Adaptive Execution with Laya",
           "path": "laya.md"
         },
