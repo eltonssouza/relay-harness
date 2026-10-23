@@ -432,7 +432,11 @@ describe("laya/auto router", () => {
 		const harness = await createHarness({
 			tools: tools.filter((tool) => !tool.exposure),
 			// Scenarios end with an unverified "done"; the evidence pillar's extra turn is not under test.
-			settings: { harnessCore: { evidence: false }, laya: settings },
+			settings: {
+				harnessCore: { evidence: false },
+				// These scenarios script the HTTP classifier; the shipped default is the in-process ONNX runtime.
+				laya: { runtime: "native", ...settings },
+			},
 			extensionFactories: [
 				(relay) => {
 					for (const tool of tools.filter((tool) => tool.exposure)) {

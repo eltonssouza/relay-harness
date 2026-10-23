@@ -261,9 +261,9 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	const server = () =>
 		settings.runtime === "docker" || settings.image || trainer.activeModel().dir !== LAYA_IMAGE_PATHS.shippedModel
 			? dockerServer
-			: settings.runtime === "onnx"
-				? onnxServer
-				: nativeServer;
+			: settings.runtime === "native"
+				? nativeServer
+				: onnxServer;
 	/** Server problem last reported, so a failing runtime is not reported on every start. */
 	let reportedProblem: string | undefined;
 	let history = new PerformanceHistory();

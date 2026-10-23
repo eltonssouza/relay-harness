@@ -104,7 +104,7 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 |---|---|---|---|
 | `laya.baseUrl` | string | `LAYA_BASE_URL` or `http://127.0.0.1:8737/v1` | Laya System One server. |
 | `laya.autostart` | boolean | `true` | Prepare and start Laya during interactive startup. See [local CPU runtime](laya.md#local-cpu-runtime). |
-| `laya.runtime` | `"native" \| "docker"` | `"native"` | Shipped-model inference runs locally on CPU. Explicit image overrides and registered Docker-volume checkpoints select Docker. |
+| `laya.runtime` | `"onnx" | "native" | "docker"` | `"onnx"` | Shipped-model inference runs inside Relay with ONNX Runtime, without Python (about 1.3 GB downloaded once). `"native"` selects the isolated Python CPU runtime. Explicit image overrides and registered Docker-volume checkpoints select Docker. |
 | `laya.python` | string | Discover an existing interpreter | Python 3.10–3.13 executable path for the isolated local runtime. Python itself is not downloaded. |
 | `laya.image` | string | The image built from this Relay version | Docker image of Laya, for example one built locally with `npm run laya:image`. |
 | `laya.policy` | string | `balanced` | Cost profile: `economy`, `balanced`, `quality` or `critical`. `--laya-policy` and `/laya policy` override it. |

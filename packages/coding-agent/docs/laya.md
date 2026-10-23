@@ -153,7 +153,9 @@ Set `laya.localOnly` to `true` to keep `laya/auto` on models served from this ma
 
 ## Local CPU runtime
 
-The shipped, already-trained `relay-laya-v5` checkpoint runs locally on CPU by default. It is a versioned alias for the existing Candidate20 weights; it does not contain newly trained weights. Docker, CUDA and Ollama are not required. Install Python 3.10 through 3.13 first; Relay discovers an existing interpreter and creates its own isolated environment under `~/.relay/agent/laya/local-runtime`. It never changes your global Python packages or installs Python itself.
+By default the shipped `relay-laya-v5` model runs inside Relay with ONNX Runtime and needs no Python (see [In-process ONNX runtime](#in-process-onnx-runtime-no-python)). The rest of this section describes the Python runtime, selected with `"laya": { "runtime": "native" }`.
+
+The shipped, already-trained `relay-laya-v5` checkpoint runs locally on CPU in that runtime.  It is a versioned alias for the existing Candidate20 weights; it does not contain newly trained weights. Docker, CUDA and Ollama are not required. Install Python 3.10 through 3.13 first; Relay discovers an existing interpreter and creates its own isolated environment under `~/.relay/agent/laya/local-runtime`. It never changes your global Python packages or installs Python itself.
 
 Interactive startup prepares the environment in the background. `/laya setup` starts it explicitly. Relay installs CPU-only PyTorch and pinned Laya/server dependencies, then downloads the six files from the package's pinned Hugging Face revision. The checkpoint and tokenizer total **678,203,281 bytes (678 MB)**; Python dependencies are additional and vary by platform. Cached files are checked by size and SHA-256 and reused; interrupted or corrupt downloads never replace a validated file. No retraining or weight conversion is involved.
 
@@ -174,12 +176,12 @@ An interpreter outside PATH can be selected by executable path:
 
 ### In-process ONNX runtime (no Python)
 
-`"laya": { "runtime": "onnx" }` runs the shipped model inside Relay with ONNX Runtime, so neither Python nor Docker is needed:
+This is the default runtime (`"laya": { "runtime": "onnx" }`). It runs the shipped model inside Relay with ONNX Runtime, so neither Python nor Docker is needed. Set `"runtime": "native"` to use the Python runtime instead:
 
 ```json
 {
   "laya": {
-    "runtime": "onnx"
+    "runtime": "native"
   }
 }
 ```
@@ -188,7 +190,7 @@ An interpreter outside PATH can be selected by executable path:
 
 Requests run one at a time with a 60-second limit. After three consecutive failures the runtime pauses for a minute. While it is unavailable, keyword rules answer as with the other runtimes. A smaller FP16 or INT8 file is not offered because it changed answers in measurement.
 
-Optional `/laya train` continues to use Docker and its GPU/CPU training pipeline. Existing trained checkpoints remain in their Docker volume and selecting one uses Docker. An explicit `laya.image` also selects Docker. `/laya use shipped` returns to native inference unless Docker was explicitly configured. Checkpoints and Docker volumes are not migrated or deleted by native setup.
+Optional `/laya train` continues to use Docker and its GPU/CPU training pipeline. Existing trained checkpoints remain in their Docker volume and selecting one uses Docker. An explicit `laya.image` also selects Docker. `/laya use shipped` returns to the default ONNX inference unless Docker was explicitly configured. Checkpoints and Docker volumes are not migrated or deleted by native setup.
 
 ## Laya runs in Docker
 
