@@ -5,6 +5,7 @@ import {
 	buildHead,
 	collate,
 	decodeAnswers,
+	encodeRequest,
 	type LayaAnswer,
 	LayaOnnxClassifier,
 	type LayaQuestionDefinition,
@@ -56,6 +57,19 @@ describe("laya native ONNX: input encoding", () => {
 		expect(ids.at(-1)).toBe(1);
 		expect(markers).toHaveLength(2);
 		expect(markers.map((position) => ids[position])).toEqual([4, 4]);
+	});
+
+	it("truncates a long Unicode request to max_len and keeps every option marker", () => {
+		const request = "Corrija o cálculo de ação 你好 ".repeat(200);
+		const { rows } = encodeRequest(charTokenizer, request, questions, { maxLen: 400, headMaxLen: 300 });
+		for (const row of rows) {
+			expect(row.ids.length).toBeLessThanOrEqual(400);
+			expect(row.ids.at(-1)).toBe(1);
+			expect(row.markers.every((position) => row.ids[position] === 4)).toBe(true);
+		}
+		expect(() => encodeRequest(charTokenizer, "   ", questions, { maxLen: 400, headMaxLen: 300 })).toThrow(
+			/non-empty/,
+		);
 	});
 
 	it("rejects malformed questions and empty requests", () => {
