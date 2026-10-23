@@ -104,7 +104,8 @@ describe("native MCP local stdio handshake and distribution", () => {
 				// Preserve native opt-outs so the handshake cannot launch an update-check subprocess.
 				env: { ...config.env, DO_NOT_TRACK: "1", CONTEXT7_API_KEY: "" },
 			});
-			const client = new McpClient({ name: "relay-native-mcp-test", version: "1.0.0", requestTimeoutMs: 15000 });
+			// Cold startup from copied dependencies can exceed 15 seconds under parallel Windows CI load.
+			const client = new McpClient({ name: "relay-native-mcp-test", version: "1.0.0", requestTimeoutMs: 30000 });
 			try {
 				await client.connect(transport);
 				const tools = await client.listTools();
@@ -113,6 +114,7 @@ describe("native MCP local stdio handshake and distribution", () => {
 				await client.close();
 			}
 		},
-		25000,
+		// Cover both bounded requests (initialize and tools/list), plus process cleanup.
+		75000,
 	);
 });

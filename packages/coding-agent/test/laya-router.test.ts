@@ -13,17 +13,21 @@ import {
 	fauxToolCall,
 } from "@relay-harness/ai";
 import { Type } from "typebox";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ENV_AGENT_DIR } from "../src/config.ts";
+import type { ExtensionFactory } from "../src/core/extensions/types.ts";
 import type { LayaSettings } from "../src/core/settings-manager.ts";
 import { getVirtualModelState } from "../src/core/virtual-models.ts";
+import goalExtension from "../src/extensions/goal/index.ts";
+import { GOAL_ENTRY, newGoal, readGoal } from "../src/extensions/goal/state.ts";
 import {
 	assessmentFromAnswers,
 	assessmentFromLabels,
+	canUseHeuristicFastPath,
 	heuristicAssessment,
 	type TaskAssessment,
 } from "../src/extensions/laya/assessment.ts";
-import layaExtension, { LAYA_PLAN_MESSAGE } from "../src/extensions/laya/index.ts";
+import layaExtension, { budgetRefusal, LAYA_PLAN_MESSAGE } from "../src/extensions/laya/index.ts";
 import { LAYA_LESSONS_MESSAGE } from "../src/extensions/laya/memory.ts";
 import {
 	applyPolicy,
@@ -291,6 +295,55 @@ describe("laya assessment", () => {
 		expect(() => assessmentFromLabels({ ...assessmentLabels, capability_tier: "huge" })).toThrow("capability_tier");
 	});
 
+	it("uses the heuristic fast path only for clear, low-risk, small tasks", () => {
+		const simple = "Please change the button label from Submit to Save in the settings page.";
+		expect(canUseHeuristicFastPath(simple, heuristicAssessment(simple))).toBe(true);
+
+		for (const request of [
+			"Fix it",
+			"Fix the SQL injection in the search endpoint",
+			"Implement a safe multi-tenant authorization system and add integration tests.",
+			"Please implement an import/export migration system for every database in our repository, including backwards compatibility, tenant isolation, locking, and rollback.",
+		]) {
+			expect(canUseHeuristicFastPath(request, heuristicAssessment(request))).toBe(false);
+		}
+	});
+
+	it.each([
+		"Implement a reusable pagination component with configurable sorting.",
+		"Rename the button label in every module across the whole repository.",
+		"Corrija o texto do botão em todo o repositório.",
+	])("does not fast-path a medium or broad task: %s", (request) => {
+		expect(canUseHeuristicFastPath(request, heuristicAssessment(request))).toBe(false);
+	});
+
+	it("bounds the fast path and rejects non-heuristic or uncertain assessments", () => {
+		const simple = "Please change the button label from Submit to Save in the settings page.";
+		const low = heuristicAssessment(simple);
+		for (const request of ["", " ", "x".repeat(1001)]) {
+			expect(canUseHeuristicFastPath(request, low)).toBe(false);
+		}
+		for (const overrides of [
+			{ complexity: 0.5 },
+			{ complexity: Number.NaN },
+			{ risk: 1 / 3 },
+			{ ambiguity: 1 / 3 },
+			{ scope: "module" as const },
+		]) {
+			expect(canUseHeuristicFastPath(simple, { ...low, task: { ...low.task, ...overrides } })).toBe(false);
+		}
+		expect(canUseHeuristicFastPath(simple, { ...low, source: "laya" })).toBe(false);
+		for (const requirement of [
+			"requires_shell",
+			"requires_web",
+			"requires_browser",
+			"requires_database",
+			"requires_git",
+		] as const) {
+			expect(canUseHeuristicFastPath(simple, { ...low, tools: { ...low.tools, [requirement]: true } })).toBe(false);
+		}
+	});
+
 	it("falls back to keyword rules in English and Portuguese", () => {
 		expect(heuristicAssessment("Corrija o texto deste botão para 'Salvar'.")).toMatchObject({
 			source: "heuristic",
@@ -399,6 +452,8 @@ describe("laya/auto router", () => {
 		settings: LayaSettings = {},
 		extraProviders: Array<ReturnType<typeof fauxProvider>> = [],
 		extensionOptions: Parameters<typeof layaExtension>[1] = {},
+		harnessSettings: Record<string, unknown> = {},
+		extraExtensions: ExtensionFactory[] = [],
 	) {
 		const anthropic = fauxProvider({
 			provider: "anthropic",
@@ -432,7 +487,12 @@ describe("laya/auto router", () => {
 		const harness = await createHarness({
 			tools: tools.filter((tool) => !tool.exposure),
 			// Scenarios end with an unverified "done"; the evidence pillar's extra turn is not under test.
-			settings: { harnessCore: { evidence: false }, laya: settings },
+			settings: {
+				harnessCore: { evidence: false },
+				// These scenarios script the HTTP classifier; the shipped default is the in-process ONNX runtime.
+				laya: { runtime: "native", ...settings },
+				...harnessSettings,
+			},
 			extensionFactories: [
 				(relay) => {
 					for (const tool of tools.filter((tool) => tool.exposure)) {
@@ -446,6 +506,7 @@ describe("laya/auto router", () => {
 				(relay) => layaExtension(relay, extensionOptions),
 				// Replaces the built-in Laya provider with the scripted classifier.
 				(relay) => relay.registerProvider(laya),
+				...extraExtensions,
 			],
 		});
 		harnesses.push(harness);
@@ -732,6 +793,148 @@ describe("laya/auto router", () => {
 		]);
 	});
 
+	it("ACI adaptive mode applies the Laya decision like plain laya/auto", async () => {
+		const { harness, respond, dispatched } = await setup(
+			SIMPLE_FIX,
+			[],
+			{},
+			[],
+			{},
+			{
+				adaptiveCognition: { enabled: true, mode: "adaptive" },
+			},
+		);
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Fix the typo in the README title");
+		expect(dispatched()).toHaveLength(1);
+		expect(harness.session.messages.filter((m) => m.role === "assistant").at(-1)?.stopReason).toBe("stop");
+	});
+
+	it("ACI adaptive heuristicFirst skips the classifier only for a clear, low-risk task", async () => {
+		const { harness, respond, requests, telemetry } = await setup(
+			SIMPLE_FIX,
+			[],
+			{ heuristicFirst: true },
+			[],
+			{},
+			{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
+		);
+		respond(fauxAssistantMessage("done"));
+
+		await harness.session.prompt("Please change the button label from Submit to Save in the settings page.");
+
+		expect(requests).toEqual([]);
+		expect(telemetry()[0].classification).toMatchObject({ source: "heuristic", heuristic_fast_path: true });
+	});
+
+	it("ACI adaptive heuristicFirst still classifies a security-sensitive task", async () => {
+		const { harness, respond, requests, telemetry } = await setup(
+			SIMPLE_FIX,
+			[],
+			{ heuristicFirst: true },
+			[],
+			{},
+			{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
+		);
+		respond(fauxAssistantMessage("done"));
+
+		await harness.session.prompt("Fix the SQL injection in the search endpoint");
+
+		expect(requests).toHaveLength(1);
+		expect(telemetry()[0].classification.heuristic_fast_path).toBeUndefined();
+	});
+
+	it.each([
+		{ enabled: true, mode: "adaptive" as const, heuristicFirst: false },
+		{ enabled: true, mode: "adaptive" as const, heuristicFirst: "false" as unknown as boolean },
+		{ enabled: true, mode: "observe" as const, heuristicFirst: true },
+		{ enabled: true, mode: "assist" as const, heuristicFirst: true },
+		{ enabled: true, mode: "strict" as const, heuristicFirst: true },
+		{ enabled: false, mode: "adaptive" as const, heuristicFirst: true },
+		{ enabled: true, mode: undefined, heuristicFirst: true },
+	])("keeps full classification for non-opted-in mode %j", async ({ enabled, mode, heuristicFirst }) => {
+		const { harness, respond, requests, telemetry } = await setup(
+			SIMPLE_FIX,
+			[],
+			{ heuristicFirst },
+			[],
+			{},
+			{ adaptiveCognition: { enabled, ...(mode ? { mode } : {}) } },
+		);
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Please change the button label from Submit to Save in the settings page.");
+		expect(requests).toHaveLength(1);
+		expect(telemetry()[0].classification.source).toBe("laya");
+		expect(telemetry()[0].classification.heuristic_fast_path).toBeUndefined();
+	});
+
+	it.each([false, true])("respects the host goal token budget with heuristicFirst=%s", async (heuristicFirst) => {
+		const edit = createTool("edit");
+		const execute = vi.spyOn(edit, "execute");
+		const { harness, respond, dispatched } = await setup(
+			SIMPLE_FIX,
+			[edit],
+			{ heuristicFirst },
+			[],
+			{},
+			{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
+			[goalExtension],
+		);
+		harness.sessionManager.appendCustomEntry(
+			GOAL_ENTRY,
+			newGoal("Verify that routing cannot bypass the token budget", 1),
+		);
+		const response = call("edit");
+		response.usage = { ...response.usage, totalTokens: 2 };
+		respond(response, fauxAssistantMessage("must not run"));
+
+		await harness.session.prompt("Please change the button label from Submit to Save in the settings page.");
+
+		expect(readGoal(harness.sessionManager)?.status).toBe("budget_exhausted");
+		expect(execute).not.toHaveBeenCalled();
+		expect(dispatched()).toHaveLength(1);
+	});
+
+	it("ACI strict mode fails instead of routing on a low-confidence Laya answer", async () => {
+		const { harness, dispatched } = await setup(
+			{ ...SIMPLE_FIX, confidence: 0.3 },
+			[],
+			{ minConfidence: 0.6, heuristicFirst: true },
+			[],
+			{},
+			{
+				adaptiveCognition: { enabled: true, mode: "strict" },
+			},
+		);
+		await harness.session.prompt("Fix the typo in the README title");
+		const reply = harness.session.messages.filter((m) => m.role === "assistant").at(-1);
+		expect(reply?.stopReason).toBe("error");
+		expect(reply?.errorMessage).toContain("laya/auto (strict)");
+		// No physical model ran: the only assistant message is the routing error of laya/auto itself.
+		expect(reply?.model).toBe("auto");
+		expect(dispatched()).toEqual(["auto:undefined"]);
+	});
+
+	it("ACI strict mode fails instead of using keyword rules when Laya does not answer", async () => {
+		const { harness, dispatched } = await setup(
+			undefined,
+			[],
+			{},
+			[],
+			{},
+			{
+				adaptiveCognition: { enabled: true, mode: "strict" },
+			},
+		);
+		await harness.session.prompt("Fix the typo in the README title");
+		const reply = harness.session.messages.filter((m) => m.role === "assistant").at(-1);
+		expect(reply?.stopReason).toBe("error");
+		expect(reply?.errorMessage).toContain("keyword rules are not used in strict mode");
+		// No physical model ran: the only assistant message is the routing error of laya/auto itself.
+		expect(reply?.model).toBe("auto");
+		expect(dispatched()).toEqual(["auto:undefined"]);
+	});
+
 	it("overrides Laya for authentication work", async () => {
 		const { harness, respond, dispatched, plan } = await setup({ ...SIMPLE_FIX, effort: "minimal" }, []);
 
@@ -756,6 +959,23 @@ describe("laya/auto router", () => {
 			escalations: [{ reason: "repeated_failure", from: "fast", to: "balanced" }],
 		});
 		expect(telemetry()[0].selected).toMatchObject({ tier: "balanced", model: "claude-sonnet-5-5" });
+	});
+
+	it.each([
+		["maxAttempts", { maxAttempts: 1 }],
+		["maxCostPerTask", { maxCostPerTask: 0 }],
+	] as const)("stops escalating when laya.budget.%s is reached and keeps the current model", async (_name, budget) => {
+		const { harness, respond, dispatched, telemetry } = await setup(SIMPLE_FIX, [createTool("edit", true)], {
+			escalateAfterFailures: 2,
+			budget,
+		});
+
+		respond(call("edit"), call("edit"), fauxAssistantMessage("done"));
+		await harness.session.prompt("Fix the off-by-one in the pager.");
+
+		expect(dispatched()).toEqual(["haiku-5-5:low", "haiku-5-5:low", "haiku-5-5:low"]);
+		expect(telemetry()[0].result).toMatchObject({ attempts: 1, escalations: [] });
+		expect(telemetry()[0].selected).toMatchObject({ tier: "fast", model: "claude-haiku-5-5" });
 	});
 
 	it("measures lexical retrieval precision and recall for English and Portuguese prompts", () => {
@@ -974,19 +1194,31 @@ describe("laya/auto router", () => {
 		]);
 	}
 
-	it("routes a request like a learned task by its labels, at once and without the Laya server", async () => {
-		learnTask();
-		const { harness, respond, dispatched, plan, telemetry } = await setup(undefined, []);
+	it.each([false, true])(
+		"keeps learned labels before keyword routing with heuristicFirst=%s",
+		async (heuristicFirst) => {
+			learnTask();
+			const { harness, respond, dispatched, plan, telemetry, requests } = await setup(
+				undefined,
+				[],
+				{ heuristicFirst },
+				[],
+				{},
+				{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
+			);
 
-		respond(fauxAssistantMessage("done"));
-		await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos, está cortado");
+			respond(fauxAssistantMessage("done"));
+			await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos, está cortado");
 
-		// Keyword rules would route this text fix to haiku with minimal effort.
-		expect(dispatched()).toEqual(["opus-5-5:high"]);
-		expect(plan()[0]).toContain("Lessons from similar tasks done before");
-		expect(plan()[0]).toContain("locales/pt-BR/orders.json");
-		expect(telemetry()[0].classification.source).toBe("memory");
-	});
+			// Keyword rules would route this text fix to haiku with minimal effort.
+			expect(dispatched()).toEqual(["opus-5-5:high"]);
+			expect(plan()[0]).toContain("Lessons from similar tasks done before");
+			expect(plan()[0]).toContain("locales/pt-BR/orders.json");
+			expect(telemetry()[0].classification.source).toBe("memory");
+			expect(telemetry()[0].classification.heuristic_fast_path).toBeUndefined();
+			expect(requests).toEqual([]);
+		},
+	);
 
 	it("gives the lessons of similar tasks to a model laya/auto does not route", async () => {
 		learnTask();
@@ -1003,5 +1235,18 @@ describe("laya/auto router", () => {
 		expect(lessons).toHaveLength(1);
 		expect(lessons[0]).toMatch(/^\[laya:lessons\] Lessons from similar tasks/);
 		expect(lessons[0]).toContain("npm run i18n:check");
+	});
+});
+
+describe("laya.budget", () => {
+	it("allows escalation when no limit is set or the task is under every limit", () => {
+		expect(budgetRefusal(undefined, 5, 100)).toBeUndefined();
+		expect(budgetRefusal({}, 5, 100)).toBeUndefined();
+		expect(budgetRefusal({ maxAttempts: 3, maxCostPerTask: 1 }, 2, 0.5)).toBeUndefined();
+	});
+
+	it("refuses with a stated reason once a limit is reached", () => {
+		expect(budgetRefusal({ maxAttempts: 3 }, 3, 0)).toBe("budget of 3 model attempts reached");
+		expect(budgetRefusal({ maxCostPerTask: 0.25 }, 1, 0.3)).toBe("cost budget of 0.25 reached (0.3000 spent)");
 	});
 });

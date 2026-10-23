@@ -17,6 +17,7 @@ const installPackageName = "@relay-harness/coding-agent-install";
 const allowedInstallScriptPackages = new Map([
 	["@google/genai@2.21.0", "preinstall is a no-op in the published package"],
 	["esbuild@0.28.2", "postinstall selects and verifies the platform-specific esbuild binary"],
+	["onnxruntime-node@1.30.0", "postinstall only fetches optional linux/x64 CUDA binaries; the bundled CPU runtime needs no script"],
 	["protobufjs@7.6.6", "postinstall only warns about protobufjs version scheme mismatches"],
 ]);
 

@@ -104,14 +104,17 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 |---|---|---|---|
 | `laya.baseUrl` | string | `LAYA_BASE_URL` or `http://127.0.0.1:8737/v1` | Laya System One server. |
 | `laya.autostart` | boolean | `true` | Prepare and start Laya during interactive startup. See [local CPU runtime](laya.md#local-cpu-runtime). |
-| `laya.runtime` | `"native" \| "docker"` | `"native"` | Shipped-model inference runs locally on CPU. Explicit image overrides and registered Docker-volume checkpoints select Docker. |
+| `laya.runtime` | `"onnx" | "native" | "docker"` | `"onnx"` | Shipped-model inference runs inside Relay with ONNX Runtime, without Python (about 1.3 GB downloaded once). `"native"` selects the isolated Python CPU runtime. Explicit image overrides and registered Docker-volume checkpoints select Docker. |
 | `laya.python` | string | Discover an existing interpreter | Python 3.10–3.13 executable path for the isolated local runtime. Python itself is not downloaded. |
 | `laya.image` | string | The image built from this Relay version | Docker image of Laya, for example one built locally with `npm run laya:image`. |
 | `laya.policy` | string | `balanced` | Cost profile: `economy`, `balanced`, `quality` or `critical`. `--laya-policy` and `/laya policy` override it. |
 | `laya.models` | object | See [laya.md](laya.md#model-registry) | Models per tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order. A tier you set replaces that tier's default list. |
 | `laya.quota` | object | `1` per provider | Share of each provider's quota still available, 0 to 1, e.g. `{ "openai-codex": 0.25 }`. |
 | `laya.minConfidence` | number | `0.5` | Laya answers below this confidence raise the tier by one. |
+| `laya.heuristicFirst` | boolean | `false` | Opt-in adaptive-mode latency optimization; requires the boolean `true`. Only clear, zero-risk, zero-ambiguity keyword assessments of complexity ≤0.25 and single-line/file scope skip ONNX. Other ACI modes retain their existing assessment path, including learned-memory lookup. |
 | `laya.escalateAfterFailures` | number | `3` | Failed tool calls in one turn before moving to the next tier. `0` disables. |
+| `laya.budget.maxAttempts` | number | none | Model attempts per task, counting the first choice and each escalation. When reached, Laya stops escalating and keeps the current model. |
+| `laya.budget.maxCostPerTask` | number | none | Provider cost already spent on the task (catalog currency, USD) at which Laya stops escalating and keeps the current model. |
 | `laya.toolRouting` | string | `advise` | `advise` names unneeded tools in the plan; `enforce` also deactivates them for the request. |
 | `laya.telemetry` | boolean | `true` | Record each routed request in `~/.relay/agent/laya/telemetry.jsonl`. |
 | `laya.memory` | boolean | `true` | Route requests similar to tasks learned with `/laya learn` by their labels, and give the running model their lessons. See [laya.md](laya.md#teach-laya-from-your-sessions). |

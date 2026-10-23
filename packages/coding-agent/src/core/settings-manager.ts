@@ -123,6 +123,22 @@ export interface CodemodeSettings {
 	inlineBudget?: number;
 }
 
+/**
+ * Adaptive Cognitive Intelligence (ACI) modes. Disabled by default, which keeps Laya exactly as before.
+ * Modes only change how much Laya intervenes; none grants tools or permissions, and `laya.localOnly`
+ * and user restrictions always win. See docs/adaptive-cognition.md.
+ */
+export interface AdaptiveCognitionSettings {
+	/** Default: false. */
+	enabled?: boolean;
+	/**
+	 * `observe` records the decision; `assist` also shows it; `adaptive` lets `laya/auto` apply it (as today);
+	 * `strict` is `adaptive` but a missing or low-confidence Laya answer fails the request instead of using keyword rules.
+	 * Default: `observe`.
+	 */
+	mode?: "observe" | "assist" | "adaptive" | "strict";
+}
+
 /** Settings of the `laya/auto` router (adaptive execution intelligence). See docs/laya.md. */
 export interface LayaSettings {
 	/** Laya System One server. Default: `LAYA_BASE_URL` or `http://127.0.0.1:8737/v1`. */
@@ -133,14 +149,35 @@ export interface LayaSettings {
 	models?: Partial<Record<"fast" | "balanced" | "strong" | "frontier", string[]>>;
 	/** Route physical model selections through Laya, staying with the selected provider. Default: false. */
 	followProvider?: boolean;
+	/**
+	 * Only route `laya/auto` to models served from this machine (loopback base URL). With no such model,
+	 * routing fails instead of falling back to a remote one. Default: false.
+	 */
+	localOnly?: boolean;
 	/** Optional tier maps for model families sharing one provider; membership identifies the active group. */
 	modelGroups?: Record<string, Partial<Record<"fast" | "balanced" | "strong" | "frontier", string[]>>>;
 	/** Relative quota still available per provider, 0..1. Default: 1 for every provider. */
 	quota?: Record<string, number>;
 	/** Laya answers below this confidence raise the tier by one. Default: 0.5. */
 	minConfidence?: number;
+	/**
+	 * Opt-in adaptive-mode latency optimization. Clear, low-risk, small requests use the keyword assessment
+	 * without running the ONNX classifier; ambiguous, risky, broad, security-sensitive, or tool-heavy requests still
+	 * run Laya. Default: false.
+	 */
+	heuristicFirst?: boolean;
 	/** Failed tool calls in one turn before escalating to the next tier; 0 disables. Default: 3. */
 	escalateAfterFailures?: number;
+	/**
+	 * Limits for one task. When a limit is reached, Laya stops escalating (to a higher tier or another provider) and keeps
+	 * the current model; it never stops a running task. Unset limits do not apply. Default: none.
+	 */
+	budget?: {
+		/** Model attempts per task, counting the first choice and every escalation. */
+		maxAttempts?: number;
+		/** Provider cost already spent on the task, in the catalog currency (USD), before an escalation is refused. */
+		maxCostPerTask?: number;
+	};
 	/** `advise` names unneeded tools in the plan; `enforce` also deactivates them. Default: `advise`. */
 	toolRouting?: "advise" | "enforce";
 	/** Opt-in maximum number of matching deferred tools to activate per request; 0 disables. */
@@ -149,8 +186,11 @@ export interface LayaSettings {
 	toolRetrievalTelemetry?: boolean;
 	/** Install and start Laya when Relay starts interactively. Default: true. */
 	autostart?: boolean;
-	/** Inference runtime. Default: native CPU; image overrides and volume checkpoints use Docker. */
-	runtime?: "native" | "docker";
+	/**
+	 * Inference runtime. Default: `onnx`, the shipped model inside Relay with ONNX Runtime, no Python (downloads about
+	 * 1.3 GB once). `native` is the isolated Python CPU runtime; `docker`, an image override or a volume checkpoint use Docker.
+	 */
+	runtime?: "onnx" | "native" | "docker";
 	/** Existing Python 3.10–3.13 executable for the isolated native CPU runtime. */
 	python?: string;
 	/** Docker image of Laya. Default: the image built from this Relay version on ghcr.io. */
@@ -234,6 +274,7 @@ export interface Settings {
 	warnings?: WarningSettings;
 	codemode?: CodemodeSettings;
 	laya?: LayaSettings;
+	adaptiveCognition?: AdaptiveCognitionSettings;
 	/** Budgets for Laya-approved subordinate workers. */
 	delegation?: Partial<DelegationLimits>;
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)

@@ -21,6 +21,8 @@ export interface TelemetryRecord {
 	request: string;
 	classification: {
 		source: TaskAssessment["source"];
+		/** True when opt-in adaptive-mode routing intentionally skipped ONNX for a clear, low-risk request. */
+		heuristic_fast_path?: boolean;
 		type: TaskType;
 		complexity: number;
 		risk: number;
@@ -34,7 +36,17 @@ export interface TelemetryRecord {
 		recommended_effort: string;
 	};
 	policy: { profile: PolicyProfile; required_tier: CapabilityTier; rules: string[] };
-	selected: { provider: string; model: string; tier: CapabilityTier; thinking_level: string };
+	selected: {
+		provider: string;
+		model: string;
+		tier: CapabilityTier;
+		thinking_level: string;
+		/** Effort the policy asked for, and how it mapped onto this model (`exact`, `raised`, `lowered`, `unsupported`). */
+		requested_thinking_level?: string;
+		reasoning_adjustment?: string;
+		/** Whether the model catalog declares the reasoning levels (`declared`) or they are assumed. */
+		reasoning_evidence?: string;
+	};
 	result: {
 		success: boolean;
 		outcome: "completed" | "error" | "aborted";
