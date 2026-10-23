@@ -124,15 +124,19 @@ export interface CodemodeSettings {
 }
 
 /**
- * Adaptive Cognitive Intelligence (ACI) rollout switch. Disabled by default; `observe` only records the
- * decision Laya would make as a session entry and never changes model, effort, tools or prompts.
- * See docs/adaptive-cognition.md.
+ * Adaptive Cognitive Intelligence (ACI) modes. Disabled by default, which keeps Laya exactly as before.
+ * Modes only change how much Laya intervenes; none grants tools or permissions, and `laya.localOnly`
+ * and user restrictions always win. See docs/adaptive-cognition.md.
  */
 export interface AdaptiveCognitionSettings {
 	/** Default: false. */
 	enabled?: boolean;
-	/** Only `observe` exists until the native runtime passes parity. Default: `observe`. */
-	mode?: "observe";
+	/**
+	 * `observe` records the decision; `assist` also shows it; `adaptive` lets `laya/auto` apply it (as today);
+	 * `strict` is `adaptive` but a missing or low-confidence Laya answer fails the request instead of using keyword rules.
+	 * Default: `observe`.
+	 */
+	mode?: "observe" | "assist" | "adaptive" | "strict";
 }
 
 /** Settings of the `laya/auto` router (adaptive execution intelligence). See docs/laya.md. */

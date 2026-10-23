@@ -5,7 +5,7 @@ import { fauxAssistantMessage } from "@relay-harness/ai";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { ENV_AGENT_DIR } from "../src/config.ts";
 import layaExtension, { ACI_OBSERVE_ENTRY } from "../src/extensions/laya/index.ts";
-import { createHarness, type Harness } from "./suite/harness.ts";
+import { createHarness, createTestUiContext, type Harness } from "./suite/harness.ts";
 
 describe("ACI observe mode (adaptiveCognition)", () => {
 	const harnesses: Harness[] = [];
@@ -25,12 +25,19 @@ describe("ACI observe mode (adaptiveCognition)", () => {
 		rmSync(agentDir, { recursive: true, force: true });
 	});
 
-	async function run(adaptiveCognition?: { enabled?: boolean; mode?: "observe" }) {
+	async function run(
+		adaptiveCognition?: { enabled?: boolean; mode?: "observe" | "assist" | "adaptive" | "strict" },
+		notices: string[] = [],
+	) {
 		const harness = await createHarness({
 			settings: { harnessCore: { evidence: false }, ...(adaptiveCognition ? { adaptiveCognition } : {}) },
 			extensionFactories: [(relay) => layaExtension(relay)],
 		});
 		harnesses.push(harness);
+		await harness.session.bindExtensions({
+			mode: "tui",
+			uiContext: createTestUiContext({ notify: (message) => notices.push(message) }),
+		});
 		const model = harness.session.model;
 		harness.setResponses([fauxAssistantMessage("done")]);
 		await harness.session.prompt("fix the failing login test");
@@ -67,5 +74,24 @@ describe("ACI observe mode (adaptiveCognition)", () => {
 				thinkingLevel: expect.any(String),
 			}),
 		]);
+	});
+
+	it("assist mode shows the suggestion without applying it when laya/auto is not selected", async () => {
+		const notices: string[] = [];
+		const off = await run({ enabled: false }, []);
+		const assist = await run({ enabled: true, mode: "assist" }, notices);
+		expect(assist.after).toBe(assist.model);
+		expect(assist.assistants.map((m) => m.model)).toEqual(off.assistants.map((m) => m.model));
+		expect(assist.observed).toHaveLength(1);
+		expect(notices.filter((n) => n.startsWith("Laya suggests"))).toEqual([
+			expect.stringContaining("Select laya/auto to apply it."),
+		]);
+	});
+
+	it("observe mode records without showing anything", async () => {
+		const notices: string[] = [];
+		const observe = await run({ enabled: true, mode: "observe" }, notices);
+		expect(observe.observed).toHaveLength(1);
+		expect(notices.filter((n) => n.startsWith("Laya suggests"))).toEqual([]);
 	});
 });

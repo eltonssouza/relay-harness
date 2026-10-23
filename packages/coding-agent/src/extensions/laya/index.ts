@@ -287,7 +287,12 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	let memoryCache: { version: string; memory: TaskMemory } | undefined;
 
 	/** ACI phase 0 observe mode: persist the decision Laya would make, without acting on it. */
-	const observeDecision = (request: string, assessment: TaskAssessment, policy?: PolicyDecision) => {
+	/** ACI mode when `adaptiveCognition.enabled` is set; undefined keeps Laya exactly as before. */
+	const aciMode = () => {
+		const aci = relay.getSettings().adaptiveCognition;
+		return aci?.enabled === true ? (aci.mode ?? "observe") : undefined;
+	};
+	const observeDecision = (request: string, assessment: TaskAssessment, policy?: PolicyDecision): PolicyDecision => {
 		const decided =
 			policy ??
 			applyPolicy(assessment, request, { minConfidence: settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE });
@@ -305,6 +310,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			escalations: decided.escalations,
 			decision: decisionRecord(assessment, decided),
 		});
+		return decided;
 	};
 	const refreshSettings = () => {
 		settings = relay.getSettings().laya ?? {};
@@ -545,9 +551,15 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const assessment =
 			pending && pending.request === text ? pending.assessment : await assess(text, ctx, request.signal);
 		pending = undefined;
-		const policy = applyPolicy(assessment, text, {
-			minConfidence: settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE,
-		});
+		const minConfidence = settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE;
+		// ACI strict: never route on keyword rules or a low-confidence answer.
+		if (aciMode() === "strict" && (assessment.source === "heuristic" || assessment.confidence < minConfidence))
+			throw new Error(
+				assessment.source === "heuristic"
+					? `laya/auto (strict): Laya did not answer${lastClassifierError ? ` (${lastClassifierError})` : ""}; keyword rules are not used in strict mode.`
+					: `laya/auto (strict): Laya confidence ${assessment.confidence.toFixed(2)} is below laya.minConfidence ${minConfidence}.`,
+			);
+		const policy = applyPolicy(assessment, text, { minConfidence });
 		const taskId = randomUUID();
 		run = { taskId, startedAt: run?.startedAt ?? Date.now() };
 		const escalations = policy.escalations.map((reason) => ({
@@ -817,10 +829,19 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			relay.setActiveTools(userTools());
 			toolBaseline = undefined;
 		}
-		const observing = relay.getSettings().adaptiveCognition?.enabled === true;
+		const mode = aciMode();
+		const observing = mode !== undefined;
 		if (!isSelected(ctx)) {
-			// ACI observe mode: record the heuristic decision only; nothing below changes.
-			if (observing) observeDecision(event.prompt, heuristicAssessment(event.prompt));
+			// ACI: record (and in assist mode show) the decision only; nothing below changes. Selecting laya/auto applies it.
+			if (observing) {
+				const assessment = heuristicAssessment(event.prompt);
+				const decided = observeDecision(event.prompt, assessment);
+				if (mode === "assist" && ctx.hasUI)
+					ctx.ui.notify(
+						`Laya suggests ${decided.requiredTier} • ${decided.thinkingLevel} • ${assessment.agent} (keyword rules). Select laya/auto to apply it.`,
+						"info",
+					);
+			}
 			// Lessons help whichever model runs the request.
 			const lessons = lessonsFor(event.prompt);
 			if (!lessons) return;

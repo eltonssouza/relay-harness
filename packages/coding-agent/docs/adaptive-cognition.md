@@ -1,10 +1,10 @@
-# Adaptive Cognitive Intelligence (observe mode)
+# Adaptive Cognitive Intelligence (modes)
 
-Adaptive Cognitive Intelligence (ACI) is the planned evolution of [Laya](laya.md) routing. Laya can already choose a model tier, a reasoning effort and a validation level for each request; ACI first measures those decisions before anything new is allowed to act on them.
+Adaptive Cognitive Intelligence (ACI) controls how much [Laya](laya.md) intervenes in a request. Laya picks a model tier, a reasoning effort, a validation level and an agent for each request; the ACI mode decides whether that decision is only recorded, shown, or applied.
 
-Only **observe mode** exists today. It is disabled by default and never changes the model, reasoning effort, active tools, prompts or responses.
+ACI is disabled by default. Disabled, Laya behaves exactly as before: `laya/auto` applies its decision and other models are left alone.
 
-## Enable observe mode
+## Enable a mode
 
 Add this to `settings.json` (global or project):
 
@@ -19,18 +19,30 @@ Add this to `settings.json` (global or project):
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
-| `adaptiveCognition.enabled` | `false` | Records decisions when `true`. |
-| `adaptiveCognition.mode` | `observe` | The only supported mode. |
+| `adaptiveCognition.enabled` | `false` | Turns ACI on. |
+| `adaptiveCognition.mode` | `observe` | `observe`, `assist`, `adaptive` or `strict`. |
+
+| Mode | With another model selected | With `laya/auto` selected |
+| --- | --- | --- |
+| `observe` | Records the decision. Nothing changes. | Applies the decision, as without ACI, and records it. |
+| `assist` | Records the decision and shows it as a notice, for example `Laya suggests strong • medium • software-engineer`. Nothing is applied until you select `laya/auto`. | Applies the decision and records it. |
+| `adaptive` | Records the decision. | Applies the decision and records it. This is plain `laya/auto` behavior. |
+| `strict` | Records the decision. | Applies the decision only when Laya answered with at least `laya.minConfidence`. If Laya did not answer, or answered with lower confidence, the request fails with an error instead of being routed by keyword rules. |
+
+## What a mode never does
+
+- No mode grants a tool or permission. Laya's `requires_*` answers can only remove unneeded tools when `laya.toolRouting` is `enforce`.
+- `laya.localOnly`, sensitive-area rules and your own model and tool selections always win over Laya's recommendation.
+- The agent Laya picks sets the role and skills for the request. A mode does not widen what that agent can do.
 
 ## What gets recorded
 
-Before each request, Relay appends an `aci.observe` custom entry to the session. The entry is stored in the session file and is never sent to the model:
+Before each request, Relay appends an `aci.observe` custom entry to the session. It is stored in the session file and is never sent to the model:
 
-- `source`: `laya`, `memory` or `heuristic`. When `laya/auto` is not the selected model, the decision comes from the local heuristic, so observe mode adds no network call.
-- `taskType` and `confidence`: the task classification.
-- `requiredTier`, `minTier`, `effort`, `thinkingLevel`, `validation`: what the policy would choose.
-- `rules` and `escalations`: why it would choose it.
+- `mode` and `source` (`laya`, `memory` or `heuristic`). When `laya/auto` is not the selected model, the decision comes from the local keyword rules, so recording adds no inference call.
+- `taskType` and `confidence`: the task classification. Confidence is Laya's certainty about its labels, not a guarantee of the result's quality.
+- `requiredTier`, `minTier`, `effort`, `thinkingLevel`, `validation`: what the policy chose.
+- `rules` and `escalations`: why.
+- `decision`: what Laya suggested next to what the policy applied (`suggestedTier`, `effectiveTier`, `suggestedEffort`, `effectiveEffort`, `decisionReasonCodes`).
 
-When `laya/auto` is the selected model, the entry repeats the decision Laya actually applied.
-
-To turn it off, remove the setting or set `enabled` to `false`.
+To turn ACI off, remove the setting or set `enabled` to `false`.

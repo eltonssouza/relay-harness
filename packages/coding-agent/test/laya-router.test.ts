@@ -399,6 +399,7 @@ describe("laya/auto router", () => {
 		settings: LayaSettings = {},
 		extraProviders: Array<ReturnType<typeof fauxProvider>> = [],
 		extensionOptions: Parameters<typeof layaExtension>[1] = {},
+		harnessSettings: Record<string, unknown> = {},
 	) {
 		const anthropic = fauxProvider({
 			provider: "anthropic",
@@ -436,6 +437,7 @@ describe("laya/auto router", () => {
 				harnessCore: { evidence: false },
 				// These scenarios script the HTTP classifier; the shipped default is the in-process ONNX runtime.
 				laya: { runtime: "native", ...settings },
+				...harnessSettings,
 			},
 			extensionFactories: [
 				(relay) => {
@@ -734,6 +736,63 @@ describe("laya/auto router", () => {
 				result: { success: true, outcome: "completed", attempts: 1, escalations: [] },
 			},
 		]);
+	});
+
+	it("ACI adaptive mode applies the Laya decision like plain laya/auto", async () => {
+		const { harness, respond, dispatched } = await setup(
+			SIMPLE_FIX,
+			[],
+			{},
+			[],
+			{},
+			{
+				adaptiveCognition: { enabled: true, mode: "adaptive" },
+			},
+		);
+		respond(fauxAssistantMessage("done"));
+		await harness.session.prompt("Fix the typo in the README title");
+		expect(dispatched()).toHaveLength(1);
+		expect(harness.session.messages.filter((m) => m.role === "assistant").at(-1)?.stopReason).toBe("stop");
+	});
+
+	it("ACI strict mode fails instead of routing on a low-confidence Laya answer", async () => {
+		const { harness, dispatched } = await setup(
+			{ ...SIMPLE_FIX, confidence: 0.3 },
+			[],
+			{ minConfidence: 0.6 },
+			[],
+			{},
+			{
+				adaptiveCognition: { enabled: true, mode: "strict" },
+			},
+		);
+		await harness.session.prompt("Fix the typo in the README title");
+		const reply = harness.session.messages.filter((m) => m.role === "assistant").at(-1);
+		expect(reply?.stopReason).toBe("error");
+		expect(reply?.errorMessage).toContain("laya/auto (strict)");
+		// No physical model ran: the only assistant message is the routing error of laya/auto itself.
+		expect(reply?.model).toBe("auto");
+		expect(dispatched()).toEqual(["auto:undefined"]);
+	});
+
+	it("ACI strict mode fails instead of using keyword rules when Laya does not answer", async () => {
+		const { harness, dispatched } = await setup(
+			undefined,
+			[],
+			{},
+			[],
+			{},
+			{
+				adaptiveCognition: { enabled: true, mode: "strict" },
+			},
+		);
+		await harness.session.prompt("Fix the typo in the README title");
+		const reply = harness.session.messages.filter((m) => m.role === "assistant").at(-1);
+		expect(reply?.stopReason).toBe("error");
+		expect(reply?.errorMessage).toContain("keyword rules are not used in strict mode");
+		// No physical model ran: the only assistant message is the routing error of laya/auto itself.
+		expect(reply?.model).toBe("auto");
+		expect(dispatched()).toEqual(["auto:undefined"]);
 	});
 
 	it("overrides Laya for authentication work", async () => {
