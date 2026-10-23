@@ -1,30 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
-import {
-	chmodSync,
-	closeSync,
-	copyFileSync,
-	existsSync,
-	mkdirSync,
-	openSync,
-	readFileSync,
-	readSync,
-	renameSync,
-	rmSync,
-	writeFileSync,
-} from "node:fs";
+import { chmodSync, copyFileSync, mkdirSync, rmSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
-import lockfile from "proper-lockfile";
-import {
-	decryptDatabase,
-	encryptDatabase,
-	isEncryptedDatabase,
-	isPlainSqliteDatabase,
-	loadOrCreateMemoryKey,
-	MEMORY_KEY_ACCOUNT,
-	osSecretStore,
-	type SecretStore,
-} from "./encryption.ts";
 import { defaultMemoryPolicy, normalizeText } from "./policy.ts";
 import type {
 	EmbeddingProvider,
@@ -149,117 +126,6 @@ export interface MemoryStoreOptions {
 	now?: () => number;
 	/** Cosine similarity below which a vector match is ignored. Default 0.3. */
 	minSimilarity?: number;
-	/** 256-bit key. When set, the file on disk is an AES-256-GCM sealed SQLite image; see openMemoryStore. */
-	encryptionKey?: Buffer;
-}
-
-/** `serialize`/`deserialize` exist in recent `node:sqlite` releases but not in every supported Node version. */
-interface SerializableDatabase {
-	serialize(): Uint8Array;
-	deserialize(data: Uint8Array): void;
-}
-
-function serializable(db: DatabaseSync): SerializableDatabase {
-	const candidate = db as unknown as Partial<SerializableDatabase>;
-	if (typeof candidate.serialize !== "function" || typeof candidate.deserialize !== "function")
-		throw new Error(
-			`Encrypted memory needs node:sqlite serialize support, which Node ${process.version} lacks. Upgrade Node or set RELAY_MEMORY_ENCRYPTION=off.`,
-		);
-	return candidate as SerializableDatabase;
-}
-
-function retry<T>(fn: () => T, codes: string[], attempts = 20): T {
-	for (let attempt = 1; ; attempt++) {
-		try {
-			return fn();
-		} catch (error) {
-			const code = (error as NodeJS.ErrnoException).code ?? "";
-			if (!codes.includes(code) || attempt >= attempts) throw error;
-			const until = Date.now() + 25;
-			while (Date.now() < until) {
-				// Synchronous wait keeps the store API synchronous, as in auth-storage.
-			}
-		}
-	}
-}
-
-function readHeader(path: string): Buffer {
-	const header = Buffer.alloc(20);
-	const fd = openSync(path, "r");
-	try {
-		return header.subarray(0, readSync(fd, header, 0, header.length, 0));
-	} finally {
-		closeSync(fd);
-	}
-}
-
-/**
- * Encrypted persistence. The live database is in memory; every committed write transaction is sealed and
- * written atomically (temp file + rename) under a cross-process lock. Before each operation the store
- * reloads the file if another process replaced it, identified by the random GCM nonce in the header.
- */
-class EncryptedDatabaseFile {
-	private stamp = "";
-	constructor(
-		readonly path: string,
-		private readonly key: Buffer,
-	) {}
-
-	lock(): () => void {
-		return retry(() => lockfile.lockSync(this.path, { realpath: false, lockfilePath: `${this.path}.lock` }), ["ELOCKED"], 400);
-	}
-
-	private currentStamp(): string {
-		try {
-			return retry(() => readHeader(this.path), ["EBUSY", "EPERM"]).toString("hex");
-		} catch (error) {
-			if ((error as NodeJS.ErrnoException).code === "ENOENT") return "missing";
-			throw error;
-		}
-	}
-
-	refresh(db: DatabaseSync): void {
-		const stamp = this.currentStamp();
-		if (stamp === this.stamp || stamp === "missing") {
-			this.stamp = stamp;
-			return;
-		}
-		const data = retry(() => readFileSync(this.path), ["EBUSY", "EPERM"]);
-		if (isPlainSqliteDatabase(data)) {
-			// A database written before encryption was enabled is sealed in place, then the plaintext is removed.
-			const plain = new DatabaseSync(this.path);
-			let image: Uint8Array;
-			try {
-				image = serializable(plain).serialize();
-			} finally {
-				plain.close();
-			}
-			serializable(db).deserialize(image);
-			this.save(db);
-			for (const suffix of ["-wal", "-shm"]) rmSync(`${this.path}${suffix}`, { force: true });
-			return;
-		}
-		serializable(db).deserialize(decryptDatabase(data, this.key));
-		this.stamp = stamp;
-	}
-
-	save(db: DatabaseSync): void {
-		try {
-			const sealed = encryptDatabase(serializable(db).serialize(), this.key);
-			const temp = `${this.path}.${process.pid}.tmp`;
-			writeFileSync(temp, sealed, { mode: 0o600 });
-			retry(() => renameSync(temp, this.path), ["EBUSY", "EPERM", "EACCES"]);
-			this.stamp = this.currentStamp();
-		} catch (error) {
-			// The next operation reloads the file, discarding the write that did not reach disk.
-			this.stamp = "";
-			throw error;
-		}
-	}
-
-	seal(db: DatabaseSync): Buffer {
-		return encryptDatabase(serializable(db).serialize(), this.key);
-	}
 }
 
 export interface MemoryJob {
@@ -300,21 +166,13 @@ export class SqliteMemoryStore implements MemoryRepository, GraphRepository, Use
 	private readonly policy: MemoryPolicy;
 	private readonly now: () => number;
 	private readonly minSimilarity: number;
-	private readonly vault?: EncryptedDatabaseFile;
 
 	constructor(options: MemoryStoreOptions) {
 		if (options.path !== ":memory:") {
 			mkdirSync(dirname(options.path), { recursive: true, mode: 0o700 });
 		}
-		if (options.encryptionKey) {
-			if (options.path === ":memory:") throw new Error("Encryption needs a database file.");
-			this.db = new DatabaseSync(":memory:");
-			serializable(this.db);
-			this.vault = new EncryptedDatabaseFile(options.path, options.encryptionKey);
-		} else {
-			this.db = new DatabaseSync(options.path);
-		}
-		if (options.path !== ":memory:" && !this.vault) {
+		this.db = new DatabaseSync(options.path);
+		if (options.path !== ":memory:") {
 			try {
 				chmodSync(options.path, 0o600);
 			} catch {}
@@ -326,15 +184,7 @@ export class SqliteMemoryStore implements MemoryRepository, GraphRepository, Use
 		// secure_delete overwrites freed pages, so forgotten content does not linger in the file.
 		this.db.exec("PRAGMA busy_timeout = 5000; PRAGMA foreign_keys = ON; PRAGMA secure_delete = ON;");
 		try {
-			if (options.path !== ":memory:" && !this.vault) this.db.exec("PRAGMA journal_mode = WAL;");
-			if (this.vault) {
-				const unlock = this.vault.lock();
-				try {
-					this.vault.refresh(this.db);
-				} finally {
-					unlock();
-				}
-			}
+			if (options.path !== ":memory:") this.db.exec("PRAGMA journal_mode = WAL;");
 			this.migrate();
 		} catch (error) {
 			this.db.close();
@@ -362,34 +212,16 @@ export class SqliteMemoryStore implements MemoryRepository, GraphRepository, Use
 		return Number((this.db.prepare("PRAGMA user_version").get() as Row).user_version);
 	}
 
-	/** True when the file on disk is sealed with AES-256-GCM. */
-	get encrypted(): boolean {
-		return this.vault !== undefined;
-	}
-
-	/** Picks up writes another process sealed to disk since this store last read or wrote it. */
-	private fresh(): void {
-		if (this.vault && !this.db.isTransaction) this.vault.refresh(this.db);
-	}
-
 	private transaction<T>(fn: () => T): T {
 		if (this.db.isTransaction) return fn();
-		const unlock = this.vault?.lock();
+		this.db.exec("BEGIN IMMEDIATE");
 		try {
-			this.vault?.refresh(this.db);
-			this.db.exec("BEGIN IMMEDIATE");
-			let result: T;
-			try {
-				result = fn();
-				this.db.exec("COMMIT");
-			} catch (error) {
-				this.db.exec("ROLLBACK");
-				throw error;
-			}
-			this.vault?.save(this.db);
+			const result = fn();
+			this.db.exec("COMMIT");
 			return result;
-		} finally {
-			unlock?.();
+		} catch (error) {
+			this.db.exec("ROLLBACK");
+			throw error;
 		}
 	}
 

@@ -154,6 +154,32 @@ describe("Phase 00: foundation", () => {
 		expect(store.recoverStaleJobs()).toBe(1);
 		expect(await store.processJobs({ work: async () => {} })).toEqual({ done: 1, failed: 0 });
 	});
+
+	it("deduplicates and claims each job once across concurrent connections", async () => {
+		const other = new SqliteMemoryStore({ path: join(dir, "memory.db"), now: () => clock });
+		try {
+			const input = { scope: "user" as const, kind: "fact" as const, content: "Usamos Vitest" };
+			const results = await Promise.all([
+				store.remember(alice, { ...input, source: user("s:a") }),
+				other.remember(alice, { ...input, source: user("s:b") }),
+			]);
+			expect(results.filter((result) => result.created)).toHaveLength(1);
+			expect(store.list(alice)).toHaveLength(1);
+			expect(store.list(alice)[0].sourceIds).toHaveLength(2);
+
+			for (let i = 0; i < 6; i++) store.enqueue("work", { n: i }, `job-${i}`);
+			const runs: number[] = [];
+			const work = async (job: { payload: Record<string, unknown> }) => {
+				await new Promise((resolve) => setTimeout(resolve, 1));
+				runs.push(Number(job.payload.n));
+			};
+			const [a, b] = await Promise.all([store.processJobs({ work }), other.processJobs({ work })]);
+			expect(a.done + b.done).toBe(6);
+			expect(runs.sort()).toEqual([0, 1, 2, 3, 4, 5]);
+		} finally {
+			other.close();
+		}
+	});
 });
 
 describe("Phase 01: persistent memory engine", () => {

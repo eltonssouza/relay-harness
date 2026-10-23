@@ -17,8 +17,8 @@ import projectMemoryExtension from "./project-memory/index.ts";
 import toolSearchExtension from "./tool-search/index.ts";
 
 export const builtInExtensions: InlineExtension[] = [
-	// No audit registration or source inspection when disabled. Experimental delegation is unchanged.
-	...(process.env.RELAY_AUDIT_ENABLED === "1"
+	// Registers only host commands; no target IO until /audit-app is run and consented. RELAY_AUDIT_ENABLED=0 opts out.
+	...(process.env.RELAY_AUDIT_ENABLED !== "0"
 		? [
 				{
 					name: "audit",

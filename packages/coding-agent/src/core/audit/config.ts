@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { lstatSync, realpathSync } from "node:fs";
-import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
+import { existsSync, lstatSync, realpathSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export type AuditConfig = {
 	version: "3.0";
@@ -261,4 +261,63 @@ export async function preflight(input: unknown, cwd = process.cwd()): Promise<Au
 		execution: effectiveExecution,
 		snapshot: effectiveSnapshot,
 	};
+}
+
+/** Dependency, cache and build-output directories; the inventory still records them as excluded. */
+export const AUTOMATIC_EXCLUDES = [
+	"**/node_modules",
+	"**/bower_components",
+	"**/.venv",
+	"**/venv",
+	"**/__pycache__",
+	"**/.tox",
+	"**/.mypy_cache",
+	"**/.pytest_cache",
+	"**/dist",
+	"**/coverage",
+	"**/.next",
+	"**/.nuxt",
+	"**/.turbo",
+	"**/.cache",
+	"**/.gradle",
+	"**/target",
+];
+/** Stable per-target directory under `base`, so status and resume find the same run without a config file. */
+export function automaticOutputRoot(target: string, base: string): string {
+	const root = canonicalPath(target);
+	const name =
+		basename(root)
+			.replace(/[^A-Za-z0-9._-]/g, "_")
+			.slice(0, 64) || "target";
+	return join(base, `${name}-${hash(root).slice(0, 12)}`);
+}
+/**
+ * Zero-configuration audit of `target` with the selected model. The caller must obtain the user's
+ * model-egress consent before running it; the result still passes every preflight gate.
+ */
+export function automaticConfig(
+	target: string,
+	model: { provider: string; id: string },
+	base: string,
+): Promise<AuditConfig> {
+	const root = canonicalPath(target);
+	return preflight({
+		version: "3.0",
+		project: { name: basename(root) || root, repository_path: root },
+		scope: { exclude: AUTOMATIC_EXCLUDES, output_root: automaticOutputRoot(root, base) },
+		model: { authorized: true, provider: model.provider, id: model.id },
+		// Library defaults are sized for fixtures; a real model needs room for tool use. All values stay within the
+		// preflight bounds, and cost keeps its default cap.
+		execution: {
+			max_task_ms: 600_000,
+			max_run_ms: 14_400_000,
+			max_task_tokens: 200_000,
+			max_tokens: 2_000_000,
+			max_task_tool_calls: 100,
+			max_tool_calls: 3000,
+			max_task_output_bytes: 262_144,
+			max_output_bytes: 1_048_576,
+		},
+		snapshot: { policy: "working-tree", git_revision: existsSync(join(root, ".git")), max_files: 100_000 },
+	});
 }
