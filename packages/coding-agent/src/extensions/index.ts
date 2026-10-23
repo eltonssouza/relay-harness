@@ -11,13 +11,14 @@ import llamaExtension from "./llama/index.ts";
 import logbookExtension from "./logbook/index.ts";
 import mcpExtension from "./mcp/index.ts";
 import nativeMcpExtension from "./native-mcp/index.ts";
+import nativeMemoryExtension from "./native-memory/index.ts";
 import ollamaExtension from "./ollama/index.ts";
 import projectMemoryExtension from "./project-memory/index.ts";
 import toolSearchExtension from "./tool-search/index.ts";
 
 export const builtInExtensions: InlineExtension[] = [
-	// No audit registration or source inspection when disabled. Experimental delegation is unchanged.
-	...(process.env.RELAY_AUDIT_ENABLED === "1"
+	// Registers only host commands; no target IO until /audit-app is run and consented. RELAY_AUDIT_ENABLED=0 opts out.
+	...(process.env.RELAY_AUDIT_ENABLED !== "0"
 		? [
 				{
 					name: "audit",
@@ -39,6 +40,8 @@ export const builtInExtensions: InlineExtension[] = [
 	{ name: "project-memory", factory: projectMemoryExtension, builtin: true },
 	{ name: "logbook", factory: logbookExtension, builtin: true },
 	{ name: "goal", factory: goalExtension, builtin: true },
+	// Opt-in (--native-memory or RELAY_NATIVE_MEMORY=1): persistent memories, knowledge graph and user model.
+	{ name: "native-memory", factory: nativeMemoryExtension, builtin: true },
 	// Replaceable: an extension that registers `codemode`, `tool_search`, or `/mcp` (such as a third-party
 	// MCP extension) takes over instead of running alongside the built-in one.
 	{ name: "codemode", factory: codemodeExtension, replaceable: true, builtin: true },

@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stream, streamSimple } from "../src/api/google-antigravity.ts";
 import { InMemoryCredentialStore } from "../src/auth/credential-store.ts";
+import * as callbackServer from "../src/auth/oauth/callback-server.ts";
 import { googleAntigravityOAuth } from "../src/auth/oauth/google-antigravity.ts";
 import type { AuthEvent, OAuthCredential, ProviderAuthInteraction } from "../src/auth/types.ts";
 import { createModels } from "../src/models.ts";
@@ -12,6 +13,7 @@ import type { Model } from "../src/types.ts";
 import { normalizeContext } from "../src/utils/transcript.ts";
 
 const nativeFetch = globalThis.fetch;
+const startCallbackServer = callbackServer.startOAuthCallbackServer;
 const signal = new AbortController().signal;
 const credential: OAuthCredential = {
 	type: "oauth",
@@ -56,12 +58,26 @@ function manualLogin(input?: (url: URL) => string): ProviderAuthInteraction {
 }
 
 describe.sequential("Google Antigravity", () => {
+	let testCallbackPort: number;
+	let boundRedirectUri: string;
+
 	beforeEach(() => {
+		testCallbackPort = 0;
+		boundRedirectUri = "";
 		vi.stubEnv("RELAY_AI_ANTIGRAVITY_CLIENT_ID", "test-client-id");
 		vi.stubEnv("RELAY_AI_ANTIGRAVITY_CLIENT_SECRET", "test-client-secret");
+		// Preserve the registered OAuth redirect, but bind a real server on an OS-selected test port.
+		vi.spyOn(callbackServer, "startOAuthCallbackServer").mockImplementation(
+			async <T>(options: Parameters<typeof startCallbackServer<T>>[0]) => {
+				const server = await startCallbackServer<T>({ ...options, port: testCallbackPort });
+				boundRedirectUri = server.redirectUri;
+				return server;
+			},
+		);
 	});
 
 	afterEach(() => {
+		vi.restoreAllMocks();
 		vi.unstubAllGlobals();
 		vi.unstubAllEnvs();
 	});
@@ -96,7 +112,7 @@ describe.sequential("Google Antigravity", () => {
 			notify(event) {
 				if (event.type !== "auth_url") return;
 				authorize = new URL(event.url);
-				const redirect = new URL(authorize.searchParams.get("redirect_uri")!);
+				const redirect = new URL(boundRedirectUri);
 				redirect.searchParams.set("state", authorize.searchParams.get("state")!);
 				redirect.searchParams.set("code", "browser-code");
 				callback = nativeFetch(redirect);
@@ -116,6 +132,9 @@ describe.sequential("Google Antigravity", () => {
 		expect(exchange?.get("code")).toBe("browser-code");
 		expect(exchange?.get("client_id")).toBe("test-client-id");
 		expect(exchange?.get("client_secret")).toBe("test-client-secret");
+		expect(authorize?.searchParams.get("redirect_uri")).toBe("http://localhost:51121/oauth-callback");
+		expect(exchange?.get("redirect_uri")).toBe(authorize?.searchParams.get("redirect_uri"));
+		expect(callbackServer.startOAuthCallbackServer).toHaveBeenCalledWith(expect.objectContaining({ port: 51121 }));
 		const digest = await crypto.subtle.digest(
 			"SHA-256",
 			new TextEncoder().encode(exchange?.get("code_verifier") ?? ""),
@@ -150,7 +169,14 @@ describe.sequential("Google Antigravity", () => {
 		const fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
 		await expect(
-			googleAntigravityOAuth.login(manualLogin(() => "http://localhost:51121/oauth-callback?code=code&state=wrong")),
+			googleAntigravityOAuth.login(
+				manualLogin((authorize) => {
+					const redirect = new URL(authorize.searchParams.get("redirect_uri")!);
+					redirect.searchParams.set("code", "code");
+					redirect.searchParams.set("state", "wrong");
+					return redirect.toString();
+				}),
+			),
 		).rejects.toThrow("state mismatch");
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
@@ -159,8 +185,12 @@ describe.sequential("Google Antigravity", () => {
 		const server = createServer();
 		await new Promise<void>((resolve, reject) => {
 			server.once("error", reject);
-			server.listen(51121, "127.0.0.1", resolve);
+			server.listen(0, "127.0.0.1", resolve);
 		});
+		const address = server.address();
+		expect(address && typeof address !== "string").toBe(true);
+		if (!address || typeof address === "string") throw new Error("Test callback server did not bind to TCP");
+		testCallbackPort = address.port;
 		try {
 			vi.stubGlobal(
 				"fetch",
@@ -243,6 +273,8 @@ describe.sequential("Google Antigravity", () => {
 				},
 			}),
 		).rejects.toThrow("Login cancelled");
+		// Rebind the canceled listener's actual port, rather than silently using another ephemeral port.
+		testCallbackPort = Number(new URL(boundRedirectUri).port);
 		vi.stubGlobal(
 			"fetch",
 			vi.fn(async (input: string | URL | Request) =>

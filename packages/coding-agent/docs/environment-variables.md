@@ -82,6 +82,8 @@ These variables are read by Relay itself:
 | `RELAY_CODING_AGENT_SESSION_DIR` | Override session storage; overridden by `--session-dir` |
 | `RELAY_PACKAGE_DIR` | Override the package directory, useful for Nix/Guix store paths |
 | `RELAY_OFFLINE` | Disable automatic network activity, including model catalog refreshes |
+| `RELAY_NATIVE_MEMORY` | Set to `1` to enable [native memory](native-memory.md), same as `--native-memory` |
+| `RELAY_MEMORY_EMBEDDING_MODEL`, `RELAY_MEMORY_EMBEDDING_API`, `RELAY_MEMORY_EMBEDDING_URL`, `RELAY_MEMORY_EMBEDDING_API_KEY` | Optional embedding model for native memory semantic search; see [Native memory](native-memory.md#semantic-search) |
 | `RELAY_SKIP_VERSION_CHECK` | Disable the GitHub latest-release check |
 | `RELAY_TELEMETRY` | Override provider attribution headers: `1`/`true`/`yes` or `0`/`false`/`no` |
 | `RELAY_CACHE_RETENTION` | Set to `long` for extended provider prompt caching where supported |

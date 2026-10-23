@@ -20,7 +20,14 @@ import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
 import { isVirtualModel } from "../../core/virtual-models.ts";
 import { loadAgentProfile } from "../engineering/index.ts";
-import { assessmentFromAnswers, assessmentFromLabels, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
+import {
+	assessmentFromAnswers,
+	assessmentFromLabels,
+	canUseHeuristicFastPath,
+	heuristicAssessment,
+	type TaskAssessment,
+} from "./assessment.ts";
+import { assertDecisionSchema, decisionRecord } from "./decision-schema.ts";
 import { type DockerRun, spawnDocker } from "./docker.ts";
 import {
 	buildLearnPrompt,
@@ -36,6 +43,7 @@ import { selectLibraryGuides } from "./library.ts";
 import { LAYA_LESSONS_MESSAGE, LESSON_SIMILARITY, ROUTE_SIMILARITY, renderLessons, TaskMemory } from "./memory.ts";
 import { LAYA_MODEL_MANIFEST } from "./model-manifest.ts";
 import { sharedNativeLayaServer } from "./native-server.ts";
+import { sharedOnnxLayaServer, toClassifierAnswers } from "./onnx-server.ts";
 import {
 	applyPolicy,
 	type Candidate,
@@ -53,10 +61,12 @@ import {
 } from "./policy.ts";
 import { scopedModelRegistry } from "./provider-scope.ts";
 import { CAPABILITY_TIERS, type CapabilityTier, LAYA_QUESTIONS, layaDecisionsFile } from "./questions.ts";
+import { type ReasoningControl, reasoningControl } from "./reasoning-control.ts";
 import { LAYA_PLAN_MESSAGE, renderPlanMessage, selectSkills, unneededTools } from "./routers.ts";
 import { LAYA_IMAGE_PATHS, type LayaImageVariant, layaImage } from "./runtime.ts";
 import { generateSeed } from "./seed.ts";
 import { isLocalUrl, LayaServer } from "./server.ts";
+import { selectStrategy } from "./strategy.ts";
 import {
 	datasetFromTelemetry,
 	HARNESS_MESSAGE,
@@ -87,8 +97,33 @@ export const LAYA_VIRTUAL_MODEL_ID = "auto";
 /** Not 8000, the port laya-trainer's own server and many development servers use. */
 export const DEFAULT_LAYA_BASE_URL = "http://127.0.0.1:8737/v1";
 
+/** Why `laya.budget` refuses another escalation, or undefined when it is allowed. */
+export function budgetRefusal(budget: LayaSettings["budget"], attempts: number, cost: number): string | undefined {
+	if (budget?.maxAttempts !== undefined && attempts >= budget.maxAttempts)
+		return `budget of ${budget.maxAttempts} model attempts reached`;
+	if (budget?.maxCostPerTask !== undefined && cost >= budget.maxCostPerTask)
+		return `cost budget of ${budget.maxCostPerTask} reached (${cost.toFixed(4)} spent)`;
+	return undefined;
+}
+
+/** Provider cost of the current task: assistant messages after the last user message. */
+function taskCost(messages: readonly Message[]): number {
+	const start = lastUserIndex(messages);
+	return summarizeRun(messages.slice(start + 1)).cost;
+}
+
+/** `laya.localOnly`: only models served from this machine (loopback base URL) may be routed to. */
+export function localOnlyAllows(
+	settings: Pick<LayaSettings, "localOnly">,
+	model: Pick<Model<Api>, "baseUrl">,
+): boolean {
+	return !settings.localOnly || isLocalUrl(model.baseUrl);
+}
+
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MIN_CONFIDENCE = 0.5;
+/** Session entry recorded by ACI observe mode (`adaptiveCognition.enabled`). */
+export const ACI_OBSERVE_ENTRY = "aci.observe";
 const DEFAULT_ESCALATE_AFTER_FAILURES = 3;
 /** After a failed classifier call, keyword rules answer for this long before Laya is tried again. */
 const LAYA_RETRY_AFTER_MS = 60_000;
@@ -113,6 +148,8 @@ export interface LayaRouterState {
 	alternatives: string[];
 	/** False for a selected model whose capability has not been mapped to a tier. */
 	capabilityKnown?: boolean;
+	/** How the policy effort maps onto the chosen model, and whether that support is declared or assumed. */
+	reasoning?: ReasoningControl;
 }
 
 const layaClassifier: ClassifierModel<"typesafe-system-one"> = {
@@ -241,11 +278,14 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		baseUrl,
 		python: () => settings.python,
 	});
+	const onnxServer = sharedOnnxLayaServer({ home: layaHome });
 	// Registered session checkpoints remain in the Docker volume. Selecting one keeps that backend.
 	const server = () =>
 		settings.runtime === "docker" || settings.image || trainer.activeModel().dir !== LAYA_IMAGE_PATHS.shippedModel
 			? dockerServer
-			: nativeServer;
+			: settings.runtime === "native"
+				? nativeServer
+				: onnxServer;
 	/** Server problem last reported, so a failing runtime is not reported on every start. */
 	let reportedProblem: string | undefined;
 	let history = new PerformanceHistory();
@@ -268,6 +308,39 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	let listener: TrainingListener | undefined;
 	let memoryCache: { version: string; memory: TaskMemory } | undefined;
 
+	/** ACI phase 0 observe mode: persist the decision Laya would make, without acting on it. */
+	/** ACI mode when `adaptiveCognition.enabled` is set; undefined keeps Laya exactly as before. */
+	const aciMode = () => {
+		const aci = relay.getSettings().adaptiveCognition;
+		return aci?.enabled === true ? (aci.mode ?? "observe") : undefined;
+	};
+	const observeDecision = (request: string, assessment: TaskAssessment, policy?: PolicyDecision): PolicyDecision => {
+		const decided =
+			policy ??
+			applyPolicy(assessment, request, { minConfidence: settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE });
+		relay.appendEntry(ACI_OBSERVE_ENTRY, {
+			mode: "observe",
+			source: assessment.source,
+			taskType: assessment.task.type,
+			confidence: assessment.confidence,
+			requiredTier: decided.requiredTier,
+			minTier: decided.minTier,
+			effort: decided.effort,
+			thinkingLevel: decided.thinkingLevel,
+			validation: decided.validation.level,
+			rules: decided.rules,
+			escalations: decided.escalations,
+			decision: decisionRecord(assessment, decided),
+			strategy: selectStrategy(
+				request,
+				assessment,
+				decided,
+				{ activeTools: relay.getActiveTools() },
+				settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE,
+			),
+		});
+		return decided;
+	};
 	const refreshSettings = () => {
 		settings = relay.getSettings().laya ?? {};
 		quota.configure(settings.quota);
@@ -338,6 +411,32 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 				// Labeled against questions that have changed since; Laya answers instead.
 			}
 		}
+
+		// This shortcut is limited to ACI adaptive mode. Observe/assist keep their existing assessment path,
+		// strict must fail rather than use rules, and an unset mode preserves existing laya/auto behavior.
+		// Learned task memory remains first because it is local and more specific than keyword rules.
+		if (settings.heuristicFirst === true && aciMode() === "adaptive") {
+			const heuristic = heuristicAssessment(request);
+			if (canUseHeuristicFastPath(request, heuristic)) return { ...heuristic, heuristicFastPath: true };
+		}
+
+		if (server() === onnxServer) {
+			// In-process ONNX runtime: no HTTP classifier. Same fallback as below when it is not ready or fails.
+			if (Date.now() < layaUnavailableUntil || onnxServer.state !== "ready") return heuristicAssessment(request);
+			try {
+				const answers = await onnxServer.classify(truncateRequest(request), LAYA_QUESTIONS, signal);
+				const converted = toClassifierAnswers(answers);
+				assertDecisionSchema(converted);
+				const assessment = assessmentFromAnswers(converted);
+				lastClassifierError = undefined;
+				return assessment;
+			} catch (error) {
+				if (signal?.aborted) throw error;
+				lastClassifierError = error instanceof Error ? error.message : String(error);
+				layaUnavailableUntil = Date.now() + LAYA_RETRY_AFTER_MS;
+				return heuristicAssessment(request);
+			}
+		}
 		const classifier = ctx.modelRegistry.findOfType("classifier", LAYA_PROVIDER_ID, LAYA_CLASSIFIER_ID);
 		// While the selected runtime installs, the classifier call would only fail.
 		if (!classifier || Date.now() < layaUnavailableUntil || server().state === "installing") {
@@ -354,6 +453,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		);
 		try {
 			if (result.stopReason !== "stop") throw new Error(result.errorMessage ?? "Laya did not answer");
+			assertDecisionSchema(result.answers);
 			const assessment = assessmentFromAnswers(result.answers);
 			lastClassifierError = undefined;
 			return assessment;
@@ -370,12 +470,14 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const selected = settings.followProvider ? selectedModel(ctx) : undefined;
 		const { registry } = scopedModelRegistry(settings, selected);
 		const result: Array<Candidate & { model: Model<Api>; capabilityKnown: boolean }> = [];
+		// localOnly is a hard restriction: it applies before any recommendation, including the selected-model fallback.
+		const allowed = (model: Model<Api>) => localOnlyAllows(settings, model);
 		for (const tier of CAPABILITY_TIERS) {
 			for (const ref of registry[tier] ?? []) {
 				const parsed = parseModelRef(ref);
 				const model = parsed && ctx.modelRegistry.find(parsed.provider, parsed.id);
 				if (!model || model.provider === LAYA_PROVIDER_ID || !ctx.modelRegistry.hasConfiguredAuth(model)) continue;
-				if (isVirtualModel(model) || !isEligibleChatModel(model.provider, model.id)) continue;
+				if (isVirtualModel(model) || !isEligibleChatModel(model.provider, model.id) || !allowed(model)) continue;
 				result.push({ ref, provider: model.provider, tier, order: result.length, model, capabilityKnown: true });
 			}
 		}
@@ -383,6 +485,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		if (
 			result.length === 0 &&
 			selected &&
+			allowed(selected) &&
 			isEligibleChatModel(selected.provider, selected.id) &&
 			ctx.modelRegistry.hasConfiguredAuth(selected)
 		) {
@@ -405,7 +508,9 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const available = candidates(ctx);
 		if (available.length === 0) {
 			throw new Error(
-				"laya/auto: no model of the Laya model registry has credentials. Log in to a provider or set laya.models.",
+				settings.localOnly
+					? "laya/auto: laya.localOnly is set and no local model (loopback base URL) of the Laya model registry has credentials. Add a local model to laya.models or turn localOnly off."
+					: "laya/auto: no model of the Laya model registry has credentials. Log in to a provider or set laya.models.",
 			);
 		}
 		const byRef = new Map(available.map((candidate) => [candidate.ref, candidate]));
@@ -463,6 +568,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			thinkingLevel: clampThinkingLevel(chosen.model, base.policy.thinkingLevel),
 			alternatives: ranked.slice(1, 4).map((candidate) => candidate.ref),
 			capabilityKnown: chosen.capabilityKnown,
+			reasoning: reasoningControl(chosen.model, base.policy.thinkingLevel),
 		};
 		current = state;
 		ctx.ui.setStatus(
@@ -483,9 +589,15 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const assessment =
 			pending && pending.request === text ? pending.assessment : await assess(text, ctx, request.signal);
 		pending = undefined;
-		const policy = applyPolicy(assessment, text, {
-			minConfidence: settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE,
-		});
+		const minConfidence = settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE;
+		// ACI strict: never route on keyword rules or a low-confidence answer.
+		if (aciMode() === "strict" && (assessment.source === "heuristic" || assessment.confidence < minConfidence))
+			throw new Error(
+				assessment.source === "heuristic"
+					? `laya/auto (strict): Laya did not answer${lastClassifierError ? ` (${lastClassifierError})` : ""}; keyword rules are not used in strict mode.`
+					: `laya/auto (strict): Laya confidence ${assessment.confidence.toFixed(2)} is below laya.minConfidence ${minConfidence}.`,
+			);
+		const policy = applyPolicy(assessment, text, { minConfidence });
 		const taskId = randomUUID();
 		run = { taskId, startedAt: run?.startedAt ?? Date.now() };
 		const escalations = policy.escalations.map((reason) => ({
@@ -516,7 +628,13 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		state: LayaRouterState,
 		reason: EscalationReason,
 		failures: number,
+		messages: ModelRouteRequest<LayaRouterState>["messages"],
 	): ModelRoute<LayaRouterState> | undefined {
+		const refused = budgetRefusal(settings.budget, state.attempts, taskCost(messages));
+		if (refused) {
+			if (ctx.hasUI) ctx.ui.notify(`Laya: ${refused}; staying on ${state.model}.`, "warning");
+			return undefined;
+		}
 		const sameTier = reason === "provider_unavailable";
 		const target = sameTier ? state.tier : nextTier(state.tier);
 		if (!target) return undefined;
@@ -559,7 +677,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 				// Following a provider is a boundary, including on rate limits and overloads.
 				if (settings.followProvider) return sticky(ctx, state);
 				quota.recordPressure(request.failed.model.provider);
-				const route = escalate(ctx, state, "provider_unavailable", state.failuresAtEscalation);
+				const route = escalate(ctx, state, "provider_unavailable", state.failuresAtEscalation, request.messages);
 				if (route) return route;
 			}
 			return sticky(ctx, state);
@@ -568,7 +686,13 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const threshold = settings.escalateAfterFailures ?? DEFAULT_ESCALATE_AFTER_FAILURES;
 		const failures = failuresThisTurn(request.messages);
 		if (threshold > 0 && failures.count - state.failuresAtEscalation >= threshold) {
-			const route = escalate(ctx, state, failures.evidence ? "test_failure" : "repeated_failure", failures.count);
+			const route = escalate(
+				ctx,
+				state,
+				failures.evidence ? "test_failure" : "repeated_failure",
+				failures.count,
+				request.messages,
+			);
 			if (route) return route;
 		}
 		return sticky(ctx, state);
@@ -589,7 +713,9 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	async function install(ctx: ExtensionContext, explicit = false): Promise<boolean> {
 		let worked = false;
 		const selectedServer = server();
-		if (selectedServer === dockerServer) await nativeServer.stop();
+		if (selectedServer !== nativeServer) await nativeServer.stop();
+		// The in-process model holds several GB of memory; release it when another runtime is selected.
+		if (selectedServer !== onnxServer) await onnxServer.stop();
 		const ok = await selectedServer.install((message) => {
 			worked = true;
 			ctx.ui.setStatus("laya-setup", `laya: ${message}`);
@@ -753,7 +879,19 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 			relay.setActiveTools(userTools());
 			toolBaseline = undefined;
 		}
+		const mode = aciMode();
+		const observing = mode !== undefined;
 		if (!isSelected(ctx)) {
+			// ACI: record (and in assist mode show) the decision only; nothing below changes. Selecting laya/auto applies it.
+			if (observing) {
+				const assessment = heuristicAssessment(event.prompt);
+				const decided = observeDecision(event.prompt, assessment);
+				if (mode === "assist" && ctx.hasUI)
+					ctx.ui.notify(
+						`Laya suggests ${decided.requiredTier} • ${decided.thinkingLevel} • ${assessment.agent} (keyword rules). Select laya/auto to apply it.`,
+						"info",
+					);
+			}
 			// Lessons help whichever model runs the request.
 			const lessons = lessonsFor(event.prompt);
 			if (!lessons) return;
@@ -770,6 +908,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const policy = applyPolicy(assessment, event.prompt, {
 			minConfidence: settings.minConfidence ?? DEFAULT_MIN_CONFIDENCE,
 		});
+		if (observing) observeDecision(event.prompt, assessment, policy);
 		const skills = selectSkills(event.systemPromptOptions.skills, assessment.agent, event.prompt);
 
 		let deactivated: string[] = [];
@@ -837,6 +976,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		if (event.reason === "quit") {
 			trainer.stop();
 			await nativeServer.stop();
+			await onnxServer.stop();
 		}
 	});
 
@@ -883,6 +1023,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 				request: state.request,
 				classification: {
 					source: state.assessment.source,
+					...(state.assessment.heuristicFastPath ? { heuristic_fast_path: true } : {}),
 					...state.assessment.task,
 					agent: state.assessment.agent,
 					validation: state.assessment.validation,
@@ -891,7 +1032,19 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 					recommended_effort: state.assessment.recommendation.effort,
 				},
 				policy: { profile: state.profile, required_tier: state.policy.requiredTier, rules: state.policy.rules },
-				selected: { provider, model: rest.join("/"), tier: state.tier, thinking_level: state.thinkingLevel },
+				selected: {
+					provider,
+					model: rest.join("/"),
+					tier: state.tier,
+					thinking_level: state.thinkingLevel,
+					...(state.reasoning
+						? {
+								requested_thinking_level: state.reasoning.requested,
+								reasoning_adjustment: state.reasoning.adjustment,
+								reasoning_evidence: state.reasoning.evidence,
+							}
+						: {}),
+				},
 				result: {
 					success,
 					outcome: summary.outcome,

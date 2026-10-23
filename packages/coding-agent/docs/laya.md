@@ -19,7 +19,7 @@ Relay normally runs every request on the model you selected. A typo fix then cos
 3. **Model registry.** Tiers are abstract (`fast`, `balanced`, `strong`, `frontier`), so Laya never learns model names. The registry maps each tier to concrete models; only models whose provider has credentials are candidates.
 4. **Selection.** Each candidate gets a utility from the cost profile: `quality × P(success) − cost × quota cost − latency × latency − risk × failure risk`. `P(success)` starts from a prior (0.90 when the model's tier is the required tier, +0.04 per tier above, −0.18 per tier below) and moves toward the observed success rate of that model on that task class. The best candidate whose success estimate reaches the profile minimum wins.
 5. **Execution.** The routed model gets a short `[laya:plan]` message next to your request: the role to take, relevant skills, the tools expected, and how to validate. It is sent after your message, not in the system prompt, so the prompt cache stays valid.
-6. **Escalation.** After `laya.escalateAfterFailures` failed tool calls (or harness verification requests) in a turn, the task moves to the next tier. A rate-limit or overload error moves it to an equivalent model of another provider.
+6. **Escalation.** After `laya.escalateAfterFailures` failed tool calls (or harness verification requests) in a turn, the task moves to the next tier. A rate-limit or overload error moves it to an equivalent model of another provider. `laya.budget` caps escalation per task: `maxAttempts` counts the first model choice and each escalation, and `maxCostPerTask` is the provider cost already spent on the task. When a limit is reached, Laya stays on the current model and says why; it never stops a running task.
 7. **Telemetry.** Each request is recorded with its classification, selected model, outcome, tests and usage. The history feeds `P(success)` in later sessions.
 
 Reasoning effort follows Laya's recommendation up to `xhigh`. Routing never uses `max`. `laya/auto` has no thinking level of its own: a selected level would cap Laya's choice without you noticing. The footer shows the routed model and effort next to the selection, and the status line shows the task type and tier.
@@ -149,9 +149,13 @@ The latest explicit physical model selection on the session branch identifies th
 
 A provider need not offer four distinct models. Missing tiers stay missing: a `frontier` request does not make a smaller local model frontier-capable. If no mapped models are available, Relay keeps the selected model and reports its capability as unclassified. If only a weaker mapped model is available, Relay reports the limitation. Declare capabilities explicitly instead of inferring quality from a model name or price. Set `followProvider` to `false` for fixed physical selections and the normal cross-provider `laya/auto` registry.
 
+Set `laya.localOnly` to `true` to keep `laya/auto` on models served from this machine: only models whose base URL is `localhost`, `127.0.0.1` or `[::1]` are candidates, including the selected-model fallback. A model with a missing or malformed base URL counts as remote. If no local model has credentials, the request fails with an error instead of falling back to a cloud model. Laya's classifier itself is unaffected; it already runs locally by default.
+
 ## Local CPU runtime
 
-The shipped, already-trained `relay-laya-v5` checkpoint runs locally on CPU by default. It is a versioned alias for the existing Candidate20 weights; it does not contain newly trained weights. Docker, CUDA and Ollama are not required. Install Python 3.10 through 3.13 first; Relay discovers an existing interpreter and creates its own isolated environment under `~/.relay/agent/laya/local-runtime`. It never changes your global Python packages or installs Python itself.
+By default the shipped `relay-laya-v5` model runs inside Relay with ONNX Runtime and needs no Python (see [In-process ONNX runtime](#in-process-onnx-runtime-no-python)). The rest of this section describes the Python runtime, selected with `"laya": { "runtime": "native" }`.
+
+The shipped, already-trained `relay-laya-v5` checkpoint runs locally on CPU in that runtime.  It is a versioned alias for the existing Candidate20 weights; it does not contain newly trained weights. Docker, CUDA and Ollama are not required. Install Python 3.10 through 3.13 first; Relay discovers an existing interpreter and creates its own isolated environment under `~/.relay/agent/laya/local-runtime`. It never changes your global Python packages or installs Python itself.
 
 Interactive startup prepares the environment in the background. `/laya setup` starts it explicitly. Relay installs CPU-only PyTorch and pinned Laya/server dependencies, then downloads the six files from the package's pinned Hugging Face revision. The checkpoint and tokenizer total **678,203,281 bytes (678 MB)**; Python dependencies are additional and vary by platform. Cached files are checked by size and SHA-256 and reused; interrupted or corrupt downloads never replace a validated file. No retraining or weight conversion is involved.
 
@@ -170,7 +174,23 @@ An interpreter outside PATH can be selected by executable path:
 }
 ```
 
-Optional `/laya train` continues to use Docker and its GPU/CPU training pipeline. Existing trained checkpoints remain in their Docker volume and selecting one uses Docker. An explicit `laya.image` also selects Docker. `/laya use shipped` returns to native inference unless Docker was explicitly configured. Checkpoints and Docker volumes are not migrated or deleted by native setup.
+### In-process ONNX runtime (no Python)
+
+This is the default runtime (`"laya": { "runtime": "onnx" }`). It runs the shipped model inside Relay with ONNX Runtime, so neither Python nor Docker is needed. Set `"runtime": "native"` to use the Python runtime instead:
+
+```json
+{
+  "laya": {
+    "runtime": "native"
+  }
+}
+```
+
+`/laya setup` (or the first interactive start) downloads `onnx/laya.onnx` and the tokenizer files from `eltonssouza/relay-laya` at a pinned commit, about 1.3 GB once, into `~/.relay/agent/laya/onnx-runtime/<commit>`. Every file is checked by size and SHA-256 before use; a mismatched download is deleted and reported. Later starts only verify the local files and work offline. The model takes several GB of memory while loaded and answers in about 6 seconds per request on CPU, like the Python runtime. Its answers match the Python runtime on the 46 reference requests within 0.002.
+
+Requests run one at a time with a 60-second limit. After three consecutive failures the runtime pauses for a minute. While it is unavailable, keyword rules answer as with the other runtimes. A smaller FP16 or INT8 file is not offered because it changed answers in measurement.
+
+Optional `/laya train` continues to use Docker and its GPU/CPU training pipeline. Existing trained checkpoints remain in their Docker volume and selecting one uses Docker. An explicit `laya.image` also selects Docker. `/laya use shipped` returns to the default ONNX inference unless Docker was explicitly configured. Checkpoints and Docker volumes are not migrated or deleted by native setup.
 
 ## Laya runs in Docker
 

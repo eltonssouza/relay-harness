@@ -1,45 +1,47 @@
 # Manual de uso: auditoria estática universal
 
-Este manual explica como habilitar e operar a auditoria estática integrada ao Relay. Para arquitetura, contratos, ameaças, persistência e detalhes de implementação, consulte a [documentação técnica em português](auditoria-tecnica.pt-BR.md) e a [referência completa em inglês](audit.md).
+Este manual explica como executar e operar a auditoria estática integrada ao Relay. Para arquitetura, contratos, ameaças, persistência e detalhes de implementação, consulte a [documentação técnica em português](auditoria-tecnica.pt-BR.md) e a [referência completa em inglês](audit.md).
 
 ## O que a funcionalidade faz
 
-A auditoria cria um snapshot local do repositório, analisa esse snapshot em 20 domínios, valida as evidências com uma sessão revisora independente e salva relatórios locais. As sessões usam o SDK do Relay e o modelo que você selecionou e autorizou na configuração.
+A auditoria cria um snapshot local do repositório, analisa esse snapshot em 20 domínios, valida as evidências com uma sessão revisora independente e salva relatórios locais. As sessões usam o SDK do Relay e o modelo que você selecionou e autorizou na confirmação do `/audit-app` (ou no arquivo de configuração).
 
 Ela **não** executa comandos ou código do repositório, não faz testes dinâmicos, não publica issues, não usa histórico Git e não gera PDF. Não é certificação, parecer jurídico nem garantia de ausência de vulnerabilidades. Uma análise estática com status `COMPLETED` continua sujeita a falsos positivos e falsos negativos.
 
 ## Antes de começar
 
 1. Use uma versão do Relay que contenha a integração.
-2. Faça uma cópia de segurança do repositório e não o altere durante a auditoria.
-3. Escolha um provedor/modelo autorizado para receber o código e o contexto necessários à análise. A opção também é necessária para modelos locais.
-4. Prepare um diretório privado para os relatórios, preferencialmente **fora** do repositório.
-5. Revise o escopo: o consentimento `working-tree` abrange arquivos modificados, não rastreados e ignorados que correspondam aos padrões configurados. Exclusões diminuem a cobertura.
+2. Não altere o repositório durante a auditoria.
+3. Selecione com `/model` um provedor/modelo autorizado a receber o código e o contexto necessários à análise. A autorização também vale para modelos locais.
 
-A redação de segredos é heurística; não garante que todos os dados sensíveis sejam removidos. Se os dados do repositório não puderem ser enviados ao modelo selecionado, **não habilite nem execute** a auditoria.
+A redação de segredos é heurística; não garante que todos os dados sensíveis sejam removidos. Se os dados do repositório não puderem ser enviados ao modelo selecionado, **não confirme** a auditoria.
 
-## Habilitar a extensão
+## Executar automaticamente
 
-A extensão fica desativada por padrão. Defina `RELAY_AUDIT_ENABLED=1` **antes de iniciar** o Relay.
+Inicie o Relay no diretório do repositório e execute:
 
-PowerShell:
-
-```powershell
-$env:RELAY_AUDIT_ENABLED = '1'
-relay
+```text
+/audit-app
 ```
 
-Linux/macOS:
+Não é preciso variável de ambiente nem arquivo de configuração. O Harness configura a auditoria sozinho:
 
-```sh
-RELAY_AUDIT_ENABLED=1 relay
-```
+| Configuração | Valor automático |
+| --- | --- |
+| Alvo | Diretório atual do Relay |
+| Modelo | O provedor/modelo selecionado; uma única confirmação mostra alvo, modelo, diretório dos relatórios e teto de custo antes de qualquer leitura ou envio |
+| Snapshot | `working-tree` (inclui arquivos modificados, não rastreados e ignorados); identidade do HEAD Git só quando `.git` existe |
+| Exclusões | Dependências, caches e saídas de build (`node_modules`, `.venv`, `venv`, `__pycache__`, `dist`, `coverage`, `.next`, `target`, ...), registradas como excluídas no inventário; credenciais e metadados Git são sempre excluídos |
+| Relatórios | `~/.relay/agent/audits/<alvo>-<hash>/audit-<uuid>/`, fora do repositório |
+| Orçamentos | Dentro dos limites do preflight: 10 min por tarefa, 4 h por execução, 200 mil tokens por tarefa, 2 milhões por execução, teto de custo 10 |
 
-A variável ativa somente os comandos da auditoria; ela não habilita delegação experimental nem concede ao worker ferramentas de shell ou escrita.
+Se você recusar a confirmação, nada é lido nem enviado. Ao final, o Relay mostra o status e o caminho do `report.md`.
 
-## Criar a configuração
+Os comandos ficam registrados por padrão e só leem o alvo depois da confirmação do `/audit-app`. Para removê-los, defina `RELAY_AUDIT_ENABLED=0` **antes de iniciar** o Relay. Eles não habilitam delegação experimental nem concedem ao worker ferramentas de shell ou escrita.
 
-Salve como `audit.yaml` em um local controlado, de preferência fora do repositório. Os caminhos `repository_path` e `output_root` são relativos **ao diretório do arquivo de configuração**.
+## Configuração avançada (opcional)
+
+Use um arquivo apenas para auditar outro diretório ou mudar escopo, orçamentos ou contexto. Salve como `audit.yaml` em um local controlado, de preferência fora do repositório. Os caminhos `repository_path` e `output_root` são relativos **ao diretório do arquivo de configuração**.
 
 ```yaml
 version: '3.0'
@@ -109,47 +111,47 @@ A saída autorizada é excluída do snapshot. Essa opção **não** autoriza mod
 
 ## Executar e controlar
 
-No Relay, use o caminho para o arquivo de configuração:
+Execute `/audit-app` sem argumentos (ou `/audit-app "C:/caminho com espaços/audit.yaml"` com a configuração avançada).
+
+O processo roda em segundo plano. O Relay informa o identificador `audit-<uuid>` e, ao final, o status e o caminho do `report.md`. Consulte o andamento:
 
 ```text
-/audit "C:/caminho com espaços/audit.yaml"
+/audit-app-status
 ```
 
-O processo roda em segundo plano. O Relay informa o identificador `audit-<uuid>` e o diretório de artefatos quando disponível. Consulte o andamento:
+Para consultar uma execução persistida, no mesmo diretório do Relay:
 
 ```text
-/audit-status
+/audit-app-status audit-<uuid>
 ```
 
-Para consultar uma execução persistida, usando a mesma configuração:
-
-```text
-/audit-status "C:/caminho/audit.yaml" audit-<uuid>
-```
+Com a configuração avançada, informe o mesmo arquivo: `/audit-app-status "C:/caminho/audit.yaml" audit-<uuid>`.
 
 Cancelar mantém checkpoints e resultados parciais:
 
 ```text
-/audit-cancel
-/audit-cancel audit-<uuid>
+/audit-app-cancel
+/audit-app-cancel audit-<uuid>
 ```
 
 O encerramento da sessão do Relay também solicita cancelamento. Uma chamada já em andamento no provedor pode demorar para terminar; o controle de orçamento não garante limite de cobrança do provedor.
 
 ## Retomar uma execução
 
-Use o mesmo arquivo, a mesma configuração e o identificador fornecido pela execução interrompida:
+No mesmo diretório e com o mesmo modelo, use o identificador fornecido pela execução interrompida:
 
 ```text
-/audit-resume "C:/caminho/audit.yaml" audit-<uuid>
+/audit-app-resume audit-<uuid>
 ```
+
+Com a configuração avançada, informe o mesmo arquivo: `/audit-app-resume "C:/caminho/audit.yaml" audit-<uuid>`.
 
 A retomada verifica o hash do snapshot, a versão/hash dos recursos, a configuração e os resultados persistidos. Tarefas concluídas compatíveis podem ser reutilizadas; tarefas interrompidas ou bloqueadas podem ser tentadas novamente. Se o repositório tiver mudado, não reutilize a execução: inicie uma nova.
 
 Se o processo morreu e deixou um lock, só solicite recuperação após verificar que o processo original não está ativo:
 
 ```text
-/audit-resume "C:/caminho/audit.yaml" audit-<uuid> --recover-stale-lock
+/audit-app-resume audit-<uuid> --recover-stale-lock
 ```
 
 A opção não força a remoção de locks ativos ou cujo estado não possa ser verificado. Não use a recuperação como forma de rodar duas instâncias sobre a mesma pasta.
@@ -161,7 +163,7 @@ A opção não força a remoção de locks ativos ou cujo estado não possa ser 
 - `FAILED`: não foi possível produzir resultado de auditoria utilizável. Verifique as mensagens do Relay e os artefatos disponíveis.
 - Status intermediários indicam a fase atual da execução.
 
-Os arquivos ficam em `output_root/audit-<uuid>/`. Os principais são:
+Os arquivos ficam em `~/.relay/agent/audits/<alvo>-<hash>/audit-<uuid>/` (ou `output_root/audit-<uuid>/` com a configuração avançada). Os principais são:
 
 | Arquivo | Conteúdo |
 | --- | --- |

@@ -6,6 +6,7 @@ import { ENV_AGENT_DIR } from "../src/config.ts";
 import type { LayaSettings } from "../src/core/settings-manager.ts";
 import layaExtension from "../src/extensions/laya/index.ts";
 import { NativeLayaServer } from "../src/extensions/laya/native-server.ts";
+import { OnnxLayaServer } from "../src/extensions/laya/onnx-server.ts";
 import { LayaServer } from "../src/extensions/laya/server.ts";
 import { trainingWorkspace } from "../src/extensions/laya/training.ts";
 import { createHarness, type Harness } from "./suite/harness.ts";
@@ -18,6 +19,8 @@ describe("Laya inference backend", () => {
 		home = mkdtempSync(join(tmpdir(), "relay-laya-backend-"));
 		vi.stubEnv(ENV_AGENT_DIR, home);
 		vi.spyOn(NativeLayaServer.prototype, "install").mockResolvedValue(true);
+		vi.spyOn(OnnxLayaServer.prototype, "install").mockResolvedValue(true);
+		vi.spyOn(OnnxLayaServer.prototype, "stop").mockResolvedValue();
 		vi.spyOn(LayaServer.prototype, "install").mockResolvedValue(true);
 		vi.spyOn(LayaServer.prototype, "stop").mockResolvedValue();
 	});
@@ -30,11 +33,19 @@ describe("Laya inference backend", () => {
 		rmSync(home, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 	});
 
-	it("uses native inference for the shipped checkpoint by default", async () => {
+	it("uses in-process ONNX inference for the shipped checkpoint by default", async () => {
 		harness = await createHarness({ extensionFactories: [layaExtension] });
 		await harness.session.prompt("/laya setup");
-		expect(NativeLayaServer.prototype.install).toHaveBeenCalledOnce();
+		expect(OnnxLayaServer.prototype.install).toHaveBeenCalledOnce();
+		expect(NativeLayaServer.prototype.install).not.toHaveBeenCalled();
 		expect(LayaServer.prototype.install).not.toHaveBeenCalled();
+	});
+
+	it("keeps the Python runtime when it is selected explicitly", async () => {
+		harness = await createHarness({ settings: { laya: { runtime: "native" } }, extensionFactories: [layaExtension] });
+		await harness.session.prompt("/laya setup");
+		expect(NativeLayaServer.prototype.install).toHaveBeenCalledOnce();
+		expect(OnnxLayaServer.prototype.install).not.toHaveBeenCalled();
 	});
 
 	it.each<LayaSettings>([{ runtime: "docker" }, { image: "custom-laya:cpu" }])(
@@ -47,7 +58,7 @@ describe("Laya inference backend", () => {
 		},
 	);
 
-	it("keeps registered volume checkpoints in Docker and can select shipped native inference", async () => {
+	it("keeps registered volume checkpoints in Docker and can select shipped inference", async () => {
 		const registry = trainingWorkspace(join(home, "laya")).registry;
 		mkdirSync(dirname(registry), { recursive: true });
 		writeFileSync(registry, JSON.stringify({ active: "local-1", models: [{ name: "local-1" }] }));
@@ -55,6 +66,6 @@ describe("Laya inference backend", () => {
 		await harness.session.prompt("/laya setup");
 		expect(LayaServer.prototype.install).toHaveBeenCalledOnce();
 		await harness.session.prompt("/laya use shipped");
-		expect(NativeLayaServer.prototype.install).toHaveBeenCalledOnce();
+		expect(OnnxLayaServer.prototype.install).toHaveBeenCalledOnce();
 	});
 });
