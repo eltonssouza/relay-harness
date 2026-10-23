@@ -48,15 +48,16 @@
 		"prepublishOnly": "npm run clean && npm run build"
 	},
 	"dependencies": {
+		"@huggingface/transformers": "4.3.1",
 		"@playwright/mcp": "0.0.83",
-		"@upstash/context7-mcp": "4.3.0",
-		"@relay-harness/chord": "^0.4.1",
 		"@relay-harness/agent-core": "^0.4.1",
 		"@relay-harness/ai": "^0.4.1",
+		"@relay-harness/chord": "^0.4.1",
 		"@relay-harness/codemode": "^0.4.1",
 		"@relay-harness/mcp": "^0.4.1",
 		"@relay-harness/tui": "^0.4.1",
 		"@silvia-odwyer/photon-node": "0.3.4",
+		"@upstash/context7-mcp": "4.3.0",
 		"ajv": "8.20.0",
 		"ajv-formats": "3.0.1",
 		"brace-expansion": "5.0.12",
