@@ -162,6 +162,16 @@ export interface LayaSettings {
 	minConfidence?: number;
 	/** Failed tool calls in one turn before escalating to the next tier; 0 disables. Default: 3. */
 	escalateAfterFailures?: number;
+	/**
+	 * Limits for one task. When a limit is reached, Laya stops escalating (to a higher tier or another provider) and keeps
+	 * the current model; it never stops a running task. Unset limits do not apply. Default: none.
+	 */
+	budget?: {
+		/** Model attempts per task, counting the first choice and every escalation. */
+		maxAttempts?: number;
+		/** Provider cost already spent on the task, in the catalog currency (USD), before an escalation is refused. */
+		maxCostPerTask?: number;
+	};
 	/** `advise` names unneeded tools in the plan; `enforce` also deactivates them. Default: `advise`. */
 	toolRouting?: "advise" | "enforce";
 	/** Opt-in maximum number of matching deferred tools to activate per request; 0 disables. */

@@ -91,6 +91,21 @@ export const LAYA_VIRTUAL_MODEL_ID = "auto";
 /** Not 8000, the port laya-trainer's own server and many development servers use. */
 export const DEFAULT_LAYA_BASE_URL = "http://127.0.0.1:8737/v1";
 
+/** Why `laya.budget` refuses another escalation, or undefined when it is allowed. */
+export function budgetRefusal(budget: LayaSettings["budget"], attempts: number, cost: number): string | undefined {
+	if (budget?.maxAttempts !== undefined && attempts >= budget.maxAttempts)
+		return `budget of ${budget.maxAttempts} model attempts reached`;
+	if (budget?.maxCostPerTask !== undefined && cost >= budget.maxCostPerTask)
+		return `cost budget of ${budget.maxCostPerTask} reached (${cost.toFixed(4)} spent)`;
+	return undefined;
+}
+
+/** Provider cost of the current task: assistant messages after the last user message. */
+function taskCost(messages: readonly Message[]): number {
+	const start = lastUserIndex(messages);
+	return summarizeRun(messages.slice(start + 1)).cost;
+}
+
 /** `laya.localOnly`: only models served from this machine (loopback base URL) may be routed to. */
 export function localOnlyAllows(
 	settings: Pick<LayaSettings, "localOnly">,
@@ -598,7 +613,13 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		state: LayaRouterState,
 		reason: EscalationReason,
 		failures: number,
+		messages: ModelRouteRequest<LayaRouterState>["messages"],
 	): ModelRoute<LayaRouterState> | undefined {
+		const refused = budgetRefusal(settings.budget, state.attempts, taskCost(messages));
+		if (refused) {
+			if (ctx.hasUI) ctx.ui.notify(`Laya: ${refused}; staying on ${state.model}.`, "warning");
+			return undefined;
+		}
 		const sameTier = reason === "provider_unavailable";
 		const target = sameTier ? state.tier : nextTier(state.tier);
 		if (!target) return undefined;
@@ -641,7 +662,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 				// Following a provider is a boundary, including on rate limits and overloads.
 				if (settings.followProvider) return sticky(ctx, state);
 				quota.recordPressure(request.failed.model.provider);
-				const route = escalate(ctx, state, "provider_unavailable", state.failuresAtEscalation);
+				const route = escalate(ctx, state, "provider_unavailable", state.failuresAtEscalation, request.messages);
 				if (route) return route;
 			}
 			return sticky(ctx, state);
@@ -650,7 +671,13 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const threshold = settings.escalateAfterFailures ?? DEFAULT_ESCALATE_AFTER_FAILURES;
 		const failures = failuresThisTurn(request.messages);
 		if (threshold > 0 && failures.count - state.failuresAtEscalation >= threshold) {
-			const route = escalate(ctx, state, failures.evidence ? "test_failure" : "repeated_failure", failures.count);
+			const route = escalate(
+				ctx,
+				state,
+				failures.evidence ? "test_failure" : "repeated_failure",
+				failures.count,
+				request.messages,
+			);
 			if (route) return route;
 		}
 		return sticky(ctx, state);

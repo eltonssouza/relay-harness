@@ -23,7 +23,7 @@ import {
 	heuristicAssessment,
 	type TaskAssessment,
 } from "../src/extensions/laya/assessment.ts";
-import layaExtension, { LAYA_PLAN_MESSAGE } from "../src/extensions/laya/index.ts";
+import layaExtension, { budgetRefusal, LAYA_PLAN_MESSAGE } from "../src/extensions/laya/index.ts";
 import { LAYA_LESSONS_MESSAGE } from "../src/extensions/laya/memory.ts";
 import {
 	applyPolicy,
@@ -821,6 +821,23 @@ describe("laya/auto router", () => {
 		expect(telemetry()[0].selected).toMatchObject({ tier: "balanced", model: "claude-sonnet-5-5" });
 	});
 
+	it.each([
+		["maxAttempts", { maxAttempts: 1 }],
+		["maxCostPerTask", { maxCostPerTask: 0 }],
+	] as const)("stops escalating when laya.budget.%s is reached and keeps the current model", async (_name, budget) => {
+		const { harness, respond, dispatched, telemetry } = await setup(SIMPLE_FIX, [createTool("edit", true)], {
+			escalateAfterFailures: 2,
+			budget,
+		});
+
+		respond(call("edit"), call("edit"), fauxAssistantMessage("done"));
+		await harness.session.prompt("Fix the off-by-one in the pager.");
+
+		expect(dispatched()).toEqual(["haiku-5-5:low", "haiku-5-5:low", "haiku-5-5:low"]);
+		expect(telemetry()[0].result).toMatchObject({ attempts: 1, escalations: [] });
+		expect(telemetry()[0].selected).toMatchObject({ tier: "fast", model: "claude-haiku-5-5" });
+	});
+
 	it("measures lexical retrieval precision and recall for English and Portuguese prompts", () => {
 		const tools = [
 			{
@@ -1066,5 +1083,18 @@ describe("laya/auto router", () => {
 		expect(lessons).toHaveLength(1);
 		expect(lessons[0]).toMatch(/^\[laya:lessons\] Lessons from similar tasks/);
 		expect(lessons[0]).toContain("npm run i18n:check");
+	});
+});
+
+describe("laya.budget", () => {
+	it("allows escalation when no limit is set or the task is under every limit", () => {
+		expect(budgetRefusal(undefined, 5, 100)).toBeUndefined();
+		expect(budgetRefusal({}, 5, 100)).toBeUndefined();
+		expect(budgetRefusal({ maxAttempts: 3, maxCostPerTask: 1 }, 2, 0.5)).toBeUndefined();
+	});
+
+	it("refuses with a stated reason once a limit is reached", () => {
+		expect(budgetRefusal({ maxAttempts: 3 }, 3, 0)).toBe("budget of 3 model attempts reached");
+		expect(budgetRefusal({ maxCostPerTask: 0.25 }, 1, 0.3)).toBe("cost budget of 0.25 reached (0.3000 spent)");
 	});
 });

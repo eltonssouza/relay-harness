@@ -112,6 +112,8 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 | `laya.quota` | object | `1` per provider | Share of each provider's quota still available, 0 to 1, e.g. `{ "openai-codex": 0.25 }`. |
 | `laya.minConfidence` | number | `0.5` | Laya answers below this confidence raise the tier by one. |
 | `laya.escalateAfterFailures` | number | `3` | Failed tool calls in one turn before moving to the next tier. `0` disables. |
+| `laya.budget.maxAttempts` | number | none | Model attempts per task, counting the first choice and each escalation. When reached, Laya stops escalating and keeps the current model. |
+| `laya.budget.maxCostPerTask` | number | none | Provider cost already spent on the task (catalog currency, USD) at which Laya stops escalating and keeps the current model. |
 | `laya.toolRouting` | string | `advise` | `advise` names unneeded tools in the plan; `enforce` also deactivates them for the request. |
 | `laya.telemetry` | boolean | `true` | Record each routed request in `~/.relay/agent/laya/telemetry.jsonl`. |
 | `laya.memory` | boolean | `true` | Route requests similar to tasks learned with `/laya learn` by their labels, and give the running model their lessons. See [laya.md](laya.md#teach-laya-from-your-sessions). |
