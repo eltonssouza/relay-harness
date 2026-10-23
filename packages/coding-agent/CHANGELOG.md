@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Added
+
+- Added opt-in native memory on built-in SQLite: memories with sources and scope isolation, hybrid lexical and optional semantic search, a temporal knowledge graph, an evolving user profile with boundaries, and a budgeted memory context for each request. Enable it with `--native-memory` or `RELAY_NATIVE_MEMORY=1`. See [Native memory](docs/native-memory.md).
+
 ## [0.4.1] - 2026-10-21
 
 ### Added
