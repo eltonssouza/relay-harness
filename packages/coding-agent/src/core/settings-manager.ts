@@ -145,6 +145,11 @@ export interface LayaSettings {
 	models?: Partial<Record<"fast" | "balanced" | "strong" | "frontier", string[]>>;
 	/** Route physical model selections through Laya, staying with the selected provider. Default: false. */
 	followProvider?: boolean;
+	/**
+	 * Only route `laya/auto` to models served from this machine (loopback base URL). With no such model,
+	 * routing fails instead of falling back to a remote one. Default: false.
+	 */
+	localOnly?: boolean;
 	/** Optional tier maps for model families sharing one provider; membership identifies the active group. */
 	modelGroups?: Record<string, Partial<Record<"fast" | "balanced" | "strong" | "frontier", string[]>>>;
 	/** Relative quota still available per provider, 0..1. Default: 1 for every provider. */

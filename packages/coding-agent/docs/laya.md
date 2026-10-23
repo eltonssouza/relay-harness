@@ -149,6 +149,8 @@ The latest explicit physical model selection on the session branch identifies th
 
 A provider need not offer four distinct models. Missing tiers stay missing: a `frontier` request does not make a smaller local model frontier-capable. If no mapped models are available, Relay keeps the selected model and reports its capability as unclassified. If only a weaker mapped model is available, Relay reports the limitation. Declare capabilities explicitly instead of inferring quality from a model name or price. Set `followProvider` to `false` for fixed physical selections and the normal cross-provider `laya/auto` registry.
 
+Set `laya.localOnly` to `true` to keep `laya/auto` on models served from this machine: only models whose base URL is `localhost`, `127.0.0.1` or `[::1]` are candidates, including the selected-model fallback. A model with a missing or malformed base URL counts as remote. If no local model has credentials, the request fails with an error instead of falling back to a cloud model. Laya's classifier itself is unaffected; it already runs locally by default.
+
 ## Local CPU runtime
 
 The shipped, already-trained `relay-laya-v5` checkpoint runs locally on CPU by default. It is a versioned alias for the existing Candidate20 weights; it does not contain newly trained weights. Docker, CUDA and Ollama are not required. Install Python 3.10 through 3.13 first; Relay discovers an existing interpreter and creates its own isolated environment under `~/.relay/agent/laya/local-runtime`. It never changes your global Python packages or installs Python itself.

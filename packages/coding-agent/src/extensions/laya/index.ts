@@ -90,6 +90,14 @@ export const LAYA_VIRTUAL_MODEL_ID = "auto";
 /** Not 8000, the port laya-trainer's own server and many development servers use. */
 export const DEFAULT_LAYA_BASE_URL = "http://127.0.0.1:8737/v1";
 
+/** `laya.localOnly`: only models served from this machine (loopback base URL) may be routed to. */
+export function localOnlyAllows(
+	settings: Pick<LayaSettings, "localOnly">,
+	model: Pick<Model<Api>, "baseUrl">,
+): boolean {
+	return !settings.localOnly || isLocalUrl(model.baseUrl);
+}
+
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MIN_CONFIDENCE = 0.5;
 /** Session entry recorded by ACI observe mode (`adaptiveCognition.enabled`). */
@@ -418,12 +426,14 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const selected = settings.followProvider ? selectedModel(ctx) : undefined;
 		const { registry } = scopedModelRegistry(settings, selected);
 		const result: Array<Candidate & { model: Model<Api>; capabilityKnown: boolean }> = [];
+		// localOnly is a hard restriction: it applies before any recommendation, including the selected-model fallback.
+		const allowed = (model: Model<Api>) => localOnlyAllows(settings, model);
 		for (const tier of CAPABILITY_TIERS) {
 			for (const ref of registry[tier] ?? []) {
 				const parsed = parseModelRef(ref);
 				const model = parsed && ctx.modelRegistry.find(parsed.provider, parsed.id);
 				if (!model || model.provider === LAYA_PROVIDER_ID || !ctx.modelRegistry.hasConfiguredAuth(model)) continue;
-				if (isVirtualModel(model) || !isEligibleChatModel(model.provider, model.id)) continue;
+				if (isVirtualModel(model) || !isEligibleChatModel(model.provider, model.id) || !allowed(model)) continue;
 				result.push({ ref, provider: model.provider, tier, order: result.length, model, capabilityKnown: true });
 			}
 		}
@@ -431,6 +441,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		if (
 			result.length === 0 &&
 			selected &&
+			allowed(selected) &&
 			isEligibleChatModel(selected.provider, selected.id) &&
 			ctx.modelRegistry.hasConfiguredAuth(selected)
 		) {
@@ -453,7 +464,9 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		const available = candidates(ctx);
 		if (available.length === 0) {
 			throw new Error(
-				"laya/auto: no model of the Laya model registry has credentials. Log in to a provider or set laya.models.",
+				settings.localOnly
+					? "laya/auto: laya.localOnly is set and no local model (loopback base URL) of the Laya model registry has credentials. Add a local model to laya.models or turn localOnly off."
+					: "laya/auto: no model of the Laya model registry has credentials. Log in to a provider or set laya.models.",
 			);
 		}
 		const byRef = new Map(available.map((candidate) => [candidate.ref, candidate]));
