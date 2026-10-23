@@ -36,6 +36,7 @@ import { selectLibraryGuides } from "./library.ts";
 import { LAYA_LESSONS_MESSAGE, LESSON_SIMILARITY, ROUTE_SIMILARITY, renderLessons, TaskMemory } from "./memory.ts";
 import { LAYA_MODEL_MANIFEST } from "./model-manifest.ts";
 import { sharedNativeLayaServer } from "./native-server.ts";
+import { sharedOnnxLayaServer, toClassifierAnswers } from "./onnx-server.ts";
 import {
 	applyPolicy,
 	type Candidate,
@@ -243,11 +244,14 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		baseUrl,
 		python: () => settings.python,
 	});
+	const onnxServer = sharedOnnxLayaServer({ home: layaHome });
 	// Registered session checkpoints remain in the Docker volume. Selecting one keeps that backend.
 	const server = () =>
 		settings.runtime === "docker" || settings.image || trainer.activeModel().dir !== LAYA_IMAGE_PATHS.shippedModel
 			? dockerServer
-			: nativeServer;
+			: settings.runtime === "onnx"
+				? onnxServer
+				: nativeServer;
 	/** Server problem last reported, so a failing runtime is not reported on every start. */
 	let reportedProblem: string | undefined;
 	let history = new PerformanceHistory();
@@ -357,6 +361,21 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 				};
 			} catch {
 				// Labeled against questions that have changed since; Laya answers instead.
+			}
+		}
+		if (server() === onnxServer) {
+			// In-process ONNX runtime: no HTTP classifier. Same fallback as below when it is not ready or fails.
+			if (Date.now() < layaUnavailableUntil || onnxServer.state !== "ready") return heuristicAssessment(request);
+			try {
+				const answers = await onnxServer.classify(truncateRequest(request), LAYA_QUESTIONS, signal);
+				const assessment = assessmentFromAnswers(toClassifierAnswers(answers));
+				lastClassifierError = undefined;
+				return assessment;
+			} catch (error) {
+				if (signal?.aborted) throw error;
+				lastClassifierError = error instanceof Error ? error.message : String(error);
+				layaUnavailableUntil = Date.now() + LAYA_RETRY_AFTER_MS;
+				return heuristicAssessment(request);
 			}
 		}
 		const classifier = ctx.modelRegistry.findOfType("classifier", LAYA_PROVIDER_ID, LAYA_CLASSIFIER_ID);
@@ -610,7 +629,9 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 	async function install(ctx: ExtensionContext, explicit = false): Promise<boolean> {
 		let worked = false;
 		const selectedServer = server();
-		if (selectedServer === dockerServer) await nativeServer.stop();
+		if (selectedServer !== nativeServer) await nativeServer.stop();
+		// The in-process model holds several GB of memory; release it when another runtime is selected.
+		if (selectedServer !== onnxServer) await onnxServer.stop();
 		const ok = await selectedServer.install((message) => {
 			worked = true;
 			ctx.ui.setStatus("laya-setup", `laya: ${message}`);
@@ -862,6 +883,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		if (event.reason === "quit") {
 			trainer.stop();
 			await nativeServer.stop();
+			await onnxServer.stop();
 		}
 	});
 

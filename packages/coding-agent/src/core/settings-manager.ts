@@ -161,8 +161,11 @@ export interface LayaSettings {
 	toolRetrievalTelemetry?: boolean;
 	/** Install and start Laya when Relay starts interactively. Default: true. */
 	autostart?: boolean;
-	/** Inference runtime. Default: native CPU; image overrides and volume checkpoints use Docker. */
-	runtime?: "native" | "docker";
+	/**
+	 * Inference runtime. Default: native CPU (Python); image overrides and volume checkpoints use Docker.
+	 * `onnx` runs the shipped model inside Relay with ONNX Runtime, without Python (downloads about 1.3 GB once).
+	 */
+	runtime?: "native" | "docker" | "onnx";
 	/** Existing Python 3.10–3.13 executable for the isolated native CPU runtime. */
 	python?: string;
 	/** Docker image of Laya. Default: the image built from this Relay version on ghcr.io. */
