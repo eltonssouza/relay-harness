@@ -21,6 +21,8 @@ export interface TelemetryRecord {
 	request: string;
 	classification: {
 		source: TaskAssessment["source"];
+		/** True when opt-in adaptive-mode routing intentionally skipped ONNX for a clear, low-risk request. */
+		heuristic_fast_path?: boolean;
 		type: TaskType;
 		complexity: number;
 		risk: number;

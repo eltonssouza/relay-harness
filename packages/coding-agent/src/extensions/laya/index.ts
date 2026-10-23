@@ -20,7 +20,13 @@ import type { LayaSettings } from "../../core/settings-manager.ts";
 import type { ModelRoute, ModelRouteRequest } from "../../core/virtual-models.ts";
 import { isVirtualModel } from "../../core/virtual-models.ts";
 import { loadAgentProfile } from "../engineering/index.ts";
-import { assessmentFromAnswers, assessmentFromLabels, heuristicAssessment, type TaskAssessment } from "./assessment.ts";
+import {
+	assessmentFromAnswers,
+	assessmentFromLabels,
+	canUseHeuristicFastPath,
+	heuristicAssessment,
+	type TaskAssessment,
+} from "./assessment.ts";
 import { assertDecisionSchema, decisionRecord } from "./decision-schema.ts";
 import { type DockerRun, spawnDocker } from "./docker.ts";
 import {
@@ -405,6 +411,15 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 				// Labeled against questions that have changed since; Laya answers instead.
 			}
 		}
+
+		// This is deliberately limited to ACI adaptive mode. Observe/assist need a real Laya decision to expose,
+		// strict must fail rather than use rules, and an unset mode preserves existing laya/auto behavior.
+		// Learned task memory remains first because it is local and more specific than keyword rules.
+		if (settings.heuristicFirst && aciMode() === "adaptive") {
+			const heuristic = heuristicAssessment(request);
+			if (canUseHeuristicFastPath(request, heuristic)) return { ...heuristic, heuristicFastPath: true };
+		}
+
 		if (server() === onnxServer) {
 			// In-process ONNX runtime: no HTTP classifier. Same fallback as below when it is not ready or fails.
 			if (Date.now() < layaUnavailableUntil || onnxServer.state !== "ready") return heuristicAssessment(request);
@@ -1008,6 +1023,7 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 				request: state.request,
 				classification: {
 					source: state.assessment.source,
+					...(state.assessment.heuristicFastPath ? { heuristic_fast_path: true } : {}),
 					...state.assessment.task,
 					agent: state.assessment.agent,
 					validation: state.assessment.validation,

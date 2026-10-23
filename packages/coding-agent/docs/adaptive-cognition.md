@@ -21,6 +21,7 @@ Add this to `settings.json` (global or project):
 | --- | --- | --- |
 | `adaptiveCognition.enabled` | `false` | Turns ACI on. |
 | `adaptiveCognition.mode` | `observe` | `observe`, `assist`, `adaptive` or `strict`. |
+| `laya.heuristicFirst` | `false` | In `adaptive` mode only, skips ONNX for a clear, small, low-risk request. Security-sensitive, ambiguous, broad or tool-heavy requests still run Laya. Other ACI modes retain full Laya inference. |
 
 | Mode | With another model selected | With `laya/auto` selected |
 | --- | --- | --- |

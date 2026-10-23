@@ -160,6 +160,12 @@ export interface LayaSettings {
 	quota?: Record<string, number>;
 	/** Laya answers below this confidence raise the tier by one. Default: 0.5. */
 	minConfidence?: number;
+	/**
+	 * Opt-in adaptive-mode latency optimization. Clear, low-risk, small requests use the keyword assessment
+	 * without running the ONNX classifier; ambiguous, risky, broad, security-sensitive, or tool-heavy requests still
+	 * run Laya. Default: false.
+	 */
+	heuristicFirst?: boolean;
 	/** Failed tool calls in one turn before escalating to the next tier; 0 disables. Default: 3. */
 	escalateAfterFailures?: number;
 	/**

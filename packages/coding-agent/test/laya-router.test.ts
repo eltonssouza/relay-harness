@@ -20,6 +20,7 @@ import { getVirtualModelState } from "../src/core/virtual-models.ts";
 import {
 	assessmentFromAnswers,
 	assessmentFromLabels,
+	canUseHeuristicFastPath,
 	heuristicAssessment,
 	type TaskAssessment,
 } from "../src/extensions/laya/assessment.ts";
@@ -289,6 +290,20 @@ describe("laya assessment", () => {
 	it("reads learned labels as a certain assessment", () => {
 		expect(assessmentFromLabels(assessmentLabels)).toEqual({ ...assessment(), confidence: 1, libraryConfidence: 1 });
 		expect(() => assessmentFromLabels({ ...assessmentLabels, capability_tier: "huge" })).toThrow("capability_tier");
+	});
+
+	it("uses the heuristic fast path only for clear, low-risk, small tasks", () => {
+		const simple = "Please change the button label from Submit to Save in the settings page.";
+		expect(canUseHeuristicFastPath(simple, heuristicAssessment(simple))).toBe(true);
+
+		for (const request of [
+			"Fix it",
+			"Fix the SQL injection in the search endpoint",
+			"Implement a safe multi-tenant authorization system and add integration tests.",
+			"Please implement an import/export migration system for every database in our repository, including backwards compatibility, tenant isolation, locking, and rollback.",
+		]) {
+			expect(canUseHeuristicFastPath(request, heuristicAssessment(request))).toBe(false);
+		}
 	});
 
 	it("falls back to keyword rules in English and Portuguese", () => {
@@ -753,6 +768,40 @@ describe("laya/auto router", () => {
 		await harness.session.prompt("Fix the typo in the README title");
 		expect(dispatched()).toHaveLength(1);
 		expect(harness.session.messages.filter((m) => m.role === "assistant").at(-1)?.stopReason).toBe("stop");
+	});
+
+	it("ACI adaptive heuristicFirst skips the classifier only for a clear, low-risk task", async () => {
+		const { harness, respond, requests, telemetry } = await setup(
+			SIMPLE_FIX,
+			[],
+			{ heuristicFirst: true },
+			[],
+			{},
+			{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
+		);
+		respond(fauxAssistantMessage("done"));
+
+		await harness.session.prompt("Please change the button label from Submit to Save in the settings page.");
+
+		expect(requests).toEqual([]);
+		expect(telemetry()[0].classification).toMatchObject({ source: "heuristic", heuristic_fast_path: true });
+	});
+
+	it("ACI adaptive heuristicFirst still classifies a security-sensitive task", async () => {
+		const { harness, respond, requests, telemetry } = await setup(
+			SIMPLE_FIX,
+			[],
+			{ heuristicFirst: true },
+			[],
+			{},
+			{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
+		);
+		respond(fauxAssistantMessage("done"));
+
+		await harness.session.prompt("Fix the SQL injection in the search endpoint");
+
+		expect(requests).toHaveLength(1);
+		expect(telemetry()[0].classification.heuristic_fast_path).toBeUndefined();
 	});
 
 	it("ACI strict mode fails instead of routing on a low-confidence Laya answer", async () => {

@@ -27,6 +27,8 @@ import {
 export interface TaskAssessment {
 	/** Laya's answers, the labels of a similar learned task, or keyword rules. */
 	source: "laya" | "memory" | "heuristic";
+	/** True when the opt-in simple-task gate skipped Laya inference. */
+	heuristicFastPath?: boolean;
 	/** Null means abstention: keyword fallbacks never invent library confidence. */
 	libraryCategory: LibraryCategoryId | null;
 	libraryConfidence: number;
@@ -269,4 +271,36 @@ export function heuristicAssessment(request: string): TaskAssessment {
 		securitySensitive: security,
 		confidence: 0.5,
 	};
+}
+
+const HEURISTIC_FAST_PATH_MAX_CHARS = 1000;
+const HEURISTIC_FAST_PATH_UNSAFE_TYPES: readonly TaskType[] = ["architecture", "debugging", "research", "security"];
+const HEURISTIC_FAST_PATH_TOOL_REQUIREMENTS: readonly ToolRequirement[] = [
+	"requires_shell",
+	"requires_web",
+	"requires_browser",
+	"requires_database",
+	"requires_git",
+];
+
+/**
+ * Returns true only when keyword rules identify a short, unambiguous, low-risk request.
+ * The caller must still honor strict, observe, and assist modes, which require Laya inference.
+ */
+export function canUseHeuristicFastPath(request: string, assessment: TaskAssessment): boolean {
+	if (typeof request !== "string" || request.trim().length === 0 || request.length > HEURISTIC_FAST_PATH_MAX_CHARS)
+		return false;
+
+	const { task, tools } = assessment;
+	return (
+		!assessment.securitySensitive &&
+		!HEURISTIC_FAST_PATH_UNSAFE_TYPES.includes(task.type) &&
+		task.complexity < 0.75 &&
+		task.risk < 2 / 3 &&
+		task.ambiguity === 0 &&
+		task.scope !== "multi_module" &&
+		task.scope !== "repository" &&
+		task.scope !== "multi_repository" &&
+		!HEURISTIC_FAST_PATH_TOOL_REQUIREMENTS.some((requirement) => tools[requirement])
+	);
 }
