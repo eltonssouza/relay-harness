@@ -3,14 +3,17 @@
  * settings, interactive authorization, constraint persistence, skills, and notifications.
  */
 
+import { homedir } from "node:os";
 import {
 	type Agent,
+	type AgentToolCall,
 	type DeveloperConstraint,
 	type DeveloperCorrection,
 	HarnessCore,
 	type HarnessCoreEvent,
+	type ToolEffect,
 } from "@relay-harness/agent-core";
-import type { ExtensionMode, ExtensionUIContext } from "./extensions/index.ts";
+import type { ExtensionMode, ExtensionUIContext, ToolAnnotations } from "./extensions/index.ts";
 import type { SessionManager } from "./session-manager.ts";
 import type { SettingsManager } from "./settings-manager.ts";
 import { createGitWorkspaceProbe } from "./workspace-probe.ts";
@@ -30,19 +33,45 @@ export interface CodingHarnessCoreOptions {
 	sessionManager: SessionManager;
 	/** Workspace root, for measuring changes. */
 	cwd: string;
+	/** Annotations a tool declares about itself (MCP `readOnlyHint`, `destructiveHint`, `openWorldHint`). */
+	getToolAnnotations: (toolName: string) => ToolAnnotations | undefined;
 	/** Interactive UI, when the session has one. */
 	getUI: () => { ui?: ExtensionUIContext; mode: ExtensionMode };
+}
+
+/**
+ * Effect of a tool that declares what it does. A tool without annotations keeps the default
+ * classification: an unknown tool is a command whose effect is unknown.
+ */
+function annotatedEffect(toolCall: AgentToolCall, annotations: ToolAnnotations | undefined): ToolEffect | undefined {
+	if (!annotations) return undefined;
+	const path = (toolCall.arguments as { path?: unknown } | undefined)?.path;
+	const paths = typeof path === "string" ? [path] : [];
+	if (annotations.readOnlyHint === true) return { kind: "read", paths };
+	if (annotations.destructiveHint === true) {
+		return { kind: "destructive", paths, reason: `the tool ${toolCall.name} declares that it is destructive` };
+	}
+	if (annotations.readOnlyHint === false && annotations.openWorldHint === true) {
+		return {
+			kind: "external",
+			paths,
+			reason: `the tool ${toolCall.name} declares that it changes an external system`,
+		};
+	}
+	return undefined;
 }
 
 /** Harness core installed on a coding session, plus the latest observations for `/harness`. */
 export class CodingHarnessCore {
 	readonly core: HarnessCore;
 	private readonly blocked: Array<{ toolName: string; reason: string }> = [];
+	private readonly sessionManager: SessionManager;
 	private readonly uninstall: () => void;
 
 	constructor(options: CodingHarnessCoreOptions) {
 		const settings = options.settingsManager.getHarnessCoreSettings();
 		const { sessionManager, getUI } = options;
+		this.sessionManager = sessionManager;
 
 		this.core = new HarnessCore({
 			alignment: settings.alignment
@@ -73,17 +102,14 @@ export class CodingHarnessCore {
 						}
 					: false,
 			verifyCommands: settings.verifyCommands,
+			workspace: { cwd: options.cwd, home: homedir() },
+			classifyEffect: (toolCall) => annotatedEffect(toolCall, options.getToolAnnotations(toolCall.name)),
 			onEvent: (event) => this.handleEvent(event, getUI),
 		});
 
 		const alignment = this.core.alignment;
 		if (alignment) {
-			const persisted = sessionManager
-				.getBranch()
-				.findLast((entry) => entry.type === "custom" && entry.customType === HARNESS_CONSTRAINTS_ENTRY);
-			const data = persisted?.type === "custom" ? (persisted.data as ConstraintsEntryData | undefined) : undefined;
-			if (data?.constraints) alignment.constraints.restore(data.constraints);
-			if (data?.corrections) alignment.restoreCorrections(data.corrections);
+			this.restoreFromBranch();
 			const persist = () => {
 				sessionManager.appendCustomEntry(HARNESS_CONSTRAINTS_ENTRY, {
 					constraints: [...alignment.constraints.list()],
@@ -95,6 +121,27 @@ export class CodingHarnessCore {
 		}
 
 		this.uninstall = this.core.install(options.agent);
+	}
+
+	/** Constraints and corrections the current branch recorded last, or none. */
+	private restoreFromBranch(): void {
+		const alignment = this.core.alignment;
+		if (!alignment) return;
+		const persisted = this.sessionManager
+			.getBranch()
+			.findLast((entry) => entry.type === "custom" && entry.customType === HARNESS_CONSTRAINTS_ENTRY);
+		const data = persisted?.type === "custom" ? (persisted.data as ConstraintsEntryData | undefined) : undefined;
+		alignment.constraints.restore(data?.constraints ?? []);
+		alignment.restoreCorrections(data?.corrections ?? []);
+	}
+
+	/**
+	 * The session moved to another branch of its tree. Constraints and corrections follow the new
+	 * branch, and state that described the old conversation (context stubs, approvals) is dropped.
+	 */
+	resync(): void {
+		this.core.resync();
+		this.restoreFromBranch();
 	}
 
 	dispose(): void {

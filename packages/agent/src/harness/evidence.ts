@@ -14,11 +14,14 @@
  * final message claims completion, compares the claim with that record. The check is
  * structural, needs no extra model call, and runs in microseconds:
  *
- * - claim + changes + no passing check after the last change   -> `unverified`
- * - claim that checks pass + the last check failed or none ran  -> `contradicted`
- * - claim + change requested + no change made                   -> `no-effect`
+ * - changes + no passing check that covers them, when the turn ends -> `unverified`
+ *   (an explicit claim is not needed: "I updated the function" ends the turn the same way)
+ * - claim that checks pass + the last check failed or none ran        -> `contradicted`
+ * - claim + change requested + no change made                         -> `no-effect`
  *
- * A flagged report sends one verification request back to the agent instead of ending the run.
+ * A check counts only if it ran tests (an empty run does not), exited successfully, and covers the
+ * changed files (a check scoped to another package does not). A flagged report sends one
+ * verification request back to the agent instead of ending the run.
  */
 
 import { isMutation, type ToolEffect } from "./effects.ts";
@@ -40,11 +43,29 @@ export type CompletionStatus =
 
 export interface VerificationRecord {
 	command: string;
+	/** Exit status was successful and the run executed at least one test. */
 	passed: boolean;
 	step: number;
 	/** The command ran only tests matching a name pattern (`-t`, `--grep`, `-k`, ...). */
 	nameFiltered: boolean;
+	/** The command exited successfully but its output says no test ran. */
+	empty: boolean;
+	/** Directories the check covers; absent when it covers the whole workspace. */
+	scope?: string[];
 }
+
+/** Output of a test run that executed nothing: a green exit that proves nothing. */
+const EMPTY_RUN = [
+	/no test files? found/i,
+	/no tests? (?:found|ran|were run|were executed|to run|collected)/i,
+	/collected 0 items/i,
+	/^\s*Tests:\s+0 total/m,
+	/^\s*Test Suites:\s+0 total/m,
+	/^(?:#|ℹ)\s*tests\s+0\s*$/m,
+	/^\s*0 passing\b/m,
+	/\bRan 0 tests\b/,
+	/\b0 examples, 0 failures\b/,
+];
 
 /** Test-runner flags that select tests by name, so the rest of the file or suite does not run. */
 const NAME_FILTER = /\s(?:-t|--testNamePattern|--test-name-pattern|--grep|-g|-k|--filter|--test-name)(?:[\s=]|$)/;
@@ -119,16 +140,14 @@ const ACKNOWLEDGEMENT = wordsPattern([
 	"not (?:yet )?(?:verified|tested|run|validated)",
 	"untested",
 	"unverified",
-	"(?:could not|couldn't|unable to|did not|didn't) (?:run|verify|test|validate)",
-	"failed",
-	"failing",
+	"(?:could not|couldn't|unable to|did not|didn't|haven't|have not|hasn't|has not) (?:run|verify|test|validate)",
 	"still fail(?:s|ing)?",
+	"(?:tests?|checks?|builds?|lint|type ?checks?) (?:still )?fail(?:s|ed|ing)?",
 	"não (?:foi |foram )?(?:verificad|testad|rodad|executad|validad)[oa]s?",
 	"não (?:consegui|pude) (?:rodar|executar|testar|verificar|validar)",
 	"não (?:verifiquei|testei|rodei|executei|validei)",
 	"sem verificação",
-	"falhou",
-	"falharam",
+	"(?:testes?|checks?|builds?|lint) (?:ainda )?(?:falh(?:a|am|ou|aram|ando))",
 	"ainda falha",
 ]);
 
@@ -140,6 +159,36 @@ export interface EvidenceLedgerOptions {
 	maxGatesPerRequest?: number;
 }
 
+/** A mutation of one path (or of unknown paths) at a step of the request. */
+interface Change {
+	path: string | undefined;
+	step: number;
+	documentation: boolean;
+}
+
+/** Whether a check scoped to `scope` covers `path`. A check without scope covers everything. */
+function covers(scope: readonly string[] | undefined, path: string | undefined): boolean {
+	if (!scope || scope.length === 0 || path === undefined) return true;
+	const file = path.replace(/\\/g, "/");
+	return scope.some((dir) => {
+		if (file.startsWith(`${dir}/`) || file.includes(`/${dir}/`)) return true;
+		// A relative edit path against an absolute scope: some ancestor directory ends the scope.
+		if (dir.startsWith("/") && !file.startsWith("/")) {
+			const parts = file.split("/");
+			parts.pop();
+			for (let length = parts.length; length > 0; length--) {
+				if (dir.endsWith(`/${parts.slice(0, length).join("/")}`)) return true;
+			}
+		}
+		return false;
+	});
+}
+
+/** Whether a message ends by asking the developer something, so it is not a completion report. */
+function endsWithQuestion(text: string): boolean {
+	return /\?[\s*_`"')\]]*$/.test(text.trim());
+}
+
 /** Tracks what the tool calls of one developer request actually did. */
 export class EvidenceLedger {
 	private readonly maxGates: number;
@@ -147,9 +196,8 @@ export class EvidenceLedger {
 	private mutations = 0;
 	/** Successful calls whose effect is unknown: commands and unrecognized tools. */
 	private opaqueEffects = 0;
-	private lastMutationStep = -1;
+	private changes: Change[] = [];
 	private changed = new Set<string>();
-	private codeChanged = false;
 	private verifications: VerificationRecord[] = [];
 	private actionRequested = false;
 	private gates = 0;
@@ -164,49 +212,79 @@ export class EvidenceLedger {
 		this.step = 0;
 		this.mutations = 0;
 		this.opaqueEffects = 0;
-		this.lastMutationStep = -1;
+		this.changes = [];
 		this.changed = new Set();
-		this.codeChanged = false;
 		this.verifications = [];
 		this.actionRequested = actionRequested;
 		this.gates = 0;
 		this.lastReport = undefined;
 	}
 
-	/** Record the outcome of an executed tool call. Blocked calls should not be recorded. */
-	recordToolOutcome(effect: ToolEffect, isError: boolean): void {
+	/**
+	 * Record the outcome of an executed tool call. Blocked calls should not be recorded. `output` is
+	 * the call's text result; a green test run whose output says no test ran is not evidence.
+	 */
+	recordToolOutcome(effect: ToolEffect, isError: boolean, output = ""): void {
 		const step = this.step++;
 		if (isMutation(effect.kind) && !isError) {
 			this.mutations++;
-			this.lastMutationStep = step;
-			for (const path of effect.paths) this.changed.add(path);
-			const documentationOnly =
-				effect.paths.length > 0 && effect.paths.every((path) => DOCUMENTATION_PATH.test(path));
-			if (!documentationOnly) this.codeChanged = true;
+			for (const path of effect.paths.length > 0 ? effect.paths : [undefined]) {
+				this.changes.push({ path, step, documentation: path !== undefined && DOCUMENTATION_PATH.test(path) });
+				if (path !== undefined) this.changed.add(path);
+			}
 		}
 		if (effect.kind === "execute" && !isError) this.opaqueEffects++;
 		if (effect.kind === "verify") {
 			const command = effect.command ?? "";
+			const empty = !isError && EMPTY_RUN.some((pattern) => pattern.test(output));
 			this.verifications.push({
 				command: clip(command, 120),
-				passed: !isError,
+				passed: !isError && !empty,
 				step,
 				nameFiltered: NAME_FILTER.test(command),
+				empty,
+				...(effect.scope ? { scope: effect.scope } : {}),
 			});
 		}
 	}
 
-	/** Changes made since the last passing check, for the harness state reminder. */
-	pendingChanges(): string[] | undefined {
-		if (this.mutations === 0 || !this.codeChanged) return undefined;
-		const lastPass = this.verifications.findLast((record) => record.passed);
-		if (lastPass && lastPass.step > this.lastMutationStep) return undefined;
-		return [...this.changed];
+	/** Changes no passing check covers, for the harness state reminder and the completion gate. */
+	private uncovered(): Change[] {
+		return this.changes.filter(
+			(change) =>
+				!change.documentation &&
+				!this.verifications.some(
+					(check) => check.passed && check.step > change.step && covers(check.scope, change.path),
+				),
+		);
 	}
 
-	/** Compare the final message of a turn with the recorded evidence. */
+	/** Paths changed since a passing check that covers them, or undefined when every change is covered. */
+	pendingChanges(): string[] | undefined {
+		const pending = this.uncovered();
+		if (pending.length === 0) return undefined;
+		return [...new Set(pending.map((change) => change.path ?? "(shell command)"))];
+	}
+
+	/** Why the pending changes are not covered, for the verification request. */
+	private pendingDetail(pending: readonly string[]): string {
+		const last = this.verifications.at(-1);
+		if (!last) return "files changed and no test, type check, build, or lint command ran afterwards";
+		if (last.empty) return `the last check ran no tests (\`${last.command}\`)`;
+		if (!last.passed) return `files changed after the last check (\`${last.command}\`, which failed)`;
+		const lateChange = this.uncovered().some((change) => change.step > last.step);
+		if (lateChange) return `files changed after the last check (\`${last.command}\`)`;
+		return `the last check (\`${last.command}\`) covers ${last.scope?.join(", ") ?? "other files"}, not ${pending.slice(0, 3).join(", ")}`;
+	}
+
+	/**
+	 * Compare the final message of a turn with the recorded evidence. A turn that ends with changes
+	 * no passing check covers is a completion report whatever its wording, unless it asks a question.
+	 */
 	assess(finalText: string): CompletionReport {
-		const claimed = COMPLETION_CLAIM.test(finalText) || CHECK_CLAIM.test(finalText);
+		const pending = this.pendingChanges();
+		const explicit = COMPLETION_CLAIM.test(finalText) || CHECK_CLAIM.test(finalText);
+		const claimed = explicit || (pending !== undefined && !endsWithQuestion(finalText));
 		const base = {
 			claimed,
 			changedPaths: [...this.changed],
@@ -230,9 +308,11 @@ export class EvidenceLedger {
 				return {
 					...base,
 					status: "contradicted",
-					detail: lastCheck
-						? `the message says checks pass, but the last check failed: \`${lastCheck.command}\``
-						: "the message says checks pass, but no test, type check, build, or lint command ran in this request",
+					detail: !lastCheck
+						? "the message says checks pass, but no test, type check, build, or lint command ran in this request"
+						: lastCheck.empty
+							? `the message says checks pass, but the last check ran no tests: \`${lastCheck.command}\``
+							: `the message says checks pass, but the last check failed: \`${lastCheck.command}\``,
 				};
 			}
 			if (this.mutations === 0) {
@@ -247,15 +327,7 @@ export class EvidenceLedger {
 						}
 					: { ...base, status: "no-claim" };
 			}
-			if (this.pendingChanges()) {
-				return {
-					...base,
-					status: "unverified",
-					detail: lastCheck
-						? `files changed after the last check (\`${lastCheck.command}\`${lastCheck.passed ? "" : ", which failed"})`
-						: "files changed and no test, type check, build, or lint command ran afterwards",
-				};
-			}
+			if (pending) return { ...base, status: "unverified", detail: this.pendingDetail(pending) };
 			return { ...base, status: "verified" };
 		})();
 		this.lastReport = report;

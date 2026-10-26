@@ -1,7 +1,7 @@
 import type { AgentTool } from "@relay-harness/agent-core";
 import { fauxAssistantMessage, fauxToolCall, type TranscriptContext } from "@relay-harness/ai";
 import { Type } from "typebox";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { HARNESS_CONSTRAINTS_ENTRY } from "../../src/core/harness-core.ts";
 import {
 	createHarness,
@@ -180,5 +180,109 @@ describe("AgentSession harness core", () => {
 		expect(resumed.session.harnessCore.core.alignment?.constraints.list().map((c) => c.text)).toEqual([
 			"Never touch package-lock.json.",
 		]);
+	});
+	it("keeps an extension's prompt out of the developer's constraints", async () => {
+		const { harness } = await create({
+			extensionFactories: [
+				(relay) => {
+					relay.registerCommand("plan", {
+						description: "Send a prompt as an extension",
+						handler: async (_args, ctx) =>
+							relay.sendUserMessage(
+								"Do not change any file except the questionnaire.",
+								ctx.isIdle() ? undefined : { deliverAs: "followUp" },
+							),
+					});
+				},
+			],
+		});
+		harness.setResponses([fauxAssistantMessage("Questionnaire written.")]);
+
+		await harness.session.prompt("/plan");
+		// The extension's message starts its own run.
+		await vi.waitFor(() => expect(getUserTexts(harness)).toHaveLength(1));
+		await harness.session.agent.waitForIdle();
+		expect(harness.session.harnessCore.core.alignment?.constraints.list()).toEqual([]);
+
+		harness.setResponses([fauxAssistantMessage("Understood.")]);
+		await harness.session.prompt("Never touch package-lock.json.");
+		expect(harness.session.harnessCore.core.alignment?.constraints.list().map((c) => c.text)).toEqual([
+			"Never touch package-lock.json.",
+		]);
+	});
+
+	it("follows the branch when the session tree is navigated", async () => {
+		const { harness } = await create();
+		harness.setResponses([fauxAssistantMessage("First done."), fauxAssistantMessage("Second done.")]);
+
+		await harness.session.prompt("Fix the parser. Never use any in the new code.");
+		const firstBranchLeaf = harness.sessionManager.getLeafId();
+		await harness.session.prompt("Now the lexer. Do not edit the tests.");
+		const core = harness.session.harnessCore.core;
+		expect(core.alignment?.constraints.list().map((c) => c.text)).toEqual([
+			"Never use any in the new code.",
+			"Do not edit the tests.",
+		]);
+
+		await harness.session.navigateTree(firstBranchLeaf as string);
+
+		expect(core.alignment?.constraints.list().map((c) => c.text)).toEqual(["Never use any in the new code."]);
+	});
+
+	it("classifies a tool by the hints it declares about itself", async () => {
+		const { harness } = await create({
+			extensionFactories: [
+				(relay) => {
+					const parameters = Type.Object({});
+					const execute = async () => ({ content: [{ type: "text" as const, text: "ok" }], details: {} });
+					relay.registerTool({
+						name: "list_issues",
+						label: "List",
+						description: "d",
+						parameters,
+						annotations: { readOnlyHint: true },
+						execute,
+					});
+					relay.registerTool({
+						name: "drop_table",
+						label: "Drop",
+						description: "d",
+						parameters,
+						annotations: { destructiveHint: true },
+						execute,
+					});
+					relay.registerTool({
+						name: "post_comment",
+						label: "Comment",
+						description: "d",
+						parameters,
+						annotations: { readOnlyHint: false, openWorldHint: true },
+						execute,
+					});
+					relay.registerTool({ name: "plain", label: "Plain", description: "d", parameters, execute });
+				},
+			],
+		});
+		const classify = (name: string) =>
+			harness.session.harnessCore.core.classify({ type: "toolCall", id: "1", name, arguments: {} }).kind;
+
+		expect(classify("list_issues")).toBe("read");
+		expect(classify("drop_table")).toBe("destructive");
+		expect(classify("post_comment")).toBe("external");
+		expect(classify("plain")).toBe("execute");
+	});
+
+	it("blocks a write outside the workspace and a write to a hook, until the request names the file", async () => {
+		const { harness, calls } = await create();
+		harness.setResponses([
+			fauxAssistantMessage(fauxToolCall("edit", { path: "/etc/cron.d/job" }), { stopReason: "toolUse" }),
+			fauxAssistantMessage(fauxToolCall("edit", { path: ".git/hooks/pre-commit" }), { stopReason: "toolUse" }),
+			fauxAssistantMessage(fauxToolCall("edit", { path: "src/a.ts" }), { stopReason: "toolUse" }),
+			fauxAssistantMessage("Stopped before the risky writes."),
+		]);
+
+		await harness.session.prompt("Tidy the code, but ask before anything unusual.");
+
+		expect(calls).toEqual(["edit:src/a.ts"]);
 	});
 });

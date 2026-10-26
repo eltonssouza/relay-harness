@@ -114,8 +114,11 @@ interface UserMessage {
   role: "user";
   content: string | (TextContent | ImageContent)[];
   timestamp: number;
+  origin?: "extension" | "harness";
 }
 ```
+
+`origin` is absent when the developer wrote the message. Messages from `relay.sendUserMessage()` carry `"extension"`; the harness's own verification requests carry `"harness"`. The [harness core](harness-core.md) reads only the developer's messages for constraints, approvals and corrections.
 
 ### AssistantMessage
 

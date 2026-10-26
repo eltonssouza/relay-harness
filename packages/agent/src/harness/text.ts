@@ -1,7 +1,7 @@
 import { contentText } from "@relay-harness/ai";
 import type { AgentMessage } from "../types.ts";
 
-/** Prefix of user-role messages the harness writes itself, so it does not observe its own output. */
+/** Prefix of user-role messages older code wrote for the harness before messages carried an origin. */
 export const HARNESS_MESSAGE_PREFIX = "[harness";
 
 /** Plain text of a user, assistant, or tool-result message. Other roles yield an empty string. */
@@ -17,9 +17,21 @@ export function messageText(message: AgentMessage): string {
 	return "";
 }
 
-/** Whether `message` was written by the developer rather than by the harness. */
+export type MessageOrigin = "developer" | "extension" | "harness";
+
+/**
+ * Who wrote a user-role message, or undefined for other roles. The typed `origin` decides; a
+ * message without one that starts with the legacy harness prefix is still the harness's.
+ */
+export function messageOrigin(message: AgentMessage): MessageOrigin | undefined {
+	if (message.role !== "user") return undefined;
+	if (message.origin) return message.origin;
+	return messageText(message).trimStart().startsWith(HARNESS_MESSAGE_PREFIX) ? "harness" : "developer";
+}
+
+/** Whether `message` was written by the developer rather than by an extension or the harness. */
 export function isDeveloperMessage(message: AgentMessage): boolean {
-	return message.role === "user" && !messageText(message).trimStart().startsWith(HARNESS_MESSAGE_PREFIX);
+	return messageOrigin(message) === "developer";
 }
 
 /**
