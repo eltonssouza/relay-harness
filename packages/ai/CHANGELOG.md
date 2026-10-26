@@ -4,6 +4,10 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Added
+
+- Added the optional `UserMessage.origin` (`"extension"` or `"harness"`). A message without it was written by the developer.
+
 ## [0.4.1] - 2026-10-21
 
 ## [0.3.2] - 2026-10-18

@@ -4,13 +4,38 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### New Features
+
+- The harness checks work against evidence, not wording. A file counts as changed whether the `edit` or `write` tool, or the shell (`sed -i`, `tee`, `> file`, `cat > f <<EOF`), changed it. A check counts only if it ran tests, its exit code reaches the tool and it covers the changed files, so `ls build`, `npm test | tail` and a test run in another package no longer count. A turn that ends with unverified changes gets one verification request. See [Evidence](docs/harness-core.md#evidence).
+- The harness asks before the risky commands that models actually write: `git -C dir push`, `rm -f`, `find -exec rm`, `docker system prune`, `rsync --delete`, `scp` to another host, inline `python -c` or `node -e` that deletes files, and writes outside the workspace or to `.git/hooks`, `.husky`, `.relay/settings.json` and `.ssh`. MCP tools are classified by the hints they declare (`readOnlyHint`, `destructiveHint`, `openWorldHint`). See [Authorization](docs/harness-core.md#alignment).
+- `npm run bench:harness` measures the harness offline, with no model: labelled risky and safe commands, checks and look-alikes, completion scenarios and a recorded session. It reports how often the harness stops fine work and how often it lets unverified work through. See [Measuring the rules](docs/harness-core.md#measuring-the-rules).
+
+### Breaking Changes
+
+- Removed subordinate-worker delegation: the `/work` command and the `propose_work`, `execute_work`, `review_work` and `complete_work` tools. Ask for ordinary work directly.
+- Removed the Laya training stack: `/laya learn`, `train`, `models`, `use`, `seed` and `export`, the learning corpora and the learned-task memory. The shipped checkpoint and the inference runtimes (local CPU, native and Docker) stay.
+- Removed the static security audit: `/audit-app`, `/audit-app-status`, `/audit-app-resume`, `/audit-app-cancel`, the audit tools and `RELAY_AUDIT_ENABLED`.
+- Removed `/intake`, `/logbook` and the legacy logbook import. Native memory and project memory stay.
+- Removed `/llama`. Point Relay at a local llama.cpp server with `models.json`, or use Ollama.
+- Removed the experimental remote stack: `relay client`, `relay server` and `RELAY_EXPERIMENTAL`, the `@relay-harness/coding-agent/client` and `@relay-harness/coding-agent/experimental/plugin` exports, and the packages `@relay-harness/chord`, `@relay-harness/client`, `@relay-harness/durable`, `@relay-harness/protocol` and `@relay-harness/server`, which stay at 0.4.1 on npm.
+- Laya no longer ships a model registry. Its tiers for Anthropic, OpenAI, OpenAI Codex, GitHub Copilot, Google and Google Antigravity come from the catalog prices, and every other provider needs `laya.models` or `laya.modelGroups`. See [Laya](docs/laya.md).
+
 ### Added
 
 - Added opt-in native memory on built-in SQLite: memories with sources and scope isolation, hybrid lexical and optional semantic search, a temporal knowledge graph, an evolving user profile with boundaries, and a budgeted memory context for each request. Enable it with `--native-memory` or `RELAY_NATIVE_MEMORY=1`. See [Native memory](docs/native-memory.md).
+- Added `/skills-audit`, which audits each skill's structure for progressive disclosure. It replaces the skills pillar of the harness core. See [Skill audit](docs/harness-core.md#skill-audit).
+- The harness restates its constraints and corrections after you navigate the session tree, so a branch no longer inherits the rules of another one.
+- Messages sent by extensions and by the harness carry an `origin`. A prompt from `/init`, `/goal` or `/agent`, or a harness verification request, no longer counts as a constraint, an approval or a correction. See [Message types](docs/message-types.md).
 
 ### Changed
 
-- Renamed the static audit commands to `/audit-app`, `/audit-app-status`, `/audit-app-resume` and `/audit-app-cancel`. They are registered by default, and `/audit-app` with no arguments now configures itself for the current repository and selected model after one consent dialog; no repository content is read before consent. Set `RELAY_AUDIT_ENABLED=0` to remove them. See [Universal static audit](docs/audit.md).
+- A check scoped to another package, a run that executed no test and a check whose exit code is hidden by a pipe, `||` or a later command no longer count as verification. `ng test`, `ng lint`, `ng build` and `ng e2e` count.
+- A question followed by an action ("Why is this slow? Make it faster.") is treated as a request. Messages in languages the harness does not recognize are never blocked as questions.
+- Engineering role profiles load by name with `/agent <role>` and no longer depend on Laya agent IDs.
+
+### Fixed
+
+- Fixed an unhandled rejection from the background Laya install when the extension context went stale.
 
 ## [0.4.1] - 2026-10-21
 
