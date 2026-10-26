@@ -7,7 +7,7 @@
 
 Relay is a terminal coding agent and the harness around it. The agent reads files, runs commands, edits code, and works through multi-step tasks with any model: a hosted provider, a subscription, or a local endpoint.
 
-The harness is the part that stays the same when the model changes. Four rules run on every request, whatever model is behind it, and they need no extra model call. Relay is minimal by design: it ships strong defaults and leaves sub-agents, plan mode, and similar features to extensions you write or install.
+The harness is the part that stays the same when the model changes. Three rules run on every request, whatever model is behind it, and they need no extra model call. Relay is minimal by design: it ships strong defaults and leaves sub-agents, plan mode, and similar features to extensions you write or install.
 
 ## Why a harness
 
@@ -18,7 +18,6 @@ Coding agents fail in predictable ways. They ignore a constraint you stated thre
 | Alignment | The agent forgets constraints, treats questions as permission to edit, runs destructive commands. | Keeps your standing rules as state and restates them on every request. Asks before destructive or external commands. Blocks the first edit in a turn where you only asked a question.                                                                    |
 | Evidence  | The agent claims success without a passing check.                                                 | Records what changed and which checks passed. A completion claim without a passing check after the last change gets one verification request. Checks with masked exit codes (`\| tail`, `\|\| true`) do not count. Large changes and files are flagged. |
 | Context   | Old tool results describe states that no longer exist.                                            | Sends recent results verbatim, replaces old large ones with one-line stubs, and restates a compact progress digest.                                                                                                                                      |
-| Skills    | Skill structure changes how the agent uses it, and nobody measures it.                            | Treats`SKILL.md` as a router, measures which resources lead to actions, and audits skill structure.                                                                                                                                                    |
 
 Inspect the state with `/harness` and tune it through the `harnessCore` settings. See [Harness Core](packages/coding-agent/docs/harness-core.md).
 
@@ -67,7 +66,7 @@ Use `nix build .` or `nix run .` to build or run your checkout. Nix builds are o
 - Script it with [print and JSON modes](packages/coding-agent/docs/cli.md), or control a separate process over [RPC](packages/coding-agent/docs/rpc.md).
 - Embed it in an application with the [TypeScript SDK](packages/coding-agent/docs/sdk.md).
 - Extend it with [extensions](packages/coding-agent/docs/extensions.md), [skills](packages/coding-agent/docs/skills.md), [prompt templates](packages/coding-agent/docs/prompt-templates.md), [themes](packages/coding-agent/docs/themes.md), and [MCP servers](packages/coding-agent/docs/mcp.md). Share them as [Relay packages](packages/coding-agent/docs/packages.md) through npm or git.
-- Connect any model through [providers](packages/coding-agent/docs/providers.md), [custom providers](packages/coding-agent/docs/custom-provider.md), or a local [llama.cpp](packages/coding-agent/docs/llama-cpp.md) server.
+- Connect any model through [providers](packages/coding-agent/docs/providers.md), [custom providers](packages/coding-agent/docs/custom-provider.md), or a local OpenAI-compatible server such as llama.cpp's `llama-server`.
 
 Start with the [documentation index](packages/coding-agent/docs/index.md) or the [quickstart](packages/coding-agent/docs/quickstart.md).
 
@@ -81,13 +80,10 @@ This monorepo holds the Relay CLI and the libraries it is built from.
 | **[@relay-harness/agent-core](packages/agent)**                                                                          | Agent runtime with tool calling, state management, and the model-independent harness |
 | **[@relay-harness/ai](packages/ai)**                                                                                     | Unified multi-provider LLM API with model discovery                                  |
 | **[@relay-harness/tui](packages/tui)**                                                                                   | Terminal UI library with differential rendering                                      |
-| **[@relay-harness/durable](packages/durable)**                                                                           | Durable conversation, task, and document runtime                                     |
 | **[@relay-harness/mcp](packages/mcp)**                                                                                   | Standalone Model Context Protocol client                                             |
 | **[@relay-harness/codemode](packages/codemode)**                                                                         | Sandboxed JavaScript execution where the only capability is calling injected tools   |
 | **[@relay-harness/telemetry](packages/telemetry)**                                                                       | Vendor-neutral telemetry contracts and typed schemas                                 |
-| **[@relay-harness/protocol](packages/protocol)**, **[client](packages/client)**, **[server](packages/server)** | Experimental remote sessions over framed CBOR                                        |
 | **[@relay-harness/evals](packages/evals)**                                                                               | Evaluation harness for the coding agent                                              |
-| **[@relay-harness/chord](packages/chord)**                                                                              | Application-composition runtime for services, replicated state, RPC, and plugins     |
 
 ## Permissions and containerization
 

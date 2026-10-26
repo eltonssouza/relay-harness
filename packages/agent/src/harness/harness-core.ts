@@ -1,5 +1,5 @@
 /**
- * Harness core: the four pillars composed on top of the agent loop.
+ * Harness core: the three pillars composed on top of the agent loop.
  *
  * Every pillar acts on the loop's provider-neutral hooks (`beforeToolCall`, `transformContext`,
  * `finishTurn`) and on its events, never on a provider API, so the behavior is the same for any
@@ -12,7 +12,6 @@
  * | Evidence    | `finishTurn`       | send a verification request when a claim lacks evidence    |
  * | Evidence    | events, `transformContext` | flag oversized changes and files (needs a probe)   |
  * | Context     | `transformContext` | recent tool window, batched elision, progress digest       |
- * | Skills      | events             | resource uptake, fanout, and phase telemetry per run       |
  */
 
 import type { AssistantMessage } from "@relay-harness/ai";
@@ -38,7 +37,6 @@ import {
 	type EvidenceLedgerOptions,
 	formatVerificationRequest,
 } from "./evidence.ts";
-import { type SkillUsageReport, SkillUsageTracker, type SkillUsageTrackerOptions } from "./skills.ts";
 import { SliceDiscipline, type SliceDisciplineOptions } from "./slices.ts";
 import { isDeveloperMessage, messageText } from "./text.ts";
 
@@ -46,16 +44,13 @@ export type HarnessCoreEvent =
 	| { type: "tool_blocked"; toolName: string; effect: ToolEffect; kind: "authorization" | "scope"; reason: string }
 	| { type: "tool_authorized"; toolName: string; effect: ToolEffect; via: "request" | "grant" | "authorizer" }
 	| { type: "completion_assessed"; report: CompletionReport }
-	| { type: "context_elided"; stats: ContextPolicyStats }
-	| { type: "skill_usage"; report: SkillUsageReport };
+	| { type: "context_elided"; stats: ContextPolicyStats };
 
 /** Options per pillar. `false` disables a pillar; omitting it uses defaults. */
 export interface HarnessCoreOptions {
 	alignment?: AlignmentPolicyOptions | false;
 	evidence?: EvidenceLedgerOptions | false;
 	context?: Omit<ContextPolicyOptions, "classifyEffect"> | false;
-	/** Skill telemetry needs to know the skills, so it is off unless configured. */
-	skills?: SkillUsageTrackerOptions | false;
 	/** Change-size and file-growth signals need a workspace probe, so they are off unless configured. */
 	slices?: SliceDisciplineOptions | false;
 	/**
@@ -69,12 +64,11 @@ export interface HarnessCoreOptions {
 	onEvent?: (event: HarnessCoreEvent) => void;
 }
 
-/** The four pillars, usable directly by any runtime or installed on an {@link Agent}. */
+/** The three pillars, usable directly by any runtime or installed on an {@link Agent}. */
 export class HarnessCore {
 	readonly alignment?: AlignmentPolicy;
 	readonly evidence?: EvidenceLedger;
 	readonly context?: ContextWindowPolicy;
-	readonly skills?: SkillUsageTracker;
 	readonly slices?: SliceDiscipline;
 	readonly verifyCommands: readonly string[];
 	private readonly classifyEffect?: ToolEffectClassifier;
@@ -91,18 +85,16 @@ export class HarnessCore {
 		if (options.context !== false) {
 			this.context = new ContextWindowPolicy({ ...options.context, classifyEffect: options.classifyEffect });
 		}
-		if (options.skills) this.skills = new SkillUsageTracker(options.skills);
 	}
 
 	classify(toolCall: AgentToolCall): ToolEffect {
 		return classifyToolCall(toolCall, this.classifyEffect, this.verifyCommands);
 	}
 
-	/** A developer request starts: reset per-request evidence, slices, and skill telemetry. */
+	/** A developer request starts: reset per-request evidence and slices. */
 	beginRequest(text: string): void {
 		this.evidence?.beginRequest(requestsAction(text));
 		this.slices?.beginRequest();
-		this.skills?.beginRun();
 	}
 
 	/**
@@ -141,7 +133,6 @@ export class HarnessCore {
 	recordToolOutcome(toolCall: AgentToolCall, isError: boolean): void {
 		const effect = this.classify(toolCall);
 		this.evidence?.recordToolOutcome(effect, isError);
-		this.skills?.recordToolCall(effect, isError);
 	}
 
 	/** Project the messages of one provider request: context policy plus harness state. */
@@ -264,8 +255,6 @@ export class HarnessCore {
 				case "agent_end": {
 					// No workspace measurement outlives the run that started it.
 					await this.slices?.refresh();
-					const report = this.skills?.report();
-					if (report && report.events.length > 0) this.onEvent?.({ type: "skill_usage", report });
 					break;
 				}
 			}

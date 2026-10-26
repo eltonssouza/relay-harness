@@ -34,7 +34,7 @@ describe("built-in task execution", () => {
 		};
 		const harness = await createHarness({
 			sessionManager,
-			settings: { laya: { autostart: false, memory: false, telemetry: false } },
+			settings: { laya: { autostart: false, telemetry: false } },
 			extensionFactories: builtInExtensions,
 			initialActiveToolNames: ["write"],
 			tools: [write],

@@ -54,7 +54,6 @@ let
       }
 
       mkdir -p "$out"
-      pack_package packages/chord chord
       pack_package packages/telemetry telemetry
       pack_package packages/ai ai
       pack_package packages/tui tui
@@ -72,7 +71,6 @@ let
     # The install lock points internal packages at registry releases. Replace
     # them with the packages built from this checkout.
     packageSourceOverrides = {
-      "node_modules/@relay-harness/chord" = workspacePackages + "/chord.tgz";
       "node_modules/@relay-harness/agent-core" = workspacePackages + "/agent.tgz";
       "node_modules/@relay-harness/ai" = workspacePackages + "/ai.tgz";
       "node_modules/@relay-harness/codemode" = workspacePackages + "/codemode.tgz";

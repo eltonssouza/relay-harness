@@ -6,7 +6,6 @@ import {
 	CAPABILITY_TIERS,
 	type CapabilityTier,
 	COMPLEXITY_LEVELS,
-	LAYA_QUESTIONS,
 	LIBRARY_CATEGORY_IDS,
 	type LibraryCategoryId,
 	REASONING_EFFORTS,
@@ -25,8 +24,8 @@ import {
 
 /** Laya's System 1 answer about one request: what the task is and how it recommends running it. */
 export interface TaskAssessment {
-	/** Laya's answers, the labels of a similar learned task, or keyword rules. */
-	source: "laya" | "memory" | "heuristic";
+	/** Laya's answers, or keyword rules. */
+	source: "laya" | "heuristic";
 	/** True when the opt-in simple-task gate skipped Laya inference. */
 	heuristicFastPath?: boolean;
 	/** Null means abstention: keyword fallbacks never invent library confidence. */
@@ -98,25 +97,6 @@ export function assessmentFromAnswers(answers: Record<string, ClassifierAnswer>)
 		securitySensitive: yes(answers, "security_sensitive"),
 		confidence: Math.min(type.confidence, tier.confidence, effort.confidence),
 	};
-}
-
-/**
- * The assessment a labeled exercise describes, read as answers given with full certainty. Throws when
- * a label is missing or not an option.
- */
-export function assessmentFromLabels(labels: Readonly<Record<string, string | number | boolean>>): TaskAssessment {
-	const answers: Record<string, ClassifierAnswer> = {};
-	for (const [id, question] of Object.entries(LAYA_QUESTIONS)) {
-		const value = labels[id];
-		if (question.type === "choice" && typeof value === "string") {
-			answers[id] = { type: "choice", choice: value, probabilities: { [value]: 1 }, confidence: 1 };
-		} else if (question.type === "score" && typeof value === "number") {
-			answers[id] = { type: "score", score: value, confidence: 1 };
-		} else if (question.type === "bool" && typeof value === "boolean") {
-			answers[id] = { type: "bool", probability: value ? 1 : 0 };
-		}
-	}
-	return assessmentFromAnswers(answers);
 }
 
 const has = (pattern: RegExp, text: string) => pattern.test(text);

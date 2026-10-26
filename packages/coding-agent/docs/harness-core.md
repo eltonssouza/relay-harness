@@ -1,15 +1,14 @@
 # Harness Core
 
-The harness core is four rules that apply to every model Relay runs: Claude, GPT, Gemini, Grok, or a local model. They act on the agent loop's hooks and events, not on a provider API, and need no extra model call. Each one addresses a measured failure of coding agents.
+The harness core is three rules that apply to every model Relay runs: Claude, GPT, Gemini, Grok, or a local model. They act on the agent loop's hooks and events, not on a provider API, and need no extra model call. Each one addresses a measured failure of coding agents.
 
 | Pillar | Failure it addresses | What the harness does |
 |---|---|---|
 | Alignment | Agents violate explicit developer constraints (38% of misalignment), treat questions as permission to edit, and run destructive commands. | Keeps constraints as state and restates them on every request. Asks before destructive or external commands. Stops the first edit in a turn where you only asked a question. Works as a pair: records your corrections and offers constraints and corrections as candidates for AGENTS.md. |
 | Evidence | Agents report "done" when the work failed. LLM judges miss most of these cases. | Records what tool calls actually changed and checked. A completion claim without a passing check after the last change gets one verification request. Counts only checks whose exit code is not masked, optionally only the project's declared commands, and flags oversized changes and files. |
 | Context | Old tool results describe states that no longer exist and grow the context. | Sends recent tool results verbatim, replaces old large ones with one-line stubs, and restates a compact progress digest. |
-| Skills | A skill's organization changes how the agent uses it, and nobody measures it. | Tells the model to treat `SKILL.md` as a router, measures which skill resources lead to actions, and audits skill structure. |
 
-All four are enabled by default. Inspect them with `/harness`; configure them with [`harnessCore` settings](settings.md#harness-core).
+All three are enabled by default. Inspect them with `/harness`; configure them with [`harnessCore` settings](settings.md#harness-core).
 
 ## Alignment
 
@@ -65,9 +64,9 @@ At each request, before the provider call:
 
 The session file is never changed; only the request is. Replacing an old message invalidates the provider's prompt cache after it, so replacement happens in batches of `harnessCore.contextBatchSize` results (default 6). Between batches the request prefix stays identical and the cache keeps hitting. Compaction still applies when the context approaches the model's limit; the context pillar makes that happen later.
 
-## Skills
+## Skill audit
 
-The skills section of the system prompt tells the model to treat a skill file as a router and to load the references and scripts it points to when a step needs them. During each run Relay records, per skill, how many resources were loaded (fanout), whether each load was followed by an action within three tool calls (effective uptake), when in the run loads happened, and revisits. `/harness` shows the last run's numbers and audits each `SKILL.md` skill for:
+Skills are not a pillar: the harness does not change what the agent does with them. The skills section of the system prompt tells the model to treat a skill file as a router and to load the references and scripts it points to when a step needs them. `/skills-audit` checks each `SKILL.md` skill against that structure and lists:
 
 - an entry file over 300 lines with no resources (consider splitting into references; keep strict formats and numeric contracts in the entry), or over 300 lines although it has resources
 - a `description` over 300 characters (it is all the model reads before deciding to load the skill, and it is paid for in every request)
@@ -89,11 +88,10 @@ const uninstall = new HarnessCore({
 }).install(agent);
 ```
 
-In Relay, `session.harnessCore.core` exposes the constraint ledger, evidence ledger, context policy, and skill tracker.
+In Relay, `session.harnessCore.core` exposes the constraint ledger, evidence ledger, and context policy.
 
 ## Sources
 
 - Tang et al., *How Coding Agents Fail Their Users*, arXiv:2605.29442, 2026.
 - Advani, *From Confident Closing to Silent Failure: Characterizing False Success in LLM Agents*, arXiv:2606.09863, 2026.
 - Lodha et al., *Less Context, Better Agents*, arXiv:2606.10209, 2026.
-- *SkillJuror: Measuring How Agent Skill Organization Changes Runtime Behavior*, arXiv:2606.11543, 2026.

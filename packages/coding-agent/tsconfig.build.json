@@ -3,9 +3,6 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"paths": {
-			"@relay-harness/chord": ["../chord/dist/index.d.ts"],
-			"@relay-harness/chord/bundler": ["../chord/dist/bundler.d.ts"],
-			"@relay-harness/chord/node": ["../chord/dist/node.d.ts"],
 			"@relay-harness/agent-core": ["../agent/dist/index.d.ts"],
 			"@relay-harness/agent-core/*": ["../agent/dist/*.d.ts"],
 			"@relay-harness/ai": ["../ai/dist/index.d.ts"],
@@ -16,5 +13,5 @@
 		"rootDir": "./src"
 	},
 	"include": ["src/**/*.ts", "src/**/*.d.ts"],
-	"exclude": ["node_modules", "dist", "src/client", "src/experimental", "src/cli/experimental"]
+	"exclude": ["node_modules", "dist"]
 }

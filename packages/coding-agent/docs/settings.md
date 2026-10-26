@@ -89,7 +89,6 @@ See [Compaction Reference](compaction.md) for trigger, summarization, and valida
 | `harnessCore.context` | boolean | `true` | Elide old large tool results from requests and restate a progress digest. |
 | `harnessCore.contextKeepRecent` | number | `6` | Tool results always sent verbatim. |
 | `harnessCore.contextBatchSize` | number | `6` | Aged-out large results elided together, to keep the prompt cache stable. |
-| `harnessCore.skills` | boolean | `true` | Measure skill resource usage for `/harness`. |
 | `harnessCore.verifyCommands` | string[] | `[]` | The project's verification commands, such as `["npm run check", "./test.sh"]`. When set, only commands that run one of them count as evidence. |
 | `harnessCore.maxChangedLines` | number | `500` | Changed lines per request before the agent is asked to verify and report the slice. `0` disables. Needs a git repository. |
 | `harnessCore.maxFileLines` | number | `1000` | Lines per file before an edit that crosses it, or grows the file by 200 lines or more, is flagged. `0` disables. |
@@ -108,7 +107,7 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 | `laya.python` | string | Discover an existing interpreter | Python 3.10–3.13 executable path for the isolated local runtime. Python itself is not downloaded. |
 | `laya.image` | string | The image built from this Relay version | Docker image of Laya, for example one built locally with `npm run laya:image`. |
 | `laya.policy` | string | `balanced` | Cost profile: `economy`, `balanced`, `quality` or `critical`. `--laya-policy` and `/laya policy` override it. |
-| `laya.models` | object | See [laya.md](laya.md#model-registry) | Models per tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order. A tier you set replaces that tier's default list. |
+| `laya.models` | object | Derived from the catalog, see [laya.md](laya.md#model-registry) | Models per tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order. A tier you set replaces that tier's derived list. |
 | `laya.quota` | object | `1` per provider | Share of each provider's quota still available, 0 to 1, e.g. `{ "openai-codex": 0.25 }`. |
 | `laya.minConfidence` | number | `0.5` | Laya answers below this confidence raise the tier by one. |
 | `laya.heuristicFirst` | boolean | `false` | Opt-in adaptive-mode latency optimization; requires the boolean `true`. Only clear, zero-risk, zero-ambiguity keyword assessments of complexity ≤0.25 and single-line/file scope skip ONNX. Other ACI modes retain their existing assessment path, including learned-memory lookup. |
@@ -117,26 +116,7 @@ Settings of the `laya/auto` model. See [Adaptive Execution with Laya](laya.md).
 | `laya.budget.maxCostPerTask` | number | none | Provider cost already spent on the task (catalog currency, USD) at which Laya stops escalating and keeps the current model. |
 | `laya.toolRouting` | string | `advise` | `advise` names unneeded tools in the plan; `enforce` also deactivates them for the request. |
 | `laya.telemetry` | boolean | `true` | Record each routed request in `~/.relay/agent/laya/telemetry.jsonl`. |
-| `laya.memory` | boolean | `true` | Route requests similar to tasks learned with `/laya learn` by their labels, and give the running model their lessons. See [laya.md](laya.md#teach-laya-from-your-sessions). |
 | `laya.timeoutMs` | number | `60000` native, `5000` Docker | Classifier timeout before keyword rules answer instead. |
-
-### Delegation budgets
-
-These limits bound [subordinate workers](delegation.md). They do not enable the gated
-feature or expand an approved plan. Changing effective settings requires a new Laya
-proposal and cancels workers bound to the previous limits.
-
-| Setting | Default | Maximum |
-|---|---|---|
-| `delegation.maxConcurrent` | `3` | `16` |
-| `delegation.maxTasks` | `8` | `32` |
-| `delegation.maxAttempts` | `2` | `10` |
-| `delegation.maxDurationMs` | `300000` | `3600000` |
-| `delegation.maxSteps` | `40` | `1000` |
-| `delegation.maxOutputBytes` | `64000` | `4194304` |
-
-Values must be positive integers; unknown fields are rejected. `maxConcurrent` cannot
-exceed `maxTasks`. Global and trusted project settings merge normally.
 
 ### Branch summaries
 
@@ -217,7 +197,7 @@ Resource paths in user settings resolve from the agent directory. Paths in proje
 
 Resource arrays support glob exclusions with `!pattern`, exact inclusion with `+path`, and exact exclusion with `-path`. Relay loads resources listed in both user-level and project settings.
 
-The built-in extensions are named `builtin:mcp`, `builtin:llama.cpp`, `builtin:codemode`, and `builtin:tool-search` in `extensions`. They load by default; `-builtin:mcp` disables one. A `+builtin:<name>` or `-builtin:<name>` entry in project settings overrides the user setting. `relay config` lists them under Built-in. `--no-extensions` disables them too, and `-e builtin:<name>` loads one explicitly.
+The built-in extensions are named `builtin:mcp`, `builtin:ollama`, `builtin:codemode`, and `builtin:tool-search` in `extensions`. They load by default; `-builtin:mcp` disables one. A `+builtin:<name>` or `-builtin:<name>` entry in project settings overrides the user setting. `relay config` lists them under Built-in. `--no-extensions` disables them too, and `-e builtin:<name>` loads one explicitly.
 
 ## Updates, telemetry, and warnings
 

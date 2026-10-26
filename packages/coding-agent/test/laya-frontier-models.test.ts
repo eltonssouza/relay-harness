@@ -1,49 +1,103 @@
 import { describe, expect, it } from "vitest";
 import {
-	DEFAULT_MODEL_REGISTRY,
+	deriveModelRegistry,
 	PerformanceHistory,
 	QuotaManager,
 	rankCandidates,
+	type TierCatalogModel,
 } from "../src/extensions/laya/policy.ts";
 import { scopedModelRegistry } from "../src/extensions/laya/provider-scope.ts";
-import { CAPABILITY_TIERS, type CapabilityTier } from "../src/extensions/laya/questions.ts";
+import { CAPABILITY_TIERS } from "../src/extensions/laya/questions.ts";
 
-describe("Laya frontier models", () => {
-	it("maps current GitHub Copilot model families to capability tiers", () => {
-		const { registry } = scopedModelRegistry(
-			{ followProvider: true },
-			{ provider: "github-copilot", id: "gpt-6-astra" },
-		);
-		expect(registry.fast).toContain("github-copilot/claude-haiku-5.5");
-		expect(registry.fast).toContain("github-copilot/gpt-5-mini");
-		expect(registry.balanced).toContain("github-copilot/claude-sonnet-5.5");
-		expect(registry.balanced).toContain("github-copilot/gpt-5.6-terra");
-		expect(registry.balanced).toContain("github-copilot/gemini-3.8-flash");
-		expect(registry.strong).toContain("github-copilot/claude-opus-5.5");
-		expect(registry.strong).toContain("github-copilot/gpt-6-sol");
-		expect(registry.frontier).toEqual(["github-copilot/gpt-6-astra", "github-copilot/gpt-6.1-sol"]);
-	});
+function priced(provider: string, id: string, input: number, output: number): TierCatalogModel {
+	return { provider, id, cost: { input, output, cacheRead: 0, cacheWrite: 0 } };
+}
 
-	it("classifies OpenAI API models when following the OpenAI provider", () => {
-		const { registry } = scopedModelRegistry({ followProvider: true }, { provider: "openai", id: "gpt-6.1-sol" });
-		expect(registry.strong).toContain("openai/gpt-6-sol");
-		expect(registry.frontier).toEqual(["openai/gpt-6.1-sol", "openai/gpt-6-astra"]);
-	});
+const anthropic = [
+	priced("anthropic", "claude-haiku-5-5", 1, 5),
+	priced("anthropic", "claude-sonnet-5-5", 3, 15),
+	priced("anthropic", "claude-opus-5-5", 5, 25),
+];
 
-	it("retains Astra and Sol within the selected Codex provider", () => {
-		const { registry } = scopedModelRegistry(
-			{ followProvider: true },
-			{ provider: "openai-codex", id: "gpt-6-astra" },
-		);
-		expect(registry.frontier).toEqual(["openai-codex/gpt-6.1-sol", "openai-codex/gpt-6-astra"]);
-	});
-
-	it("never offers Fable when following the selected Anthropic provider", () => {
-		const { registry } = scopedModelRegistry(
-			{ followProvider: true },
-			{ provider: "anthropic", id: "claude-fable-5" },
-		);
+describe("Laya tiers derived from catalog prices", () => {
+	it("maps three price levels of a provider to fast, balanced and strong", () => {
+		const registry = deriveModelRegistry(anthropic);
+		expect(registry.fast).toEqual(["anthropic/claude-haiku-5-5"]);
+		expect(registry.balanced).toEqual(["anthropic/claude-sonnet-5-5"]);
+		expect(registry.strong).toEqual(["anthropic/claude-opus-5-5"]);
 		expect(registry.frontier).toEqual([]);
+	});
+
+	it("adds frontier at a fourth price level", () => {
+		const registry = deriveModelRegistry([...anthropic, priced("anthropic", "claude-next", 15, 75)]);
+		expect(registry.frontier).toEqual(["anthropic/claude-next"]);
+		expect(registry.strong).toEqual(["anthropic/claude-opus-5-5"]);
+	});
+
+	it("keeps models that share a price, such as effort variants, in one tier", () => {
+		const registry = deriveModelRegistry([
+			priced("google-antigravity", "gemini-flash-low", 0.3, 2.5),
+			priced("google-antigravity", "gemini-flash-high", 0.3, 2.5),
+			priced("google-antigravity", "gemini-pro-low", 1.25, 10),
+			priced("google-antigravity", "gemini-pro-high", 1.25, 10),
+			priced("google-antigravity", "claude-opus-low", 5, 25),
+		]);
+		expect(registry.fast).toEqual(["google-antigravity/gemini-flash-high", "google-antigravity/gemini-flash-low"]);
+		expect(registry.balanced).toEqual(["google-antigravity/gemini-pro-high", "google-antigravity/gemini-pro-low"]);
+		expect(registry.strong).toEqual(["google-antigravity/claude-opus-low"]);
+	});
+
+	it("derives each provider on its own price scale", () => {
+		const registry = deriveModelRegistry([
+			...anthropic,
+			priced("cheap", "small", 0.01, 0.02),
+			priced("cheap", "large", 0.5, 1),
+		]);
+		expect(registry.fast).toEqual(["anthropic/claude-haiku-5-5", "cheap/small"]);
+		expect(registry.strong).toEqual(["anthropic/claude-opus-5-5", "cheap/large"]);
+	});
+
+	it("gives a provider with one price level no tiers", () => {
+		const registry = deriveModelRegistry([priced("lmstudio", "qwen-7b", 0, 0), priced("lmstudio", "qwen-32b", 0, 0)]);
+		expect(Object.values(registry).flat()).toEqual([]);
+	});
+
+	it("is deterministic regardless of catalog order", () => {
+		expect(deriveModelRegistry([...anthropic].reverse())).toEqual(deriveModelRegistry(anthropic));
+	});
+});
+
+describe("provider-scoped registry from the catalog", () => {
+	const catalog = [
+		...anthropic,
+		priced("anthropic", "claude-fable-5-1", 15, 75),
+		priced("openai", "mini", 0.4, 1.6),
+		priced("openai", "main", 2, 8),
+		priced("openai", "pro", 15, 60),
+	];
+
+	it("never counts or offers Fable, which is not an eligible model", () => {
+		const { registry } = scopedModelRegistry(
+			{ followProvider: true },
+			{ provider: "anthropic", id: "claude-opus-5-5" },
+			catalog,
+		);
+		expect(Object.values(registry).flat()).not.toContain("anthropic/claude-fable-5-1");
+		expect(registry.frontier).toEqual([]);
+		expect(registry.strong).toEqual(["anthropic/claude-opus-5-5"]);
+	});
+
+	it("retains the selected provider's derived tiers when local models were configured", () => {
+		const settings = { followProvider: true, models: { fast: ["lmstudio/qwen-7b"] } };
+		expect(
+			scopedModelRegistry(settings, { provider: "anthropic", id: "claude-sonnet-5-5" }, catalog).registry.fast,
+		).toEqual(["anthropic/claude-haiku-5-5"]);
+	});
+
+	it("keeps every provider's models when not following one", () => {
+		const { registry } = scopedModelRegistry({}, undefined, catalog);
+		expect(registry.fast).toEqual(["anthropic/claude-haiku-5-5", "openai/mini"]);
+		expect(registry.strong).toEqual(["anthropic/claude-opus-5-5", "openai/pro"]);
 	});
 
 	it("does not leak cloud models into an explicitly mapped local group", () => {
@@ -53,58 +107,18 @@ describe("Laya frontier models", () => {
 				modelGroups: { "local-qwen": { balanced: ["lmstudio/qwen/qwen3.8-27b"] } },
 			},
 			{ provider: "lmstudio", id: "qwen/qwen3.8-27b" },
+			catalog,
 		);
 		expect(registry.balanced).toEqual(["lmstudio/qwen/qwen3.8-27b"]);
 		expect(registry.frontier).toEqual([]);
 	});
 
-	it("maps all seven Antigravity model families to explicit capability tiers", () => {
-		const { registry, scope } = scopedModelRegistry(
-			{ followProvider: true },
-			{ provider: "google-antigravity", id: "gemini-3.8-flash" },
-		);
-		expect(scope).toBe("google-antigravity");
-		expect(registry.fast).toContain("google-antigravity/gemini-3.7-flash");
-		expect(registry.fast).toContain("google-antigravity/gemini-3.6-flash");
-		expect(registry.balanced).toContain("google-antigravity/gemini-3.8-flash");
-		expect(registry.balanced).toContain("google-antigravity/claude-sonnet-5-5");
-		expect(registry.balanced).toContain("google-antigravity/gpt-oss-120b-medium");
-		expect(registry.strong).toContain("google-antigravity/claude-opus-5-5");
-		expect(registry.strong).toContain("google-antigravity/gemini-3.1-pro");
-		expect(registry.frontier).toEqual([]);
-		expect(
-			Object.values(registry)
-				.flat()
-				.every((ref) => ref.startsWith("google-antigravity/")),
-		).toBe(true);
-	});
-
-	it.each([
-		["fast", "gemini-3.7-flash", ["low", "medium", "high"]],
-		["fast", "gemini-3.6-flash", ["low", "medium", "high"]],
-		["balanced", "gemini-3.8-flash", ["low", "medium", "high"]],
-		["balanced", "claude-sonnet-5-5", ["low", "medium", "high"]],
-		["strong", "claude-opus-5-5", ["low", "medium", "high"]],
-		["strong", "gemini-3.1-pro", ["low", "high"]],
-	] as const)("recognizes %s variants of %s in provider-following mode", (tier, id, efforts) => {
-		for (const effort of efforts) {
-			const modelId = `${id}-${effort}`;
-			const { registry } = scopedModelRegistry(
-				{ followProvider: true },
-				{ provider: "google-antigravity", id: modelId },
-			);
-			expect(registry[tier]).toContain(`google-antigravity/${modelId}`);
-		}
-	});
-
 	it.each(["fast", "balanced", "strong"] as const)(
-		"can route a %s task using only Antigravity credentials",
+		"can route a %s task using only one provider's credentials",
 		(requiredTier) => {
-			const { registry } = scopedModelRegistry({ followProvider: false });
+			const { registry } = scopedModelRegistry({ followProvider: false }, undefined, anthropic);
 			const candidates = CAPABILITY_TIERS.flatMap((tier) =>
-				(registry[tier] ?? [])
-					.filter((ref) => ref.startsWith("google-antigravity/"))
-					.map((ref, order) => ({ ref, provider: "google-antigravity", tier, order })),
+				(registry[tier] ?? []).map((ref, order) => ({ ref, provider: "anthropic", tier, order })),
 			);
 			const ranked = rankCandidates(candidates, {
 				requiredTier,
@@ -116,12 +130,12 @@ describe("Laya frontier models", () => {
 				quota: new QuotaManager(),
 			});
 			expect(ranked[0].tier).toBe(requiredTier);
-			expect(ranked[0].provider).toBe("google-antigravity");
+			expect(ranked[0].provider).toBe("anthropic");
 		},
 	);
 
-	it("keeps user-defined tier overrides and Antigravity group boundaries", () => {
-		const overridden = scopedModelRegistry({ models: { balanced: ["custom/model"] } });
+	it("keeps user-defined tier overrides and group boundaries", () => {
+		const overridden = scopedModelRegistry({ models: { balanced: ["custom/model"] } }, undefined, catalog);
 		expect(overridden.registry.balanced).toEqual(["custom/model"]);
 		const grouped = scopedModelRegistry(
 			{
@@ -134,18 +148,9 @@ describe("Laya frontier models", () => {
 				},
 			},
 			{ provider: "google-antigravity", id: "claude-sonnet-5-5" },
+			catalog,
 		);
 		expect(grouped.registry.fast).toEqual([]);
 		expect(grouped.registry.balanced).toEqual(["google-antigravity/claude-sonnet-5-5"]);
-	});
-
-	it("registers each Antigravity model in only one tier", () => {
-		const refs = Object.values(DEFAULT_MODEL_REGISTRY)
-			.flat()
-			.filter((ref) => ref.startsWith("google-antigravity/"));
-		expect(new Set(refs).size).toBe(refs.length);
-		for (const tier of ["fast", "balanced", "strong"] satisfies CapabilityTier[]) {
-			expect(DEFAULT_MODEL_REGISTRY[tier].some((ref) => ref.startsWith("google-antigravity/"))).toBe(true);
-		}
 	});
 });

@@ -13,7 +13,6 @@ import lockfile from "proper-lockfile";
 import { CONFIG_DIR_NAME, getAgentDir } from "../config.ts";
 import { normalizePath, resolvePath } from "../utils/paths.ts";
 import { stripBom } from "../utils/text.ts";
-import type { DelegationLimits } from "./delegation/limits.ts";
 import { DEFAULT_HTTP_IDLE_TIMEOUT_MS, parseHttpIdleTimeoutMs } from "./http-dispatcher.ts";
 
 export interface CompactionModelOverride {
@@ -33,7 +32,7 @@ export interface CompactionSettings {
 	modelOverrides?: Record<string, CompactionModelOverride>; // exact "provider/modelId" keys
 }
 
-/** The four harness pillars. Each defaults to enabled; changes apply to sessions created afterwards. */
+/** The three harness pillars. Each defaults to enabled; changes apply to sessions created afterwards. */
 export interface HarnessCoreSettings {
 	alignment?: boolean; // default: true - developer constraints, authorization gate, question scope guard
 	authorizationGate?: boolean; // default: true - require authorization for destructive and external commands
@@ -42,7 +41,6 @@ export interface HarnessCoreSettings {
 	context?: boolean; // default: true - recent tool window, batched elision, progress digest
 	contextKeepRecent?: number; // default: 6 - tool results always sent verbatim
 	contextBatchSize?: number; // default: 6 - aged-out large results per elision batch
-	skills?: boolean; // default: true - skill resource uptake telemetry
 	verifyCommands?: string[]; // default: [] - the project's checks; when set, only these count as verification
 	maxChangedLines?: number; // default: 500 - changed lines per request before the agent is asked to close the slice; 0 disables
 	maxFileLines?: number; // default: 1000 - lines per file before growth is flagged; 0 disables
@@ -197,8 +195,6 @@ export interface LayaSettings {
 	image?: string;
 	/** Write routing telemetry to the agent directory. Default: true. */
 	telemetry?: boolean;
-	/** Route requests similar to tasks learned with `/laya learn` by their labels, and show their lessons. Default: true. */
-	memory?: boolean;
 	/** Classifier timeout before keyword fallback. Default: 60000 for native CPU, 5000 for Docker. */
 	timeoutMs?: number;
 }
@@ -275,8 +271,6 @@ export interface Settings {
 	codemode?: CodemodeSettings;
 	laya?: LayaSettings;
 	adaptiveCognition?: AdaptiveCognitionSettings;
-	/** Budgets for Laya-approved subordinate workers. */
-	delegation?: Partial<DelegationLimits>;
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)
 	httpProxy?: string; // Proxy URL applied as HTTP_PROXY and HTTPS_PROXY for Relay-managed HTTP clients
 	httpIdleTimeoutMs?: number; // HTTP header/body idle timeout in milliseconds; 0 disables it
@@ -1026,7 +1020,6 @@ export class SettingsManager {
 			context: settings?.context ?? true,
 			contextKeepRecent: settings?.contextKeepRecent ?? 6,
 			contextBatchSize: settings?.contextBatchSize ?? 6,
-			skills: settings?.skills ?? true,
 			verifyCommands: settings?.verifyCommands?.filter((command) => typeof command === "string") ?? [],
 			maxChangedLines: settings?.maxChangedLines ?? 500,
 			maxFileLines: settings?.maxFileLines ?? 1000,

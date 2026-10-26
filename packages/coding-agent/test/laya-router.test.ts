@@ -22,13 +22,11 @@ import goalExtension from "../src/extensions/goal/index.ts";
 import { GOAL_ENTRY, newGoal, readGoal } from "../src/extensions/goal/state.ts";
 import {
 	assessmentFromAnswers,
-	assessmentFromLabels,
 	canUseHeuristicFastPath,
 	heuristicAssessment,
 	type TaskAssessment,
 } from "../src/extensions/laya/assessment.ts";
 import layaExtension, { budgetRefusal, LAYA_PLAN_MESSAGE } from "../src/extensions/laya/index.ts";
-import { LAYA_LESSONS_MESSAGE } from "../src/extensions/laya/memory.ts";
 import {
 	applyPolicy,
 	type Candidate,
@@ -38,10 +36,8 @@ import {
 } from "../src/extensions/laya/policy.ts";
 import { scopedModelRegistry } from "../src/extensions/laya/provider-scope.ts";
 import { LAYA_QUESTIONS, layaDecisionsFile } from "../src/extensions/laya/questions.ts";
-import { generateSeed } from "../src/extensions/laya/seed.ts";
-import { datasetFromTelemetry, historyFromTelemetry, type TelemetryRecord } from "../src/extensions/laya/telemetry.ts";
+import { historyFromTelemetry, type TelemetryRecord } from "../src/extensions/laya/telemetry.ts";
 import { evaluateToolRetrieval, retrieveTools } from "../src/extensions/laya/tool-retrieval.ts";
-import { trainingWorkspace, writeRows } from "../src/extensions/laya/training.ts";
 import { createHarness, type Harness } from "./suite/harness.ts";
 
 interface Script {
@@ -117,29 +113,6 @@ function answersFor(script: Script): Record<string, ClassifierAnswer> {
 		security_sensitive: bool(script.security),
 	};
 }
-
-/** Labels of SIMPLE_FIX in the dataset format. */
-const assessmentLabels: Record<string, string | number | boolean> = {
-	library_category: "engineering",
-	task_type: "bug_fix",
-	complexity: 1,
-	scope: "single_file",
-	risk: 0,
-	ambiguity: 0,
-	reasoning_requirement: 1,
-	capability_tier: "fast",
-	reasoning_effort: "low",
-	agent: "software-engineer",
-	validation_level: "unit_test",
-	requires_write: true,
-	requires_shell: false,
-	requires_tests: true,
-	requires_web: false,
-	requires_browser: false,
-	requires_database: false,
-	requires_git: false,
-	security_sensitive: false,
-};
 
 const assessment = (script: Partial<Script> = {}): TaskAssessment =>
 	assessmentFromAnswers(answersFor({ ...SIMPLE_FIX, ...script }));
@@ -233,14 +206,17 @@ describe("laya policy", () => {
 });
 
 describe("provider-scoped model registry", () => {
-	it("retains Claude and Codex defaults when local models were configured", () => {
+	it("retains the derived tiers of the selected provider when local models were configured", () => {
 		const settings = { followProvider: true, models: { fast: ["lmstudio/qwen-7b"] } };
-		expect(scopedModelRegistry(settings, { provider: "anthropic", id: "claude-sonnet-5-5" }).registry.fast).toEqual([
-			"anthropic/claude-haiku-5-5",
-		]);
-		expect(scopedModelRegistry(settings, { provider: "openai-codex", id: "gpt-6.1-sol" }).registry.fast).toEqual([
-			"openai-codex/gpt-6-luna",
-		]);
+		const cost = (output: number) => ({ input: output / 5, output, cacheRead: 0, cacheWrite: 0 });
+		const catalog = [
+			{ provider: "anthropic", id: "claude-haiku-5-5", cost: cost(5) },
+			{ provider: "anthropic", id: "claude-sonnet-5-5", cost: cost(15) },
+			{ provider: "anthropic", id: "claude-opus-5-5", cost: cost(25) },
+		];
+		expect(
+			scopedModelRegistry(settings, { provider: "anthropic", id: "claude-sonnet-5-5" }, catalog).registry.fast,
+		).toEqual(["anthropic/claude-haiku-5-5"]);
 	});
 
 	it("restricts a mixed gateway to the selected family and provider", () => {
@@ -288,11 +264,6 @@ describe("laya assessment", () => {
 		const answers = answersFor(SIMPLE_FIX);
 		answers.capability_tier = { type: "choice", choice: "huge", probabilities: { huge: 1 }, confidence: 1 };
 		expect(() => assessmentFromAnswers(answers)).toThrow(/capability_tier/);
-	});
-
-	it("reads learned labels as a certain assessment", () => {
-		expect(assessmentFromLabels(assessmentLabels)).toEqual({ ...assessment(), confidence: 1, libraryConfidence: 1 });
-		expect(() => assessmentFromLabels({ ...assessmentLabels, capability_tier: "huge" })).toThrow("capability_tier");
 	});
 
 	it("uses the heuristic fast path only for clear, low-risk, small tasks", () => {
@@ -371,22 +342,7 @@ describe("laya training data", () => {
 		expect(file.decisions.complexity).toMatchObject({ type: "score" });
 	});
 
-	it("generates deterministic seed exercises whose labels are valid options", () => {
-		const rows = generateSeed(300);
-		expect(rows).toHaveLength(300);
-		expect(generateSeed(300)).toEqual(rows);
-		expect(new Set(rows.map((row) => row.state.request)).size).toBe(300);
-		for (const row of rows) {
-			for (const [id, value] of Object.entries(row.expected)) {
-				const question = LAYA_QUESTIONS[id];
-				if (question.type === "choice") expect(Object.keys(question.criteria)).toContain(value);
-				else if (question.type === "score") expect(value).toBeLessThan(question.criteria.length);
-				else expect(typeof value).toBe("boolean");
-			}
-		}
-	});
-
-	it("turns telemetry into history and evidence-labeled exercises", () => {
+	it("turns telemetry into history", () => {
 		const record = (success: boolean, outcome: TelemetryRecord["result"]["outcome"]): TelemetryRecord =>
 			({
 				request: "Fix the pager",
@@ -396,9 +352,6 @@ describe("laya training data", () => {
 			}) as TelemetryRecord;
 		const records = [record(true, "completed"), record(false, "error"), record(false, "aborted")];
 		expect(historyFromTelemetry(records).get("bug_fix:2", "anthropic/sonnet")).toEqual({ runs: 2, successes: 1 });
-		expect(datasetFromTelemetry(records)).toEqual([
-			{ state: { request: "Fix the pager" }, expected: { capability_tier: "balanced" }, source: "harness" },
-		]);
 	});
 });
 
@@ -457,9 +410,16 @@ describe("laya/auto router", () => {
 	) {
 		const anthropic = fauxProvider({
 			provider: "anthropic",
-			models: ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"].map((id) => ({
-				id,
+			// Tiers derive from price: haiku fast, sonnet balanced, opus strong; Fable is not an eligible model.
+			models: [
+				["claude-haiku-5-5", 5],
+				["claude-sonnet-5-5", 15],
+				["claude-opus-5-5", 25],
+				["claude-fable-5-1", 75],
+			].map(([id, output]) => ({
+				id: String(id),
 				reasoning: true,
+				cost: { input: Number(output) / 5, output: Number(output), cacheRead: 0, cacheWrite: 0 },
 			})),
 		});
 		const requests: string[] = [];
@@ -1062,7 +1022,7 @@ describe("laya/auto router", () => {
 		const lines = readFileSync(path, "utf8").trim().split("\n");
 		expect(lines).toHaveLength(1);
 		expect(JSON.parse(lines[0])).toMatchObject({
-			candidateCount: 2,
+			candidateCount: 1,
 			retrievedCount: 1,
 			invokedCount: 1,
 			invokedRetrievedCount: 1,
@@ -1171,70 +1131,6 @@ describe("laya/auto router", () => {
 
 		expect(dispatched()).toEqual(["haiku-5-5:minimal", "haiku-5-5:minimal"]);
 		expect(telemetry().map((record) => record.classification.source)).toEqual(["heuristic", "heuristic"]);
-	});
-
-	/** A task learned with /laya learn: the button text lives in a translation file the rules cannot know. */
-	function learnTask() {
-		writeRows(trainingWorkspace(join(agentDir, "laya")).dataset, [
-			...generateSeed(50).map((row, i) => ({ id: `r${i}`, ...row })),
-			{
-				id: "s00001",
-				state: { request: "Corrija o texto do botão Salvar na tela de pedidos" },
-				expected: {
-					...assessmentLabels,
-					task_type: "bug_fix",
-					capability_tier: "strong",
-					reasoning_effort: "high",
-					scope: "multi_module",
-				},
-				source: "session",
-				split: "train",
-				lesson: "The label comes from locales/pt-BR/orders.json, not the component; run npm run i18n:check.",
-			},
-		]);
-	}
-
-	it.each([false, true])(
-		"keeps learned labels before keyword routing with heuristicFirst=%s",
-		async (heuristicFirst) => {
-			learnTask();
-			const { harness, respond, dispatched, plan, telemetry, requests } = await setup(
-				undefined,
-				[],
-				{ heuristicFirst },
-				[],
-				{},
-				{ adaptiveCognition: { enabled: true, mode: "adaptive" } },
-			);
-
-			respond(fauxAssistantMessage("done"));
-			await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos, está cortado");
-
-			// Keyword rules would route this text fix to haiku with minimal effort.
-			expect(dispatched()).toEqual(["opus-5-5:high"]);
-			expect(plan()[0]).toContain("Lessons from similar tasks done before");
-			expect(plan()[0]).toContain("locales/pt-BR/orders.json");
-			expect(telemetry()[0].classification.source).toBe("memory");
-			expect(telemetry()[0].classification.heuristic_fast_path).toBeUndefined();
-			expect(requests).toEqual([]);
-		},
-	);
-
-	it("gives the lessons of similar tasks to a model laya/auto does not route", async () => {
-		learnTask();
-		const { harness, respond } = await setup(undefined, []);
-		await harness.session.setModel(harness.session.modelRuntime.getModel("anthropic", "claude-haiku-5-5")!);
-
-		respond(fauxAssistantMessage("done"), fauxAssistantMessage("ok"));
-		await harness.session.prompt("Corrija o texto do botão Salvar na tela de pedidos");
-		await harness.session.prompt("Write the README for the auth module");
-
-		const lessons = harness.session.messages.flatMap((m) =>
-			m.role === "custom" && m.customType === LAYA_LESSONS_MESSAGE ? [String(m.content)] : [],
-		);
-		expect(lessons).toHaveLength(1);
-		expect(lessons[0]).toMatch(/^\[laya:lessons\] Lessons from similar tasks/);
-		expect(lessons[0]).toContain("npm run i18n:check");
 	});
 });
 

@@ -7,17 +7,12 @@ import { spawnSync } from "node:child_process";
 import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentConsumer } from "./coding-agent-consumer.mjs";
 
 const packages = [
-	{ directory: "packages/chord", name: "@relay-harness/chord" },
 	{ directory: "packages/telemetry", name: "@relay-harness/telemetry" },
 	{ directory: "packages/codemode", name: "@relay-harness/codemode" },
 	{ directory: "packages/mcp", name: "@relay-harness/mcp" },
 	{ directory: "packages/ai", name: "@relay-harness/ai" },
-	{ directory: "packages/durable", name: "@relay-harness/durable" },
 	{ directory: "packages/tui", name: "@relay-harness/tui" },
 	{ directory: "packages/agent", name: "@relay-harness/agent-core" },
-	{ directory: "packages/protocol", name: "@relay-harness/protocol" },
-	{ directory: "packages/client", name: "@relay-harness/client" },
-	{ directory: "packages/server", name: "@relay-harness/server" },
 	{ directory: "packages/coding-agent", name: "@relay-harness/coding-agent" },
 ];
 

@@ -14,7 +14,6 @@ Extensions, prompt templates, and skills can add commands. The command menu in R
 | `/scoped-models` | Configure the models used by interactive cycling |
 | `/login [provider]` | Add provider authentication |
 | `/logout` | Remove provider authentication |
-| `/llama` | Manage models on the configured llama.cpp router |
 
 ## Sessions and context
 
@@ -24,8 +23,9 @@ Extensions, prompt templates, and skills can add commands. The command menu in R
 | `/resume` | Switch to another saved session |
 | `/name [name]` | Set the session display name, or show the current name when omitted |
 | `/session` | Show current session information and statistics |
+| `/skills-audit` | Audit each skill's structure for [progressive disclosure](harness-core.md#skill-audit) |
 | `/goal [objective\|pause\|resume\|clear]` | Manage a [persistent goal](goals.md) with optional `--tokens <budget>` |
-| `/harness` | Show the [harness core](harness-core.md): constraints, pending approvals, evidence, context savings, and skill usage |
+| `/harness` | Show the [harness core](harness-core.md): constraints, pending approvals, evidence, and context savings |
 | `/tree` | Navigate the session tree |
 | `/fork` | Create a new session from an earlier user message |
 | `/clone` | Duplicate the current session at its current position |

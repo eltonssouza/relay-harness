@@ -21,11 +21,11 @@ Add this to `settings.json` (global or project):
 | --- | --- | --- |
 | `adaptiveCognition.enabled` | `false` | Turns ACI on. |
 | `adaptiveCognition.mode` | `observe` | `observe`, `assist`, `adaptive` or `strict`. |
-| `laya.heuristicFirst` | `false` | In `adaptive` mode only, skips ONNX for a clear, small, low-risk request. Security-sensitive, ambiguous, broad or tool-heavy requests still run Laya. Other modes retain the existing assessment path, including learned-memory lookup. |
+| `laya.heuristicFirst` | `false` | In `adaptive` mode only, skips ONNX for a clear, small, low-risk request. Security-sensitive, ambiguous, broad or tool-heavy requests still run Laya. Other modes retain the existing assessment path. |
 
-The experimental shortcut requires the boolean `true` (not a string). It accepts only keyword assessments with complexity at most 0.25, zero detected risk and ambiguity, and single-line or single-file scope. Long requests and explicit module/repository scope signals are excluded even when another keyword suggests a small change. Learned task memory keeps precedence. These are conservative routing hints, not a security authorization mechanism: permissions, model restrictions and host budget guards remain authoritative.
+The experimental shortcut requires the boolean `true` (not a string). It accepts only keyword assessments with complexity at most 0.25, zero detected risk and ambiguity, and single-line or single-file scope. Long requests and explicit module/repository scope signals are excluded even when another keyword suggests a small change. These are conservative routing hints, not a security authorization mechanism: permissions, model restrictions and host budget guards remain authoritative.
 
-Telemetry marks intentional skips with `classification.heuristic_fast_path: true`. A missing flag is not evidence that inference ran: learned memory and classifier failures remain separate assessment paths. Measure quality, cost, classifier calls and end-to-end latency together before enabling the shortcut broadly.
+Telemetry marks intentional skips with `classification.heuristic_fast_path: true`. A missing flag is not evidence that inference ran: classifier failures remain a separate assessment path. Measure quality, cost, classifier calls and end-to-end latency together before enabling the shortcut broadly.
 
 | Mode | With another model selected | With `laya/auto` selected |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ Telemetry marks intentional skips with `classification.heuristic_fast_path: true
 
 Before each request, Relay appends an `aci.observe` custom entry to the session. It is stored in the session file and is never sent to the model:
 
-- `mode` and `source` (`laya`, `memory` or `heuristic`). When `laya/auto` is not the selected model, the decision comes from the local keyword rules, so recording adds no inference call.
+- `mode` and `source` (`laya` or `heuristic`). When `laya/auto` is not the selected model, the decision comes from the local keyword rules, so recording adds no inference call.
 - `taskType` and `confidence`: the task classification. Confidence is Laya's certainty about its labels, not a guarantee of the result's quality.
 - `requiredTier`, `minTier`, `effort`, `thinkingLevel`, `validation`: what the policy chose.
 - `rules` and `escalations`: why.

@@ -500,7 +500,6 @@ export class AgentSession {
 			settingsManager: this.settingsManager,
 			sessionManager: this.sessionManager,
 			cwd: this._cwd,
-			getSkills: () => this._resourceLoader.getSkills().skills,
 			getUI: () => ({ ui: this._extensionUIContext, mode: this._extensionMode }),
 		});
 

@@ -474,7 +474,7 @@ describe("package commands", () => {
 			cwd: projectDir,
 			agentDir,
 			settingsManager,
-			builtinExtensions: ["llama.cpp", "mcp"],
+			builtinExtensions: ["browser", "mcp"],
 		}).resolve();
 		const selector = new ConfigSelectorComponent(
 			{ global: resolvedPaths, project: resolvedPaths },
@@ -491,11 +491,11 @@ describe("package commands", () => {
 		const list = selector.getResourceList();
 		initTheme("dark");
 		expect(list.render(80).join("\n")).toContain("Built-in");
-		expect(list.render(80).join("\n")).toContain("llama.cpp");
+		expect(list.render(80).join("\n")).toContain("browser");
 		list.handleInput(" ");
-		expect(settingsManager.getGlobalSettings().extensions).toEqual(["-builtin:llama.cpp"]);
+		expect(settingsManager.getGlobalSettings().extensions).toEqual(["-builtin:browser"]);
 		list.handleInput(" ");
-		expect(settingsManager.getGlobalSettings().extensions).toEqual(["+builtin:llama.cpp"]);
+		expect(settingsManager.getGlobalSettings().extensions).toEqual(["+builtin:browser"]);
 	});
 
 	it("cycles project built-in extension overrides in config local mode", async () => {

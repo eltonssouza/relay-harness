@@ -1,12 +1,12 @@
 # Native memory
 
-Relay can keep durable memory across sessions: facts and decisions, a temporal knowledge graph and an evolving user profile. It is opt-in. Start Relay with `--native-memory` or set `RELAY_NATIVE_MEMORY=1`. When it is off, Relay registers only the flag and leaves the existing memory paths ([graph memory](project-memory.md), [logbook](logbook.md)) unchanged. To roll back, turn the flag off. The database stays on disk.
+Relay can keep durable memory across sessions: facts and decisions, a temporal knowledge graph and an evolving user profile. It is opt-in. Start Relay with `--native-memory` or set `RELAY_NATIVE_MEMORY=1`. When it is off, Relay registers only the flag and leaves the existing memory path ([graph memory](project-memory.md)) unchanged. To roll back, turn the flag off. The database stays on disk.
 
 ## Storage
 
 Memory lives in one local SQLite database at `~/.relay/agent/memory/memory.db`, or under `RELAY_CODING_AGENT_DIR` when that is set. It uses Node's built-in `node:sqlite`, so no new dependency is needed. The file is created with owner-only permissions where the platform supports them. Schema changes are versioned migrations, and Relay refuses to open a database written by a newer version.
 
-Every memory, relation and profile attribute records its source: a session and tool call, a logbook note or a user statement. Records are partitioned by tenant and owner (`local` and the OS user), and memories are scoped:
+Every memory, relation and profile attribute records its source: a session and tool call or a user statement. Records are partitioned by tenant and owner (`local` and the OS user), and memories are scoped:
 
 | Scope | Visible to |
 | --- | --- |
@@ -46,7 +46,6 @@ Tools:
 | `/memory profile` | Show the current profile |
 | `/memory revoke <key>` | Revoke a profile attribute |
 | `/memory boundary <topic>` | Never store or infer the topic; revokes matching attributes |
-| `/memory import-logbook` | Import `/logbook note` entries as project memories (trusted projects; idempotent; the logbook is not changed) |
 | `/memory reindex` | Rebuild the lexical index and queue missing embeddings |
 | `/memory gc` | Expire temporary attributes and purge deletions older than 30 days |
 | `/memory jobs` | List pending and dead-letter jobs |
