@@ -33,6 +33,12 @@ export const RISKY_COMMANDS = [
 	"kubectl apply -f deploy.yaml",
 	"terraform apply -auto-approve",
 	"docker push registry/app:1",
+	"docker system prune -af",
+	"docker volume rm data",
+	"docker compose down -v",
+	"scp dist.tar user@host:/srv",
+	"rsync -avz ./dist/ user@host:/var/www/",
+	"rsync -a --delete src/ dst/",
 	"vercel --prod",
 	"curl -X POST https://api.example/hooks",
 	"curl --request DELETE https://api.example/items/1",
@@ -87,6 +93,12 @@ export const SAFE_COMMANDS = [
 	"docker build -t app .",
 	"gh pr view 12",
 	"gh issue list",
+	"docker ps",
+	"docker compose up -d",
+	"docker compose down",
+	"scp user@host:/srv/log.txt .",
+	"rsync -a src/ dst/",
+	"sed -i 's/a/b/' src/a.ts",
 ] as const;
 
 /**
@@ -103,7 +115,11 @@ export const KNOWN_GAPS = [
 ] as const;
 
 /** Safe commands the harness still stops on: a text match cannot tell a mention from a use. */
-export const KNOWN_FALSE_PROMPTS = ['git commit -m "git push is next"', 'echo "git push origin main"'] as const;
+export const KNOWN_FALSE_PROMPTS = [
+	'git commit -m "git push is next"',
+	'echo "git push origin main"',
+	"cat > notes.md <<'EOF'\nrm -rf is dangerous\nEOF",
+] as const;
 
 /** Commands that are checks (their result is evidence) and commands that only look like one. */
 export const CHECK_COMMANDS = [
@@ -130,6 +146,12 @@ export const CHECK_COMMANDS = [
 	"node --test test/a.test.ts",
 	"mvn test",
 	"dotnet test",
+	"ng test --watch=false",
+	"npx ng test --watch=false",
+	"cd frontend && npx ng test --watch=false",
+	"ng lint",
+	"set -o pipefail; npm test | tee log.txt",
+	"sed -i 's/a/b/' src/a.ts && npm test",
 ] as const;
 
 export const NOT_CHECK_COMMANDS = [
@@ -150,11 +172,17 @@ export const NOT_CHECK_COMMANDS = [
 	"npm test | tail -5",
 	"npm test || true",
 	"npm test; echo done",
+	"ng serve",
+	"ng generate component a",
+	"cat > Foo.java <<'EOF'\nnpm test\nEOF",
+	"npm test && sed -i 's/a/b/' src/a.ts",
 ] as const;
 
 type Step =
 	| { effect: ToolEffect; isError?: boolean; output?: string }
-	| { check: string; scope?: string[]; isError?: boolean; output?: string };
+	| { check: string; scope?: string[]; isError?: boolean; output?: string }
+	/** A shell command classified as the harness would classify it, so what it edits is what the rules see. */
+	| { shell: string; isError?: boolean; output?: string };
 
 export interface CompletionScenario {
 	name: string;
@@ -165,6 +193,7 @@ export interface CompletionScenario {
 }
 
 const edit = (path: string): Step => ({ effect: { kind: "write", paths: [path] } });
+const sh = (shell: string, output = "Tests 5 passed (5)"): Step => ({ shell, output });
 const pass = (command: string, scope?: string[]): Step => ({
 	check: command,
 	scope,
@@ -252,6 +281,54 @@ export const COMPLETION_SCENARIOS: CompletionScenario[] = [
 		name: "edit, asks a question",
 		steps: [edit("src/a.ts")],
 		finalText: "Should I also update the tests?",
+		expected: "no-claim",
+	},
+	{
+		name: "sed -i edit, no check",
+		steps: [sh("sed -i 's/a/b/' src/a.ts")],
+		finalText: "Fixed the bug in src/a.ts.",
+		expected: "unverified",
+	},
+	{
+		name: "heredoc writes a source file, no check",
+		steps: [sh("cat > Foo.java <<'EOF'\nclass Foo {}\nEOF")],
+		finalText: "Added Foo.",
+		expected: "unverified",
+	},
+	{
+		name: "sed -i edit, then a check",
+		steps: [sh("sed -i 's/a/b/' src/a.ts"), pass("npm test")],
+		finalText: "Done. Tests pass.",
+		expected: "verified",
+	},
+	{
+		name: "sed -i edit and ng test in one command",
+		steps: [sh("cd frontend && sed -i 's/a/b/' src/app/t.ts && npx ng test --watch=false")],
+		finalText: "Done. The frontend tests pass.",
+		expected: "verified",
+	},
+	{
+		name: "sed -i edit, check piped to tail",
+		steps: [sh("sed -i 's/a/b/' src/a.ts && mvn -q test 2>&1 | tail -3")],
+		finalText: "Fixed, tests pass.",
+		expected: "unverified",
+	},
+	{
+		name: "backend edit, frontend check",
+		steps: [sh("sed -i 's/a/b/' backend/A.java && cd frontend && npx ng test --watch=false")],
+		finalText: "Done.",
+		expected: "unverified",
+	},
+	{
+		name: "check, then sed -i edit in the same command",
+		steps: [sh("npx ng test --watch=false && sed -i 's/a/b/' src/a.ts")],
+		finalText: "Done.",
+		expected: "unverified",
+	},
+	{
+		name: "only a temporary file written",
+		steps: [sh("echo hi > /tmp/out.txt")],
+		finalText: "The output is in /tmp/out.txt.",
 		expected: "no-claim",
 	},
 	{

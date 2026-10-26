@@ -20,9 +20,11 @@ import {
 	isCorrection,
 	isQuestionOnly,
 	messageOrigin,
+	requiresAuthorization,
 	SliceDiscipline,
 	type WorkspaceProbe,
 } from "../src/harness/index.ts";
+import { parseShell } from "../src/harness/shell.ts";
 import type { AgentMessage, AgentTool, AgentToolCall, StreamFn } from "../src/types.ts";
 
 class MockAssistantStream extends EventStream<AssistantMessageEvent, AssistantMessage> {
@@ -839,5 +841,120 @@ describe("resync after the conversation moves to another branch", () => {
 
 		expect(core.context?.renderProgress()).toBeUndefined();
 		expect(core.alignment?.pendingAuthorizations()).toEqual([]);
+	});
+});
+
+describe("shell edits count as changes", () => {
+	const classify = (command: string) =>
+		classifyToolCall({ type: "toolCall", id: "1", name: "bash", arguments: { command } }, undefined, [], {
+			cwd: "/work/app",
+		});
+
+	it.each([
+		["sed -i 's/a/b/' src/a.ts", ["src/a.ts"]],
+		["sed -i.bak -e 's/a/b/' -e 's/c/d/' a.txt b.ts", ["a.txt", "b.ts"]],
+		["perl -pi -e 's/a/b/' lib/x.pl", ["lib/x.pl"]],
+		["echo x > src/a.ts", ["src/a.ts"]],
+		["cat > Foo.java <<'EOF'\nclass Foo {}\nEOF", ["Foo.java"]],
+		["tee out.ts < in.ts", ["out.ts"]],
+		["mv a.ts b.ts", ["a.ts", "b.ts"]],
+		["cp a.ts b.ts", ["b.ts"]],
+		["cd backend && sed -i s/a/b/ A.java", ["backend/A.java"]],
+		["git apply fix.patch", []],
+	])("records %s as an edit", (command, paths) => {
+		expect(classify(command).writes).toEqual(paths);
+	});
+
+	it.each([
+		"sed -n '1,20p' src/a.ts",
+		'grep ">=" src/a.ts',
+		"echo hi > /tmp/out.txt",
+		"cmd > /dev/null 2>&1",
+		"mvn test > out.log 2>&1",
+		"npm test | tee log.txt",
+		"git apply --check fix.patch",
+	])("does not record %s as an edit of the project", (command) => {
+		expect(classify(command).writes).toBeUndefined();
+	});
+
+	it("does not read a heredoc body as commands", () => {
+		const commands = parseShell("cat > a.md <<'EOF'\nnpm test\nrm -rf x\nEOF\nls");
+		expect(commands.map((command) => command.argv[0])).toEqual(["cat", "ls"]);
+		expect(classify("cat > a.md <<'EOF'\nnpm test\nEOF")).toMatchObject({ kind: "execute", writes: ["a.md"] });
+	});
+
+	function verdict(commands: string[], finalText = "Done.") {
+		const ledger = new EvidenceLedger();
+		ledger.beginRequest(true);
+		for (const command of commands) ledger.recordToolOutcome(classify(command), false, "Tests 5 passed (5)");
+		return ledger.assess(finalText).status;
+	}
+
+	it("gates a turn whose only edit was made through the shell", () => {
+		expect(verdict(["sed -i 's/a/b/' src/a.ts"])).toBe("unverified");
+		expect(verdict(["cat > Foo.java <<'EOF'\nclass Foo {}\nEOF"])).toBe("unverified");
+	});
+
+	it("accepts a shell edit followed by a check that covers it", () => {
+		expect(verdict(["sed -i 's/a/b/' src/a.ts", "npm test"])).toBe("verified");
+		expect(verdict(["cd frontend && sed -i s/a/b/ src/a.ts && npx ng test --watch=false"])).toBe("verified");
+	});
+
+	it("does not accept a check that is masked, scoped elsewhere, or earlier than the edit", () => {
+		expect(verdict(["sed -i s/a/b/ src/a.ts && mvn -q test 2>&1 | tail -3"])).toBe("unverified");
+		expect(verdict(["sed -i s/a/b/ backend/A.java && cd frontend && npx ng test --watch=false"])).toBe("unverified");
+		expect(verdict(["npx ng test --watch=false && sed -i s/a/b/ src/a.ts"])).toBe("unverified");
+	});
+
+	it("ignores a command that only writes a temporary file", () => {
+		expect(verdict(["echo hi > /tmp/out.txt"], "The output is in /tmp/out.txt.")).toBe("no-claim");
+	});
+});
+
+describe("Angular CLI, docker and remote copies", () => {
+	it.each(["ng test --watch=false", "npx ng test", "ng lint", "ng build", "cd frontend && npx ng e2e"])(
+		"counts %s as a check",
+		(command) => {
+			expect(classifyCommand(command).kind).toBe("verify");
+		},
+	);
+
+	it.each(["ng serve", "ng generate component a", "ng test --watch=false || true"])(
+		"does not count %s as a check",
+		(command) => {
+			expect(classifyCommand(command).kind).toBe("execute");
+		},
+	);
+
+	it.each([
+		"docker system prune -af",
+		"docker volume prune -f",
+		"docker image prune -a",
+		"docker volume rm data",
+		"docker compose down -v",
+		"docker-compose down --volumes",
+		"rsync -a --delete src/ dst/",
+	])("asks before %s", (command) => {
+		expect(classifyCommand(command).kind).toBe("destructive");
+	});
+
+	it.each([
+		"scp dist.tar user@host:/srv",
+		"scp -P 2222 file host:/tmp",
+		"rsync -avz ./dist/ user@host:/var/www/",
+		"rsync -a src/ rsync://mirror/module",
+	])("asks before sending files with %s", (command) => {
+		expect(classifyCommand(command).kind).toBe("external");
+	});
+
+	it.each([
+		"docker ps",
+		"docker compose up -d",
+		"docker compose down",
+		"docker build -t app .",
+		"scp user@host:/srv/log.txt .",
+		"rsync -a src/ dst/",
+	])("does not ask before %s", (command) => {
+		expect(requiresAuthorization(classifyCommand(command).kind)).toBe(false);
 	});
 });

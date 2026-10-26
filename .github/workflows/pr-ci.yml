@@ -32,7 +32,10 @@ jobs:
           node-version: "22"
           cache: npm
       - name: Install native build prerequisites
-        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev ripgrep
+      - name: Install fd
+        # The find tool tests need fd 10.2 or newer (--no-require-git); Ubuntu's fd-find is 9.x.
+        run: cargo install fd-find --version 10.3.0 --locked
       - name: Run the local gate
         run: bash ./ci.sh
       - name: Check that the gate left the tree clean
