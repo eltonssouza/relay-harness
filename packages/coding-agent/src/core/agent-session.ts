@@ -500,7 +500,7 @@ export class AgentSession {
 			settingsManager: this.settingsManager,
 			sessionManager: this.sessionManager,
 			cwd: this._cwd,
-			getSkills: () => this._resourceLoader.getSkills().skills,
+			getToolAnnotations: (name) => this._toolDefinitions.get(name)?.definition.annotations,
 			getUI: () => ({ ui: this._extensionUIContext, mode: this._extensionMode }),
 		});
 
@@ -2026,9 +2026,9 @@ export class AgentSession {
 				);
 			}
 			if (options.streamingBehavior === "followUp") {
-				await this._queueFollowUp(expandedText, currentImages);
+				await this._queueFollowUp(expandedText, currentImages, options?.source);
 			} else {
-				await this._queueSteer(expandedText, currentImages);
+				await this._queueSteer(expandedText, currentImages, options?.source);
 			}
 			preflightResult?.("queued");
 			return;
@@ -2093,6 +2093,7 @@ export class AgentSession {
 			role: "user",
 			content: userContent,
 			timestamp: Date.now(),
+			...(options?.source === "extension" ? { origin: "extension" as const } : {}),
 		});
 
 		// Inject any pending "nextTurn" messages as context alongside the user message
@@ -2202,9 +2203,9 @@ export class AgentSession {
 		expandedText = expandPromptTemplate(expandedText, [...this.promptTemplates]);
 
 		if (behavior === "steer") {
-			await this._queueSteer(expandedText, processedInput.images);
+			await this._queueSteer(expandedText, processedInput.images, source);
 		} else {
-			await this._queueFollowUp(expandedText, processedInput.images);
+			await this._queueFollowUp(expandedText, processedInput.images, source);
 		}
 		return "queued";
 	}
@@ -2245,7 +2246,7 @@ export class AgentSession {
 	/**
 	 * Internal: Queue a steering message (already expanded, no extension command check).
 	 */
-	private async _queueSteer(text: string, images?: ImageContent[]): Promise<void> {
+	private async _queueSteer(text: string, images?: ImageContent[], source?: InputSource): Promise<void> {
 		this._steeringMessages.push(text);
 		this._emitQueueUpdate();
 		const content: (TextContent | ImageContent)[] = [{ type: "text", text }];
@@ -2256,20 +2257,26 @@ export class AgentSession {
 			role: "user",
 			content,
 			timestamp: Date.now(),
+			...(source === "extension" ? { origin: "extension" as const } : {}),
 		});
 	}
 
 	/**
 	 * Internal: Queue a follow-up message (already expanded, no extension command check).
 	 */
-	private async _queueFollowUp(text: string, images?: ImageContent[]): Promise<void> {
+	private async _queueFollowUp(text: string, images?: ImageContent[], source?: InputSource): Promise<void> {
 		this._followUpMessages.push(text);
 		this._emitQueueUpdate();
 		const content: (TextContent | ImageContent)[] = [{ type: "text", text }];
 		if (images) {
 			content.push(...images);
 		}
-		this.agent.followUp({ role: "user", content, timestamp: Date.now() });
+		this.agent.followUp({
+			role: "user",
+			content,
+			timestamp: Date.now(),
+			...(source === "extension" ? { origin: "extension" as const } : {}),
+		});
 	}
 
 	/**
@@ -4147,6 +4154,8 @@ export class AgentSession {
 			// Update finalized context from the canonical session projection.
 			this._refreshFinalizedContext();
 			this._restoreToolsFromTranscript();
+			// Constraints, corrections and context stubs describe the branch just left.
+			this._harnessCore.resync();
 
 			// Emit session_tree event
 			await this._extensionRunner.emit({

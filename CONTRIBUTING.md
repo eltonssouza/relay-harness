@@ -66,11 +66,13 @@ run in Git Bash; from PowerShell use `& 'C:\Program Files\Git\bin\bash.exe' ./ci
 when Git is installed at that location. A Windows run does not validate Linux-only
 tests; Linux validation remains a separate requirement when applicable.
 
-GitHub Actions no longer runs CI for PRs or branch pushes. Include the validated
-commit, operating system, Node version and local result in the PR description.
+Pull requests to `develop` also run the Linux gate in `.github/workflows/pr-ci.yml`
+(`bash ./ci.sh`, then a clean-tree check); branch pushes run no CI, and the workflow
+does not replace the local run. Include the validated commit, operating system, Node
+version and local result in the PR description.
 The required `local/verify` status may report success only after the full local
-runner passes for that commit. Local CI does not approve a Laya model or enable
-distribution or automatic delegation.
+runner passes for that commit. Local CI does not approve a Laya model or
+distribution.
 
 Do not edit `CHANGELOG.md`. Changelog entries are added by maintainers.
 

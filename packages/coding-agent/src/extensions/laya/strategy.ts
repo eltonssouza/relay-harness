@@ -14,7 +14,6 @@ export const STRATEGY_RULES_VERSION = "aci-strategy-rules-v1";
 
 export const STRATEGIES = [
 	"human_review",
-	"delegate",
 	"decompose",
 	"plan_execute_verify",
 	"tool_assisted",
@@ -57,7 +56,6 @@ export interface StrategyDecision {
 	abstentions: Array<{ strategy: Strategy; reason: string }>;
 }
 
-const DELEGATION_TOOL = "execute_work";
 const BROAD_SCOPES = new Set<TaskSnapshot["scope"]>(["multi_module", "repository", "multi_repository"]);
 const HIGH = 0.75;
 
@@ -101,12 +99,6 @@ export function selectStrategy(
 			strategy: "human_review",
 			when: evidence.ambiguity >= HIGH || (evidence.securitySensitive && evidence.risk >= HIGH) || uncertain,
 			reason: evidence.ambiguity >= HIGH ? "high_ambiguity" : uncertain ? "low_confidence" : "sensitive_high_risk",
-		},
-		{
-			strategy: "delegate",
-			when: BROAD_SCOPES.has(evidence.scope) && evidence.complexity >= HIGH,
-			reason: "broad_complex_task",
-			missing: has(new RegExp(`^${DELEGATION_TOOL}$`)) ? undefined : "delegation_unavailable",
 		},
 		{
 			strategy: "decompose",

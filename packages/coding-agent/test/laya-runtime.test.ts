@@ -43,18 +43,21 @@ function health(state: { up: boolean }): typeof fetch {
 
 const IMAGE = `${LAYA_IMAGE_REPOSITORY}:v1-cpu-abc`;
 
-function server(docker: DockerRun, state: { up: boolean }, model: string = LAYA_IMAGE_PATHS.shippedModel) {
+function server(docker: DockerRun, state: { up: boolean }) {
 	return new LayaServer({
 		docker,
 		baseUrl: () => "http://127.0.0.1:8000/v1",
 		image: async () => IMAGE,
-		model: () => model,
 		fetch: health(state),
 	});
 }
 
-const labels = (model: string = LAYA_IMAGE_PATHS.shippedModel) =>
-	JSON.stringify({ "relay.laya.image": IMAGE, "relay.laya.model": model, "relay.laya.address": "127.0.0.1:8000" });
+const labels = () =>
+	JSON.stringify({
+		"relay.laya.image": IMAGE,
+		"relay.laya.model": LAYA_IMAGE_PATHS.shippedModel,
+		"relay.laya.address": "127.0.0.1:8000",
+	});
 
 describe("laya image", () => {
 	it("tags the image with the model version, the variant and a hash of its build context", () => {
@@ -80,7 +83,6 @@ describe("laya image", () => {
 		});
 		expect(cpu["serve.py"]).toContain('"version": version');
 		expect(cpu["serve.py"]).toContain("required != version");
-		expect(cpu["train.py"]).toContain("def cmd_learn(a):");
 		expect(cpu["serve.py"]).toContain('@app.post("/v1/systemone")');
 	});
 
@@ -181,8 +183,6 @@ describe("laya server container", () => {
 				"unless-stopped",
 				"--publish",
 				"127.0.0.1:8000:8000",
-				"--volume",
-				`relay-laya-models:${LAYA_IMAGE_PATHS.trainedModels}`,
 				IMAGE,
 				"--model",
 				LAYA_IMAGE_PATHS.shippedModel,
@@ -225,21 +225,25 @@ describe("laya server container", () => {
 		expect(calls.map((args) => args[0])).toEqual(["version", "container", "image", "image"]);
 	});
 
-	it("replaces the container when the active model changes", async () => {
+	it("replaces the container when its image changes", async () => {
 		const state = { up: true };
-		const trained = "/data/models/local-1";
+		const stale = JSON.stringify({
+			"relay.laya.image": `${LAYA_IMAGE_REPOSITORY}:v1-cpu-old`,
+			"relay.laya.model": LAYA_IMAGE_PATHS.shippedModel,
+			"relay.laya.address": "127.0.0.1:8000",
+		});
 		const { docker, calls } = fakeDocker([
 			[["version"], () => ok("29.0.0")],
-			[["container", "inspect"], () => ok(`true ${labels()}`)],
+			[["container", "inspect"], () => ok(`true ${stale}`)],
 			[["image", "inspect"], () => ok("sha256:1")],
 			[["rm"], () => ok()],
 			[["run"], () => ok("container-id")],
 			[["image", "ls"], () => ok(IMAGE)],
 		]);
-		expect(await server(docker, state, trained).install()).toBe(true);
+		expect(await server(docker, state).install()).toBe(true);
 		expect(calls).toContainEqual(["rm", "--force", "relay-laya"]);
 		const run = calls.find((args) => args[0] === "run");
-		expect(run?.[run.indexOf("--model") + 1]).toBe(trained);
+		expect(run).toContain(IMAGE);
 	});
 
 	it("uses a server that already answers when the container is not Relay's", async () => {
@@ -260,7 +264,6 @@ describe("laya server container", () => {
 			docker,
 			baseUrl: () => "http://127.0.0.1:8000/v1",
 			image: async () => IMAGE,
-			model: () => LAYA_IMAGE_PATHS.shippedModel,
 			// A laya-trainer server of another project.
 			fetch: (async () =>
 				new Response(JSON.stringify({ ok: true, decisions: ["natureza", "intencao"] }))) as typeof fetch,
@@ -283,62 +286,5 @@ describe("laya server container", () => {
 		const laya = server(docker, { up: false });
 		expect(await laya.install()).toBe(false);
 		expect(laya.describe()).toBe("failed: The Laya container stopped: RuntimeError: model.safetensors is corrupt");
-	});
-
-	it("falls back to the image's model when a registered checkpoint is missing", async () => {
-		let inspections = 0;
-		let runsStarted = 0;
-		let selectedModel = "/data/models/v4-library-retry";
-		const healthState = { up: false };
-		const reports: string[] = [];
-		const { docker, calls } = fakeDocker([
-			[["version"], () => ok("29.0.0")],
-			[
-				["container", "inspect"],
-				() => {
-					inspections++;
-					return inspections === 1 || inspections === 3
-						? fail("No such container")
-						: ok(`false ${labels(selectedModel)}`);
-				},
-			],
-			[["image", "inspect"], () => ok("sha256:1")],
-			[
-				["run"],
-				() => {
-					if (++runsStarted === 2) healthState.up = true;
-					return ok("container-id");
-				},
-			],
-			[
-				["logs"],
-				() => ({
-					code: 0,
-					stdout: "FileNotFoundError: Local model path not found: '/data/models/v4-library-retry'",
-					stderr: "",
-				}),
-			],
-			[["rm"], () => ok()],
-			[["image", "ls"], () => ok(IMAGE)],
-		]);
-		const laya = new LayaServer({
-			docker,
-			baseUrl: () => "http://127.0.0.1:8000/v1",
-			image: async () => IMAGE,
-			model: () => selectedModel,
-			useShippedModel: () => {
-				selectedModel = LAYA_IMAGE_PATHS.shippedModel;
-			},
-			fetch: health(healthState),
-		});
-
-		expect(await laya.install((message) => reports.push(message))).toBe(true);
-
-		const runs = calls.filter((args) => args[0] === "run");
-		expect(runs).toHaveLength(2);
-		expect(runs[0]).toContain("/data/models/v4-library-retry");
-		expect(runs[1]).toContain(LAYA_IMAGE_PATHS.shippedModel);
-		expect(calls).toContainEqual(["rm", "--force", "relay-laya"]);
-		expect(reports).toContain("trained model is missing; switching to the model bundled in the image");
 	});
 });

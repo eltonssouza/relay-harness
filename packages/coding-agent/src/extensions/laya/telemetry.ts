@@ -164,22 +164,3 @@ export function historyFromTelemetry(records: readonly TelemetryRecord[]): Perfo
 	}
 	return history;
 }
-
-/**
- * Training exercises with evidence-based tier labels: for each successful run, the tier that
- * finished it. Only `capability_tier` is labeled; the other answers came from Laya itself and would
- * teach it nothing new. Review the rows before adding them (`/laya-data`).
- */
-export function datasetFromTelemetry(records: readonly TelemetryRecord[]): Array<{
-	state: { request: string };
-	expected: { capability_tier: CapabilityTier };
-	source: "harness";
-}> {
-	return records
-		.filter((record) => record.result.success && record.request.trim())
-		.map((record) => ({
-			state: { request: record.request },
-			expected: { capability_tier: record.selected.tier },
-			source: "harness",
-		}));
-}

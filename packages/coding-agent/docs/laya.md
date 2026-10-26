@@ -14,7 +14,7 @@ Relay normally runs every request on the model you selected. A typo fix then cos
 
 ## How a request is routed
 
-1. **Task intelligence (Laya).** [Laya](https://github.com/NandhaKishorM/laya) is a small local classifier, the fast "System 1". It answers 19 typed questions about the request in one call: task type, complexity, scope, risk, ambiguity, reasoning needed, recommended capability tier and effort, agent role, validation level, the tools needed, whether the task is security-sensitive, and the library category. Relay calls it through the same System One protocol it uses for TypeSafe classifiers. A request close to a task learned with `/laya learn` takes that task's answers instead ([memory](#teach-laya-from-your-sessions)).
+1. **Task intelligence (Laya).** [Laya](https://github.com/NandhaKishorM/laya) is a small local classifier, the fast "System 1". It answers 19 typed questions about the request in one call: task type, complexity, scope, risk, ambiguity, reasoning needed, recommended capability tier and effort, agent role, validation level, the tools needed, whether the task is security-sensitive, and the library category. Relay calls it through the same System One protocol it uses for TypeSafe classifiers.
 2. **Policy engine.** Deterministic rules set floors Laya cannot lower. Production database migrations, authentication, security vulnerabilities and payment processing require at least the `strong` tier, an effort of at least `medium`, and review. High risk also requires `strong`. An answer whose confidence is below `laya.minConfidence` raises the tier by one.
 3. **Model registry.** Tiers are abstract (`fast`, `balanced`, `strong`, `frontier`), so Laya never learns model names. The registry maps each tier to concrete models; only models whose provider has credentials are candidates.
 4. **Selection.** Each candidate gets a utility from the cost profile: `quality × P(success) − cost × quota cost − latency × latency − risk × failure risk`. `P(success)` starts from a prior (0.90 when the model's tier is the required tier, +0.04 per tier above, −0.18 per tier below) and moves toward the observed success rate of that model on that task class. The best candidate whose success estimate reaches the profile minimum wins.
@@ -32,50 +32,9 @@ When the Laya server is not running (Python is missing, installation is in progr
 
 Category descriptions are concise enough to fit the native checkpoint's 256-token question budget. Longer descriptions caused Laya to cap every option at 24 tokens, dropping terms such as Git. Verify the complete rendered options with the checkpoint tokenizer when changing these descriptions, and keep training and serving definitions identical.
 
-Point `LAYA_LIBRARY_DIR` at a directory containing `LIBRARY_INDEX.json` and the guide files. Without it, Relay checks `<cwd>/library`. Extension consumers can pass `libraryDir` to `layaExtension`. The index's category directory determines the label: REST API design belongs to `web_frontend`, React to `frameworks`, Git to `devops`, SSH to `security`, and n8n to `automation`. The actual index places *Refactoring and Code Improvement* and *Writing Maintainable Code* in `architecture`; their title-based training examples follow that ownership rather than a generic engineering rule.
+Point `LAYA_LIBRARY_DIR` at a directory containing `LIBRARY_INDEX.json` and the guide files. Without it, Relay checks `<cwd>/library`. Extension consumers can pass `libraryDir` to `layaExtension`. The index's category directory determines the label: REST API design belongs to `web_frontend`, React to `frameworks`, Git to `devops`, SSH to `security`, and n8n to `automation`. The actual index places *Refactoring and Code Improvement* and *Writing Maintainable Code* in `architecture`; the shipped model follows that ownership rather than a generic engineering rule.
 
-The plan lists up to two guides ranked lexically **inside the predicted category**. Confidence below the calibrated threshold gives suggestions only. Keyword fallbacks abstain from category selection, and remembered labels do not authorize content injection. No matching title means no injection. `LAYA_LIBRARY_MIN_CONFIDENCE` (or extension option `libraryMinConfidence`) enables injection only after validation has established a threshold. With no override, a registered active model supplies its validation threshold only if its library acceptance gate passed; otherwise injection stays disabled. Invalid overrides disable injection. References are bounded to 12,000 characters per request; excerpts say when truncated. Paths and symlinks outside the configured root are rejected.
-
-The reproducible dataset is shipped in `resources/laya/library.jsonl`. A training workspace merges it without overwriting existing request labels, then replays the old exercises. Relay writes its current training script into that workspace and runs the mounted script, including when `laya.image` selects an older compatible runtime image. Library evaluation requires at least 90% category accuracy, 85% accuracy on Portuguese examples, all six named boundary examples from the plan correct, and **no decrease on any existing decision** with identical held-out coverage. The broader held-out boundary slice is reported separately; it has the same category accuracy target as the full held-out set. ECE (expected calibration error: the gap between confidence and observed accuracy, weighted across ten confidence buckets) is reported. The existing 1% aggregate tolerance applies only to evaluations without library labels.
-
-From a source checkout with an existing `.laya/data/dataset.jsonl`, local v3 model and installed CUDA image:
-
-```powershell
-node scripts/train-laya-library.mjs prepare C:/path/to/library
-node scripts/train-laya-library.mjs review
-$env:LAYA_TRAIN_IMAGE = 'your-installed-laya-cuda-image'
-node scripts/train-laya-library.mjs train
-node scripts/train-laya-library.mjs evaluate-runtime v4
-node scripts/train-laya-library.mjs report
-# Only after the acceptance gate passes:
-node scripts/train-laya-library.mjs register "$HOME/.relay/agent/laya"
-```
-
-Preparation exports the current decision contract to `.laya/decisions.json`, generates at least 60 training requests per category and six per guide, adds three mixed-stack boundary training requests per category, and appends separate bilingual validation/test cases. Every guide has both English and Portuguese training examples. Training preserves its dataset, decisions and Python script under `.laya/jobs/<model>`, writes `.laya/models/v4` and `.laya/reports/library-v4-result.json`; the report compares every old decision, lists category mistakes, Portuguese accuracy and ECE. Injection confidence is selected **on validation only**, requiring at least ten accepted predictions with 95% observed precision; insufficient evidence leaves injection disabled. Do not adjust thresholds using test predictions.
-
-The training requests combine agent-authored technical problems with six request styles per guide, including explanations, implementation, diagnosis and review. Portuguese requests use Portuguese scenarios. Mixed-stack examples teach dominant-topic labels independently of the held-out cases. Rare categories receive additional constraints to balance coverage. Their metrics are a small synthetic benchmark, not production evidence. Review every boundary label and a 10% sample of training labels before rollout. `review` creates `.laya/reports/library-label-review.md` with all boundary rows and a deterministic 10% sample of the others, tied to the dataset SHA-256; its status remains pending until a human reviews the labels. The separate `resources/laya/runtime-cases.jsonl` contains 30 agent-authored daily-use examples (three per category, ten in Portuguese), created at the user's request and excluded from training and calibration. `evaluate-runtime` compares a local checkpoint on this set; its source stays explicitly synthetic. Independently collected real requests are useful additional production evidence. The library index and original guide contents are not changed.
-
-The dataset also contains 200 independently authored short training requests, twenty per category, with 70% English and 30% Portuguese. They omit guide citations and cover additional language semantics, algorithms, operations and other technical concepts. Validation, test and public boundary requests remain separate. Review sampling takes 10% within each generation cohort, preserving earlier approved samples. `library-short-label-review.md` contains the additional twenty boundary labels and eighteen ordinary labels to review. Previous approvals are archived by dataset hash; adding rows does not invalidate the historical approval of an older checkpoint, but the expanded dataset needs its own confirmation before activation.
-
-`evaluate-runtime` also checks the six public boundary examples listed in the implementation plan, stored in `resources/laya/boundary-cases.jsonl`. They are excluded from training. The report lists each expected and predicted category; registration requires all six to be correct, separately from the held-out accuracy and regression gates.
-
-To refine a preserved checkpoint with new training scenarios, rerun `prepare` and then `train v4-scenarios v4`. Evaluate with `evaluate-runtime v4-scenarios`, report with `report v4-scenarios`, and register with `register <laya-home> v4-scenarios`. Refinement initializes from v4 but still compares acceptance against the unchanged v3 baseline. It never trains on validation, test or daily-use cases.
-
-If a model fits the training scenarios but fails independently phrased validation requests, `train v4-compact v3 compact` freezes the encoder and alternates original training requests with compact views that remove incidental guide citations. Language names remain; framework-specific requests retain their framework identity. These views reuse the approved labels, preserve the original dataset and its review hash, and apply only to training scenarios. The recipe increases library replay weight, records both options in checkpoint metadata, and uses the same acceptance gates and validation-only calibration.
-
-If freezing also prevents the model from fitting the training examples, `train v4-adapt v4-scenarios compact-adapt` retains the compact views and allows encoder adaptation at a reduced learning rate. Its replay and acceptance baseline still preserve the old questions; a failed candidate stays inactive.
-
-`train v4-balanced v4-short balanced` also weights library classes by inverse training frequency, normalized to a mean weight of one across training requests. It repeats the existing `provider-neutral-policy` replay rows four times to retain expert capability and effort labels. Both weights come exclusively from training rows and are recorded in checkpoint metadata; held-out requests, labels and calibration remain unchanged. Compact views remove the final guide citation, preserving technical phrases such as "using the reflog" inside the problem.
-
-`train v4-supervised v3 supervised` starts afresh from v3, adapts the full encoder and trains library labels with supervised cross-entropy. The original policy-gradient term remains for replay questions. This recipe doubles library repetitions and repeats expert policy rows sixteen times; it needs more GPU memory than partial encoder adaptation. It retains the same fixed evaluation sets, regression gates and review requirements.
-
-For a preserved supervised checkpoint, `train v4-library v4-supervised supervised-adapt` retains supervised library loss and expert replay, with partial encoder adaptation and a reduced learning rate. Export the current definitions with `prepare` first so the immutable job snapshot records the exact descriptions used in training.
-
-Local jobs save recovery checkpoints as `<model>-epoch-1`, `<model>-epoch-2` and `<model>-epoch-3`. These are uncalibrated and never registered or activated automatically. If Docker stops during training, preserve the interrupted job and start a new named job from the last complete recovery checkpoint. Optimizer and scheduler state restart; the new job still runs calibration and every acceptance check before registration.
-
-A report does not publish or switch the serving model. If the acceptance gate fails, keep v3. `register <laya-home>` copies the accepted v4 into the runtime Docker volume and appends its scores and calibrated threshold to the runtime registry without changing the active model or deleting older checkpoints. It requires the separate runtime evaluation and human confirmation whose dataset SHA-256 matches the library rows in the model's preserved training snapshot; it refuses to overwrite an existing v4. Select the registered checkpoint with `/laya use v4`; roll back with `/laya use v3`, which restarts the container on that checkpoint. After passing validation and review, use the existing model packaging workflow to distribute v4; publication requires a separate release action.
-
-Registered checkpoint names take precedence over the package's model version. `/laya use shipped` explicitly selects the checkpoint embedded in the Docker image. This distinction matters with `laya.image` overrides: an older compatible image may embed v1 while the volume contains the registered v3 rollback checkpoint.
+The plan lists up to two guides ranked lexically **inside the predicted category**. Confidence below the calibrated threshold gives suggestions only. Keyword fallbacks abstain from category selection. No matching title means no injection. `LAYA_LIBRARY_MIN_CONFIDENCE` (or extension option `libraryMinConfidence`) enables injection only after validation has established a threshold. With no override, injection stays disabled. Invalid overrides disable injection. References are bounded to 12,000 characters per request; excerpts say when truncated. Paths and symlinks outside the configured root are rejected.
 
 ## Cost profiles
 
@@ -90,28 +49,15 @@ Select one with `laya.policy`, `relay --laya-policy economy`, or `/laya policy q
 
 ## Model registry
 
-| Tier | Current examples from the default model registry (2026-10-10) |
-|---|---|
-| `fast` | `anthropic/claude-haiku-5-5`, `openai/gpt-6-luna`, `github-copilot/gpt-5-mini`, `google-antigravity/gemini-3.7-flash` |
-| `balanced` | `anthropic/claude-sonnet-5-5`, `openai/gpt-5.6-terra`, `github-copilot/gemini-3.8-flash`, `github-copilot/grok-4.7` |
-| `strong` | `anthropic/claude-opus-5-5`, `openai/gpt-6-sol`, `github-copilot/kimi-k2.7-code`, `google-antigravity/gemini-3.1-pro` |
-| `frontier` | `openai-codex/gpt-6-astra`, `openai-codex/gpt-6.1-sol`, `github-copilot/gpt-6.1-sol` |
+Relay keeps no list of model IDs. The default tiers come from the catalog: for each of Anthropic, OpenAI API, OpenAI Codex, GitHub Copilot, Google, and Google Antigravity, Relay takes the permitted models that have credentials and orders them by output price, then input price. A price level maps to a tier by its position among that provider's distinct levels: three levels give `fast`, `balanced`, and `strong`, and a fourth adds `frontier`. Models that share a price, such as the effort variants of one model, share a tier. A provider with a single price level carries no capability signal and gets no default tiers. Every other provider, such as a gateway, a cloud account or a local server, routes only through `laya.models` or `laya.modelGroups`, so Laya never sends a request to a provider nobody named for it.
 
-The registry includes current model IDs from Anthropic, OpenAI API, OpenAI Codex, GitHub Copilot, Google, and Google Antigravity. Each model is ranked only within its selected provider when `laya.followProvider` is enabled.
+With Anthropic credentials, for example, Claude Haiku 5.5 is `fast`, Sonnet 5.5 `balanced`, and Opus 5.5 `strong`. Prices move with the catalog, and so do the tiers. Each model is ranked only within its selected provider when `laya.followProvider` is enabled.
 
 The harness permits only Claude Opus, Sonnet, and Haiku 5.5 across providers, including supported gateway IDs and effort variants. Claude Fable and older Claude versions are excluded from manual selection and execution, not just Laya routing. The `openai-codex` provider permits only `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna`, and `gpt-5.6-terra`; this GPT restriction does not apply to OpenAI API or GitHub Copilot. Other model families are unchanged.
 
 Explicit configuration, model groups, restored sessions, and routing fallbacks cannot bypass this policy. If no permitted candidate is available, routing fails rather than using an excluded model. Models must still exist in the provider's catalog and have configured credentials; these rules do not create catalog entries.
 
-The default registry also includes these Google Antigravity models under the `google-antigravity` provider:
-
-| Tier | Antigravity models |
-|---|---|
-| `fast` | Gemini 3.7 Flash, Gemini 3.6 Flash |
-| `balanced` | Claude Sonnet 5.5, Gemini 3.8 Flash, GPT-OSS 120B (Medium) |
-| `strong` | Claude Opus 5.5, Gemini 3.1 Pro |
-
-Sign in with `/login google-antigravity` to make the account's discovered models available to Laya. The registry recognizes both family IDs and separate `low`, `medium`, and `high` effort IDs (Gemini 3.1 Pro has `low` and `high`). Only IDs present in the account catalog are candidates. These defaults also work with `laya.followProvider`; explicit `laya.models` and `laya.modelGroups` settings still take precedence.
+Sign in with `/login google-antigravity` to make the account's discovered models available to Laya. Separate `low`, `medium`, and `high` effort IDs share a price and therefore a tier. Only IDs present in the account catalog are candidates. These defaults also work with `laya.followProvider`; explicit `laya.models` and `laya.modelGroups` settings still take precedence.
 
 Replace a tier with `laya.models`:
 
@@ -190,70 +136,38 @@ This is the default runtime (`"laya": { "runtime": "onnx" }`). It runs the shipp
 
 Requests run one at a time with a 60-second limit. After three consecutive failures the runtime pauses for a minute. While it is unavailable, keyword rules answer as with the other runtimes. A smaller FP16 or INT8 file is not offered because it changed answers in measurement.
 
-Optional `/laya train` continues to use Docker and its GPU/CPU training pipeline. Existing trained checkpoints remain in their Docker volume and selecting one uses Docker. An explicit `laya.image` also selects Docker. `/laya use shipped` returns to the default ONNX inference unless Docker was explicitly configured. Checkpoints and Docker volumes are not migrated or deleted by native setup.
+An explicit `laya.runtime: "docker"` or `laya.image` selects Docker.
 
 ## Laya runs in Docker
 
-Docker remains available with `"laya": { "runtime": "docker" }`, an explicit `laya.image`, or a selected checkpoint stored in the Docker volume. In this mode, Laya and Python run in `ghcr.io/eltonssouza/relay-laya`, built by Relay's release from the same sources as the package:
+Docker remains available with `"laya": { "runtime": "docker" }`, or an explicit `laya.image`. In this mode, Laya and Python run in `ghcr.io/eltonssouza/relay-laya`, built by Relay's release from the same sources as the package:
 
 | Image | Used when | Size |
 |---|---|---|
 | `relay-laya-v5-cpu-<hash>` | No NVIDIA GPU | about 2 GB |
-| `relay-laya-v5-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU; training uses it | about 6 GB |
+| `relay-laya-v5-cuda-<hash>` | `nvidia-smi` finds an NVIDIA GPU | about 6 GB |
 
-The image holds Python 3.11, `torch`, `laya[serve]`, the shipped model from the Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya) (pinned to one commit, every file checked against the sha256 in the package), and the scripts that serve and train it. The tag ends in a hash of all of that, so each Relay version runs the image built from its own sources.
+The image holds Python 3.11, `torch`, `laya[serve]`, the shipped model from the Hugging Face repository [eltonssouza/relay-laya](https://huggingface.co/eltonssouza/relay-laya) (pinned to one commit, every file checked against the sha256 in the package), and the script that serves it. The tag ends in a hash of all of that, so each Relay version runs the image built from its own sources.
 
 When Docker inference is selected, every interactive Relay start makes sure, in the background, that:
 
 1. the image is present, pulling it the first time (the status line shows the layers);
-2. a container named `relay-laya` runs it with the active model, published on `127.0.0.1:8737` only (the port of `laya.baseUrl`), with `--restart unless-stopped`;
+2. a container named `relay-laya` runs it with the shipped model, published on `127.0.0.1:8737` only (the port of `laya.baseUrl`), with `--restart unless-stopped`;
 3. the server answers.
 
-The container then keeps running between sessions and comes back with Docker, so requests do not wait for the model to load. It serves on the CPU, which keeps the GPU free for training. Models trained from your sessions live in the Docker volume `relay-laya-models`. On the host, `~/.relay/agent/laya` only holds Relay's own data: the training exercises, the list of trained models, and telemetry. A Python environment or model left there by Relay 1.0.2 is deleted.
+The container then keeps running between sessions and comes back with Docker, so requests do not wait for the model to load. On the host, `~/.relay/agent/laya` only holds Relay's own data, such as telemetry. A Python environment or model left there by Relay 1.0.2 is deleted.
 
 Until the server answers, and whenever Docker is missing or stopped, keyword rules route requests; Relay says once why Laya is not running. Install [Docker Desktop](https://docs.docker.com/get-started/get-docker/) (Windows, macOS) or Docker Engine (Linux) and start it; the next Relay start installs Laya. `/laya setup` does it right away.
 
 A server that already answers on the port when there is no `relay-laya` container is used as is, so you can run your own; one that announces other questions than Relay's, such as a laya-trainer server of another project, is reported instead of used. Relay manages a container only for a local `laya.baseUrl`. `"laya": { "autostart": false }` leaves Docker alone, and `laya.image` runs another image, for example one you built with `npm run laya:image -- --variant cpu` in a Relay checkout.
 
-## Teach Laya from your sessions
+## Rebuild the model
 
-The shipped model learned from synthetic requests, so it routes your kind of work by rules of thumb. Teach it the tasks you actually do:
-
-```
-/laya learn
-```
-
-1. **Collect.** Relay lists every request of the current session with the evidence of how it went: the model and effort that ran it, the tools called, the files changed, the commands, the errors of failed tool calls, whether tests and builds passed, what laya/auto planned, and your next message (a correction there means the task was not done right). `/laya learn <session file>` reads another session instead.
-2. **Label.** The agent answers Laya's 19 questions for each task from that evidence, for example "this fix needed the `balanced` tier, not `fast`: it took two failed edits and a correction". When the task taught something, it also writes a lesson: "The label comes from `locales/pt-BR/orders.json`, not the component; run `npm run i18n:check`." It saves them with the `laya_learn` tool and replies with a table of what it labeled. The labels are exercises in `~/.relay/agent/laya/training/data/dataset.jsonl`; a request learned again replaces its old labels.
-3. **Remember.** From the next request on, without waiting for training and even without Docker:
-   - A request close to a learned task is routed with that task's labels instead of Laya's or the keyword rules' answers. The status line shows `(memory)`. "Corrija o texto do botão Salvar na tela de pedidos, está cortado" goes to the tier and effort the learned "Corrija o texto do botão Salvar na tela de pedidos" needed, not to the cheapest tier the words "corrija o texto" suggest.
-   - The model that runs a request gets the lessons of similar learned tasks: in the laya/auto plan, or in a hidden `[laya:lessons]` message when you selected a model yourself.
-
-   Closeness is the cosine of the requests' word vectors, with words common to every coding request weighted down: routing needs 0.6, a lesson 0.45. Requests in another language than the learned one rarely match; training covers those. Turn the memory off with `"laya": { "memory": false }`.
-4. **Train.** Training runs in a Docker container, `relay-laya-train`, from the model that routes today. It mixes the session tasks with a replay sample of the earlier exercises, so Laya learns the new tasks without forgetting the rest. With an 8 GB NVIDIA GPU it takes about 7 minutes; the container gets the GPU when the CUDA image runs and Docker supports GPUs (Docker Desktop with WSL 2 on Windows, the NVIDIA Container Toolkit on Linux). Without one Relay asks first, because it can take an hour or more. The current model keeps routing while it runs, and the status line shows its progress.
-5. **Test and activate.** The new model and the current one answer the same held-out test, exercises neither was trained on. When the dataset includes library labels, activation requires the library targets above and no regression on any existing decision; evaluations without library labels allow at most 1% fewer correct answers overall. Relay replaces the server container with one serving the accepted model, and reports how many answers on the session tasks it now gets right, before and after.
-
-You can also ask in your own words ("learn from this conversation"): with [`tool_search`](cli.md#tools) active, the agent finds `laya_learn` itself.
-
-| Command | Effect |
-|---|---|
-| `/laya learn [session file]` | Label the tasks of this session (or of a session file) and train on them |
-| `/laya train` | Train again on every session task collected so far |
-| `/laya models` | The shipped and trained models, their test scores, the exercises, and training progress |
-| `/laya use <model>` | Route with another model, for example `/laya use v1` to go back to the shipped one |
-
-Trained models live in the Docker volume `relay-laya-models` (about 680 MB each). Relay keeps the active one and the two newest others, and deletes older ones. Training needs Docker and the Laya image (`/laya setup`), and stops when Relay quits; it continues across `/new` and `/resume`.
-
-## Retrain from scratch
-
-To change the questions or rebuild the model, train with the `laya-trainer` Claude Code plugin. The questions Relay sends are the contract with the trained checkpoint, so train with Relay's own definitions:
+Relay does not train Laya. To change the questions or rebuild the model, train outside Relay with the `laya-trainer` Claude Code plugin. The questions Relay sends are the contract with the trained checkpoint, so train with Relay's own definitions:
 
 1. `/laya-init` prepares the training tools.
 2. `/laya decisions` (in Relay) writes the questions to `.laya/decisions.json`.
-3. `/laya seed 1100` writes synthetic bootstrap exercises to `.laya/data/relay-seed.jsonl`; add them with `/laya-data`. Their labels follow one rule from the task profile, so they teach Laya the policy, not evidence. The session tasks in `~/.relay/agent/laya/training/data/dataset.jsonl` (source `session`) can be added the same way.
-4. `/laya-train`, then `/laya-eval`.
-
-`/laya export` writes one exercise per successful routed request, labeled only with the tier that finished it, to `.laya/data/relay-telemetry.jsonl`. Telemetry stays local and contains your requests; turn it off with `"laya": { "telemetry": false }`.
+3. Write the training exercises, then run `/laya-train` and `/laya-eval`.
 
 ### Ship a new model
 
@@ -271,16 +185,11 @@ cp /tmp/laya-v2/model-manifest.ts packages/coding-agent/src/extensions/laya/mode
 
 | Command | Effect |
 |---|---|
-| `/laya` | Profile, runtime and server status, the routing model and training progress, models with credentials, quota, and the last plan with its alternatives and escalations |
+| `/laya` | Profile, runtime and server status, models with credentials, quota, and the last plan with its alternatives and escalations |
 | `/laya setup`, `/laya start` | Install and start the selected local CPU or Docker runtime |
 | `/laya stop` | Stop this process's local server or the managed Docker container |
-| `/laya learn [session file]` | Teach Laya the tasks of this session ([details](#teach-laya-from-your-sessions)) |
-| `/laya train` | Train again on the session tasks collected so far |
-| `/laya models`, `/laya use <model>` | List the shipped and trained models, or route with another one |
 | `/laya policy <profile>` | Cost profile for this session |
 | `/laya decisions [path]` | Write the questions in laya-trainer format |
-| `/laya seed [count] [path]` | Write synthetic training exercises |
-| `/laya export [path]` | Write evidence-labeled exercises from telemetry |
 
 Set `"laya": { "toolRouting": "enforce" }` to also deactivate the tools a request does not need, for example `edit` and `write` for a question. The tool set is restored before the next request is planned. Tools the router does not recognize stay active.
 

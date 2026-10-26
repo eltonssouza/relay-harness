@@ -1,19 +1,29 @@
 import { isEligibleChatModel } from "../../core/model-eligibility.ts";
 import type { LayaSettings } from "../../core/settings-manager.ts";
-import { DEFAULT_MODEL_REGISTRY, parseModelRef } from "./policy.ts";
+import { DEFAULT_TIER_PROVIDERS, deriveModelRegistry, parseModelRef, type TierCatalogModel } from "./policy.ts";
 import { CAPABILITY_TIERS, type CapabilityTier } from "./questions.ts";
 
 type TierRegistry = Partial<Record<CapabilityTier, string[]>>;
 
-/** Keep task intelligence independent of providers; constrain the concrete model catalog here. */
+/**
+ * Keep task intelligence independent of providers; constrain the concrete model catalog here.
+ * `catalog` holds the models that have credentials; tiers a setting does not name are derived from
+ * the eligible ones of the providers in `DEFAULT_TIER_PROVIDERS`.
+ */
 export function scopedModelRegistry(
 	settings: LayaSettings,
 	selected?: { provider: string; id: string },
+	catalog: readonly TierCatalogModel[] = [],
 ): { registry: TierRegistry; scope?: string } {
+	const derived = deriveModelRegistry(
+		catalog.filter(
+			(model) => DEFAULT_TIER_PROVIDERS.has(model.provider) && isEligibleChatModel(model.provider, model.id),
+		),
+	);
 	if (!settings.followProvider) {
 		const registry: TierRegistry = {};
 		for (const tier of CAPABILITY_TIERS) {
-			registry[tier] = (settings.models?.[tier] ?? DEFAULT_MODEL_REGISTRY[tier]).filter((ref) => {
+			registry[tier] = (settings.models?.[tier] ?? derived[tier]).filter((ref) => {
 				const model = parseModelRef(ref);
 				return model && isEligibleChatModel(model.provider, model.id);
 			});
@@ -31,9 +41,7 @@ export function scopedModelRegistry(
 	const group = groups[0];
 	const registry: TierRegistry = {};
 	for (const tier of CAPABILITY_TIERS) {
-		const refs = group
-			? (group[1][tier] ?? [])
-			: [...DEFAULT_MODEL_REGISTRY[tier], ...(settings.models?.[tier] ?? [])];
+		const refs = group ? (group[1][tier] ?? []) : [...derived[tier], ...(settings.models?.[tier] ?? [])];
 		registry[tier] = [...new Set(refs)].filter((candidate) => {
 			const model = parseModelRef(candidate);
 			return model?.provider === selected.provider && isEligibleChatModel(model.provider, model.id);

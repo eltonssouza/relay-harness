@@ -1,51 +1,43 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CONFIG_DIR_NAME, getAgentDir, getEngineeringResourcesPath } from "../../config.ts";
 import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types.ts";
 import { parseFrontmatter } from "../../utils/frontmatter.ts";
-import { AGENT_IDS, type AgentId } from "../laya/questions.ts";
 
-export interface AgentProfile {
-	name: AgentId;
-	path: string;
-	content: string;
-	/** Missing metadata imposes no additional restriction on the phase's selected tools. */
-	tools?: string[];
-}
+type ProfileContext = Pick<ExtensionContext, "cwd" | "isProjectTrusted">;
 
-/** Local profiles with the same name replace the shipped profile, only in trusted projects. */
-export function loadStructuredAgentProfile(
-	agent: AgentId,
-	ctx: Pick<ExtensionContext, "cwd" | "isProjectTrusted">,
-): AgentProfile | undefined {
-	const paths = [
-		...(ctx.isProjectTrusted() ? [join(ctx.cwd, CONFIG_DIR_NAME, "agents", `${agent}.md`)] : []),
-		join(getAgentDir(), "agents", `${agent}.md`),
-		join(getEngineeringResourcesPath(), "agents", `${agent}.md`),
+const PROFILE_NAME = /^[a-z0-9][a-z0-9-]*$/;
+
+/** Profile directories in precedence order. Project profiles load only in trusted projects. */
+function profileDirectories(ctx: ProfileContext): string[] {
+	return [
+		...(ctx.isProjectTrusted() ? [join(ctx.cwd, CONFIG_DIR_NAME, "agents")] : []),
+		join(getAgentDir(), "agents"),
+		join(getEngineeringResourcesPath(), "agents"),
 	];
-	const path = paths.find(existsSync);
-	if (!path) return undefined;
-	const { body, frontmatter } = parseFrontmatter(readFileSync(path, "utf8"));
-	const tools = frontmatter.tools;
-	if (
-		tools !== undefined &&
-		(!Array.isArray(tools) || tools.some((tool: unknown) => typeof tool !== "string" || !tool.trim()))
-	)
-		throw new Error(`Invalid tool restrictions in profile ${path}`);
-	const allowedTools = tools === undefined ? undefined : [...new Set(tools as string[])];
-	return {
-		name: agent,
-		path,
-		content: `[harness:role] ${agent}\nApply this role to the current task. Repository instructions and user requirements take precedence. Context placeholders refer to the actual conversation and repository; do not invent their contents.\n${allowedTools === undefined ? "" : `Delegated worker tool restrictions (also limited by Laya and the Harness): ${allowedTools.join(", ") || "none"}.\n`}${body}`,
-		tools: allowedTools,
-	};
 }
 
-export function loadAgentProfile(
-	agent: AgentId,
-	ctx: Pick<ExtensionContext, "cwd" | "isProjectTrusted">,
-): string | undefined {
-	return loadStructuredAgentProfile(agent, ctx)?.content;
+/** Names of the role profiles that exist; a local profile with a shipped name replaces the shipped one. */
+export function listAgentProfiles(ctx: ProfileContext): string[] {
+	const names = new Set<string>();
+	for (const directory of profileDirectories(ctx)) {
+		if (!existsSync(directory)) continue;
+		for (const file of readdirSync(directory)) {
+			const name = file.endsWith(".md") ? file.slice(0, -3) : undefined;
+			if (name && PROFILE_NAME.test(name)) names.add(name);
+		}
+	}
+	return [...names].sort();
+}
+
+export function loadAgentProfile(agent: string, ctx: ProfileContext): string | undefined {
+	if (!PROFILE_NAME.test(agent)) return undefined;
+	const path = profileDirectories(ctx)
+		.map((directory) => join(directory, `${agent}.md`))
+		.find(existsSync);
+	if (!path) return undefined;
+	const { body } = parseFrontmatter(readFileSync(path, "utf8"));
+	return `[harness:role] ${agent}\nApply this role to the current task. Repository instructions and user requirements take precedence. Context placeholders refer to the actual conversation and repository; do not invent their contents.\n${body}`;
 }
 
 export default function engineeringExtension(relay: ExtensionAPI): void {
@@ -53,12 +45,15 @@ export default function engineeringExtension(relay: ExtensionAPI): void {
 	relay.registerCommand("agent", {
 		description: "Load an engineering role for the next task",
 		getArgumentCompletions: (prefix) =>
-			AGENT_IDS.filter((name) => name.startsWith(prefix)).map((name) => ({ value: name, label: name })),
+			listAgentProfiles({ cwd: process.cwd(), isProjectTrusted: () => false })
+				.filter((name) => name.startsWith(prefix))
+				.map((name) => ({ value: name, label: name })),
 		handler: async (args, ctx) => {
-			const agent = AGENT_IDS.find((name) => name === args.trim());
+			const roles = listAgentProfiles(ctx);
+			const agent = roles.find((name) => name === args.trim());
 			const profile = agent && loadAgentProfile(agent, ctx);
 			if (!profile) {
-				ctx.ui.notify(`Usage: /agent <role> (${AGENT_IDS.join(", ")})`, "warning");
+				ctx.ui.notify(`Usage: /agent <role> (${roles.join(", ")})`, "warning");
 				return;
 			}
 			relay.sendUserMessage(profile, ctx.isIdle() ? undefined : { deliverAs: "followUp" });

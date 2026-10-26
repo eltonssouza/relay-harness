@@ -114,6 +114,15 @@ export class ContextWindowPolicy {
 		return changed ? result : messages;
 	}
 
+	/**
+	 * Forget what was elided and the digest. The conversation changed under the policy (the developer
+	 * moved to another branch), so those stubs and entries no longer describe it.
+	 */
+	reset(): void {
+		this.elided.clear();
+		this.digest.length = 0;
+	}
+
 	/** Compact digest of elided work, or undefined when nothing was elided. */
 	renderProgress(): string | undefined {
 		if (this.digest.length === 0) return undefined;

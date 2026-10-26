@@ -44,10 +44,6 @@
               "path": "containerization.md"
             },
             {
-              "title": "Run Local Models",
-              "path": "llama-cpp.md"
-            },
-            {
               "title": "Configure Your Terminal",
               "path": "terminal-setup.md"
             },
@@ -187,14 +183,6 @@
         {
           "title": "Adaptive Cognition Modes",
           "path": "adaptive-cognition.md"
-        },
-        {
-          "title": "Subordinate Workers",
-          "path": "delegation.md"
-        },
-        {
-          "title": "Requirements Intake",
-          "path": "intake.md"
         },
         {
           "title": "JSON Event Stream",

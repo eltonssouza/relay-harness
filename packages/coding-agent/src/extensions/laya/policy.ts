@@ -1,4 +1,4 @@
-import type { ModelThinkingLevel } from "@relay-harness/ai";
+import type { Api, Model, ModelThinkingLevel } from "@relay-harness/ai";
 import type { TaskAssessment } from "./assessment.ts";
 import {
 	CAPABILITY_TIERS,
@@ -36,79 +36,56 @@ export const PROFILES: Record<PolicyProfile, ProfileWeights> = {
 	critical: { quality: 0.7, cost: 0, latency: 0, risk: 0.3, minSuccess: 0.95 },
 };
 
-/** Antigravity catalogs may expose each reasoning effort as a separate model ID. */
-function antigravityModels(id: string, efforts: readonly string[] = []): string[] {
-	return [id, ...efforts.map((effort) => `${id}-${effort}`)].map((model) => `google-antigravity/${model}`);
-}
+/**
+ * Providers whose models the default tiers cover. A provider outside this list, such as a gateway
+ * or an ambient cloud account, routes only through `laya.models` or `laya.modelGroups`, so Laya
+ * never sends a request to a provider nobody named for it.
+ */
+export const DEFAULT_TIER_PROVIDERS: ReadonlySet<string> = new Set([
+	"anthropic",
+	"github-copilot",
+	"google",
+	"google-antigravity",
+	"openai",
+	"openai-codex",
+]);
+
+/** The catalog fields tier derivation reads. */
+export type TierCatalogModel = Pick<Model<Api>, "provider" | "id" | "cost">;
 
 /**
- * Concrete models per tier as `provider/model`, in preference order. Only models whose provider
- * has credentials are candidates. Override with the `laya.models` setting.
+ * Concrete models per tier as `provider/model`, derived from catalog prices instead of a
+ * hand-kept list. Within each provider, models are ordered by output price, then input price, and a
+ * price level maps to a tier by its position among the provider's distinct levels: three levels
+ * give fast, balanced and strong; a fourth adds frontier. Models that share a price, such as the
+ * effort variants of one model, share a tier. A provider with a single price level carries no
+ * capability signal and gets no tiers; the selected model still routes, unclassified. Callers pass
+ * only models that have credentials and are eligible. Override a tier with the `laya.models` setting.
  */
-export const DEFAULT_MODEL_REGISTRY: Record<CapabilityTier, string[]> = {
-	fast: [
-		"anthropic/claude-haiku-5-5",
-		"github-copilot/claude-haiku-5.5",
-		"github-copilot/gpt-6-luna",
-		"github-copilot/gpt-5.6-luna",
-		"github-copilot/gpt-5.4-mini",
-		"github-copilot/gpt-5.4-nano",
-		"github-copilot/gpt-5-mini",
-		"github-copilot/mai-code-1.1-flash",
-		"github-copilot/mai-code-1-flash-picker",
-		"github-copilot/gemini-3.7-flash",
-		"github-copilot/gemini-3.6-flash",
-		"openai-codex/gpt-6-luna",
-		"openai/gpt-6-luna",
-		"openai/gpt-5.6-luna",
-		"google/gemini-3.5-flash",
-		...antigravityModels("gemini-3.7-flash", ["medium", "low", "high"]),
-		...antigravityModels("gemini-3.6-flash", ["medium", "low", "high"]),
-	],
-	balanced: [
-		"anthropic/claude-sonnet-5-5",
-		"github-copilot/claude-sonnet-5.5",
-		"github-copilot/gpt-5.6-terra",
-		"github-copilot/gpt-5.5",
-		"github-copilot/gpt-5.4",
-		"github-copilot/grok-4.7",
-		"github-copilot/grok-4.6",
-		"github-copilot/grok-4.5",
-		"github-copilot/kimi-k3",
-		"github-copilot/gemini-3.8-flash",
-		"openai/gpt-5.6-terra",
-		"openai/gpt-5.5",
-		"openai-codex/gpt-5.6-terra",
-		"google/gemini-3.8-flash",
-		...antigravityModels("claude-sonnet-5-5", ["medium", "low", "high"]),
-		...antigravityModels("gemini-3.8-flash", ["medium", "low", "high"]),
-		...antigravityModels("gpt-oss-120b-medium"),
-	],
-	strong: [
-		"anthropic/claude-opus-5-5",
-		"github-copilot/claude-opus-5.5",
-		"github-copilot/gpt-6-sol",
-		"github-copilot/gpt-5.6-sol",
-		"github-copilot/gpt-5.3-codex",
-		"github-copilot/kimi-k2.7-code",
-		"openai/gpt-6-sol",
-		"openai/gpt-5.6-sol",
-		"openai/gpt-5.5-pro",
-		"openai/gpt-5-pro",
-		"openai-codex/gpt-6.1-sol",
-		"google/gemini-3.1-pro-preview",
-		...antigravityModels("claude-opus-5-5", ["medium", "low", "high"]),
-		...antigravityModels("gemini-3.1-pro", ["high", "low"]),
-	],
-	frontier: [
-		"github-copilot/gpt-6-astra",
-		"github-copilot/gpt-6.1-sol",
-		"openai/gpt-6.1-sol",
-		"openai/gpt-6-astra",
-		"openai-codex/gpt-6.1-sol",
-		"openai-codex/gpt-6-astra",
-	],
-};
+export function deriveModelRegistry(models: readonly TierCatalogModel[]): Record<CapabilityTier, string[]> {
+	const registry: Record<CapabilityTier, string[]> = { fast: [], balanced: [], strong: [], frontier: [] };
+	const byProvider = new Map<string, TierCatalogModel[]>();
+	for (const model of models) byProvider.set(model.provider, [...(byProvider.get(model.provider) ?? []), model]);
+	for (const provider of [...byProvider.keys()].sort()) {
+		const entries = byProvider.get(provider) ?? [];
+		const levelKey = (model: TierCatalogModel) => `${model.cost.output}/${model.cost.input}`;
+		const levels = [...new Set(entries.map(levelKey))].sort((a, b) => {
+			const [outputA, inputA] = a.split("/").map(Number);
+			const [outputB, inputB] = b.split("/").map(Number);
+			return outputA - outputB || inputA - inputB;
+		});
+		if (levels.length < 2) continue;
+		for (const model of [...entries].sort((a, b) => a.id.localeCompare(b.id))) {
+			const position = levels.indexOf(levelKey(model));
+			const tier =
+				CAPABILITY_TIERS[
+					Math.min(CAPABILITY_TIERS.length - 1, Math.floor((position * CAPABILITY_TIERS.length) / levels.length))
+				];
+			registry[tier].push(`${provider}/${model.id}`);
+		}
+	}
+	return registry;
+}
 
 /** Relative quota cost and latency per tier, 0..1. */
 const TIER_PRIORS: Record<CapabilityTier, { cost: number; latency: number }> = {

@@ -13,11 +13,7 @@ If Relay is already installed, choose what you want to do:
 - [Use Relay interactively](usage.md) to add files, run commands, direct ongoing work, and export results.
 - [Choose a model](models.md) or connect a subscription, API key, local model, or compatible endpoint.
 - [Continue or branch a session](sessions.md) to resume work or explore another approach without losing history.
-- [Use the project development logbook](logbook.md) to review progress saved independently from the conversation transcript.
 - [Enable opt-in native memory](native-memory.md) for durable memories, a temporal knowledge graph and a user profile across sessions.
-- [Run an opt-in universal static audit](audit.md) with scoped snapshots, independent evidence review and resumable local reports.
-  - [Manual de uso em português brasileiro](auditoria-manual.pt-BR.md).
-  - [Documentação técnica em português brasileiro](auditoria-tecnica.pt-BR.md).
 - [Configure Relay](configuration.md) for your preferences, working folders, instructions, and reusable resources.
 - [Understand how Relay works](how-relay-works.md), including tools, context, sessions, and the agent loop.
 

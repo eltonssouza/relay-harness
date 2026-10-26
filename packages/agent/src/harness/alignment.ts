@@ -291,7 +291,7 @@ const INTERROGATIVE_START = new RegExp(
 	"iu",
 );
 
-const ACTION_REQUEST = wordsPattern([
+const ACTION_WORDS = [
 	"fix",
 	"implement",
 	"add",
@@ -363,6 +363,60 @@ const ACTION_REQUEST = wordsPattern([
 	"melhore",
 	"melhorar",
 	"improve",
+];
+
+const ACTION_REQUEST = wordsPattern(ACTION_WORDS);
+
+/** A sentence that begins with an action verb, optionally softened: "Make it faster", "Please fix it". */
+const IMPERATIVE_SENTENCE = new RegExp(
+	`^\\s*(?:please\\s+|por favor,?\\s+|also\\s+|then\\s+|e\\s+|depois\\s+)?(?:${ACTION_WORDS.join("|")})(?![\\p{L}\\p{N}_])`,
+	"iu",
+);
+
+/**
+ * Words only English and Portuguese messages use (shared Romance words such as "de" or "que" are
+ * left out). Intent is judged only for those languages; any other message fails open, so a Spanish
+ * "¿Puedes arreglar esto?" is never mistaken for a question that blocks the first edit.
+ */
+const KNOWN_LANGUAGE = wordsPattern([
+	"the",
+	"is",
+	"are",
+	"this",
+	"that",
+	"it",
+	"why",
+	"how",
+	"what",
+	"does",
+	"you",
+	"can",
+	"please",
+	"não",
+	"nao",
+	"você",
+	"voce",
+	"isso",
+	"esse",
+	"essa",
+	"uma",
+	"também",
+	"são",
+	"pelo",
+	"pela",
+	"por que",
+	"porque",
+	"por quê",
+	"como",
+	"onde",
+	"quando",
+	"quem",
+	"teste",
+	"testes",
+	"código",
+	"função",
+	"qual",
+	"quais",
 ]);
 
 /** Explicit request markers that turn a question into a request: "can you fix", "pode corrigir". */
@@ -385,12 +439,16 @@ const REQUEST_MARKER = wordsPattern([
  *
  * "Why does the build fail?" is a question even though "build" is an action verb: an
  * explanatory opening counts as a request only with an explicit marker ("Why does it fail?
- * Please fix it."). Other questions are requests when they contain an action verb
- * ("Can you fix the test?").
+ * Please fix it.") or a later sentence that starts with an action verb ("Why is this slow? Make it
+ * faster."). Other questions are requests when they contain an action verb ("Can you fix the
+ * test?"). Messages in other languages are never question-only.
  */
 export function isQuestionOnly(text: string): boolean {
 	const prose = developerProse(text);
-	if (!prose) return false;
+	if (!prose || !KNOWN_LANGUAGE.test(prose)) return false;
+	// "Why is this slow? Make it faster." asks, then requests: a later sentence led by an action verb decides.
+	const sentences = prose.split(/(?<=[.!?])\s+|\n+/).filter((sentence) => sentence.trim().length > 0);
+	if (sentences.slice(1).some((sentence) => IMPERATIVE_SENTENCE.test(sentence))) return false;
 	const explanatory = INTERROGATIVE_START.test(prose);
 	if (!explanatory && !prose.endsWith("?")) return false;
 	if (explanatory && !REQUEST_MARKER.test(prose)) return true;
@@ -675,6 +733,19 @@ export class AlignmentPolicy {
 		this.pending.clear();
 	}
 
+	/**
+	 * Drop state that belongs to the conversation as it was: pending approvals, one-shot grants and
+	 * the latest request. The next developer message sets them again.
+	 */
+	resetConversationState(): void {
+		this.pending.clear();
+		this.grants.clear();
+		this.latestRequest = "";
+		this.questionOnly = false;
+		this.scopeWarned = false;
+		this.correcting = false;
+	}
+
 	/** Operations currently waiting for the developer's approval. */
 	pendingAuthorizations(): string[] {
 		return [...this.pending];
@@ -742,7 +813,7 @@ export class AlignmentPolicy {
 		// Only affirmative clauses authorize: "não faça push ainda" names the operation to forbid it.
 		const request = this.latestRequest
 			.toLowerCase()
-			.split(/[.,;!?\n]|(?<![\p{L}])(?:but|mas|porém|porem)(?![\p{L}])/u)
+			.split(/\.(?=\s|$)|[,;!?\n]|(?<![\p{L}])(?:but|mas|porém|porem)(?![\p{L}])/u)
 			.filter((clause) => !RESERVATION.test(clause))
 			.join(" . ");
 		const named = OPERATION_WORDS.some((word) => {
@@ -754,6 +825,15 @@ export class AlignmentPolicy {
 			);
 		});
 		if (named) return { action: "allow", via: "request" };
+
+		// A write to a sensitive or outside path is allowed when the request names that file.
+		const namesTarget =
+			command === "" &&
+			effect.paths.length > 0 &&
+			effect.paths.every((path) =>
+				request.includes((path.replace(/\\/g, "/").split("/").pop() ?? path).toLowerCase()),
+			);
+		if (namesTarget) return { action: "allow", via: "request" };
 
 		const approved = await this.authorize?.({ toolName, effect, fingerprint: operation }, signal);
 		if (approved === true) return { action: "allow", via: "authorizer" };

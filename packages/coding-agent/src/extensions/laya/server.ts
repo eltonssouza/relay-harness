@@ -1,12 +1,6 @@
 import { DOCKER_MISSING, type DockerRun, dockerError } from "./docker.ts";
 import { LAYA_QUESTIONS } from "./questions.ts";
-import {
-	LAYA_CONTAINER,
-	LAYA_CONTAINER_PORT,
-	LAYA_IMAGE_PATHS,
-	LAYA_IMAGE_REPOSITORY,
-	LAYA_MODELS_VOLUME,
-} from "./runtime.ts";
+import { LAYA_CONTAINER, LAYA_CONTAINER_PORT, LAYA_IMAGE_PATHS, LAYA_IMAGE_REPOSITORY } from "./runtime.ts";
 
 const HEALTH_TIMEOUT_MS = 1500;
 /** Loading the model on the CPU of a slow machine takes a while. */
@@ -35,10 +29,6 @@ export interface LayaServerOptions {
 	baseUrl: () => string;
 	/** Image to run. */
 	image: () => Promise<string>;
-	/** Model to serve, as a path inside the container. */
-	model: () => string;
-	/** Clear a stale trained-model selection after Docker reports its path is missing. */
-	useShippedModel?: () => void;
 	fetch?: typeof fetch;
 }
 
@@ -60,7 +50,7 @@ function publishAddress(baseUrl: string): string {
 
 /**
  * The Laya server container. `install()` pulls the image when it is missing and keeps one container
- * running with the active model, published on the configured local port only. The container
+ * running with the shipped model, published on the configured local port only. The container
  * restarts with Docker, so later sessions find it answering. A server that answers without being
  * ours (no container named relay-laya) is used as is, unless it serves other questions than Relay's.
  */
@@ -178,7 +168,7 @@ export class LayaServer {
 
 		const labels = {
 			[LABEL_IMAGE]: image,
-			[LABEL_MODEL]: this.options.model(),
+			[LABEL_MODEL]: LAYA_IMAGE_PATHS.shippedModel,
 			[LABEL_ADDRESS]: publishAddress(baseUrl),
 		};
 		const matches = container && Object.entries(labels).every(([key, value]) => container.labels[key] === value);
@@ -214,18 +204,6 @@ export class LayaServer {
 			if (!current?.running) {
 				const logs = await docker(["logs", "--tail", "5", LAYA_CONTAINER], { signal, timeout: COMMAND_TIMEOUT_MS });
 				const detail = dockerError(logs);
-				if (
-					detail.includes("Local model path not found") &&
-					this.options.model() !== LAYA_IMAGE_PATHS.shippedModel &&
-					this.options.useShippedModel
-				) {
-					const removed = await docker(["rm", "--force", LAYA_CONTAINER], { signal, timeout: COMMAND_TIMEOUT_MS });
-					if (removed.code !== 0)
-						return this.fail("failed", `Removing the broken Laya container failed: ${dockerError(removed)}`);
-					this.options.useShippedModel();
-					report("trained model is missing; switching to the model bundled in the image");
-					return this.run(report, signal);
-				}
 				return this.fail("failed", `The Laya container stopped: ${detail}`);
 			}
 			await new Promise((resolve) => setTimeout(resolve, POLL_MS));
@@ -249,8 +227,6 @@ export class LayaServer {
 			"unless-stopped",
 			"--publish",
 			`${labels[LABEL_ADDRESS]}:${LAYA_CONTAINER_PORT}`,
-			"--volume",
-			`${LAYA_MODELS_VOLUME}:${LAYA_IMAGE_PATHS.trainedModels}`,
 			...Object.entries(labels).flatMap(([key, value]) => ["--label", `${key}=${value}`]),
 			image,
 			"python",
@@ -294,7 +270,7 @@ export class LayaServer {
 			.split("\n")
 			.map((line) => line.trim())
 			.filter((ref) => ref && ref !== image && !ref.endsWith(":<none>"));
-		// An image still used by a training container is kept; rmi fails on it.
+		// An image still used by a container is kept; rmi fails on it.
 		if (others.length > 0) await this.options.docker(["rmi", ...others], { timeout: COMMAND_TIMEOUT_MS });
 	}
 
@@ -307,7 +283,7 @@ export class LayaServer {
 	describe(): string {
 		switch (this.state) {
 			case "ready":
-				return `running in Docker${this.image ? ` (${this.image}, model ${this.options.model()})` : ""}`;
+				return `running in Docker${this.image ? ` (${this.image})` : ""}`;
 			case "installing":
 				return "installing in Docker";
 			case "no-docker":

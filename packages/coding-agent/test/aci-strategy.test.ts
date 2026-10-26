@@ -3,7 +3,7 @@ import { heuristicAssessment, type TaskAssessment } from "../src/extensions/laya
 import { applyPolicy } from "../src/extensions/laya/policy.ts";
 import { STRATEGIES, STRATEGY_RULES_VERSION, selectStrategy } from "../src/extensions/laya/strategy.ts";
 
-const ALL_TOOLS = ["read", "edit", "write", "bash", "web_fetch", "execute_work"];
+const ALL_TOOLS = ["read", "edit", "write", "bash", "web_fetch"];
 const MIN_CONFIDENCE = 0.5;
 
 function assessment(overrides: {
@@ -48,16 +48,11 @@ describe("cognitive strategy selector (rules v1)", () => {
 		expect(decision.abstentions).toEqual([]);
 	});
 
-	it("decomposes a multi-step task and delegates it when the delegation tool is available", () => {
+	it("decomposes a broad or complex task", () => {
 		const broad = assessment({ task: { scope: "repository", complexity: 0.9 } });
-		expect(decide("migrate the whole repo to ESM", broad).decision.strategy).toBe("delegate");
-		const withoutDelegation = decide(
-			"migrate the whole repo to ESM",
-			broad,
-			ALL_TOOLS.filter((t) => t !== "execute_work"),
-		).decision;
-		expect(withoutDelegation.strategy).toBe("decompose");
-		expect(withoutDelegation.abstentions).toEqual([{ strategy: "delegate", reason: "delegation_unavailable" }]);
+		const { decision } = decide("migrate the whole repo to ESM", broad);
+		expect(decision.strategy).toBe("decompose");
+		expect(decision.abstentions).toEqual([]);
 	});
 
 	it("uses tools only when they are active, and abstains otherwise", () => {

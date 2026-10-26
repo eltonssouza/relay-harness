@@ -272,7 +272,7 @@ export function printHelp(extensionFlags?: ExtensionFlag[]): void {
 					})
 					.join("\n")}\n`
 			: "";
-	console.log(`${chalk.bold(APP_NAME)} - Coding harness with tools, extensions, and opt-in static audits
+	console.log(`${chalk.bold(APP_NAME)} - Coding harness with tools and extensions
 
 ${chalk.bold("Usage:")}
   ${APP_NAME} [options] [--] [@files...] [messages...]
