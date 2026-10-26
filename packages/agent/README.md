@@ -528,7 +528,7 @@ const uninstall = harness.install(agent);
 | Evidence | `EvidenceLedger`, `SliceDiscipline` | Compares completion claims with recorded changes and checks; steers one verification request when a claim lacks evidence. With `verifyCommands`, only the project's declared checks count. With a `WorkspaceProbe`, flags requests that change too many lines and files that grow too large. |
 | Context | `ContextWindowPolicy` | Keeps recent tool results verbatim, elides older large ones in cache-friendly batches, and restates a progress digest. |
 
-Tool effects come from `classifyToolCall()`, which knows common tool names (`read`, `edit`, `write`, `bash`, ...) and classifies shell commands. Pass `classifyEffect` for other tools. Each pillar can be disabled with `false` and used on its own without an `Agent`. See the [coding agent's Harness Core reference](../coding-agent/docs/harness-core.md) for the rules in detail.
+Tool effects come from `classifyToolCall()`, which knows common tool names (`read`, `edit`, `write`, `bash`, ...) and classifies shell commands by the program they run. Pass `classifyEffect` for other tools, and `workspace: { cwd, home }` so `write` and `edit` calls outside the workspace or to files that run code (`.git/hooks`, `.ssh`) need authorization. User messages carry an optional `origin` (`"extension"` or `"harness"`); only messages without one are read as the developer's. Call `resync()` when the conversation moves to another branch. Each pillar can be disabled with `false` and used on its own without an `Agent`. See the [coding agent's Harness Core reference](../coding-agent/docs/harness-core.md) for the rules in detail.
 
 ## Proxy Usage
 

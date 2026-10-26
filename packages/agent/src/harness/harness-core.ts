@@ -30,7 +30,7 @@ import {
 	type ContextPolicyStats,
 	ContextWindowPolicy,
 } from "./context.ts";
-import { classifyToolCall, type ToolEffect, type ToolEffectClassifier } from "./effects.ts";
+import { type ClassifyContext, classifyToolCall, type ToolEffect, type ToolEffectClassifier } from "./effects.ts";
 import {
 	type CompletionReport,
 	EvidenceLedger,
@@ -38,7 +38,20 @@ import {
 	formatVerificationRequest,
 } from "./evidence.ts";
 import { SliceDiscipline, type SliceDisciplineOptions } from "./slices.ts";
-import { isDeveloperMessage, messageText } from "./text.ts";
+import { messageOrigin, messageText } from "./text.ts";
+
+/** Text of a tool result, for output-based evidence. */
+function resultText(result: unknown): string {
+	const content = (result as { content?: unknown } | undefined)?.content;
+	if (!Array.isArray(content)) return "";
+	return content
+		.map((block) =>
+			block && typeof block === "object" && (block as { type?: string }).type === "text"
+				? String((block as { text?: unknown }).text ?? "")
+				: "",
+		)
+		.join("\n");
+}
 
 export type HarnessCoreEvent =
 	| { type: "tool_blocked"; toolName: string; effect: ToolEffect; kind: "authorization" | "scope"; reason: string }
@@ -60,6 +73,8 @@ export interface HarnessCoreOptions {
 	verifyCommands?: readonly string[];
 	/** Classification for tools the default name-based rules do not know. */
 	classifyEffect?: ToolEffectClassifier;
+	/** Workspace root and home directory, so writes outside the workspace or to hooks and credentials are gated. */
+	workspace?: ClassifyContext;
 	/** Observer for pillar decisions, for UI, logs, and telemetry. Must not throw. */
 	onEvent?: (event: HarnessCoreEvent) => void;
 }
@@ -72,11 +87,13 @@ export class HarnessCore {
 	readonly slices?: SliceDiscipline;
 	readonly verifyCommands: readonly string[];
 	private readonly classifyEffect?: ToolEffectClassifier;
+	private readonly workspace: ClassifyContext;
 	private readonly onEvent?: (event: HarnessCoreEvent) => void;
 	private lastElidedResults = 0;
 
 	constructor(options: HarnessCoreOptions = {}) {
 		this.classifyEffect = options.classifyEffect;
+		this.workspace = options.workspace ?? {};
 		this.onEvent = options.onEvent;
 		this.verifyCommands = (options.verifyCommands ?? []).filter((command) => command.trim().length > 0);
 		if (options.slices) this.slices = new SliceDiscipline(options.slices);
@@ -88,7 +105,7 @@ export class HarnessCore {
 	}
 
 	classify(toolCall: AgentToolCall): ToolEffect {
-		return classifyToolCall(toolCall, this.classifyEffect, this.verifyCommands);
+		return classifyToolCall(toolCall, this.classifyEffect, this.verifyCommands, this.workspace);
 	}
 
 	/** A developer request starts: reset per-request evidence and slices. */
@@ -129,10 +146,19 @@ export class HarnessCore {
 		return AlignmentPolicy.toHookResult(decision);
 	}
 
-	/** Record the outcome of an executed (or blocked) tool call. */
-	recordToolOutcome(toolCall: AgentToolCall, isError: boolean): void {
-		const effect = this.classify(toolCall);
-		this.evidence?.recordToolOutcome(effect, isError);
+	/** Record the outcome of an executed (or blocked) tool call. `output` is its text result. */
+	recordToolOutcome(toolCall: AgentToolCall, isError: boolean, output?: string): void {
+		this.evidence?.recordToolOutcome(this.classify(toolCall), isError, output);
+	}
+
+	/**
+	 * The conversation changed under the pillars (the developer moved to another branch). Drop what
+	 * belongs to the old one: context stubs and digest, pending approvals and grants. Constraints and
+	 * corrections are restored by the caller from the new branch.
+	 */
+	resync(): void {
+		this.context?.reset();
+		this.alignment?.resetConversationState();
 	}
 
 	/** Project the messages of one provider request: context policy plus harness state. */
@@ -166,6 +192,7 @@ export class HarnessCore {
 				role: "user",
 				content: [{ type: "text", text: formatVerificationRequest(report, this.verifyCommands) }],
 				timestamp: Date.now(),
+				origin: "harness",
 			},
 		};
 	}
@@ -212,17 +239,24 @@ export class HarnessCore {
 					// The run's own prompt message follows `agent_start`; continuations and retries have none.
 					awaitingRequest = true;
 					break;
-				case "message_end":
-					if (isDeveloperMessage(event.message)) {
+				case "message_end": {
+					const origin = messageOrigin(event.message);
+					if (origin === "developer") {
 						const text = messageText(event.message);
 						if (awaitingRequest) this.beginRequest(text);
 						awaitingRequest = false;
 						this.observeDeveloperMessage(text, event.message.timestamp, agentHasResponded);
+					} else if (origin === "extension") {
+						// An extension started this run: it is a request for evidence, but it states no
+						// constraints, grants no approvals and corrects nothing.
+						if (awaitingRequest) this.beginRequest(messageText(event.message));
+						awaitingRequest = false;
 					} else if (event.message.role === "assistant") {
 						awaitingRequest = false;
 						agentHasResponded = true;
 					}
 					break;
+				}
 				case "tool_execution_start": {
 					const toolCall: AgentToolCall = {
 						type: "toolCall",
@@ -241,7 +275,7 @@ export class HarnessCore {
 					const toolCall = toolCalls.get(event.toolCallId);
 					toolCalls.delete(event.toolCallId);
 					if (!toolCall) break;
-					this.recordToolOutcome(toolCall, event.isError);
+					this.recordToolOutcome(toolCall, event.isError, resultText(event.result));
 					const effect = this.classify(toolCall);
 					if (effect.kind !== "read") {
 						await this.slices?.afterChange(
