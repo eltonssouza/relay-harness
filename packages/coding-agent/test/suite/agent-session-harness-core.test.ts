@@ -65,6 +65,32 @@ describe("AgentSession harness core", () => {
 		expect(harness.session.harnessCore.core.evidence?.latestReport()?.status).toBe("verified");
 	});
 
+	it("asks for verification after an edit made through the shell, and accepts ng test as the check", async () => {
+		const { harness, calls } = await create();
+		harness.setResponses([
+			fauxAssistantMessage(
+				fauxToolCall("bash", { command: "sed -i 's/true/!task.done/' src/app/task.service.ts" }),
+				{
+					stopReason: "toolUse",
+				},
+			),
+			fauxAssistantMessage("Done, toggle now flips the state."),
+			fauxAssistantMessage(fauxToolCall("bash", { command: "npx ng test --watch=false" }), {
+				stopReason: "toolUse",
+			}),
+			fauxAssistantMessage("Fixed; the frontend tests pass."),
+		]);
+
+		await harness.session.prompt("Make toggle in src/app/task.service.ts flip the state");
+
+		expect(calls).toEqual([
+			"bash:sed -i 's/true/!task.done/' src/app/task.service.ts",
+			"bash:npx ng test --watch=false",
+		]);
+		expect(getUserTexts(harness)[1]).toContain("[harness:evidence] Completion check");
+		expect(harness.session.harnessCore.core.evidence?.latestReport()?.status).toBe("verified");
+	});
+
 	it("counts only declared verification commands and names them in the verification request", async () => {
 		const { harness, calls } = await create({ settings: { harnessCore: { verifyCommands: ["npm run check"] } } });
 		harness.setResponses([

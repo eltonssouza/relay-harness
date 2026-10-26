@@ -42,6 +42,12 @@ export interface ToolEffect {
 	 * check covers the whole workspace.
 	 */
 	scope?: string[];
+	/**
+	 * For shell commands: workspace files the command modifies (`sed -i`, `tee`, `> file`, `mv`, `patch`).
+	 * An empty list means it edits files it does not name (`git apply`). With `verify`, every write
+	 * comes before the check, so the check can cover it.
+	 */
+	writes?: string[];
 }
 
 /** Where the session runs, so paths can be judged against the workspace. */
@@ -170,6 +176,12 @@ const COMMAND_RULES: CommandRule[] = [
 		reason: "infrastructure change",
 	},
 	{ pattern: /\bdocker\s+push\b/, kind: "external", reason: "image push" },
+	{
+		pattern:
+			/\bdocker\s+(?:(?:system|volume|container|image|network|builder)\s+prune|volume\s+rm)\b|\bdocker(?:\s+|-)compose\b[^\n;&|]*\sdown\b[^\n;&|]*\s(?:-v|--volumes)\b/,
+		kind: "destructive",
+		reason: "docker deletes containers, images or volumes",
+	},
 	{ pattern: /\b(?:vercel|netlify|fly|firebase)\s+deploy\b|\bvercel\s+--prod\b/, kind: "external", reason: "deploy" },
 	{
 		pattern:
@@ -272,6 +284,7 @@ const SUBCOMMAND_CHECKS: Record<string, readonly string[]> = {
 	mvnw: ["test", "verify", "package", "compile", "check"],
 	gradle: ["test", "check", "build", "assemble"],
 	gradlew: ["test", "check", "build", "assemble"],
+	ng: ["test", "lint", "build", "e2e"],
 	playwright: ["test"],
 	cypress: ["run"],
 	make: ["test", "tests", "check", "lint", "build", "verify", "ci", "all"],
@@ -425,6 +438,24 @@ function isCheckCommand(argv: readonly string[]): boolean {
 	return CHECK_SCRIPTS.has(name.replace(/\.(?:sh|bash)$/, "")) && /\.(?:sh|bash)$/.test(words[0]);
 }
 
+/**
+ * Directory a command runs in after the `cd` commands before it, relative to the workspace, or
+ * undefined when a `cd` leaves the workspace.
+ */
+function workingDirectory(commands: readonly ShellCommand[], index: number): string | undefined {
+	let base = "";
+	for (let position = 0; position < index; position++) {
+		const argv = commands[position].argv;
+		if ((programName(argv[0]) === "cd" || programName(argv[0]) === "pushd") && argv[1]) {
+			const target = argv[1].replace(/\\/g, "/");
+			if (target.startsWith("/")) base = target.replace(/\/+$/, "");
+			else if (target === ".." || target.startsWith("../") || target.startsWith("~")) return undefined;
+			else base = [base, target.replace(/^\.\//, "").replace(/\/+$/, "")].filter(Boolean).join("/");
+		}
+	}
+	return base;
+}
+
 /** Directories a check covers, from `cd`, `--prefix`, `-C`, `--workspace <path>` and `-p <tsconfig>`. */
 function checkScope(commands: readonly ShellCommand[], index: number): string[] | undefined {
 	const normalize = (value: string): string | undefined => {
@@ -435,16 +466,8 @@ function checkScope(commands: readonly ShellCommand[], index: number): string[] 
 		return path.includes("/") || path.startsWith("/") ? path : undefined;
 	};
 	const scope: string[] = [];
-	let base = "";
-	for (let position = 0; position <= index; position++) {
-		const argv = commands[position].argv;
-		if (position < index && (programName(argv[0]) === "cd" || programName(argv[0]) === "pushd") && argv[1]) {
-			const target = argv[1].replace(/\\/g, "/");
-			if (target.startsWith("/")) base = target.replace(/\/+$/, "");
-			else if (target === ".." || target.startsWith("../") || target.startsWith("~")) return undefined;
-			else base = [base, target.replace(/^\.\//, "").replace(/\/+$/, "")].filter(Boolean).join("/");
-		}
-	}
+	const base = workingDirectory(commands, index);
+	if (base === undefined) return undefined;
 	if (base) scope.push(base);
 	const args = commands[index].argv;
 	for (let position = 0; position < args.length - 1; position++) {
@@ -477,6 +500,8 @@ export function masksExitCode(command: string, checkEnd = 0): boolean {
 interface LocatedCheck {
 	/** Offset just after the last check in the command. */
 	end: number;
+	/** Position of the check among the command's simple commands. */
+	index: number;
 	scope?: string[];
 }
 
@@ -486,7 +511,7 @@ function lastCheck(command: string, verifyCommands: readonly string[]): LocatedC
 	if (verifyCommands.length === 0) {
 		for (let index = commands.length - 1; index >= 0; index--) {
 			if (isCheckCommand(commands[index].argv))
-				return { end: commands[index].end, scope: checkScope(commands, index) };
+				return { end: commands[index].end, index, scope: checkScope(commands, index) };
 		}
 		return undefined;
 	}
@@ -506,7 +531,7 @@ function lastCheck(command: string, verifyCommands: readonly string[]): LocatedC
 	}
 	if (end < 0) return undefined;
 	const index = commands.findIndex((item) => item.start <= matchStart && matchStart < item.end);
-	return { end, scope: index >= 0 ? checkScope(commands, index) : undefined };
+	return { end, index, scope: index >= 0 ? checkScope(commands, index) : undefined };
 }
 
 /** Inline interpreter code (`python -c`, `node -e`) that needs authorization, if any. */
@@ -526,22 +551,159 @@ function inlineCodeEffect(
 	return undefined;
 }
 
+/** An `scp` or `rsync` argument that names another host: `host:path`, `user@host:path`, `scp://host/path`. */
+function isRemoteSpec(arg: string): boolean {
+	if (/^(?:scp|rsync|ssh|sftp):\/\//.test(arg)) return true;
+	if (/^[A-Za-z]:[\\/]/.test(arg)) return false;
+	return /^(?:[\w.+-]+@)?(?:[\w.-]+|\[[0-9a-fA-F:.]+\]):/.test(arg);
+}
+
+/** `scp` and `rsync` that send files to another host, or `rsync` that deletes at its destination. */
+function remoteCopyEffect(
+	commands: readonly ShellCommand[],
+): { kind: "destructive" | "external"; reason: string } | undefined {
+	for (const { argv } of commands) {
+		const words = stripWrappers(argv);
+		const name = words.length > 0 ? programName(words[0]) : "";
+		if (name !== "scp" && name !== "rsync") continue;
+		const args = words.slice(1);
+		if (name === "rsync" && args.some((arg) => /^--(?:del|delete(?:-[a-z]+)?|remove-source-files)$/.test(arg))) {
+			return { kind: "destructive", reason: "rsync --delete removes files at the destination" };
+		}
+		const destination = args.filter((arg) => !arg.startsWith("-")).at(-1);
+		if (destination !== undefined && isRemoteSpec(destination)) {
+			return { kind: "external", reason: `${name} sends files to another host` };
+		}
+	}
+	return undefined;
+}
+
+/** Options that carry the script of `sed` and `perl`, so the next word is not a file. */
+const SCRIPT_OPTIONS = new Set(["-e", "-E", "-f", "--expression", "--file"]);
+
+/** Files named by `sed -i` and `perl -i`: the words that are neither options nor the script. */
+function inPlaceTargets(args: readonly string[]): string[] {
+	const files: string[] = [];
+	let scriptGiven = false;
+	for (let index = 0; index < args.length; index++) {
+		const arg = args[index];
+		if (SCRIPT_OPTIONS.has(arg)) {
+			scriptGiven = true;
+			index++;
+		} else if (/^--(?:expression|file)=/.test(arg)) {
+			scriptGiven = true;
+		} else if (arg !== "" && !arg.startsWith("-")) {
+			files.push(arg);
+		}
+	}
+	return scriptGiven ? files : files.slice(1);
+}
+
+/** The subcommand of a `git` command line, past `-C dir` and `-c key=value`. */
+function gitSubcommand(args: readonly string[]): string | undefined {
+	for (let index = 0; index < args.length; index++) {
+		if (args[index] === "-C" || args[index] === "-c") index++;
+		else if (!args[index].startsWith("-")) return args[index];
+	}
+	return undefined;
+}
+
+/**
+ * Files a simple command modifies, by program (`sed -i`, `perl -i`, `tee`, `mv`, `cp`, `patch`,
+ * `git apply`) and by output redirection. An empty list means it edits files it does not name.
+ */
+function commandWrites(argv: readonly string[], outputs: readonly string[]): string[] | undefined {
+	const words = stripWrappers(argv);
+	const name = words.length > 0 ? programName(words[0]) : "";
+	const args = words.slice(1);
+	const plain = args.filter((arg) => arg !== "" && !arg.startsWith("-"));
+	let files: string[] | undefined;
+	if (
+		name === "sed" &&
+		args.some((arg) => arg === "--in-place" || arg.startsWith("--in-place=") || /^-[a-zA-Z]*i/.test(arg))
+	)
+		files = inPlaceTargets(args);
+	else if (name === "perl" && args.some((arg) => /^-[0-9a-zA-Z]*i/.test(arg))) files = inPlaceTargets(args);
+	else if (name === "tee" || name === "mv") files = plain;
+	else if (name === "cp" || name === "install") files = plain.slice(-1);
+	else if (
+		name === "patch" ||
+		(name === "git" &&
+			gitSubcommand(args) === "apply" &&
+			!args.some((arg) => /^--(?:check|stat|numstat|summary)$/.test(arg)))
+	)
+		files = [];
+	if (files === undefined && outputs.length === 0) return undefined;
+	return [...(files ?? []), ...outputs];
+}
+
+/** Whether a path a command writes is in the workspace: not a device, a temporary file or a home file. */
+function inWorkspace(path: string, context: ClassifyContext): boolean {
+	const text = path.replace(/\\/g, "/");
+	if (text.startsWith("/dev/") || text === "~" || text.startsWith("~/")) return false;
+	if (!/^(?:\/|[A-Za-z]:\/)/.test(text)) return true;
+	if (TEMP_ROOTS.some((root) => text.startsWith(root))) return false;
+	if (!context.cwd) return true;
+	const root = normalizePath(context.cwd.replace(/\\/g, "/").replace(/\/+$/, ""));
+	const full = normalizePath(text);
+	return full === root || full.startsWith(`${root}/`);
+}
+
+/**
+ * Workspace files the commands of one shell line modify, and the position of the last command that
+ * modifies one. A check's own output redirection (`mvn test > out.log`) and a pipe that keeps its
+ * output (`mvn test | tee out.log`) are not changes.
+ */
+function shellWrites(
+	commands: readonly ShellCommand[],
+	context: ClassifyContext,
+): { paths: string[]; last: number } | undefined {
+	const paths: string[] = [];
+	let last = -1;
+	commands.forEach((command, index) => {
+		if (isCheckCommand(command.argv)) return;
+		// `npm test | tee log.txt` keeps the check's output; it does not edit the project.
+		if (index > 0 && commands[index - 1].next === "|" && isCheckCommand(commands[index - 1].argv)) return;
+		const written = commandWrites(command.argv, command.outputs);
+		if (!written) return;
+		const base = workingDirectory(commands, index);
+		const kept: string[] = [];
+		for (const path of written) {
+			const resolved = base && !/^(?:\/|[A-Za-z]:[\\/]|~)/.test(path) ? `${base}/${path}` : path;
+			if (inWorkspace(resolved, context)) kept.push(resolved);
+		}
+		// Named files that are all outside the workspace change nothing it holds.
+		if (written.length > 0 && kept.length === 0) return;
+		paths.push(...kept);
+		last = index;
+	});
+	return last >= 0 ? { paths, last } : undefined;
+}
+
 /**
  * Classify a shell command. With `verifyCommands`, only those commands count as verification;
  * otherwise commands that run a known test runner, type checker, linter or build do. A check
  * whose exit code is masked is not verification.
  */
-export function classifyCommand(command: string, verifyCommands: readonly string[] = []): Omit<ToolEffect, "paths"> {
+export function classifyCommand(
+	command: string,
+	verifyCommands: readonly string[] = [],
+	context: ClassifyContext = {},
+): Omit<ToolEffect, "paths"> {
 	for (const rule of COMMAND_RULES) {
 		if (rule.pattern.test(command)) return { kind: rule.kind, command, reason: rule.reason };
 	}
-	const inline = inlineCodeEffect(parseShell(command));
-	if (inline) return { kind: inline.kind, command, reason: inline.reason };
+	const commands = parseShell(command);
+	const risky = inlineCodeEffect(commands) ?? remoteCopyEffect(commands);
+	if (risky) return { kind: risky.kind, command, reason: risky.reason };
+	const writes = shellWrites(commands, context);
+	const written = writes ? { writes: writes.paths } : {};
 	const check = lastCheck(command, verifyCommands);
-	if (check && !masksExitCode(command, check.end)) {
-		return { kind: "verify", command, ...(check.scope ? { scope: check.scope } : {}) };
+	// A file changed after the check in the same line is not covered by it.
+	if (check && !masksExitCode(command, check.end) && !(writes && writes.last > check.index)) {
+		return { kind: "verify", command, ...(check.scope ? { scope: check.scope } : {}), ...written };
 	}
-	return { kind: "execute", command };
+	return { kind: "execute", command, ...written };
 }
 
 function stringArg(args: Record<string, unknown>, ...keys: string[]): string | undefined {
@@ -620,7 +782,7 @@ export function classifyToolCall(
 
 	if (SHELL_TOOLS.has(name)) {
 		const command = stringArg(args, "command", "cmd", "script") ?? "";
-		return { ...classifyCommand(command, verifyCommands), paths };
+		return { ...classifyCommand(command, verifyCommands, context), paths };
 	}
 	if (WRITE_TOOLS.has(name)) {
 		for (const target of paths) {

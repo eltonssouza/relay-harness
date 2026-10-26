@@ -9,6 +9,7 @@ import {
 	type AgentMessage,
 	ContextWindowPolicy,
 	classifyCommand,
+	classifyToolCall,
 	EvidenceLedger,
 	isQuestionOnly,
 	requiresAuthorization,
@@ -84,6 +85,17 @@ export function completionMetrics(): CompletionMetrics {
 		for (const step of scenario.steps) {
 			if ("effect" in step) {
 				ledger.recordToolOutcome(step.effect, step.isError ?? false, step.output);
+				continue;
+			}
+			if ("shell" in step) {
+				const toolCall = {
+					type: "toolCall",
+					id: "bench",
+					name: "bash",
+					arguments: { command: step.shell },
+				} as const;
+				const effect = classifyToolCall(toolCall, undefined, [], { cwd: "/work/app" });
+				ledger.recordToolOutcome(effect, step.isError ?? false, step.output);
 				continue;
 			}
 			const effect: ToolEffect = {

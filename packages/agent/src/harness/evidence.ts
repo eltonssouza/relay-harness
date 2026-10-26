@@ -225,13 +225,20 @@ export class EvidenceLedger {
 	 * the call's text result; a green test run whose output says no test ran is not evidence.
 	 */
 	recordToolOutcome(effect: ToolEffect, isError: boolean, output = ""): void {
-		const step = this.step++;
-		if (isMutation(effect.kind) && !isError) {
+		let step = this.step++;
+		const record = (paths: readonly string[]) => {
 			this.mutations++;
-			for (const path of effect.paths.length > 0 ? effect.paths : [undefined]) {
+			for (const path of paths.length > 0 ? paths : [undefined]) {
 				this.changes.push({ path, step, documentation: path !== undefined && DOCUMENTATION_PATH.test(path) });
 				if (path !== undefined) this.changed.add(path);
 			}
+		};
+		if (isMutation(effect.kind) && !isError) record(effect.paths);
+		// Files a shell command edited before its own check: the check can cover them. A failed check
+		// still ran after the edit; any other failed command may not have reached it.
+		if (effect.writes && (!isError || effect.kind === "verify")) {
+			record(effect.writes);
+			if (effect.kind === "verify") step = this.step++;
 		}
 		if (effect.kind === "execute" && !isError) this.opaqueEffects++;
 		if (effect.kind === "verify") {
