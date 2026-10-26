@@ -664,7 +664,10 @@ export default function layaExtension(relay: ExtensionAPI, options: LayaExtensio
 		history = settings.telemetry === false ? new PerformanceHistory() : historyFromTelemetry(store.read());
 		removeHostRuntime();
 		// Prepare the selected runtime in the background. Noninteractive sessions do not install it.
-		if (settings.autostart !== false && ctx.hasUI && isLocalUrl(baseUrl())) void install(ctx);
+		if (settings.autostart !== false && ctx.hasUI && isLocalUrl(baseUrl())) {
+			// The session can end before the background install reports; a stale context has no one to tell.
+			install(ctx).catch(() => {});
+		}
 	});
 
 	/** The user's own tool set: the active tools, or the set enforcement replaced while it is unchanged. */
