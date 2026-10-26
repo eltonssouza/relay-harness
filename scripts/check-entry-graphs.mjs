@@ -19,9 +19,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 /** Workspace package name -> its source root, so cross-package imports are followed. */
 const WORKSPACE = {
-	"@relay-harness/chord": "packages/chord/src",
 	"@relay-harness/ai": "packages/ai/src",
-	"@relay-harness/durable": "packages/durable/src",
 	"@relay-harness/agent-core": "packages/agent/src",
 	"@relay-harness/codemode": "packages/codemode/src",
 	"@relay-harness/telemetry": "packages/telemetry/src",
@@ -40,13 +38,6 @@ const BUDGETS = {
 			forbid: ["providers/", "models.generated.ts", "index.ts", "utils/validation.ts", "utils/typebox-helpers.ts"],
 		},
 		"./utils/*": { maxFiles: 3, forbid: ["providers/", "api/", "index.ts"] },
-	},
-	"packages/durable": {
-		".": {
-			// Tool argument validation reaches TypeBox; provider-session creation reaches relay-ai's lean UUID utility.
-			maxFiles: 62,
-			forbid: ["packages/ai/src/index.ts", "packages/ai/src/utils/typebox-helpers.ts"],
-		},
 	},
 };
 

@@ -18,11 +18,6 @@ const banner = {
 const allowedExternalPackages = new Set([
 	// Transformers resolves native ONNX/Sharp binaries and assets from its installed dependency tree.
 	"@huggingface/transformers",
-	"@relay-harness/chord",
-	"@relay-harness/chord/bundler",
-	"@relay-harness/chord/context",
-	"@relay-harness/chord/delta",
-	"@relay-harness/chord/node",
 	"@silvia-odwyer/photon-node",
 	"jiti",
 	// Optional native accelerators. Their callers fall back to JavaScript when absent.
@@ -88,7 +83,7 @@ function commonBuildOptions() {
 		banner,
 		bundle: true,
 		define: { RELAY_BUNDLED_NODE: "true" },
-		external: ["@huggingface/transformers", "@relay-harness/chord", "@silvia-odwyer/photon-node"],
+		external: ["@huggingface/transformers", "@silvia-odwyer/photon-node"],
 		format: "esm",
 		legalComments: "none",
 		logLevel: "warning",

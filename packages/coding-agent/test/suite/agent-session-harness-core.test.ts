@@ -139,9 +139,7 @@ describe("AgentSession harness core", () => {
 		expect(harness.session.systemPrompt).toContain("you own the how");
 		expect(getMessageText(requests[0].messages.at(-1))).not.toContain("corrects your previous approach");
 		expect(getMessageText(requests[1].messages.at(-1))).toContain("corrects your previous approach");
-		const learnings = harness.session.harnessCore
-			.describe([])
-			.find((section) => section.title.startsWith("Learnings"));
+		const learnings = harness.session.harnessCore.describe().find((section) => section.title.startsWith("Learnings"));
 		expect(learnings?.lines[0]).toBe("correction: Não, simplifica. Quatro estados: pending, sending, sent, unknown.");
 
 		const { harness: resumed } = await create({ sessionManager: harness.sessionManager });

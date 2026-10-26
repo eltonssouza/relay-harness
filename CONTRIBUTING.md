@@ -69,8 +69,8 @@ tests; Linux validation remains a separate requirement when applicable.
 GitHub Actions no longer runs CI for PRs or branch pushes. Include the validated
 commit, operating system, Node version and local result in the PR description.
 The required `local/verify` status may report success only after the full local
-runner passes for that commit. Local CI does not approve a Laya model or enable
-distribution or automatic delegation.
+runner passes for that commit. Local CI does not approve a Laya model or
+distribution.
 
 Do not edit `CHANGELOG.md`. Changelog entries are added by maintainers.
 

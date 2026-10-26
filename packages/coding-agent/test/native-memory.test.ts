@@ -1,15 +1,13 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fauxAssistantMessage, fauxToolCall, getSystemMessageText } from "@relay-harness/ai";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildMemoryContext } from "../src/core/memory/context-builder.ts";
 import { embeddingProviderFromEnv, HttpEmbeddingProvider } from "../src/core/memory/embeddings.ts";
-import { importLogbookNotes } from "../src/core/memory/legacy-import.ts";
 import { defaultMemoryPolicy } from "../src/core/memory/policy.ts";
 import { MEMORY_SCHEMA_VERSION, restoreMemoryStore, SqliteMemoryStore } from "../src/core/memory/sqlite-store.ts";
 import type { EmbeddingProvider, MemoryPrincipal } from "../src/core/memory/types.ts";
-import { appendLogbookEvent } from "../src/extensions/logbook/storage.ts";
 import { createNativeMemoryExtension } from "../src/extensions/native-memory/index.ts";
 import { createHarness, type Harness } from "./suite/harness.ts";
 
@@ -488,17 +486,6 @@ describe("Phase 05: hardening", () => {
 		const hits = await store.search(alice, "modulo m7");
 		expect(hits.length).toBeGreaterThan(0);
 		expect(performance.now() - started).toBeLessThan(1000);
-	});
-
-	it("reads legacy logbook notes idempotently and leaves the logbook untouched", async () => {
-		appendLogbookEvent(dir, { sessionId: "s1", type: "note", text: "Deploy exige aprovação do time" });
-		appendLogbookEvent(dir, { sessionId: "s1", type: "checkpoint", outcome: "completed" });
-		const logbook = join(dir, ".relay", "memory", "logbook", "events.jsonl");
-		const before = readFileSync(logbook, "utf8");
-		expect(await importLogbookNotes(store, alice, dir)).toEqual({ imported: 1, skipped: 0 });
-		expect(await importLogbookNotes(store, alice, dir)).toEqual({ imported: 0, skipped: 1 });
-		expect(readFileSync(logbook, "utf8")).toBe(before);
-		expect((await store.search(alice, "deploy aprovação"))[0].sources[0].reference).toMatch(/^logbook:/);
 	});
 });
 

@@ -3,21 +3,16 @@
  * settings, interactive authorization, constraint persistence, skills, and notifications.
  */
 
-import { readdirSync, readFileSync } from "node:fs";
-import { basename, join, relative } from "node:path";
 import {
 	type Agent,
-	auditSkill,
 	type DeveloperConstraint,
 	type DeveloperCorrection,
 	HarnessCore,
 	type HarnessCoreEvent,
-	type SkillUsageReport,
 } from "@relay-harness/agent-core";
 import type { ExtensionMode, ExtensionUIContext } from "./extensions/index.ts";
 import type { SessionManager } from "./session-manager.ts";
 import type { SettingsManager } from "./settings-manager.ts";
-import type { Skill } from "./skills.ts";
 import { createGitWorkspaceProbe } from "./workspace-probe.ts";
 
 /** Session entry type that persists developer constraints and corrections across resumes and compaction. */
@@ -29,44 +24,12 @@ interface ConstraintsEntryData {
 	corrections?: DeveloperCorrection[];
 }
 
-/** Files of a skill directory, relative with forward slashes. Bounded so a huge directory cannot stall `/harness`. */
-function listSkillResources(skill: Skill, limit = 200): string[] {
-	const files: string[] = [];
-	const visit = (dir: string, depth: number) => {
-		if (depth > 4 || files.length >= limit) return;
-		for (const entry of readdirSync(dir, { withFileTypes: true })) {
-			if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
-			const path = join(dir, entry.name);
-			if (entry.isDirectory()) visit(path, depth + 1);
-			else if (path !== skill.filePath) files.push(relative(skill.baseDir, path).replace(/\\/g, "/"));
-		}
-	};
-	visit(skill.baseDir, 0);
-	return files;
-}
-
-/**
- * Progressive-disclosure findings for a skill. Only `SKILL.md` skills own their directory; a
- * loose Markdown skill shares a skills root with other skills, so it has no resources to audit.
- * Unreadable skills yield no findings.
- */
-function auditSkillOnDisk(skill: Skill): string[] {
-	if (basename(skill.filePath) !== "SKILL.md") return [];
-	try {
-		const resources = listSkillResources(skill);
-		return auditSkill(readFileSync(skill.filePath, "utf8"), resources).map((finding) => finding.message);
-	} catch {
-		return [];
-	}
-}
-
 export interface CodingHarnessCoreOptions {
 	agent: Agent;
 	settingsManager: SettingsManager;
 	sessionManager: SessionManager;
 	/** Workspace root, for measuring changes. */
 	cwd: string;
-	getSkills: () => readonly Skill[];
 	/** Interactive UI, when the session has one. */
 	getUI: () => { ui?: ExtensionUIContext; mode: ExtensionMode };
 }
@@ -74,7 +37,6 @@ export interface CodingHarnessCoreOptions {
 /** Harness core installed on a coding session, plus the latest observations for `/harness`. */
 export class CodingHarnessCore {
 	readonly core: HarnessCore;
-	private lastSkillUsage: SkillUsageReport | undefined;
 	private readonly blocked: Array<{ toolName: string; reason: string }> = [];
 	private readonly uninstall: () => void;
 
@@ -101,14 +63,6 @@ export class CodingHarnessCore {
 			evidence: settings.evidence ? {} : false,
 			context: settings.context
 				? { keepRecent: settings.contextKeepRecent, batchSize: settings.contextBatchSize }
-				: false,
-			skills: settings.skills
-				? {
-						skills: () =>
-							options
-								.getSkills()
-								.map((skill) => ({ name: skill.name, baseDir: skill.baseDir, filePath: skill.filePath })),
-					}
 				: false,
 			slices:
 				settings.evidence && (settings.maxChangedLines > 0 || settings.maxFileLines > 0)
@@ -152,11 +106,6 @@ export class CodingHarnessCore {
 		return [...this.core.promptGuidelines()];
 	}
 
-	/** Skill usage of the last run that loaded a skill resource. */
-	getLastSkillUsage(): SkillUsageReport | undefined {
-		return this.lastSkillUsage;
-	}
-
 	/** Recent tool calls the alignment policy blocked, newest last. */
 	getBlockedCalls(): ReadonlyArray<{ toolName: string; reason: string }> {
 		return this.blocked;
@@ -173,7 +122,7 @@ export class CodingHarnessCore {
 	}
 
 	/** Plain-text status of every pillar, as sections of lines, for `/harness`. */
-	describe(skills: readonly Skill[]): Array<{ title: string; lines: string[] }> {
+	describe(): Array<{ title: string; lines: string[] }> {
 		const { alignment, evidence, context } = this.core;
 		const sections: Array<{ title: string; lines: string[] }> = [];
 
@@ -243,18 +192,6 @@ export class CodingHarnessCore {
 			sections.push({ title: "Context", lines: ["disabled"] });
 		}
 
-		const usage = this.lastSkillUsage;
-		const skillLines = usage
-			? usage.skills.map(
-					(skill) =>
-						`${skill.skill}: ${skill.events} loads, fanout ${skill.fanout}, effective uptake ${Math.round(skill.effectiveUptake * 100)}%, ` +
-						`phases ${Math.round(skill.phases.early * 100)}/${Math.round(skill.phases.middle * 100)}/${Math.round(skill.phases.late * 100)}%`,
-				)
-			: ["no skill resources loaded yet"];
-		for (const skill of skills) {
-			for (const finding of auditSkillOnDisk(skill)) skillLines.push(`${skill.name}: ${finding}`);
-		}
-		sections.push({ title: "Skills", lines: this.core.skills ? skillLines : ["disabled"] });
 		return sections;
 	}
 
@@ -263,9 +200,6 @@ export class CodingHarnessCore {
 			case "tool_blocked":
 				this.blocked.push({ toolName: event.toolName, reason: event.reason });
 				if (this.blocked.length > 20) this.blocked.shift();
-				break;
-			case "skill_usage":
-				this.lastSkillUsage = event.report;
 				break;
 			case "completion_assessed": {
 				const { report } = event;

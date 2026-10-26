@@ -7,7 +7,6 @@ import { getAgentDir } from "../../config.ts";
 import type { ExtensionAPI, ExtensionContext } from "../../core/extensions/types.ts";
 import { buildMemoryContext } from "../../core/memory/context-builder.ts";
 import { embeddingProviderFromEnv } from "../../core/memory/embeddings.ts";
-import { importLogbookNotes } from "../../core/memory/legacy-import.ts";
 import { SqliteMemoryStore } from "../../core/memory/sqlite-store.ts";
 import type { MemoryPrincipal } from "../../core/memory/types.ts";
 import { projectRoot } from "../project-memory/graph.ts";
@@ -285,24 +284,11 @@ export function createNativeMemoryExtension(options: NativeMemoryOptions = {}) {
 		});
 
 		const USAGE =
-			"Usage: /memory [status|search <query>|forget <id>|profile|revoke <key>|boundary <topic>|import-logbook|reindex|gc|jobs|export <file>|backup <file>]";
+			"Usage: /memory [status|search <query>|forget <id>|profile|revoke <key>|boundary <topic>|reindex|gc|jobs|export <file>|backup <file>]";
 		relay.registerCommand("memory", {
 			description: "Inspect and manage the native memory engine (enable with --native-memory)",
 			getArgumentCompletions: (prefix) =>
-				[
-					"status",
-					"search",
-					"forget",
-					"profile",
-					"revoke",
-					"boundary",
-					"import-logbook",
-					"reindex",
-					"gc",
-					"jobs",
-					"export",
-					"backup",
-				]
+				["status", "search", "forget", "profile", "revoke", "boundary", "reindex", "gc", "jobs", "export", "backup"]
 					.filter((value) => value.startsWith(prefix))
 					.map((value) => ({ value, label: value })),
 			handler: async (args, ctx) => {
@@ -368,16 +354,6 @@ export function createNativeMemoryExtension(options: NativeMemoryOptions = {}) {
 							if (!value) break;
 							engine.addBoundary(who, value);
 							ctx.ui.notify(`Memory will not store or infer "${value}".`, "info");
-							return;
-						}
-						case "import-logbook": {
-							if (!ctx.isProjectTrusted()) {
-								ctx.ui.notify("Trust this project with /trust before importing its logbook.", "warning");
-								return;
-							}
-							const result = await importLogbookNotes(engine, who, projectRoot(ctx.cwd));
-							drain();
-							ctx.ui.notify(`Imported ${result.imported} logbook note(s); ${result.skipped} skipped.`, "info");
 							return;
 						}
 						case "reindex": {

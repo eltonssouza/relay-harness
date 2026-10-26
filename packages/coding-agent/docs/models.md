@@ -9,7 +9,7 @@ For a built-in provider, start with `/login`, then choose a model with `/model`.
 | A supported subscription | Sign in through `/login` |
 | A provider API key | Store it through `/login` or set its environment variable |
 | Models installed in Ollama | Start the local daemon; Relay discovers its installed models |
-| A local GGUF model | Connect Relay to the llama.cpp router |
+| A local GGUF model or other local server | Add its OpenAI-compatible endpoint to `models.json` |
 | An OpenAI-, Anthropic-, or Google-compatible endpoint | Add it to `models.json` |
 | A provider with a custom protocol or authentication flow | Build or install a provider extension |
 
@@ -36,10 +36,6 @@ Run `/thinking` to select the thinking level for the current model. Press `Ctrl+
 A session records model and thinking-level changes. Resuming the session restores them without changing defaults for new sessions.
 
 ## Connect local models
-
-Relay integrates directly with the llama.cpp router. The router discovers GGUF files and loads models on demand. Relay's `/llama` command manages the router, while `/model` selects one of its loaded models.
-
-Follow [Local Models with llama.cpp](llama-cpp.md) for server startup, model layout, downloads, and connection troubleshooting.
 
 ### Ollama
 
@@ -150,8 +146,6 @@ Classifier models do not chat. They answer typed questions about JSON state: pic
 | `vercel-ai-gateway` | `typesafe-ai/jev` | `AI_GATEWAY_API_KEY` |
 | `opencode` | `jev-1.13`, `jev-1.13-free` | `OPENCODE_API_KEY` |
 
-Chat models on a [llama.cpp router](llama-cpp.md#classification) are also listed as classifier models.
-
 Classifier models do not appear in `/model`. The model reaches them through the [`codemode`](cli.md#enable-codemode) tool, which is off unless an MCP server turned it on. Enable it with `"defaultTools": ["+codemode"]` in [settings](settings.md#tools). Scripts then list classifier models with `models.getAvailableOfType("classifier")` and call `models.classify(model, { state, questions })`:
 
 ```js
@@ -202,7 +196,7 @@ Use an extension when the provider needs custom streaming, model discovery, or a
 
 ### A model does not appear
 
-Confirm that its provider has usable authentication. Custom models can load from `models.json` but remain unavailable in `/model` until Relay can resolve credentials. For llama.cpp, only models currently loaded by the router appear.
+Confirm that its provider has usable authentication. Custom models can load from `models.json` but remain unavailable in `/model` until Relay can resolve credentials.
 
 ### Authentication works in one shell only
 

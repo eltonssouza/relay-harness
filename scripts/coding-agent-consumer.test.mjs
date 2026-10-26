@@ -1,60 +1,34 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentConsumer } from "./coding-agent-consumer.mjs";
 
 const codingAgentName = "@relay-harness/coding-agent";
-const devPackages = ["client", "protocol", "server"].map((name) => `@relay-harness/${name}`);
 
-function createFixture(t, { importServer = false, declareServer = false, auditResources = true } = {}) {
+function createFixture(t, { importUndeclared = false } = {}) {
 	const root = mkdtempSync(join(tmpdir(), "relay-consumer-test-"));
 	t.after(() => rmSync(root, { recursive: true, force: true }));
-	const packages = [codingAgentName, "@relay-harness/chord", ...devPackages].map((name) => ({
-		name,
-		directory: join(root, "packages", name.split("/")[1]),
-	}));
+	const packages = [{ name: codingAgentName, directory: join(root, "packages", "coding-agent") }];
 	for (const pkg of packages) {
-		const isAgent = pkg.name === codingAgentName;
 		const manifest = {
 			name: pkg.name,
 			version: "1.0.0",
 			type: "module",
-			exports: isAgent ? {
-				".": "./dist/index.js",
-				"./client": { source: "./src/client/index.ts" },
-				"./experimental/plugin": { source: "./src/experimental/plugin.ts" },
-			} : "./dist/index.js",
-			...(isAgent ? {
-				bin: { relay: "dist/bundle/cli.js" },
-				dependencies: {
-					"@relay-harness/chord": "1.0.0",
-					...(declareServer ? { "@relay-harness/server": "1.0.0" } : {}),
-				},
-				devDependencies: Object.fromEntries(devPackages.map((name) => [name, "1.0.0"])),
-			} : {}),
+			exports: { ".": "./dist/index.js" },
+			bin: { relay: "dist/bundle/cli.js" },
 		};
 		const files = {
 			"package.json": JSON.stringify(manifest),
-			"dist/index.js": isAgent ? `
-${importServer ? 'import "@relay-harness/server";' : ""}
-import { marker } from "@relay-harness/chord";
-if (marker !== "local tarball") throw new Error("Wrong Chord artifact");
+			"dist/index.js": `
+${importUndeclared ? 'import "@relay-harness/undeclared";' : ""}
 export function createAgentSession() {}
 export class SessionManager { static inMemory() {} }
 export class ModelRuntime { static create() {} }
-` : 'export const marker = "local tarball";',
-			...(isAgent ? {
-				"dist/cli.js": 'console.log("1.0.0");',
-				"dist/bundle/cli.js": 'console.log("1.0.0");',
-				...(auditResources ? {
-					"dist/core/audit/contracts.js": `export function loadResources() {
-const roles = ["security", "malware", "privacy", "supply-chain", "infrastructure", "ai-security"];
-return { routing: { routing: Object.fromEntries(Array.from({ length: 20 }, (_, i) => [String(i + 1), { primary: roles[i % 6] }])) }, prompt: () => "fixture protocol" };
-}`,
-				} : {}),
-			} : {}),
+`,
+			"dist/cli.js": 'console.log("1.0.0");',
+			"dist/bundle/cli.js": 'console.log("1.0.0");',
 		};
 		for (const [path, content] of Object.entries(files)) {
 			mkdirSync(dirname(join(pkg.directory, path)), { recursive: true });
@@ -68,39 +42,15 @@ return { routing: { routing: Object.fromEntries(Array.from({ length: 20 }, (_, i
 }
 
 // #9132: installing every tarball directly hid undeclared runtime imports.
-test("installs only coding-agent directly and uses overrides only for declared runtime dependencies", (t) => {
+test("installs only coding-agent directly", (t) => {
 	const directory = createFixture(t);
 	const manifest = JSON.parse(readFileSync(join(directory, "package.json"), "utf8"));
 	assert.deepEqual(Object.keys(manifest.dependencies), [codingAgentName]);
-	for (const name of devPackages) {
-		assert.ok(manifest.overrides[name]);
-		assert.equal(existsSync(join(directory, "node_modules", name)), false);
-	}
 	smokeTestCodingAgentConsumer(directory);
-
-	const nested = join(directory, "node_modules", codingAgentName, "node_modules/@relay-harness/server");
-	mkdirSync(nested, { recursive: true });
-	writeFileSync(join(nested, "package.json"), JSON.stringify({ name: "@relay-harness/server", version: "1.0.0" }));
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /@relay-harness\/server must not be installed/);
-	rmSync(nested, { recursive: true });
-
-	const experimental = join(directory, "node_modules", codingAgentName, "dist/experimental");
-	mkdirSync(experimental);
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /contains development-only code/);
-});
-
-test("fails when an otherwise working SDK/CLI omits the audit runtime resources entry", (t) => {
-	const directory = createFixture(t, { auditResources: false });
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /dist[\\/]core[\\/]audit[\\/]contracts\.js/);
 });
 
 // #9132: smoke-test the public SDK, not just a bundled CLI that hides missing imports.
-test("fails when the SDK imports an undeclared server despite a working CLI", (t) => {
-	const directory = createFixture(t, { importServer: true });
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /Cannot find package '@relay-harness\/server'/);
-});
-
-test("fails if a development-only dependency is added back to the published dependency tree", (t) => {
-	const directory = createFixture(t, { declareServer: true });
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /@relay-harness\/server must not be installed/);
+test("fails when the SDK imports an undeclared package despite a working CLI", (t) => {
+	const directory = createFixture(t, { importUndeclared: true });
+	assert.throws(() => smokeTestCodingAgentConsumer(directory), /Cannot find package '@relay-harness\/undeclared'/);
 });

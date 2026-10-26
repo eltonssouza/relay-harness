@@ -129,27 +129,27 @@ describe("DefaultPackageManager", () => {
 				cwd: tempDir,
 				agentDir,
 				settingsManager,
-				builtinExtensions: ["mcp", "llama.cpp"],
+				builtinExtensions: ["mcp", "ollama"],
 			});
 			const builtins = async () =>
 				(await pm.resolve()).extensions.map((r) => [r.path, r.enabled, r.metadata.source, r.metadata.scope]);
 
 			expect(await builtins()).toEqual([
 				["builtin:mcp", true, "builtin", "user"],
-				["builtin:llama.cpp", true, "builtin", "user"],
+				["builtin:ollama", true, "builtin", "user"],
 			]);
 
 			settingsManager.setExtensionPaths(["-builtin:mcp"]);
-			settingsManager.setProjectExtensionPaths(["+builtin:mcp", "-builtin:llama.cpp"]);
+			settingsManager.setProjectExtensionPaths(["+builtin:mcp", "-builtin:ollama"]);
 			expect(await builtins()).toEqual([
 				["builtin:mcp", true, "builtin", "project"],
-				["builtin:llama.cpp", false, "builtin", "project"],
+				["builtin:ollama", false, "builtin", "project"],
 			]);
 
 			settingsManager.setProjectExtensionPaths([]);
 			expect(await builtins()).toEqual([
 				["builtin:mcp", false, "builtin", "user"],
-				["builtin:llama.cpp", true, "builtin", "user"],
+				["builtin:ollama", true, "builtin", "user"],
 			]);
 		});
 

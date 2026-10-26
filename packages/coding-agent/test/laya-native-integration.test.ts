@@ -1,6 +1,6 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ENV_AGENT_DIR } from "../src/config.ts";
 import type { LayaSettings } from "../src/core/settings-manager.ts";
@@ -8,7 +8,6 @@ import layaExtension from "../src/extensions/laya/index.ts";
 import { NativeLayaServer } from "../src/extensions/laya/native-server.ts";
 import { OnnxLayaServer } from "../src/extensions/laya/onnx-server.ts";
 import { LayaServer } from "../src/extensions/laya/server.ts";
-import { trainingWorkspace } from "../src/extensions/laya/training.ts";
 import { createHarness, type Harness } from "./suite/harness.ts";
 
 describe("Laya inference backend", () => {
@@ -57,15 +56,4 @@ describe("Laya inference backend", () => {
 			expect(NativeLayaServer.prototype.install).not.toHaveBeenCalled();
 		},
 	);
-
-	it("keeps registered volume checkpoints in Docker and can select shipped inference", async () => {
-		const registry = trainingWorkspace(join(home, "laya")).registry;
-		mkdirSync(dirname(registry), { recursive: true });
-		writeFileSync(registry, JSON.stringify({ active: "local-1", models: [{ name: "local-1" }] }));
-		harness = await createHarness({ extensionFactories: [layaExtension] });
-		await harness.session.prompt("/laya setup");
-		expect(LayaServer.prototype.install).toHaveBeenCalledOnce();
-		await harness.session.prompt("/laya use shipped");
-		expect(OnnxLayaServer.prototype.install).toHaveBeenCalledOnce();
-	});
 });

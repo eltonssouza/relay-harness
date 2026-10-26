@@ -10,7 +10,6 @@ import { describe, expect, it } from "vitest";
 import { Agent } from "../src/agent.ts";
 import {
 	AlignmentPolicy,
-	auditSkill,
 	ContextWindowPolicy,
 	classifyCommand,
 	EvidenceLedger,
@@ -19,7 +18,6 @@ import {
 	type HarnessCoreEvent,
 	isCorrection,
 	isQuestionOnly,
-	SkillUsageTracker,
 	SliceDiscipline,
 	type WorkspaceProbe,
 } from "../src/harness/index.ts";
@@ -459,64 +457,6 @@ describe("context", () => {
 		const projected = policy.transform(messages);
 		expect(JSON.stringify(projected[1])).toContain("stale");
 		expect(projected[3]).toBe(messages[3]);
-	});
-});
-
-describe("skills", () => {
-	it("measures fanout and effective uptake of skill resources", () => {
-		const tracker = new SkillUsageTracker({
-			skills: () => [{ name: "pdf", baseDir: "/skills/pdf", filePath: "/skills/pdf/SKILL.md" }],
-		});
-		tracker.beginRun();
-		tracker.recordToolCall({ kind: "read", paths: ["/skills/pdf/SKILL.md"] }, false);
-		tracker.recordToolCall({ kind: "read", paths: ["/skills/pdf/references/forms.md"] }, false);
-		tracker.recordToolCall({ kind: "write", paths: ["out.pdf"] }, false);
-		tracker.recordToolCall(
-			{ kind: "execute", paths: [], command: "python /skills/pdf/scripts/fill.py out.pdf" },
-			false,
-		);
-		tracker.recordToolCall({ kind: "read", paths: ["/skills/pdf/references/forms.md"] }, false);
-		const report = tracker.report();
-		expect(report.events.map((event) => [event.resource, event.kind])).toEqual([
-			["SKILL.md", "entry"],
-			["references/forms.md", "reference"],
-			["scripts/fill.py", "script"],
-			["references/forms.md", "reference"],
-		]);
-		expect(report.skills[0]).toMatchObject({ skill: "pdf", events: 4, fanout: 3, revisits: 1 });
-		// The last reference load has no action after it.
-		expect(report.skills[0].effectiveUptake).toBe(0.75);
-	});
-
-	it("audits skill structure for progressive disclosure", () => {
-		const entry = [
-			"# PDF",
-			"When filling forms, read [forms](references/forms.md).",
-			"See `references/api.md`.",
-			"Use [missing](references/missing.md) for edge cases.",
-		].join("\n");
-		const findings = auditSkill(entry, ["references/forms.md", "references/api.md", "scripts/orphan.py"]);
-		expect(findings.map((finding) => [finding.code, finding.resource])).toEqual([
-			["reference-without-trigger", "references/api.md"],
-			["missing-resource", "references/missing.md"],
-			["unreferenced-resource", "scripts/orphan.py"],
-		]);
-		expect(auditSkill("x\n".repeat(400), []).map((finding) => finding.code)).toEqual(["monolithic-entry"]);
-		const routed = "When filling forms, read [forms](references/forms.md).\n";
-		expect(auditSkill(routed + "x\n".repeat(400), ["references/forms.md"]).map((finding) => finding.code)).toEqual([
-			"oversized-entry",
-		]);
-	});
-
-	it("does not treat output paths in code spans as skill resources", () => {
-		const entry = "Write the report to `docs/audit/report.pdf`. Before step 3, read `references/categories.md`.";
-		expect(auditSkill(entry, ["references/categories.md"])).toEqual([]);
-	});
-
-	it("flags descriptions over the character limit", () => {
-		const entry = (description: string) => `---\nname: x\ndescription: "${description}"\n---\n# X\n`;
-		expect(auditSkill(entry("Use when filling PDF forms."), []).map((finding) => finding.code)).toEqual([]);
-		expect(auditSkill(entry("y".repeat(301)), []).map((finding) => finding.code)).toEqual(["description-too-long"]);
 	});
 });
 

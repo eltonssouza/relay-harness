@@ -1,9 +1,8 @@
 import { createHash } from "node:crypto";
-import { TRAIN_SCRIPT } from "./train-script.ts";
 
 /**
- * Docker runtime assets for optional container inference and training. Default shipped-model
- * inference uses native-server.ts and the same pinned model manifest on the host.
+ * Docker runtime assets for optional container inference. Default shipped-model inference
+ * uses onnx-server.ts, or native-server.ts with the same pinned model manifest on the host.
  */
 
 export interface LayaModelFile {
@@ -28,20 +27,13 @@ export interface LayaModelManifest {
 export const LAYA_IMAGE_REPOSITORY = "ghcr.io/eltonssouza/relay-laya";
 /** The server container, kept running between Relay sessions. */
 export const LAYA_CONTAINER = "relay-laya";
-/** The container of a running training; removed when it ends. */
-export const LAYA_TRAIN_CONTAINER = "relay-laya-train";
-/** Volume with the models trained from sessions. */
-export const LAYA_MODELS_VOLUME = "relay-laya-models";
 /** Port the server listens on inside its container. */
 export const LAYA_CONTAINER_PORT = 8000;
 
 /** Paths inside the image and its containers. */
 export const LAYA_IMAGE_PATHS = {
 	shippedModel: "/opt/laya/model",
-	trainedModels: "/data/models",
 	serveScript: "/opt/laya/serve.py",
-	trainScript: "/opt/laya/train.py",
-	workspace: "/workspace",
 } as const;
 
 /** `cpu` runs everywhere; `cuda` carries the CUDA build of torch for machines with an NVIDIA GPU. */
@@ -164,10 +156,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONIOENCODING=utf-8 PIP_NO_C
     PIP_DISABLE_PIP_VERSION_CHECK=1 USE_TF=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
 RUN pip install --upgrade pip && pip install torch --index-url ${TORCH_INDEX[variant]}
 RUN pip install "${manifest.layaPackage}" fastapi uvicorn
-RUN useradd --create-home laya && mkdir -p ${paths.trainedModels} && chown laya ${paths.trainedModels}
+RUN useradd --create-home laya
 COPY fetch_model.py model.json /opt/laya/
 RUN python /opt/laya/fetch_model.py /opt/laya/model.json ${paths.shippedModel}
-COPY serve.py train.py /opt/laya/
+COPY serve.py /opt/laya/
 USER laya
 EXPOSE ${LAYA_CONTAINER_PORT}
 CMD ["python", "${paths.serveScript}", "--model", "${paths.shippedModel}", "--host", "0.0.0.0", "--port", "${LAYA_CONTAINER_PORT}"]
@@ -181,7 +173,6 @@ export function layaImageContext(manifest: LayaModelManifest, variant: LayaImage
 		"fetch_model.py": FETCH_MODEL_SCRIPT,
 		"model.json": `${JSON.stringify({ version: manifest.version, baseUrl: manifest.baseUrl, files: manifest.files }, null, 2)}\n`,
 		"serve.py": SERVE_SCRIPT,
-		"train.py": TRAIN_SCRIPT,
 	};
 }
 
@@ -202,9 +193,4 @@ export function layaImageTag(manifest: LayaModelManifest, variant: LayaImageVari
 
 export function layaImage(manifest: LayaModelManifest, variant: LayaImageVariant): string {
 	return `${LAYA_IMAGE_REPOSITORY}:${layaImageTag(manifest, variant)}`;
-}
-
-/** Container path of a model trained from sessions. */
-export function trainedModelPath(name: string): string {
-	return `${LAYA_IMAGE_PATHS.trainedModels}/${name}`;
 }

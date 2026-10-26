@@ -1,8 +1,6 @@
-import { Client } from "@relay-harness/client";
 import { createAssistantMessageEventStream, Type } from "@relay-harness/ai";
 import { complete, getModel, getProviders, streamSimple } from "@relay-harness/ai/compat";
 import { Agent, streamProxy } from "@relay-harness/agent-core";
-import { decodeCbor, encodeCbor, PROTOCOL_VERSION } from "@relay-harness/protocol";
 
 // Keep this entry browser-safe. It is bundled by scripts/check-browser-smoke.mjs
 // to catch accidental Node-only runtime imports in browser-facing package exports.
@@ -21,7 +19,4 @@ console.log(
 	typeof stream.push,
 	agent.hasQueuedMessages(),
 	typeof streamProxy,
-	typeof Client,
-	PROTOCOL_VERSION,
-	decodeCbor(encodeCbor({ browser: true })),
 );
