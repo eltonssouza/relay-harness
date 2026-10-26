@@ -4,6 +4,21 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Removed `SystemOne` and the skill usage tracker (`SkillUsageTracker`). `HarnessCore` no longer tracks how skills are used.
+
+### Added
+
+- Added `ToolEffect.scope` (the directories a check covers) and `ToolEffect.writes` (the files a shell command edits), and the `HarnessCore` option `workspace` and method `resync()`.
+- Added `messageOrigin`, `isDeveloperMessage` and `MessageOrigin` to tell the developer's messages from those of extensions and of the harness.
+- The harness classifies shell commands with a small lexer, so verification is recognized by the program a command runs and shell edits and heredocs are read correctly.
+
+### Changed
+
+- `classifyCommand` and `classifyToolCall` accept an optional `ClassifyContext` (`cwd`, `home`) to judge paths against the workspace, and `EvidenceLedger.recordToolOutcome` accepts the call's output, so a green run that executed no test is not evidence. Existing calls keep working.
+- A check counts as verification only if it covers the changed files and its exit code is not hidden by a pipe, `||` or a later command; a turn that ends with unverified changes is reported as unverified whatever its final message says.
+
 ## [0.4.1] - 2026-10-21
 
 ## [0.3.2] - 2026-10-18
