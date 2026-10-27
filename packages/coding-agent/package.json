@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/coding-agent",
-	"version": "0.4.1",
+	"version": "0.5.0",
 	"description": "Coding agent CLI with read, bash, edit, write tools and session management",
 	"type": "module",
 	"relayConfig": {
@@ -41,11 +41,11 @@
 	"dependencies": {
 		"@huggingface/transformers": "4.3.1",
 		"@playwright/mcp": "0.0.83",
-		"@relay-harness/agent-core": "^0.4.1",
-		"@relay-harness/ai": "^0.4.1",
-		"@relay-harness/codemode": "^0.4.1",
-		"@relay-harness/mcp": "^0.4.1",
-		"@relay-harness/tui": "^0.4.1",
+		"@relay-harness/agent-core": "^0.5.0",
+		"@relay-harness/ai": "^0.5.0",
+		"@relay-harness/codemode": "^0.5.0",
+		"@relay-harness/mcp": "^0.5.0",
+		"@relay-harness/tui": "^0.5.0",
 		"@silvia-odwyer/photon-node": "0.3.4",
 		"@upstash/context7-mcp": "4.3.0",
 		"ajv": "8.20.0",

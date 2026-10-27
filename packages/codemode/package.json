@@ -1,6 +1,6 @@
 {
 	"name": "@relay-harness/codemode",
-	"version": "0.4.1",
+	"version": "0.5.0",
 	"description": "Sandboxed JavaScript execution where the only capability is calling injected tools",
 	"type": "module",
 	"main": "./dist/index.js",
