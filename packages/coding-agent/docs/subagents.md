@@ -20,6 +20,9 @@ Relay reads definitions from these directories, and an earlier one replaces a de
 
 - `.relay/agents/` in the project, only when the project is trusted
 - `~/.relay/agent/agents/`
+- installed catalogs in `~/.relay/agent/agent-catalogs/`, such as general-agents
+
+`/agents` and `relay agents list` show the loaded definitions and the ones that were rejected, with the reason.
 
 | Field | Meaning |
 |---|---|
@@ -29,6 +32,18 @@ Relay reads definitions from these directories, and an earlier one replaces a de
 | `model` | `haiku`, `sonnet`, or `opus` (the `fast`, `balanced`, and `strong` capability tiers), a tier name, a model as `provider/model` or as an ID of the session's provider, or `inherit` (the default) for the session's model. |
 
 In a definition installed from a package, `<PKG>` becomes the package's folder and `<ROOT>` the collection's, as general-agents uses them; other definitions keep them as written. The system prompt ends with the working directory.
+
+## general-agents
+
+[general-agents](https://github.com/eltonssouza/general-agents) is a collection of 74 specialist and role agents plus an orchestrator that routes work to them. Install it with:
+
+```sh
+relay agents install
+```
+
+Relay installs the commit pinned in its source, not a branch, so the agents read and run a reviewed revision. The install leaves out the collection's test suites, icons, and GitHub Copilot copies (about 34 MB remain). `--from <path>` installs a local copy on a machine without network access. A catalog is a folder with `.claude-plugin/marketplace.json`; each plugin it lists keeps its definitions in `agents/*.md`.
+
+The agents' skill and lookup scripts need Python 3 on PATH. Without it the agents still run, and the install says that the scripts are unavailable.
 
 ## Model tiers
 
