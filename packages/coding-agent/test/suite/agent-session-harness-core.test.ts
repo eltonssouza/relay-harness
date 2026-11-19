@@ -1,4 +1,4 @@
-import type { AgentTool } from "@relay-harness/agent-core";
+import { type AgentTool, TypeScriptHarnessEngine } from "@relay-harness/agent-core";
 import { fauxAssistantMessage, fauxToolCall, type TranscriptContext } from "@relay-harness/ai";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -32,6 +32,7 @@ describe("AgentSession harness core", () => {
 
 	afterEach(() => {
 		while (harnesses.length > 0) harnesses.pop()?.cleanup();
+		vi.unstubAllEnvs();
 	});
 
 	async function create(
@@ -62,7 +63,7 @@ describe("AgentSession harness core", () => {
 		const userTexts = getUserTexts(harness);
 		expect(userTexts).toHaveLength(2);
 		expect(userTexts[1]).toContain("[harness:evidence] Completion check");
-		expect(harness.session.harnessCore.core.evidence?.latestReport()?.status).toBe("verified");
+		expect(harness.session.harnessCore.core.engine.latestReport()?.status).toBe("verified");
 	});
 
 	it("asks for verification after an edit made through the shell, and accepts ng test as the check", async () => {
@@ -88,7 +89,7 @@ describe("AgentSession harness core", () => {
 			"bash:npx ng test --watch=false",
 		]);
 		expect(getUserTexts(harness)[1]).toContain("[harness:evidence] Completion check");
-		expect(harness.session.harnessCore.core.evidence?.latestReport()?.status).toBe("verified");
+		expect(harness.session.harnessCore.core.engine.latestReport()?.status).toBe("verified");
 	});
 
 	it("counts only declared verification commands and names them in the verification request", async () => {
@@ -106,7 +107,7 @@ describe("AgentSession harness core", () => {
 
 		expect(calls).toEqual(["edit:src/a.ts", "bash:npx tsc --noEmit", "bash:npm run check"]);
 		expect(getUserTexts(harness)[1]).toContain("run the project's verification (`npm run check`)");
-		expect(harness.session.harnessCore.core.evidence?.latestReport()?.status).toBe("verified");
+		expect(harness.session.harnessCore.core.engine.latestReport()?.status).toBe("verified");
 	});
 
 	it("does not gate when the evidence pillar is disabled", async () => {
@@ -169,7 +170,7 @@ describe("AgentSession harness core", () => {
 		expect(learnings?.lines[0]).toBe("correction: Não, simplifica. Quatro estados: pending, sending, sent, unknown.");
 
 		const { harness: resumed } = await create({ sessionManager: harness.sessionManager });
-		expect(resumed.session.harnessCore.core.alignment?.corrections().map((c) => c.text)).toEqual([
+		expect(resumed.session.harnessCore.core.engine.corrections().map((c) => c.text)).toEqual([
 			"Não, simplifica. Quatro estados: pending, sending, sent, unknown.",
 		]);
 	});
@@ -203,7 +204,7 @@ describe("AgentSession harness core", () => {
 		).toBe(true);
 
 		const { harness: resumed } = await create({ sessionManager: harness.sessionManager });
-		expect(resumed.session.harnessCore.core.alignment?.constraints.list().map((c) => c.text)).toEqual([
+		expect(resumed.session.harnessCore.core.engine.constraints().map((c) => c.text)).toEqual([
 			"Never touch package-lock.json.",
 		]);
 	});
@@ -213,21 +214,21 @@ describe("AgentSession harness core", () => {
 		harness.setResponses([fauxAssistantMessage("Understood.")]);
 		await harness.session.prompt("Never touch package-lock.json. Always run the tests before committing.");
 		const harnessCore = harness.session.harnessCore;
-		const texts = () => harnessCore.core.alignment?.constraints.list().map((c) => c.text);
+		const texts = () => harnessCore.core.engine.constraints().map((c) => c.text);
 		expect(texts()).toEqual(["Never touch package-lock.json.", "Always run the tests before committing."]);
 
 		expect(harnessCore.forgetConstraint("c1")).toBe(true);
 		expect(harnessCore.forgetConstraint("c9")).toBe(false);
 		expect(texts()).toEqual(["Always run the tests before committing."]);
 		const { harness: resumed } = await create({ sessionManager: harness.sessionManager });
-		expect(resumed.session.harnessCore.core.alignment?.constraints.list().map((c) => c.text)).toEqual([
+		expect(resumed.session.harnessCore.core.engine.constraints().map((c) => c.text)).toEqual([
 			"Always run the tests before committing.",
 		]);
 
 		resumed.session.harnessCore.clearLearnings();
 		const { harness: cleared } = await create({ sessionManager: harness.sessionManager });
-		expect(cleared.session.harnessCore.core.alignment?.constraints.list()).toEqual([]);
-		expect(cleared.session.harnessCore.core.alignment?.corrections()).toEqual([]);
+		expect(cleared.session.harnessCore.core.engine.constraints()).toEqual([]);
+		expect(cleared.session.harnessCore.core.engine.corrections()).toEqual([]);
 	});
 
 	it("keeps an extension's prompt out of the developer's constraints", async () => {
@@ -251,11 +252,11 @@ describe("AgentSession harness core", () => {
 		// The extension's message starts its own run.
 		await vi.waitFor(() => expect(getUserTexts(harness)).toHaveLength(1));
 		await harness.session.agent.waitForIdle();
-		expect(harness.session.harnessCore.core.alignment?.constraints.list()).toEqual([]);
+		expect(harness.session.harnessCore.core.engine.constraints()).toEqual([]);
 
 		harness.setResponses([fauxAssistantMessage("Understood.")]);
 		await harness.session.prompt("Never touch package-lock.json.");
-		expect(harness.session.harnessCore.core.alignment?.constraints.list().map((c) => c.text)).toEqual([
+		expect(harness.session.harnessCore.core.engine.constraints().map((c) => c.text)).toEqual([
 			"Never touch package-lock.json.",
 		]);
 	});
@@ -268,14 +269,14 @@ describe("AgentSession harness core", () => {
 		const firstBranchLeaf = harness.sessionManager.getLeafId();
 		await harness.session.prompt("Now the lexer. Do not edit the tests.");
 		const core = harness.session.harnessCore.core;
-		expect(core.alignment?.constraints.list().map((c) => c.text)).toEqual([
+		expect(core.engine.constraints().map((c) => c.text)).toEqual([
 			"Never use any in the new code.",
 			"Do not edit the tests.",
 		]);
 
 		await harness.session.navigateTree(firstBranchLeaf as string);
 
-		expect(core.alignment?.constraints.list().map((c) => c.text)).toEqual(["Never use any in the new code."]);
+		expect(core.engine.constraints().map((c) => c.text)).toEqual(["Never use any in the new code."]);
 	});
 
 	it("classifies a tool by the hints it declares about itself", async () => {
@@ -333,5 +334,19 @@ describe("AgentSession harness core", () => {
 		await harness.session.prompt("Tidy the code, but ask before anything unusual.");
 
 		expect(calls).toEqual(["edit:src/a.ts"]);
+	});
+
+	it("runs the Rust engine unless RELAY_HARNESS_ENGINE is typescript", async () => {
+		const { harness } = await create();
+		expect(harness.session.harnessCore.core.engine).not.toBeInstanceOf(TypeScriptHarnessEngine);
+		harness.setResponses([fauxAssistantMessage("Done.")]);
+		await harness.session.prompt("Fix the parser. Never use any in the new code.");
+		expect(harness.session.harnessCore.core.engine.constraints().map((c) => c.text)).toEqual([
+			"Never use any in the new code.",
+		]);
+
+		vi.stubEnv("RELAY_HARNESS_ENGINE", "typescript");
+		const { harness: fallback } = await create();
+		expect(fallback.session.harnessCore.core.engine).toBeInstanceOf(TypeScriptHarnessEngine);
 	});
 });

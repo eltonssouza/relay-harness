@@ -105,7 +105,17 @@ const uninstall = new HarnessCore({
 }).install(agent);
 ```
 
-In Relay, `session.harnessCore.core` exposes the constraint ledger, evidence ledger, and context policy.
+An engine runs the pillars. `HarnessCore` uses the TypeScript pillars unless it is given another engine; the Rust engine compiled to WebAssembly is a separate entry, so the main entry does not carry the module:
+
+```typescript
+import { createHarnessWasmEngine } from "@relay-harness/agent-core/harness-wasm";
+
+const core = new HarnessCore({ engine: createHarnessWasmEngine });
+```
+
+Both engines decide the same way: the HarnessCore tests run on both and check that a session sends the provider identical requests. Relay runs the Rust engine; `RELAY_HARNESS_ENGINE=typescript` runs the TypeScript pillars instead, a fallback kept for one release.
+
+In Relay, `session.harnessCore.core.engine` exposes the constraints, corrections, latest completion report, pending changes and context statistics.
 
 ## Sources
 

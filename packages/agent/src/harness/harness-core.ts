@@ -17,26 +17,16 @@
 import type { AssistantMessage } from "@relay-harness/ai";
 import type { Agent } from "../agent.ts";
 import type { AgentEvent, AgentMessage, AgentToolCall, BeforeToolCallResult } from "../types.ts";
-import {
-	type AlignmentDecision,
-	AlignmentPolicy,
-	type AlignmentPolicyOptions,
-	PAIR_PROGRAMMING_GUIDELINES,
-	requestsAction,
-} from "./alignment.ts";
+import { type AlignmentDecision, AlignmentPolicy, type AlignmentPolicyOptions } from "./alignment.ts";
 import {
 	appendHarnessState,
 	type ContextPolicyOptions,
 	type ContextPolicyStats,
-	ContextWindowPolicy,
+	type ContextWindowPolicy,
 } from "./context.ts";
-import { type ClassifyContext, classifyToolCall, type ToolEffect, type ToolEffectClassifier } from "./effects.ts";
-import {
-	type CompletionReport,
-	EvidenceLedger,
-	type EvidenceLedgerOptions,
-	formatVerificationRequest,
-} from "./evidence.ts";
+import type { ClassifyContext, ToolEffect, ToolEffectClassifier } from "./effects.ts";
+import { type HarnessEngine, type HarnessEngineFactory, TypeScriptHarnessEngine } from "./engine.ts";
+import type { CompletionReport, EvidenceLedger, EvidenceLedgerOptions } from "./evidence.ts";
 import { SliceDiscipline, type SliceDisciplineOptions } from "./slices.ts";
 import { messageOrigin, messageText } from "./text.ts";
 
@@ -91,46 +81,61 @@ export interface HarnessCoreOptions {
 	workspace?: ClassifyContext;
 	/** Observer for pillar decisions, for UI, logs, and telemetry. Must not throw. */
 	onEvent?: (event: HarnessCoreEvent) => void;
+	/**
+	 * The engine that runs the pillars. Default: the TypeScript pillars. The Rust engine is
+	 * `createHarnessWasmEngine` from `@relay-harness/agent-core/harness-wasm`.
+	 */
+	engine?: HarnessEngineFactory;
 }
 
 /** The three pillars, usable directly by any runtime or installed on an {@link Agent}. */
 export class HarnessCore {
-	readonly alignment?: AlignmentPolicy;
-	readonly evidence?: EvidenceLedger;
-	readonly context?: ContextWindowPolicy;
+	readonly engine: HarnessEngine;
 	readonly slices?: SliceDiscipline;
 	readonly verifyCommands: readonly string[];
-	private readonly classifyEffect?: ToolEffectClassifier;
-	private readonly workspace: ClassifyContext;
+	/** Called when constraints or corrections change, so a runtime can persist them. */
+	onLearningsChange?: () => void;
 	private readonly onEvent?: (event: HarnessCoreEvent) => void;
 	private lastElidedResults = 0;
 
 	constructor(options: HarnessCoreOptions = {}) {
-		this.classifyEffect = options.classifyEffect;
-		this.workspace = options.workspace ?? {};
 		this.onEvent = options.onEvent;
 		this.verifyCommands = (options.verifyCommands ?? []).filter((command) => command.trim().length > 0);
 		if (options.slices) this.slices = new SliceDiscipline(options.slices);
-		if (options.alignment !== false) this.alignment = new AlignmentPolicy(options.alignment);
-		if (options.evidence !== false) {
-			this.evidence = new EvidenceLedger({ cwd: options.workspace?.cwd, ...options.evidence });
-		}
-		if (options.context !== false) {
-			this.context = new ContextWindowPolicy({
-				cwd: options.workspace?.cwd,
-				...options.context,
-				classifyEffect: options.classifyEffect,
-			});
-		}
+		const createEngine = options.engine ?? ((engineOptions) => new TypeScriptHarnessEngine(engineOptions));
+		this.engine = createEngine({
+			alignment: options.alignment,
+			evidence: options.evidence,
+			context: options.context,
+			verifyCommands: this.verifyCommands,
+			classifyEffect: options.classifyEffect,
+			workspace: options.workspace ?? {},
+			onLearningsChange: () => this.onLearningsChange?.(),
+		});
+	}
+
+	/** The alignment pillar's TypeScript class, when the TypeScript engine runs the pillars. */
+	get alignment(): AlignmentPolicy | undefined {
+		return this.engine instanceof TypeScriptHarnessEngine ? this.engine.alignment : undefined;
+	}
+
+	/** The evidence pillar's TypeScript class, when the TypeScript engine runs the pillars. */
+	get evidence(): EvidenceLedger | undefined {
+		return this.engine instanceof TypeScriptHarnessEngine ? this.engine.evidence : undefined;
+	}
+
+	/** The context pillar's TypeScript class, when the TypeScript engine runs the pillars. */
+	get context(): ContextWindowPolicy | undefined {
+		return this.engine instanceof TypeScriptHarnessEngine ? this.engine.context : undefined;
 	}
 
 	classify(toolCall: AgentToolCall): ToolEffect {
-		return classifyToolCall(toolCall, this.classifyEffect, this.verifyCommands, this.workspace);
+		return this.engine.classify(toolCall);
 	}
 
 	/** A developer request starts: reset per-request evidence and slices. */
 	beginRequest(text: string): void {
-		this.evidence?.beginRequest(requestsAction(text));
+		this.engine.beginRequest(text);
 		this.slices?.beginRequest();
 	}
 
@@ -139,19 +144,19 @@ export class HarnessCore {
 	 * says whether the agent had already responded, so the message can correct it.
 	 */
 	observeDeveloperMessage(text: string, timestamp = Date.now(), afterAgentWork = true): void {
-		this.alignment?.observeDeveloperMessage(text, timestamp, afterAgentWork);
+		this.engine.observeDeveloperMessage(text, timestamp, afterAgentWork);
 	}
 
 	/** Collaboration rules for the system prompt, empty when the alignment pillar is disabled. */
 	promptGuidelines(): readonly string[] {
-		return this.alignment ? PAIR_PROGRAMMING_GUIDELINES : [];
+		return this.engine.promptGuidelines();
 	}
 
 	/** Alignment check for a validated tool call. */
 	async beforeToolCall(toolCall: AgentToolCall, signal?: AbortSignal): Promise<BeforeToolCallResult | undefined> {
-		if (!this.alignment) return undefined;
+		if (!this.engine.pillars.alignment) return undefined;
 		const effect = this.classify(toolCall);
-		const decision: AlignmentDecision = await this.alignment.check(toolCall.name, effect, signal);
+		const decision: AlignmentDecision = await this.engine.check(toolCall.name, effect, signal);
 		if (decision.action === "block") {
 			this.onEvent?.({
 				type: "tool_blocked",
@@ -171,7 +176,7 @@ export class HarnessCore {
 	 * `startedAt` is what {@link EvidenceLedger.beginToolCall} returned when the call started.
 	 */
 	recordToolOutcome(toolCall: AgentToolCall, isError: boolean, output?: string, startedAt?: number): void {
-		this.evidence?.recordToolOutcome(this.classify(toolCall), isError, output, startedAt);
+		this.engine.recordToolOutcome(this.classify(toolCall), isError, output, startedAt);
 	}
 
 	/**
@@ -180,14 +185,13 @@ export class HarnessCore {
 	 * corrections are restored by the caller from the new branch.
 	 */
 	resync(): void {
-		this.context?.reset();
-		this.alignment?.resetConversationState();
+		this.engine.resync();
 	}
 
 	/** Project the messages of one provider request: context policy plus harness state. */
 	transformContext(messages: AgentMessage[]): AgentMessage[] {
-		let projected = this.context ? this.context.transform(messages) : messages;
-		const stats = this.context?.getStats();
+		let projected = this.engine.transformContext(messages);
+		const stats = this.engine.contextStats();
 		if (stats && stats.elidedResults !== this.lastElidedResults) {
 			this.lastElidedResults = stats.elidedResults;
 			this.onEvent?.({ type: "context_elided", stats: { ...stats } });
@@ -204,16 +208,16 @@ export class HarnessCore {
 	assessFinalMessage(
 		message: AssistantMessage,
 	): { report: CompletionReport; verificationRequest?: AgentMessage } | undefined {
-		if (!this.evidence) return undefined;
-		const report = this.evidence.assess(messageText(message));
-		const gate = this.evidence.shouldGate(report);
+		const assessment = this.engine.assessFinalMessage(messageText(message));
+		if (!assessment) return undefined;
+		const { report, verificationRequest } = assessment;
 		this.onEvent?.({ type: "completion_assessed", report });
-		if (!gate) return { report };
+		if (verificationRequest === undefined) return { report };
 		return {
 			report,
 			verificationRequest: {
 				role: "user",
-				content: [{ type: "text", text: formatVerificationRequest(report, this.verifyCommands) }],
+				content: [{ type: "text", text: verificationRequest }],
 				timestamp: Date.now(),
 				origin: "harness",
 			},
@@ -222,24 +226,12 @@ export class HarnessCore {
 
 	/** Harness state restated next to the latest message, or undefined when there is none. */
 	renderState(): string | undefined {
-		const sections: string[] = [];
-		const correction = this.alignment?.renderCorrection();
-		if (correction) sections.push(correction);
-		const constraints = this.alignment?.renderConstraints();
-		if (constraints) sections.push(constraints);
-		const pending = this.evidence?.pendingChanges();
-		if (pending && pending.length > 0) {
-			const shown = pending.slice(0, 8).join(", ");
-			sections.push(
-				`Changed since the last passing check: ${shown}${pending.length > 8 ? ", ..." : ""}. Verify before reporting completion.`,
-			);
-		}
-		const slices = this.slices?.render();
-		if (slices) sections.push(slices);
-		const progress = this.context?.renderProgress();
-		if (progress) sections.push(progress);
-		if (sections.length === 0) return undefined;
-		return ["Generated by the harness, not written by the developer.", ...sections].join("\n\n");
+		return this.engine.renderState(this.slices?.render());
+	}
+
+	/** Release the engine's state. The core must not be used afterwards. */
+	dispose(): void {
+		this.engine.dispose();
 	}
 
 	/**
@@ -290,7 +282,7 @@ export class HarnessCore {
 						arguments: event.args ?? {},
 					};
 					toolCalls.set(event.toolCallId, toolCall);
-					const start = this.evidence?.beginToolCall();
+					const start = this.engine.beginToolCall();
 					if (start !== undefined) startedAt.set(event.toolCallId, start);
 					const effect = this.classify(toolCall);
 					if (mayChangeFiles(effect)) await this.slices?.beforeChange(toolCall.id, writtenPaths(effect));

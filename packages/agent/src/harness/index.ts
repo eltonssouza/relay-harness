@@ -1,6 +1,7 @@
 export * from "./alignment.ts";
 export * from "./context.ts";
 export * from "./effects.ts";
+export * from "./engine.ts";
 export * from "./evidence.ts";
 export * from "./harness-core.ts";
 export * from "./slices.ts";
