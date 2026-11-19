@@ -8,6 +8,7 @@
 //! malformed inputs drop more than the last value. Every boundary it cuts at is an ASCII
 //! character or an end, so working on UTF-8 bytes gives the same slices as UTF-16 indices.
 
+use serde::{Serialize, Serializer};
 use serde_json::{Map, Value};
 
 use crate::text::js_trim;
@@ -21,6 +22,19 @@ pub fn js_number(number: f64) -> Value {
     } else {
         serde_json::Number::from_f64(number).map_or(Value::Null, Value::Number)
     }
+}
+
+/// `serialize_with` for an `f64` field, written as `js_number` writes it.
+pub fn serialize_js_f64<S: Serializer>(number: &f64, serializer: S) -> Result<S::Ok, S::Error> {
+    js_number(*number).serialize(serializer)
+}
+
+/// `serialize_with` for an optional `f64` field.
+pub fn serialize_js_f64_option<S: Serializer>(
+    number: &Option<f64>,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    number.map(js_number).serialize(serializer)
 }
 
 /// Escape raw control characters in string literals and double the backslash of an escape JSON
