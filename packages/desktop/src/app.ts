@@ -5,6 +5,7 @@
  */
 
 import type { Bridge } from "./bridge.ts";
+import { HarnessPanel, type HarnessSnapshot } from "./panel.ts";
 import { type ChatMessage, chip, element, messageText, relativeTime, renderMessage, settleTool } from "./render.ts";
 import { RpcConnection, type RpcEvent } from "./rpc.ts";
 
@@ -46,6 +47,9 @@ export class App {
 	private readonly sendButton: HTMLButtonElement;
 	private readonly abortButton: HTMLButtonElement;
 	private readonly status: HTMLElement;
+	private readonly modelSelect: HTMLSelectElement;
+	private readonly thinkingSelect: HTMLSelectElement;
+	private readonly panel: HarnessPanel;
 	private readonly toasts: HTMLElement;
 	private state: SessionState = { isStreaming: false };
 	private streaming?: { node: HTMLElement; text: HTMLElement };
@@ -69,7 +73,22 @@ export class App {
 		const chat = element("main", "chat");
 		const header = element("header", "titlebar");
 		this.status = element("span", "crumb");
-		header.append(element("span", "title", "Relay"), this.status);
+		this.modelSelect = element("select", "picker");
+		this.modelSelect.setAttribute("aria-label", "Model");
+		this.modelSelect.addEventListener("change", () => void this.selectModel(this.modelSelect.value));
+		this.thinkingSelect = element("select", "picker");
+		this.thinkingSelect.setAttribute("aria-label", "Thinking level");
+		this.thinkingSelect.addEventListener(
+			"change",
+			() => void this.changeSetting({ type: "set_thinking_level", level: this.thinkingSelect.value }),
+		);
+		header.append(
+			element("span", "title", "Relay"),
+			this.status,
+			element("span", "spacer"),
+			this.modelSelect,
+			this.thinkingSelect,
+		);
 		this.messages = element("div", "messages");
 		this.messages.setAttribute("aria-live", "polite");
 		const composer = element("form", "composer");
@@ -99,12 +118,19 @@ export class App {
 
 		this.toasts = element("div", "toasts");
 		this.toasts.setAttribute("role", "status");
-		root.replaceChildren(sidebar, chat, this.toasts);
+		this.panel = new HarnessPanel((id) => void this.forgetConstraint(id));
+		root.replaceChildren(sidebar, chat, this.panel.element, this.toasts);
 		root.classList.add("app");
 	}
 
 	async start(): Promise<void> {
-		await Promise.all([this.refreshState(), this.loadMessages(), this.loadSessions()]);
+		await Promise.all([
+			this.refreshState(),
+			this.loadMessages(),
+			this.loadSessions(),
+			this.refreshHarness(),
+			this.loadPickers(),
+		]);
 	}
 
 	private async refreshState(): Promise<void> {
@@ -113,11 +139,62 @@ export class App {
 	}
 
 	private renderStatus(): void {
-		const model = this.state.model ? `${this.state.model.provider}/${this.state.model.id}` : "no model";
-		const parts = [this.state.sessionName, model, this.state.thinkingLevel && `thinking ${this.state.thinkingLevel}`];
-		this.status.textContent = parts.filter(Boolean).join(" · ");
+		this.status.textContent = this.state.sessionName ?? "";
+		const current = this.state.model ? `${this.state.model.provider}/${this.state.model.id}` : "";
+		if ([...this.modelSelect.options].some((option) => option.value === current)) this.modelSelect.value = current;
+		if (this.state.thinkingLevel) this.thinkingSelect.value = this.state.thinkingLevel;
 		this.sendButton.textContent = this.state.isStreaming ? "Steer" : "Send";
 		this.abortButton.hidden = !this.state.isStreaming;
+	}
+
+	/** Fill the model and thinking-level pickers with what relay offers. */
+	private async loadPickers(): Promise<void> {
+		const [{ models }, { levels }] = await Promise.all([
+			this.rpc.request<{ models: Array<{ provider: string; id: string; name?: string }> }>({
+				type: "get_available_models",
+			}),
+			this.rpc.request<{ levels: string[] }>({ type: "get_available_thinking_levels" }),
+		]);
+		this.modelSelect.replaceChildren(
+			...models.map((model) => {
+				const option = element("option", undefined, `${model.name ?? model.id} (${model.provider})`);
+				option.value = `${model.provider}/${model.id}`;
+				return option;
+			}),
+		);
+		this.thinkingSelect.replaceChildren(
+			...levels.map((level) => {
+				const option = element("option", undefined, `thinking ${level}`);
+				option.value = level;
+				return option;
+			}),
+		);
+		this.renderStatus();
+	}
+
+	private async selectModel(value: string): Promise<void> {
+		const slash = value.indexOf("/");
+		if (slash <= 0) return;
+		await this.changeSetting({ type: "set_model", provider: value.slice(0, slash), modelId: value.slice(slash + 1) });
+	}
+
+	/** Apply a model or thinking change; on failure the pickers show the session's state again. */
+	private async changeSetting(command: { type: string; [key: string]: unknown }): Promise<void> {
+		try {
+			await this.rpc.request(command);
+		} catch (error) {
+			this.toast(error instanceof Error ? error.message : String(error), "bad");
+		}
+		await this.refreshState();
+	}
+
+	private async refreshHarness(): Promise<void> {
+		this.panel.render(await this.rpc.request<HarnessSnapshot>({ type: "get_harness_state" }));
+	}
+
+	private async forgetConstraint(id: string): Promise<void> {
+		await this.rpc.request({ type: "harness_forget", constraintId: id });
+		await this.refreshHarness();
 	}
 
 	private async loadMessages(): Promise<void> {
@@ -194,6 +271,21 @@ export class App {
 				this.state.isStreaming = false;
 				this.renderStatus();
 				void this.loadSessions();
+				void this.refreshHarness();
+				break;
+			case "tool_execution_start":
+				if (event.toolName === "agent" && !event.parentToolCallId) {
+					this.panel.agentStarted(String(event.toolCallId), event.args as Record<string, unknown> | undefined);
+				}
+				break;
+			case "tool_execution_update":
+				if (event.toolName === "agent") {
+					const partial = event.partialResult as ChatMessage | undefined;
+					this.panel.agentProgress(String(event.toolCallId), partial ? messageText(partial) : "");
+				}
+				break;
+			case "tool_execution_end":
+				if (event.toolName === "agent") this.panel.agentFinished(String(event.toolCallId), event.isError === true);
 				break;
 			case "message_start": {
 				const message = event.message as ChatMessage;
