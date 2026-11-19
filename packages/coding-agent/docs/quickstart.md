@@ -6,15 +6,14 @@ For native Windows setup, read [Windows Setup](windows.md). For Android, read [T
 
 ## 1. Install Relay
 
-Relay requires Node.js 22.19 or newer. Install it from npm:
+Relay is not published to npm. Each release run of the [release workflow](https://github.com/eltonssouza/relay-harness/actions/workflows/release.yml) keeps its downloads as artifacts of the run; downloading them needs a GitHub sign-in.
 
-```bash
-npm install -g --ignore-scripts @relay-harness/coding-agent
-```
+- **Standalone binary**: the `relay-binaries-<version>` artifact has an archive per platform (`relay-windows-x64.zip`, `relay-darwin-arm64.tar.gz`, `relay-linux-x64.tar.gz`, and the other x64 and arm64 builds). The binary needs no Node.js. Unpack the archive, keep the folder whole (the binary reads the files next to it), and add the folder to your `PATH`.
+- **Desktop app**: the `relay-desktop-<version>-msi`, `-dmg` and `-appimage` artifacts hold its installers. The app carries the binary, so it needs no separate install.
 
-Relay does not require dependency lifecycle scripts, so `--ignore-scripts` is safe. To update Relay, run the same command again. `relay update` updates installed packages and model catalogs, not Relay itself.
+Neither is code-signed yet, so Windows SmartScreen and macOS Gatekeeper warn on first launch. To update Relay, download the new release; Relay tells you when one is out. `relay update` updates installed packages and model catalogs, not Relay itself.
 
-To work on Relay itself, build it from a checkout instead:
+To work on Relay itself, build it from a checkout instead (this needs Node.js 22.19 or newer):
 
 ```bash
 git clone https://github.com/eltonssouza/relay-harness.git
@@ -122,7 +121,9 @@ Start with the least powerful mechanism that meets your need:
 
 ## Uninstall Relay
 
-If you installed Relay from npm, run:
+If you installed the standalone binary, delete its folder and remove it from your `PATH`. Uninstall the desktop app like any other app.
+
+If you installed Relay from npm before it stopped being published there, run:
 
 ```bash
 npm uninstall -g @relay-harness/coding-agent

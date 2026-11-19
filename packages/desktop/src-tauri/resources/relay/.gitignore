@@ -1,0 +1,5 @@
+# The release workflow extracts the relay binary for the installer's platform here, and
+# tauri.conf.json bundles this folder. A local build leaves it empty, and the app then runs relay
+# from PATH.
+*
+!.gitignore

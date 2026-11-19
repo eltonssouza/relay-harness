@@ -15,10 +15,21 @@ const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 
 interface TauriConfig {
 	version: string;
-	bundle: { active: boolean; targets: string[]; icon: string[] };
+	bundle: { active: boolean; targets: string[]; icon: string[]; resources: Record<string, string> };
+}
+
+interface Job {
+	needs?: string;
+	strategy: { matrix: { include: Array<{ os: string; bundle: string; binary: string }> } };
+	steps: Array<{ run?: string; uses?: string }>;
 }
 
 const config = JSON.parse(readFileSync(join(SHELL, "tauri.conf.json"), "utf8")) as TauriConfig;
+const workflow = parse(readFileSync(join(ROOT, ".github/workflows/release.yml"), "utf8")) as {
+	jobs: Record<string, Job>;
+};
+const installers = workflow.jobs["desktop-installers"];
+const runs = (job: Job) => job.steps.map((step) => step.run ?? "").join("\n");
 
 /** Width and height of a PNG, from its IHDR chunk. */
 function pngSize(data: Buffer): [number, number] {
@@ -63,20 +74,27 @@ describe("the desktop installers", () => {
 	});
 
 	it("are built and kept by the release workflow on each platform", () => {
-		const workflow = parse(readFileSync(join(ROOT, ".github/workflows/release.yml"), "utf8")) as {
-			jobs: Record<
-				string,
-				{
-					strategy: { matrix: { include: Array<{ os: string; bundle: string }> } };
-					steps: Array<{ run?: string; uses?: string }>;
-				}
-			>;
-		};
-		const job = workflow.jobs["desktop-installers"];
-		expect(job.strategy.matrix.include.map((entry) => entry.bundle).sort()).toEqual(["appimage", "dmg", "msi"]);
-		const runs = job.steps.map((step) => step.run ?? "").join("\n");
-		expect(runs).toMatch(/cargo tauri build --bundles \$\{\{ matrix\.bundle \}\}/);
-		expect(runs).toContain("npm run build --workspace @relay-harness/desktop");
-		expect(job.steps.some((step) => step.uses?.startsWith("actions/upload-artifact@"))).toBe(true);
+		const bundles = installers.strategy.matrix.include.map((entry) => entry.bundle);
+		expect(bundles.sort()).toEqual(["appimage", "dmg", "msi"]);
+		expect(runs(installers)).toMatch(/cargo tauri build --bundles \$\{\{ matrix\.bundle \}\}/);
+		expect(runs(installers)).toContain("npm run build --workspace @relay-harness/desktop");
+		expect(installers.steps.some((step) => step.uses?.startsWith("actions/upload-artifact@"))).toBe(true);
+	});
+
+	it("carry the relay binary of their platform from the release's binaries job", () => {
+		// The folder is in every checkout, so a local build finds it; only the release fills it.
+		expect(config.bundle.resources).toEqual({ "resources/relay": "relay" });
+		expect(readFileSync(join(SHELL, "resources/relay/.gitignore"), "utf8")).toMatch(/^\*$/m);
+
+		expect(installers.needs).toBe("binaries");
+		expect(runs(workflow.jobs.binaries)).toContain("scripts/build-binaries.sh");
+		const script = readFileSync(join(ROOT, "scripts/build-binaries.sh"), "utf8");
+		// The script's list of every platform, not the `--platform` override.
+		const platforms = /^\s*PLATFORMS=\(([a-z0-9 -]+)\)/m.exec(script)?.[1].split(" ") ?? [];
+		expect(platforms).toContain("windows-x64");
+		for (const entry of installers.strategy.matrix.include) expect(platforms).toContain(entry.binary);
+		const extracts = installers.steps.filter((step) => step.run?.includes("matrix.binary"));
+		expect(extracts.length).toBe(2);
+		for (const step of extracts) expect(step.run).toContain("packages/desktop/src-tauri/resources/relay");
 	});
 });

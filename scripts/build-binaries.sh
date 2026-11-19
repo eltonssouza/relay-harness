@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Build relay binaries for all platforms locally.
-# Mirrors .github/workflows/build-binaries.yml
+# The release workflow (.github/workflows/release.yml) runs it to build the release binaries.
 #
 # Usage:
 #   ./scripts/build-binaries.sh [--skip-install] [--skip-build] [--offline-model-data] [--platform <platform>] [--out <dir>]
