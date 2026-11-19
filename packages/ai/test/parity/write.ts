@@ -2,7 +2,8 @@
  * Writes the `packages/ai` reference files in `crates/fixtures/` for the Rust port to match:
  * the JSON helpers, the Anthropic, OpenAI Responses and OpenAI Chat Completions request bodies
  * and stream decoding, the Google Gemini requests and stream decoding, each adapter's
- * `streamSimple` option mapping, and each built-in provider's API-key resolution. Run through
+ * `streamSimple` option mapping, each built-in provider's API-key resolution, and the retry policy
+ * every adapter wraps its request in. Run through
  * `npm run parity:record`, after the agent scenarios, which the Anthropic bodies read.
  */
 
@@ -22,6 +23,7 @@ import {
 } from "./openai-completions-stream-record.ts";
 import { OPENAI_RESPONSES_DIR, responsesCases, responsesJson } from "./openai-responses-record.ts";
 import { RESPONSES_STREAM_DIR, responsesStreamCases, responsesStreamJson } from "./openai-responses-stream-record.ts";
+import { RETRY_FILE, retryJson } from "./retry-record.ts";
 import { SIMPLE_DIR, simpleCases, simpleJson } from "./simple-record.ts";
 
 async function writeCases<T extends { name: string }>(
@@ -47,6 +49,7 @@ await writeCases(GOOGLE_DIR, googleCases(), googleJson);
 await writeCases(GOOGLE_STREAM_DIR, googleStreamCases(), googleStreamJson);
 await writeCases(SIMPLE_DIR, simpleCases(), simpleJson);
 await writeCases(AUTH_DIR, authCases(), authJson);
+writeFileSync(RETRY_FILE, await retryJson());
 console.log(
-	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests, ${googleStreamCases().length} Google streams, ${simpleCases().length} simple-option cases and ${authCases().length} provider auth resolutions to crates/fixtures/`,
+	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests, ${googleStreamCases().length} Google streams, ${simpleCases().length} simple-option cases, ${authCases().length} provider auth resolutions and the retry policy to crates/fixtures/`,
 );
