@@ -71,8 +71,7 @@ Pull requests to `develop` also run the Linux gate in `.github/workflows/pr-ci.y
 does not replace the local run. Include the validated commit, operating system, Node
 version and local result in the PR description.
 The required `local/verify` status may report success only after the full local
-runner passes for that commit. Local CI does not approve a Laya model or
-distribution.
+runner passes for that commit.
 
 Do not edit `CHANGELOG.md`. Changelog entries are added by maintainers.
 

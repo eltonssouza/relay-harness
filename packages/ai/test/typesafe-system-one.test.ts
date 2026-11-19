@@ -47,7 +47,7 @@ const wireAnswers = {
 };
 
 describe("TypeSafe System One", () => {
-	it("uses Laya's answer probability instead of its entropy confidence when both are returned", async () => {
+	it("uses System One's answer probability instead of its entropy confidence when both are returned", async () => {
 		const nativeContext: ClassifierContext = {
 			...context,
 			questions: {

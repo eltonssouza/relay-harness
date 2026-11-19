@@ -2,7 +2,7 @@
 
 This directory contains the standardized, self-contained **Skills Catalog** designed for modern agentic AI workflows and LLM execution.
 
-All skills are decoupled from hardcoded models (model selection and routing are managed externally by **Laya**) and operate independently of legacy library lookups, terminal CLI commands, or arbitrary gate protocols.
+All skills are decoupled from hardcoded models (the model is whatever the session selects) and operate independently of legacy library lookups, terminal CLI commands, or arbitrary gate protocols.
 
 ## Skills Matrix (19 Orthogonal Capabilities)
 

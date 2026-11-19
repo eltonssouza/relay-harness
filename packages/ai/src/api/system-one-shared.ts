@@ -77,7 +77,7 @@ function probabilities(label: string, value: unknown, id: string): Record<string
 	);
 }
 
-/** Laya's answer_confidence is answer probability; its confidence field measures entropy. */
+/** System One's answer_confidence is answer probability; its confidence field measures entropy. */
 function answerConfidence(label: string, answer: Record<string, unknown>, id: string): number {
 	return requiredNumber(
 		label,

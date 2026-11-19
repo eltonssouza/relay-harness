@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import { getEngineeringResourcesPath } from "../src/config.ts";
 import { loadSkillsFromDir } from "../src/core/skills.ts";
 import { loadAgentProfile } from "../src/extensions/engineering/index.ts";
-import { AGENTS } from "../src/extensions/laya/questions.ts";
 import { parseFrontmatter } from "../src/utils/frontmatter.ts";
 
 describe("distributed engineering resources", () => {
@@ -22,7 +21,7 @@ describe("distributed engineering resources", () => {
 		expect(files).toHaveLength(16);
 		for (const file of files) {
 			const { frontmatter } = parseFrontmatter(readFileSync(join(root, file), "utf8"));
-			expect(AGENTS).toHaveProperty(String(frontmatter.name));
+			expect(frontmatter.name).toBe(file.replace(/\.md$/, ""));
 		}
 		expect(loadAgentProfile("software-engineer", { cwd: root, isProjectTrusted: () => false })).toContain(
 			"Test-Driven Discipline",

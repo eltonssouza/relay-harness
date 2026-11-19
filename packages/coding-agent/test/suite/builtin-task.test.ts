@@ -35,7 +35,7 @@ describe("built-in task execution", () => {
 		const harness = await createHarness({
 			sessionManager,
 			// The evidence pillar would ask for a check after the .ts write; these tests are about task flow.
-			settings: { laya: { autostart: false, telemetry: false }, harnessCore: { evidence: false } },
+			settings: { harnessCore: { evidence: false } },
 			extensionFactories: builtInExtensions,
 			initialActiveToolNames: ["write"],
 			tools: [write],

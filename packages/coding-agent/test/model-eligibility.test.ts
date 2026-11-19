@@ -62,7 +62,7 @@ describe("current chat model policy", () => {
 	it("does not restrict other model families", () => {
 		expect(isEligibleChatModel("local", "qwen2.5-coder")).toBe(true);
 		expect(isEligibleChatModel("google", "gemini-3.5-pro")).toBe(true);
-		expect(isEligibleChatModel("laya", "auto")).toBe(true);
+		expect(isEligibleChatModel("router", "auto")).toBe(true);
 	});
 });
 
@@ -111,12 +111,12 @@ describe("ModelRuntime model policy integration", () => {
 	it("rejects virtual routes to a prohibited model", async () => {
 		const { runtime, faux } = await setup("anthropic", ["claude-fable-5-1"]);
 		runtime.registerVirtualModel({
-			provider: "laya",
+			provider: "router",
 			id: "auto",
-			name: "Laya Auto",
+			name: "Router Auto",
 			route: () => ({ model: faux.models[0], thinkingLevel: "off" }),
 		});
-		const model = runtime.getModel("laya", "auto")!;
+		const model = runtime.getModel("router", "auto")!;
 		await expect(runtime.resolveModel(model, [], { reason: "user", thinkingLevel: "off" })).rejects.toThrow(
 			"not a physical model",
 		);
