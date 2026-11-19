@@ -1,0 +1,529 @@
+{
+	"name": "edge-native-tools",
+	"description": "System messages in place with tool_addition and tool_removal blocks.",
+	"model": {
+		"id": "claude-test",
+		"name": "Claude Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "http://127.0.0.1:9",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 3,
+			"output": 15,
+			"cacheRead": 0.3,
+			"cacheWrite": 3.75
+		},
+		"contextWindow": 200000,
+		"maxTokens": 64000,
+		"compat": {
+			"supportsMidConvoSystemMessages": true,
+			"supportsMidConvoToolChanges": true
+		}
+	},
+	"apiKey": "sk-ant-api03-parity",
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Base prompt.",
+			"sections": {
+				"intro": "<intro>Hello</intro>",
+				"rules": "<rules>Be brief.</rules>"
+			},
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string",
+								"description": "File path"
+							},
+							"offset": {
+								"type": "number"
+							},
+							"limit": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "notes",
+					"description": "Keep a note.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"text": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"text"
+						]
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "   ",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": "Look at this."
+				},
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				},
+				{
+					"type": "text",
+					"text": "  "
+				},
+				{
+					"type": "text",
+					"text": "<harness>state</harness>",
+					"volatile": true
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Plan the read.",
+					"thinkingSignature": "sig-1"
+				},
+				{
+					"type": "thinking",
+					"thinking": ""
+				},
+				{
+					"type": "thinking",
+					"thinking": "An unsigned thought."
+				},
+				{
+					"type": "thinking",
+					"thinking": "",
+					"thinkingSignature": "opaque",
+					"redacted": true
+				},
+				{
+					"type": "text",
+					"text": " "
+				},
+				{
+					"type": "text",
+					"text": "Reading a.ts."
+				},
+				{
+					"type": "toolCall",
+					"id": "call|weird|id",
+					"name": "read",
+					"arguments": {
+						"path": "a.ts"
+					}
+				}
+			],
+			"api": "anthropic-messages",
+			"provider": "anthropic",
+			"model": "claude-test",
+			"providerThinkingLevel": "medium",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call|weird|id",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "export const a = 1;"
+				},
+				{
+					"type": "text",
+					"text": "<harness>after the read</harness>",
+					"volatile": true
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "system",
+			"content": "Extra instructions.",
+			"sections": {
+				"rules": "<rules>Be thorough.</rules>",
+				"intro": null
+			},
+			"toolsAdded": [
+				{
+					"name": "write",
+					"description": "Write a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"content": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path",
+							"content"
+						]
+					}
+				}
+			],
+			"toolsRemoved": [
+				{
+					"name": "notes"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Another model's thinking.",
+					"thinkingSignature": "other"
+				},
+				{
+					"type": "text",
+					"text": "From another model."
+				},
+				{
+					"type": "toolCall",
+					"id": "fc_123|abc+def==/🙈",
+					"name": "write",
+					"arguments": {
+						"path": "b.ts",
+						"content": "x"
+					},
+					"thoughtSignature": "thought"
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "gpt-test",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "Partial answer"
+				}
+			],
+			"api": "anthropic-messages",
+			"provider": "anthropic",
+			"model": "claude-test",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "error",
+			"errorMessage": "overloaded",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Continue 🙈",
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "claude-test",
+		"messages": [
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Look at this."
+					},
+					{
+						"type": "image",
+						"source": {
+							"type": "base64",
+							"media_type": "image/png",
+							"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+						}
+					},
+					{
+						"type": "text",
+						"text": "<harness>state</harness>"
+					}
+				]
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Plan the read.",
+						"signature": "sig-1"
+					},
+					{
+						"type": "text",
+						"text": "An unsigned thought."
+					},
+					{
+						"type": "redacted_thinking",
+						"data": "opaque"
+					},
+					{
+						"type": "text",
+						"text": "Reading a.ts."
+					},
+					{
+						"type": "tool_use",
+						"id": "call|weird|id",
+						"name": "read",
+						"input": {
+							"path": "a.ts"
+						}
+					}
+				]
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "tool_result",
+						"tool_use_id": "call|weird|id",
+						"content": "export const a = 1;",
+						"is_error": false
+					},
+					{
+						"type": "text",
+						"text": "<harness>after the read</harness>"
+					}
+				]
+			},
+			{
+				"role": "system",
+				"content": [
+					{
+						"type": "text",
+						"text": "Extra instructions.\n\nUpdated system prompt section \"rules\":\n\n<rules>Be thorough.</rules>\n\nRemoved system prompt section \"intro\"."
+					},
+					{
+						"type": "tool_removal",
+						"tool": {
+							"type": "tool_reference",
+							"name": "notes"
+						}
+					},
+					{
+						"type": "tool_addition",
+						"tool": {
+							"type": "tool_definition",
+							"definition": {
+								"name": "write",
+								"description": "Write a file.",
+								"eager_input_streaming": true,
+								"input_schema": {
+									"type": "object",
+									"properties": {
+										"path": {
+											"type": "string"
+										},
+										"content": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"path",
+										"content"
+									]
+								}
+							}
+						}
+					}
+				]
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "Another model's thinking."
+					},
+					{
+						"type": "text",
+						"text": "From another model."
+					},
+					{
+						"type": "tool_use",
+						"id": "fc_123_abc_def_____",
+						"name": "write",
+						"input": {
+							"path": "b.ts",
+							"content": "x"
+						}
+					}
+				]
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "tool_result",
+						"tool_use_id": "fc_123_abc_def_____",
+						"content": "No result provided",
+						"is_error": true
+					}
+				]
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Continue 🙈",
+						"cache_control": {
+							"type": "ephemeral"
+						}
+					}
+				]
+			}
+		],
+		"max_tokens": 64000,
+		"stream": true,
+		"betas": [
+			"inline-tools-2026-09-15"
+		],
+		"system": [
+			{
+				"type": "text",
+				"text": "Base prompt.\n\n<intro>Hello</intro>\n\n<rules>Be brief.</rules>",
+				"cache_control": {
+					"type": "ephemeral"
+				}
+			}
+		],
+		"tools": [
+			{
+				"name": "read",
+				"description": "Read a file.",
+				"eager_input_streaming": true,
+				"input_schema": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "File path"
+						},
+						"offset": {
+							"type": "number"
+						},
+						"limit": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"path"
+					]
+				}
+			},
+			{
+				"name": "notes",
+				"description": "Keep a note.",
+				"eager_input_streaming": true,
+				"input_schema": {
+					"type": "object",
+					"properties": {
+						"text": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"text"
+					]
+				},
+				"cache_control": {
+					"type": "ephemeral"
+				}
+			},
+			{
+				"name": "__pi_deferred_placeholder__",
+				"description": "Reserved placeholder. Never available. Never call this.",
+				"input_schema": {
+					"type": "object",
+					"properties": {},
+					"required": []
+				},
+				"defer_loading": true
+			}
+		]
+	}
+}

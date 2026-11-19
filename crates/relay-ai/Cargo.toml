@@ -11,4 +11,5 @@ path = "src/lib.rs"
 
 [dependencies]
 serde = { version = "=1.0.229", default-features = false, features = ["std", "derive"] }
-serde_json = { version = "=1.0.154", default-features = false, features = ["std"] }
+# Insertion order, as JavaScript objects keep it: request bodies must match the TypeScript ones.
+serde_json = { version = "=1.0.154", default-features = false, features = ["std", "preserve_order"] }
