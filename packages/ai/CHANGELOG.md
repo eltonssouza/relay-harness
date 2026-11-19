@@ -4,6 +4,14 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Added
+
+- Added `TextContent.volatile` for text that changes on every request, and the `UserMessage.origin` value `agent`.
+
+### Fixed
+
+- The Anthropic provider sends volatile text after the tool results and puts the cache breakpoint on the last block that is not volatile, so restated state no longer invalidates the prompt cache.
+
 ## [0.5.0] - 2026-10-27
 
 ### Added
