@@ -16,60 +16,14 @@ use crate::message::{
     ToolCall, Usage,
 };
 use crate::model::{calculate_cost, Model};
+use crate::openai_sdk::{
+    is_truthy, sdk_message, template, text_of, token_count, GrammarInput, SdkMessage,
+};
 use crate::sse::{ServerSentEvent, SseDecoder};
 use crate::strict::grammar_tool_input_properties;
 use crate::transcript::{declared_tools, resolve_transcript};
 
 const CHATGPT_USAGE_URL: &str = "https://chatgpt.com/settings/usage";
-
-/// The JSON-encoded deltas of a grammar tool's input, as `appendGrammarToolInputJsonDelta` writes
-/// them: `{"<property>":"` first, the escaped input as it grows, `"}` when it closes.
-#[derive(Debug, Default)]
-struct GrammarInput {
-    property: String,
-    input: String,
-    started: bool,
-    closed: bool,
-}
-
-impl GrammarInput {
-    fn append(&mut self, next_input: &str, close: bool) -> Result<Option<String>, String> {
-        if self.closed {
-            if close && next_input == self.input {
-                return Ok(None);
-            }
-            return Err(format!(
-                "grammar tool input for property \"{}\" changed after it was closed",
-                self.property
-            ));
-        }
-        if !next_input.starts_with(&self.input) {
-            return Err(format!(
-                "grammar tool input for property \"{}\" changed non-monotonically",
-                self.property
-            ));
-        }
-        let input_delta = &next_input[self.input.len()..];
-        if !close && input_delta.is_empty() {
-            return Ok(None);
-        }
-        let mut delta = String::new();
-        if !self.started {
-            delta.push('{');
-            delta.push_str(&json!(self.property).to_string());
-            delta.push_str(":\"");
-            self.started = true;
-        }
-        let escaped = json!(input_delta).to_string();
-        delta.push_str(&escaped[1..escaped.len() - 1]);
-        self.input = next_input.to_string();
-        if close {
-            delta.push_str("\"}");
-            self.closed = true;
-        }
-        Ok(Some(delta))
-    }
-}
 
 /// What an open output item streams into.
 #[derive(Debug)]
@@ -98,54 +52,6 @@ pub struct OpenAIResponsesStream {
     saw_terminal: bool,
     sentinel: bool,
     finished: bool,
-}
-
-fn text_of(value: &Value, field: &str) -> String {
-    value
-        .get(field)
-        .and_then(Value::as_str)
-        .unwrap_or_default()
-        .to_string()
-}
-
-/// `` `${value}` `` for an id part: `undefined` when it is missing.
-fn template(value: Option<&Value>) -> String {
-    match value {
-        None => "undefined".into(),
-        Some(Value::String(text)) => text.clone(),
-        Some(Value::Null) => "null".into(),
-        Some(other) => other.to_string(),
-    }
-}
-
-fn token_count(value: Option<&Value>) -> u64 {
-    value
-        .and_then(|value| {
-            value
-                .as_u64()
-                .or_else(|| value.as_f64().map(|float| float as u64))
-        })
-        .unwrap_or(0)
-}
-
-/// `APIError.makeMessage` for an error object without an HTTP status.
-fn api_error_message(error: &Value) -> String {
-    match error.get("message") {
-        Some(Value::String(message)) if !message.is_empty() => message.clone(),
-        Some(message) if is_truthy(message) => message.to_string(),
-        _ if is_truthy(error) => error.to_string(),
-        _ => "(no status code or body)".into(),
-    }
-}
-
-fn is_truthy(value: &Value) -> bool {
-    match value {
-        Value::Null => false,
-        Value::Bool(flag) => *flag,
-        Value::Number(number) => number.as_f64().is_some_and(|number| number != 0.0),
-        Value::String(text) => !text.is_empty(),
-        Value::Array(_) | Value::Object(_) => true,
-    }
 }
 
 fn map_stop_reason(
@@ -308,27 +214,14 @@ impl OpenAIResponsesStream {
         sse: &ServerSentEvent,
         emitted: &mut Vec<AssistantEvent>,
     ) -> Result<(), String> {
-        if sse.data == "[DONE]" {
-            self.sentinel = true;
-            return Ok(());
+        match sdk_message(sse).map_err(|error| error.message)? {
+            SdkMessage::Sentinel => {
+                self.sentinel = true;
+                Ok(())
+            }
+            SdkMessage::Ignored => Ok(()),
+            SdkMessage::Data(data) => self.event(&data, emitted),
         }
-        let data: Value = serde_json::from_str(&sse.data)
-            .map_err(|_| "Error reading response: malformed server-sent event JSON.".to_string())?;
-        let named = sse.event.as_deref();
-        if named.is_some_and(|name| name.starts_with("thread.")) {
-            return Ok(());
-        }
-        if named == Some("error") {
-            let error = data
-                .get("error")
-                .filter(|error| !error.is_null())
-                .unwrap_or(&data);
-            return Err(api_error_message(error));
-        }
-        if let Some(error) = data.get("error").filter(|error| is_truthy(error)) {
-            return Err(api_error_message(error));
-        }
-        self.event(&data, emitted)
     }
 
     fn end(&mut self, emitted: &mut Vec<AssistantEvent>) -> Result<(), String> {
@@ -461,10 +354,7 @@ impl OpenAIResponsesStream {
                 Slot::ToolCall {
                     index,
                     partial_json: None,
-                    grammar: Some(GrammarInput {
-                        property,
-                        ..GrammarInput::default()
-                    }),
+                    grammar: Some(GrammarInput::new(property)),
                 }
             }
             _ => return false,

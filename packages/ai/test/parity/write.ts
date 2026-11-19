@@ -1,7 +1,7 @@
 /**
  * Writes the `packages/ai` reference files in `crates/fixtures/` for the Rust port to match:
- * the JSON helpers, the Anthropic and OpenAI Responses request bodies and stream decoding, and
- * the OpenAI Chat Completions request bodies. Run through
+ * the JSON helpers, and the Anthropic, OpenAI Responses and OpenAI Chat Completions request bodies
+ * and stream decoding. Run through
  * `npm run parity:record`, after the agent scenarios, which the Anthropic bodies read.
  */
 
@@ -11,6 +11,11 @@ import { ANTHROPIC_DIR, anthropicCases, anthropicJson } from "./anthropic-record
 import { ANTHROPIC_STREAM_DIR, streamCaseJson, streamCases } from "./anthropic-stream-record.ts";
 import { JSON_DIR, jsonFixtureText } from "./json-record.ts";
 import { completionsCases, completionsJson, OPENAI_COMPLETIONS_DIR } from "./openai-completions-record.ts";
+import {
+	COMPLETIONS_STREAM_DIR,
+	completionsStreamCases,
+	completionsStreamJson,
+} from "./openai-completions-stream-record.ts";
 import { OPENAI_RESPONSES_DIR, responsesCases, responsesJson } from "./openai-responses-record.ts";
 import { RESPONSES_STREAM_DIR, responsesStreamCases, responsesStreamJson } from "./openai-responses-stream-record.ts";
 
@@ -32,6 +37,7 @@ await writeCases(ANTHROPIC_STREAM_DIR, streamCases(), streamCaseJson);
 await writeCases(OPENAI_RESPONSES_DIR, responsesCases(), responsesJson);
 await writeCases(RESPONSES_STREAM_DIR, responsesStreamCases(), responsesStreamJson);
 await writeCases(OPENAI_COMPLETIONS_DIR, completionsCases(), completionsJson);
+await writeCases(COMPLETIONS_STREAM_DIR, completionsStreamCases(), completionsStreamJson);
 console.log(
-	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams and ${completionsCases().length} Chat Completions bodies to crates/fixtures/`,
+	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies and ${completionsStreamCases().length} Chat Completions streams to crates/fixtures/`,
 );
