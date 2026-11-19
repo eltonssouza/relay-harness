@@ -174,6 +174,18 @@ impl OpenAIResponsesStream {
         self.handle(events, true)
     }
 
+    /// End the stream with a failure the decoder did not see: the request failed, the connection
+    /// dropped, or the request was aborted. The output keeps what arrived.
+    pub fn end_with_error(&mut self, reason: StopReason, message: String) -> AssistantEvent {
+        self.finished = true;
+        self.output.stop_reason = reason;
+        self.output.error_message = Some(message);
+        AssistantEvent::Error {
+            reason,
+            error: Message::Assistant(Box::new(self.output.clone())),
+        }
+    }
+
     fn handle(&mut self, events: Vec<ServerSentEvent>, last: bool) -> Vec<AssistantEvent> {
         let mut emitted = Vec::new();
         let result = (|| {

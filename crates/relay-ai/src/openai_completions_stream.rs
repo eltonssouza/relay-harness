@@ -275,6 +275,28 @@ impl OpenAICompletionsStream {
         self.handle(events, true)
     }
 
+    /// End the stream with a failure the decoder did not see. The output keeps what arrived.
+    pub fn end_with_error(&mut self, reason: StopReason, message: String) -> AssistantEvent {
+        self.finished = true;
+        self.apply_reasoning_details();
+        self.output.stop_reason = reason;
+        self.output.error_message = Some(message);
+        AssistantEvent::Error {
+            reason,
+            error: Message::Assistant(Box::new(self.output.clone())),
+        }
+    }
+
+    /// The end events of every block, as the adapter closes them when the stream stops; an
+    /// aborted request stops it.
+    pub fn close_blocks(&mut self) -> Vec<AssistantEvent> {
+        let mut emitted = Vec::new();
+        if let Err(error) = self.close_all_blocks(&mut emitted) {
+            emitted.push(self.end_with_error(StopReason::Error, error.message));
+        }
+        emitted
+    }
+
     fn handle(&mut self, events: Vec<ServerSentEvent>, last: bool) -> Vec<AssistantEvent> {
         let mut emitted = Vec::new();
         let result = (|| {
@@ -331,6 +353,11 @@ impl OpenAICompletionsStream {
 
     /// End every block in content order, then check the stop reason.
     fn end(&mut self, emitted: &mut Vec<AssistantEvent>) -> Result<(), SdkError> {
+        self.close_all_blocks(emitted)?;
+        self.end_after_blocks(emitted)
+    }
+
+    fn close_all_blocks(&mut self, emitted: &mut Vec<AssistantEvent>) -> Result<(), SdkError> {
         for index in 0..self.output.content.len() {
             let text = match &self.output.content[index] {
                 OutputBlock::Text(text) => Some(text.text.clone()),
@@ -353,6 +380,10 @@ impl OpenAICompletionsStream {
                 self.end_tool_call(index, emitted)?;
             }
         }
+        Ok(())
+    }
+
+    fn end_after_blocks(&mut self, emitted: &mut Vec<AssistantEvent>) -> Result<(), SdkError> {
         if !self.has_finish_reason && !self.supports_finish_reason {
             let has_tool_call = self
                 .output

@@ -3,7 +3,8 @@
  * the JSON helpers, the Anthropic, OpenAI Responses and OpenAI Chat Completions request bodies
  * and stream decoding, the Google Gemini requests and stream decoding, each adapter's
  * `streamSimple` option mapping, each built-in provider's API-key resolution, the retry policy
- * every adapter wraps its request in, and each adapter's HTTP requests and error messages. Run through
+ * every adapter wraps its request in, each adapter's HTTP requests and error messages, and the events of
+ * failed streams. Run through
  * `npm run parity:record`, after the agent scenarios, which the Anthropic bodies read.
  */
 
@@ -26,6 +27,7 @@ import { OPENAI_RESPONSES_DIR, responsesCases, responsesJson } from "./openai-re
 import { RESPONSES_STREAM_DIR, responsesStreamCases, responsesStreamJson } from "./openai-responses-stream-record.ts";
 import { RETRY_FILE, retryJson } from "./retry-record.ts";
 import { SIMPLE_DIR, simpleCases, simpleJson } from "./simple-record.ts";
+import { STREAM_FAILURE_DIR, streamFailureCases, streamFailureJson } from "./stream-failure-record.ts";
 
 async function writeCases<T extends { name: string }>(
 	directory: string,
@@ -52,6 +54,7 @@ await writeCases(SIMPLE_DIR, simpleCases(), simpleJson);
 await writeCases(AUTH_DIR, authCases(), authJson);
 writeFileSync(RETRY_FILE, await retryJson());
 await writeCases(HTTP_DIR, httpCases(), httpJson);
+await writeCases(STREAM_FAILURE_DIR, streamFailureCases(), streamFailureJson);
 console.log(
-	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests, ${googleStreamCases().length} Google streams, ${simpleCases().length} simple-option cases, ${authCases().length} provider auth resolutions, the retry policy and ${httpCases().length} HTTP requests and errors to crates/fixtures/`,
+	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests, ${googleStreamCases().length} Google streams, ${simpleCases().length} simple-option cases, ${authCases().length} provider auth resolutions, the retry policy, ${httpCases().length} HTTP requests and errors and ${streamFailureCases().length} stream failures to crates/fixtures/`,
 );

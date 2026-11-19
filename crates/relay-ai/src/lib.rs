@@ -18,6 +18,7 @@
 //! - `options`: request options adapters share.
 //! - `abort`, `retry`, `http`: cancellation, the SDKs' retry policy, and sending requests.
 //! - `provider_request`: each adapter's URL, headers and wire body, and its HTTP error messages.
+//! - `stream`: each adapter's `stream()`, sending the request and decoding the response.
 //! - `simple`: the provider-neutral options (`streamSimple`) mapped to each adapter's, and the
 //!   context estimate that limits the output.
 //! - `json`, `sse`: provider output helpers (JSON repair and partial parsing, server-sent events).
@@ -53,6 +54,7 @@ pub mod provider_request;
 pub mod retry;
 pub mod simple;
 pub mod sse;
+pub mod stream;
 pub mod strict;
 pub mod text;
 pub mod transcript;
