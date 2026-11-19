@@ -55,7 +55,7 @@
 
 - `crates/harness-core` ports the harness core of `packages/agent/src/harness` to Rust. The toolchain is pinned by `rust-toolchain.toml`; direct crate dependencies are pinned to exact versions and `Cargo.lock` is committed and reviewed like `package-lock.json`.
 - `bash ./ci.sh` runs `cargo fmt --all --check`, `cargo clippy --all-targets --locked -- -D warnings` and `cargo test --locked`. Run them after changing Rust code.
-- `crates/harness-core/tests/fixtures/classification.json` holds the TypeScript classification of every corpus command and edge case. After changing a rule in `effects.ts` or `shell.ts`, run `npm run harness:golden` and make the Rust tests pass; `golden.test.ts` fails while the file is behind the TypeScript code.
+- `crates/harness-core/tests/fixtures/classification.json` holds the TypeScript classification of every corpus command and edge case, and `pillars.json` the alignment decisions, text readings and completion reports. After changing a rule in `packages/agent/src/harness`, run `npm run harness:golden` and make the Rust tests pass; `golden.test.ts` fails while the files are behind the TypeScript code.
 
 ## Dependency and Install Security
 

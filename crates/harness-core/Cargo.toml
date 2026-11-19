@@ -1,7 +1,7 @@
 [package]
 name = "relay-harness-core"
 version = "0.0.0"
-description = "The model-independent harness core of Relay: shell lexer and tool effect classification."
+description = "The model-independent harness core of Relay: classification, alignment and evidence."
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
@@ -10,6 +10,7 @@ publish.workspace = true
 path = "src/lib.rs"
 
 [dependencies]
+fancy-regex = { version = "=0.20.2", default-features = false, features = ["std", "unicode", "perf"] }
 regex = { version = "=1.13.2", default-features = false, features = ["std", "perf"] }
 
 [dev-dependencies]

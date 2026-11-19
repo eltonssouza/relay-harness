@@ -25,6 +25,7 @@ import {
 	RISKY_COMMANDS,
 	SAFE_COMMANDS,
 } from "./corpus.ts";
+import { PILLARS_FILE, pillarsJson } from "./golden-pillars.ts";
 
 export const GOLDEN_FILE = fileURLToPath(
 	new URL("../../../../crates/harness-core/tests/fixtures/classification.json", import.meta.url),
@@ -220,5 +221,8 @@ export function readGolden(): string {
 
 if (process.argv.includes("--write")) {
 	writeFileSync(GOLDEN_FILE, goldenJson());
-	console.log(`wrote ${goldenEntries().length} classifications to ${GOLDEN_FILE}`);
+	writeFileSync(PILLARS_FILE, await pillarsJson());
+	console.log(
+		`wrote ${goldenEntries().length} classifications to ${GOLDEN_FILE} and the pillar results to ${PILLARS_FILE}`,
+	);
 }

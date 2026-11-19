@@ -7,6 +7,14 @@
 //! - [`shell`]: a small shell lexer for classification, not a shell.
 //! - [`effects`]: what a tool call does to the world (read, write, execute, verify, destructive,
 //!   external), the risky operations a command line performs, and the paths its deletions name.
+//! - [`alignment`]: constraints, intent, corrections, authorization and the question-turn guard.
+//! - [`evidence`]: the evidence ledger and the completion report.
+//! - [`text`]: the lexicon helpers, on `fancy-regex` for JavaScript-compatible lookaround.
+//!
+//! `tests/golden.rs` and `tests/pillars.rs` compare every result with the TypeScript harness.
 
+pub mod alignment;
 pub mod effects;
+pub mod evidence;
 pub mod shell;
+pub mod text;
