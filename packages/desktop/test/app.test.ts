@@ -43,6 +43,8 @@ function findChrome(): string {
 
 interface Fixtures {
 	responses: Record<string, unknown>;
+	/** Commands the test answers itself, with `respond`. */
+	manual?: string[];
 }
 
 declare global {
@@ -73,6 +75,7 @@ function installFakeBridge(fixtures: Fixtures): void {
 			const value = command as Record<string, unknown>;
 			window.__sent.push(value);
 			if (value.type === "extension_ui_response") return;
+			if (fixtures.manual?.includes(String(value.type))) return;
 			const data = fixtures.responses[String(value.type)];
 			queueMicrotask(() =>
 				window.__fake.emit({
@@ -186,7 +189,24 @@ const FIXTURES: Fixtures = {
 			maxFileLines: 1000,
 		},
 		set_harness_setting: { evidence: false },
+		get_auth_providers: {
+			providers: [
+				{
+					id: "anthropic",
+					name: "Anthropic",
+					oauth: true,
+					apiKey: true,
+					configured: true,
+					method: "oauth",
+					source: "stored",
+				},
+				{ id: "openai", name: "OpenAI", oauth: false, apiKey: true, configured: false },
+			],
+		},
+		logout: {},
+		cancel_login: { cancelled: true },
 	},
+	manual: ["login"],
 };
 
 function serve(): Promise<Server> {
@@ -331,8 +351,18 @@ describe("the desktop screen", () => {
 		await expect.poll(sent).toContainEqual({ type: "extension_ui_response", id: "c2", confirmed: false });
 		expect(await page.getByRole("alertdialog").count()).toBe(0);
 
-		await emit({ type: "extension_ui_request", id: "s1", method: "select", title: "Pick", options: ["a", "b"] });
-		await expect.poll(sent).toContainEqual({ type: "extension_ui_response", id: "s1", cancelled: true });
+		await emit({
+			type: "extension_ui_request",
+			id: "s1",
+			method: "select",
+			title: "Pick one",
+			options: ["alpha", "beta"],
+		});
+		await page.getByRole("dialog", { name: "Pick one" }).getByRole("button", { name: "beta" }).click();
+		await expect.poll(sent).toContainEqual({ type: "extension_ui_response", id: "s1", value: "beta" });
+
+		await emit({ type: "extension_ui_request", id: "e1", method: "editor", title: "Edit" });
+		await expect.poll(sent).toContainEqual({ type: "extension_ui_response", id: "e1", cancelled: true });
 	});
 
 	it("shows model text as text, never as markup", async () => {
@@ -444,5 +474,51 @@ describe("the desktop screen", () => {
 		);
 		await dialog.press("Escape");
 		expect(await page.getByRole("dialog", { name: "Harness settings" }).count()).toBe(0);
+	});
+
+	it("asks for a masked secret and answers or cancels", async () => {
+		await emit({ type: "extension_ui_request", id: "k1", method: "input", title: "Enter the API key", secret: true });
+		const dialog = page.getByRole("dialog", { name: "Enter the API key" });
+		const field = dialog.getByRole("textbox", { name: "Enter the API key" });
+		expect(await dialog.locator("input").getAttribute("type")).toBe("password");
+		await dialog.locator("input").fill("sk-test");
+		await dialog.locator("input").press("Enter");
+		await expect.poll(sent).toContainEqual({ type: "extension_ui_response", id: "k1", value: "sk-test" });
+		expect(await field.count()).toBe(0);
+
+		await emit({ type: "extension_ui_request", id: "k2", method: "input", title: "Name" });
+		await page.getByRole("dialog", { name: "Name" }).getByRole("button", { name: "Cancel" }).click();
+		await expect.poll(sent).toContainEqual({ type: "extension_ui_response", id: "k2", cancelled: true });
+	});
+
+	it("signs in with the link shown, and signs out", async () => {
+		await page.getByRole("button", { name: "Accounts" }).click();
+		const dialog = page.getByRole("dialog", { name: "Accounts" });
+		expect(await dialog.locator(".account .title").allTextContents()).toEqual(["Anthropic", "OpenAI"]);
+		expect(await dialog.locator(".account").first().locator(".chip").textContent()).toBe("signed in · stored");
+
+		await dialog.getByRole("button", { name: "Sign in: Anthropic" }).click();
+		await expect
+			.poll(sent)
+			.toContainEqual(expect.objectContaining({ type: "login", provider: "anthropic", method: "oauth" }));
+		expect(await dialog.getByRole("button", { name: "API key: OpenAI" }).isDisabled()).toBe(true);
+		await emit({
+			type: "auth_event",
+			provider: "anthropic",
+			event: { type: "auth_url", url: "https://example.com/oauth?code=1" },
+		});
+		expect(await dialog.locator(".link").textContent()).toBe("https://example.com/oauth?code=1");
+		const login = (await sent()).find((command) => command.type === "login");
+		await emit({ id: login?.id, type: "response", command: "login", success: true, data: { provider: "anthropic" } });
+		await expect.poll(() => page.locator(".toast").last().textContent()).toContain("Signed in to Anthropic");
+		await expect
+			.poll(async () => (await sent()).filter((command) => command.type === "get_auth_providers").length)
+			.toBe(2);
+		expect(await dialog.getByRole("button", { name: "API key: OpenAI" }).isDisabled()).toBe(false);
+
+		await dialog.getByRole("button", { name: "Sign out: Anthropic" }).click();
+		await expect.poll(sent).toContainEqual(expect.objectContaining({ type: "logout", provider: "anthropic" }));
+		await dialog.press("Escape");
+		expect(await page.getByRole("dialog", { name: "Accounts" }).count()).toBe(0);
 	});
 });

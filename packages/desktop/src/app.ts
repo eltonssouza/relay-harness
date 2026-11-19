@@ -4,7 +4,9 @@
  * no agent logic of its own.
  */
 
+import { AccountsDialog, type AuthEvent, type AuthProvider } from "./accounts.ts";
 import type { Bridge } from "./bridge.ts";
+import { askInput, askSelect } from "./dialogs.ts";
 import { HarnessPanel, type HarnessSnapshot } from "./panel.ts";
 import { type ChatMessage, chip, element, messageText, relativeTime, renderMessage, settleTool } from "./render.ts";
 import { RpcConnection, type RpcEvent } from "./rpc.ts";
@@ -56,6 +58,7 @@ export class App {
 	private streaming?: { node: HTMLElement; text: HTMLElement };
 	private readonly confirms: ConfirmRequest[] = [];
 	private dialogOpen = false;
+	private accounts?: AccountsDialog;
 
 	constructor(root: HTMLElement, bridge: Bridge) {
 		this.root = root;
@@ -69,7 +72,10 @@ export class App {
 		newSession.addEventListener("click", () => void this.newSession());
 		this.sessionsList = element("nav", "sessions");
 		this.sessionsList.setAttribute("aria-label", "Sessions");
-		sidebar.append(element("div", "label", "Sessions"), newSession, this.sessionsList);
+		const accounts = element("button", "btn accounts-button", "Accounts");
+		accounts.type = "button";
+		accounts.addEventListener("click", () => void this.openAccounts());
+		sidebar.append(element("div", "label", "Sessions"), newSession, this.sessionsList, accounts);
 
 		const chat = element("main", "chat");
 		const header = element("header", "titlebar");
@@ -334,6 +340,9 @@ export class App {
 				}
 				break;
 			}
+			case "auth_event":
+				this.accounts?.showEvent(String(event.provider), event.event as AuthEvent);
+				break;
 			case "extension_ui_request":
 				this.handleUiRequest(event);
 				break;
@@ -353,13 +362,70 @@ export class App {
 					request.notifyType === "error" ? "bad" : request.notifyType === "warning" ? "warn" : "plain",
 				);
 				break;
-			case "select":
 			case "input":
+				void askInput(this.root, {
+					title: String(request.title ?? ""),
+					placeholder: typeof request.placeholder === "string" ? request.placeholder : undefined,
+					secret: request.secret === true,
+				}).then((value) => this.answer(id, value));
+				break;
+			case "select":
+				void askSelect(
+					this.root,
+					String(request.title ?? ""),
+					Array.isArray(request.options) ? request.options.map(String) : [],
+				).then((value) => this.answer(id, value));
+				break;
 			case "editor":
 				// Not offered by this screen yet: answer so the agent does not wait.
 				this.rpc.notify({ type: "extension_ui_response", id, cancelled: true });
 				break;
 		}
+	}
+
+	/** Answer an `input` or `select` request; undefined means the developer cancelled. */
+	private answer(id: string, value: string | undefined): void {
+		this.rpc.notify(
+			value === undefined
+				? { type: "extension_ui_response", id, cancelled: true }
+				: { type: "extension_ui_response", id, value },
+		);
+	}
+
+	private async openAccounts(): Promise<void> {
+		if (this.accounts) return;
+		const { providers } = await this.rpc.request<{ providers: AuthProvider[] }>({ type: "get_auth_providers" });
+		this.accounts = new AccountsDialog(
+			this.root,
+			providers,
+			{
+				login: async (provider, method) => {
+					try {
+						await this.rpc.request({ type: "login", provider: provider.id, method });
+						this.toast(`Signed in to ${provider.name}`, "ok");
+					} catch (error) {
+						const message = error instanceof Error ? error.message : String(error);
+						if (message !== "Login cancelled") this.toast(message, "bad");
+					}
+					await this.refreshAccounts();
+				},
+				cancel: (provider) => void this.rpc.request({ type: "cancel_login", provider }),
+				logout: async (provider) => {
+					await this.rpc.request({ type: "logout", provider: provider.id });
+					await this.refreshAccounts();
+				},
+			},
+			() => {
+				this.accounts = undefined;
+			},
+		);
+	}
+
+	/** Credentials changed: the providers and the models they make available. */
+	private async refreshAccounts(): Promise<void> {
+		const { providers } = await this.rpc.request<{ providers: AuthProvider[] }>({ type: "get_auth_providers" });
+		this.accounts?.render(providers);
+		await this.loadPickers();
 	}
 
 	private showNextConfirm(): void {

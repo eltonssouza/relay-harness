@@ -162,6 +162,56 @@ describe("RPC harness, session and settings commands", () => {
 	});
 });
 
+describe("RPC account commands", () => {
+	afterEach(() => {
+		rpcIo.outputLines = [];
+		rpcIo.lineHandler = undefined;
+	});
+
+	/** The first UI request the server sent after `count` earlier ones. */
+	async function uiRequest(count: number): Promise<Record<string, unknown>> {
+		let found: Record<string, unknown> | undefined;
+		await vi.waitFor(() => {
+			found = parseOutputLines().filter((line) => line.type === "extension_ui_request")[count];
+			expect(found).toBeDefined();
+		});
+		return found as Record<string, unknown>;
+	}
+
+	test("lists providers, signs in with a masked API key prompt, cancels, and signs out", async () => {
+		const listenerSnapshot = takeListenerSnapshot();
+		const harness = await createHarness();
+		try {
+			void runRpcMode(createRuntimeHost(harness));
+			await vi.waitFor(() => expect(rpcIo.lineHandler).toBeDefined());
+			const provider = harness.getModel().provider;
+
+			const listed = (await request({ type: "get_auth_providers" })).data as {
+				providers: Array<{ id: string; apiKey: boolean; configured: boolean }>;
+			};
+			expect(listed.providers.find((entry) => entry.id === provider)).toMatchObject({ apiKey: true });
+
+			const login = request({ type: "login", provider, method: "api_key" });
+			const prompt = await uiRequest(0);
+			expect(prompt).toMatchObject({ method: "input", secret: true });
+			rpcIo.lineHandler?.(JSON.stringify({ type: "extension_ui_response", id: prompt.id, value: "sk-test-key" }));
+			expect(await login).toMatchObject({ success: true, data: { provider } });
+			expect(harness.session.modelRuntime.getProviderAuthStatus(provider).configured).toBe(true);
+
+			const cancelled = request({ type: "login", provider, method: "api_key" });
+			const second = await uiRequest(1);
+			rpcIo.lineHandler?.(JSON.stringify({ type: "extension_ui_response", id: second.id, cancelled: true }));
+			expect(await cancelled).toMatchObject({ success: false, error: "Login cancelled" });
+
+			expect(await request({ type: "logout", provider })).toMatchObject({ success: true, command: "logout" });
+			expect(await request({ type: "cancel_login", provider })).toMatchObject({ data: { cancelled: false } });
+		} finally {
+			harness.cleanup();
+			restoreListeners(listenerSnapshot);
+		}
+	});
+});
+
 describe("RpcClient harness, session and settings methods", () => {
 	test("send the matching commands", async () => {
 		const client = new RpcClient();

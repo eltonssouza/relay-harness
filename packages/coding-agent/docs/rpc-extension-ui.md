@@ -78,6 +78,8 @@ Prompt the user for free-form text.
 
 Expected response: `extension_ui_response` with `value` (the entered text) or `cancelled: true`.
 
+`"secret": true` marks an answer to mask while it is typed, such as the API key a `login` asks for.
+
 ### editor
 
 Open a multi-line text editor with optional prefilled content.

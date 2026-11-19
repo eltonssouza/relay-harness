@@ -6,7 +6,7 @@
  */
 
 import type { AgentMessage, ThinkingLevel } from "@relay-harness/agent-core";
-import type { ImageContent, Model } from "@relay-harness/ai";
+import type { AuthEvent, ImageContent, Model } from "@relay-harness/ai";
 import type { PromptDisposition, QueuedInputDisposition, SessionStats } from "../../core/agent-session.ts";
 import type { BashResult } from "../../core/bash-executor.ts";
 import type { CompactionResult } from "../../core/compaction/index.ts";
@@ -79,6 +79,10 @@ export type RpcCommand =
 	| { id?: string; type: "get_harness_state" }
 	| { id?: string; type: "harness_forget"; constraintId: string }
 	| { id?: string; type: "harness_clear" }
+	| { id?: string; type: "get_auth_providers" }
+	| { id?: string; type: "login"; provider: string; method: "oauth" | "api_key" }
+	| { id?: string; type: "cancel_login"; provider: string }
+	| { id?: string; type: "logout"; provider: string }
 	| { id?: string; type: "get_harness_settings" }
 	| { id?: string; type: "set_harness_setting"; key: string; value: unknown }
 
@@ -100,6 +104,27 @@ export interface RpcSlashCommand {
 	source: "extension" | "prompt" | "skill";
 	/** Source metadata for the owning resource */
 	sourceInfo: SourceInfo;
+}
+
+/** A provider the developer can sign in to, for `get_auth_providers`. */
+export interface RpcAuthProvider {
+	id: string;
+	name: string;
+	/** Signing in with the provider's account (OAuth) is offered. */
+	oauth: boolean;
+	/** Entering an API key is offered. */
+	apiKey: boolean;
+	/** Whether a credential is configured, and how. */
+	configured: boolean;
+	method?: "oauth" | "api_key";
+	source?: string;
+}
+
+/** Progress of a `login`: the URL to open, a device code, information or a progress message. */
+export interface RpcAuthEvent {
+	type: "auth_event";
+	provider: string;
+	event: AuthEvent;
 }
 
 /** A session in `list_sessions`: its metadata without the text of every message. */
@@ -264,6 +289,16 @@ export type RpcResponse =
 	| {
 			id?: string;
 			type: "response";
+			command: "get_auth_providers";
+			success: true;
+			data: { providers: RpcAuthProvider[] };
+	  }
+	| { id?: string; type: "response"; command: "login"; success: true; data: { provider: string } }
+	| { id?: string; type: "response"; command: "cancel_login"; success: true; data: { cancelled: boolean } }
+	| { id?: string; type: "response"; command: "logout"; success: true }
+	| {
+			id?: string;
+			type: "response";
 			command: "get_harness_settings" | "set_harness_setting";
 			success: true;
 			data: Required<HarnessCoreSettings>;
@@ -291,6 +326,8 @@ export type RpcExtensionUIRequest =
 			title: string;
 			placeholder?: string;
 			timeout?: number;
+			/** The answer is a secret, such as an API key: mask what is typed. */
+			secret?: boolean;
 	  }
 	| { type: "extension_ui_request"; id: string; method: "editor"; title: string; prefill?: string }
 	| {

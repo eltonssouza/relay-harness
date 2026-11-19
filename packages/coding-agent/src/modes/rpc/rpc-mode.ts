@@ -32,6 +32,8 @@ import { type Theme, theme } from "../interactive/theme/theme.ts";
 import { toJsonEvent } from "../json-event.ts";
 import { attachJsonlLineReader, serializeJsonLine } from "./jsonl.ts";
 import type {
+	RpcAuthEvent,
+	RpcAuthProvider,
 	RpcCommand,
 	RpcExtensionUIRequest,
 	RpcExtensionUIResponse,
@@ -86,6 +88,8 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 
 	// Shutdown request flag
 	let shutdownRequested = false;
+	/** Running logins by provider, so `cancel_login` can stop one. */
+	const logins = new Map<string, AbortController>();
 	let shuttingDown = false;
 	const signalCleanupHandlers: Array<() => void> = [];
 
@@ -691,6 +695,108 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 				return success(id, "harness_forget", {
 					removed: session.harnessCore.forgetConstraint(command.constraintId),
 				});
+			}
+
+			// =================================================================
+			// Accounts
+			// =================================================================
+
+			case "get_auth_providers": {
+				const runtime = session.modelRuntime;
+				const providers: RpcAuthProvider[] = runtime
+					.getProviders()
+					.filter((provider) => provider.auth.oauth || provider.auth.apiKey)
+					.map((provider) => {
+						const status = runtime.getProviderAuthStatus(provider.id);
+						return {
+							id: provider.id,
+							name: provider.name,
+							oauth: provider.auth.oauth !== undefined,
+							apiKey: provider.auth.apiKey !== undefined,
+							configured: status.configured,
+							...(status.configured
+								? {
+										method: runtime.isUsingOAuth(provider.id) ? ("oauth" as const) : ("api_key" as const),
+										source: status.label ?? status.source,
+									}
+								: {}),
+						};
+					})
+					.sort((a, b) => a.name.localeCompare(b.name));
+				return success(id, "get_auth_providers", { providers });
+			}
+
+			case "login": {
+				const { provider, method } = command;
+				if (logins.has(provider)) return error(id, "login", `A login to ${provider} is already running`);
+				const controller = new AbortController();
+				logins.set(provider, controller);
+				const cancelled = () => {
+					controller.abort();
+					return new Error("Login cancelled");
+				};
+				try {
+					await session.modelRuntime.login(
+						provider,
+						method,
+						{
+							signal: controller.signal,
+							prompt: async (prompt) => {
+								if (prompt.type === "select") {
+									const label = await createDialogPromise<string | undefined>(
+										{ signal: controller.signal },
+										undefined,
+										{
+											method: "select",
+											title: prompt.message,
+											options: prompt.options.map((option) => option.label),
+										},
+										(response) => ("value" in response ? response.value : undefined),
+									);
+									const chosen = prompt.options.find((option) => option.label === label);
+									if (!chosen) throw cancelled();
+									return chosen.id;
+								}
+								const value = await createDialogPromise<string | undefined>(
+									{ signal: controller.signal },
+									undefined,
+									{
+										method: "input",
+										title: prompt.message,
+										placeholder: prompt.placeholder,
+										...(prompt.type === "secret" ? { secret: true } : {}),
+									},
+									(response) => ("value" in response ? response.value : undefined),
+								);
+								if (value === undefined) throw cancelled();
+								return value;
+							},
+							notify: (event) => output({ type: "auth_event", provider, event } satisfies RpcAuthEvent),
+						},
+						{ getDeviceId: () => session.settingsManager.getOrCreateDeviceId() },
+					);
+					return success(id, "login", { provider });
+				} catch (cause) {
+					const message = controller.signal.aborted
+						? "Login cancelled"
+						: cause instanceof Error
+							? cause.message
+							: String(cause);
+					return error(id, "login", message);
+				} finally {
+					logins.delete(provider);
+				}
+			}
+
+			case "cancel_login": {
+				const controller = logins.get(command.provider);
+				controller?.abort();
+				return success(id, "cancel_login", { cancelled: controller !== undefined });
+			}
+
+			case "logout": {
+				await session.modelRuntime.logout(command.provider);
+				return success(id, "logout");
 			}
 
 			case "get_harness_settings": {
