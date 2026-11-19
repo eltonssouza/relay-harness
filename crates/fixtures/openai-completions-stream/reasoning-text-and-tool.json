@@ -1,0 +1,198 @@
+{
+	"name": "reasoning-text-and-tool",
+	"description": "Reasoning, interleaved text and a tool call; cached, cache-write and reasoning tokens.",
+	"model": {
+		"id": "test-model",
+		"name": "Test Model",
+		"api": "openai-completions",
+		"provider": "custom",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0.5,
+			"output": 1.5,
+			"cacheRead": 0.05,
+			"cacheWrite": 0.6
+		},
+		"contextWindow": 128000,
+		"maxTokens": 32000
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "apply_patch",
+					"description": "Apply a patch.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"patch": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"patch"
+						]
+					},
+					"constrainedSampling": {
+						"type": "grammar",
+						"variants": {
+							"openai_lark": "start: \"*** Begin Patch\" /[\\s\\S]*/"
+						}
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"sse": "data: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{\"reasoning_content\":\"Read the \"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{\"reasoning_content\":\"file.\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Reading \"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call_1\",\"type\":\"function\",\"function\":{\"name\":\"read\",\"arguments\":\"\"}}]},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"{\\\"pa\"}}]},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"now.\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"th\\\":\\\"a.ts\\\"}\"}}]},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"tool_calls\"}]}\n\ndata: {\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"model\":\"test-model\",\"choices\":[],\"usage\":{\"prompt_tokens\":1000,\"completion_tokens\":200,\"prompt_tokens_details\":{\"cached_tokens\":700,\"cache_write_tokens\":50},\"completion_tokens_details\":{\"reasoning_tokens\":80}}}\n\ndata: [DONE]\n\n",
+	"splits": [],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "thinking_start",
+			"contentIndex": 0
+		},
+		{
+			"type": "thinking_delta",
+			"contentIndex": 0,
+			"delta": "Read the "
+		},
+		{
+			"type": "thinking_delta",
+			"contentIndex": 0,
+			"delta": "file."
+		},
+		{
+			"type": "text_start",
+			"contentIndex": 1
+		},
+		{
+			"type": "text_delta",
+			"contentIndex": 1,
+			"delta": "Reading "
+		},
+		{
+			"type": "toolcall_start",
+			"contentIndex": 2
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 2,
+			"delta": ""
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 2,
+			"delta": "{\"pa"
+		},
+		{
+			"type": "text_delta",
+			"contentIndex": 1,
+			"delta": "now."
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 2,
+			"delta": "th\":\"a.ts\"}"
+		},
+		{
+			"type": "thinking_end",
+			"contentIndex": 0,
+			"content": "Read the file."
+		},
+		{
+			"type": "text_end",
+			"contentIndex": 1,
+			"content": "Reading now."
+		},
+		{
+			"type": "toolcall_end",
+			"contentIndex": 2,
+			"toolCall": {
+				"type": "toolCall",
+				"id": "call_1",
+				"name": "read",
+				"arguments": {
+					"path": "a.ts"
+				}
+			}
+		},
+		{
+			"type": "done",
+			"reason": "toolUse",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Read the file.",
+						"thinkingSignature": "reasoning_content"
+					},
+					{
+						"type": "text",
+						"text": "Reading now."
+					},
+					{
+						"type": "toolCall",
+						"id": "call_1",
+						"name": "read",
+						"arguments": {
+							"path": "a.ts"
+						}
+					}
+				],
+				"api": "openai-completions",
+				"provider": "custom",
+				"model": "test-model",
+				"usage": {
+					"input": 250,
+					"output": 200,
+					"cacheRead": 700,
+					"cacheWrite": 50,
+					"reasoning": 80,
+					"totalTokens": 1200,
+					"cost": {
+						"input": 0.000125,
+						"output": 0.00030000000000000003,
+						"cacheRead": 0.000035000000000000004,
+						"cacheWrite": 0.00003,
+						"total": 0.00049
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"responseId": "chatcmpl-1",
+				"rawStopReason": "tool_calls"
+			}
+		}
+	]
+}
