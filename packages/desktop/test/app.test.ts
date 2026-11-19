@@ -145,6 +145,34 @@ const FIXTURES: Fixtures = {
 		prompt: { disposition: "started" },
 		steer: { disposition: "queued" },
 		switch_session: { cancelled: false },
+		get_harness_state: {
+			engine: "rust",
+			pillars: { alignment: true, evidence: true, context: true },
+			constraints: [
+				{ id: "c1", text: "Never edit the tests." },
+				{ id: "c2", text: "Use pnpm instead of npm." },
+			],
+			corrections: [],
+			pendingAuthorizations: [],
+			blockedCalls: [{ toolName: "bash", reason: "Blocked by the harness alignment policy. Ask first." }],
+			latestReport: {
+				status: "unverified",
+				detail: "files changed and no check ran afterwards",
+				verifications: [{ command: "npm test -- parser", passed: true }],
+			},
+			pendingChanges: ["src/parser.ts"],
+			contextStats: { elidedResults: 12, elidedChars: 48210, batches: 2 },
+			verifyCommands: ["npm run check"],
+		},
+		harness_forget: { removed: true },
+		get_available_models: {
+			models: [
+				{ provider: "anthropic", id: "claude-sonnet-5-5", name: "Claude Sonnet 5.5" },
+				{ provider: "anthropic", id: "claude-opus-5-5", name: "Claude Opus 5.5" },
+			],
+		},
+		get_available_thinking_levels: { levels: ["off", "low", "medium", "high"] },
+		set_model: { provider: "anthropic", id: "claude-opus-5-5" },
 	},
 };
 
@@ -202,7 +230,11 @@ describe("the desktop screen", () => {
 	it("shows the sessions, the model and the conversation with its tool results", async () => {
 		expect(await page.locator(".session").count()).toBe(2);
 		expect(await page.locator(".session.active .name").textContent()).toBe("Fix the parser");
-		expect(await page.locator(".crumb").textContent()).toContain("anthropic/claude-sonnet-5-5");
+		expect(await page.locator(".crumb").textContent()).toBe("Fix the parser");
+		await expect
+			.poll(() => page.getByRole("combobox", { name: "Model" }).inputValue())
+			.toBe("anthropic/claude-sonnet-5-5");
+		expect(await page.getByRole("combobox", { name: "Thinking level" }).inputValue()).toBe("medium");
 		expect(await page.locator(".msg.user").first().textContent()).toBe("The parser crashes on empty input.");
 		const tool = page.locator("details.tool").first();
 		expect(await tool.locator(".arg").textContent()).toBe("src/parser.ts");
@@ -315,5 +347,59 @@ describe("the desktop screen", () => {
 		await page.evaluate(() => window.__fake.exit(1));
 		expect(await page.locator(".notice.bad").textContent()).toContain("relay stopped (exit code 1)");
 		expect(await page.locator("textarea").isDisabled()).toBe(true);
+	});
+
+	it("shows the harness state and forgets a constraint", async () => {
+		const panel = page.getByRole("complementary", { name: "Harness" });
+		await panel.locator(".constraint").first().waitFor();
+		expect(await panel.locator(".constraint .text").allTextContents()).toEqual([
+			"Never edit the tests.",
+			"Use pnpm instead of npm.",
+		]);
+		expect(await panel.locator("h3", { hasText: "Evidence" }).locator(".chip").textContent()).toBe("unverified");
+		expect(await panel.textContent()).toContain("src/parser.ts");
+		expect(await panel.textContent()).toContain("12 in 2 batches");
+		expect(await panel.textContent()).toContain("Harness engine: rust");
+
+		await panel.getByRole("button", { name: "Forget constraint c1" }).click();
+		await expect.poll(sent).toContainEqual(expect.objectContaining({ type: "harness_forget", constraintId: "c1" }));
+		await expect
+			.poll(async () => (await sent()).filter((command) => command.type === "get_harness_state").length)
+			.toBe(2);
+	});
+
+	it("lists the subagents the agent tool runs, with their progress and outcome", async () => {
+		const agents = page.locator(".agent-list");
+		expect(await agents.textContent()).toBe("No subagents in this session.");
+		await emit({
+			type: "tool_execution_start",
+			toolCallId: "a1",
+			toolName: "agent",
+			args: { subagent_type: "go-expert", description: "Fix the race", prompt: "..." },
+		});
+		expect(await agents.locator(".agent-row .title").textContent()).toBe("go-expert");
+		expect(await agents.locator(".agent-row .chip").textContent()).toBe("running");
+		await emit({
+			type: "tool_execution_update",
+			toolCallId: "a1",
+			toolName: "agent",
+			partialResult: { content: [{ type: "text", text: "go-expert: bash" }] },
+		});
+		expect(await agents.locator(".agent-row .muted").textContent()).toBe("go-expert: bash");
+		await emit({ type: "tool_execution_end", toolCallId: "a1", toolName: "agent", isError: false, result: {} });
+		expect(await agents.locator(".agent-row .chip").textContent()).toBe("completed");
+	});
+
+	it("changes the model and the thinking level through relay", async () => {
+		const model = page.getByRole("combobox", { name: "Model" });
+		await expect.poll(() => model.locator("option").count()).toBe(2);
+		await model.selectOption("anthropic/claude-opus-5-5");
+		await expect
+			.poll(sent)
+			.toContainEqual(
+				expect.objectContaining({ type: "set_model", provider: "anthropic", modelId: "claude-opus-5-5" }),
+			);
+		await page.getByRole("combobox", { name: "Thinking level" }).selectOption("high");
+		await expect.poll(sent).toContainEqual(expect.objectContaining({ type: "set_thinking_level", level: "high" }));
 	});
 });
