@@ -1,0 +1,50 @@
+{
+	"name": "google-error-rate-limit",
+	"description": "Quota exhausted.",
+	"adapter": "google",
+	"model": {
+		"id": "gemini-2.5-flash",
+		"name": "Test",
+		"api": "google-generative-ai",
+		"provider": "google",
+		"baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "google-parity-key"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 429,
+		"body": "{\"error\":{\"code\":429,\"message\":\"Quota exceeded.\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+		"headers": {
+			"content-type": "application/json"
+		},
+		"statusText": "Too Many Requests"
+	},
+	"stopReason": "error",
+	"errorMessage": "{\"error\":{\"code\":429,\"message\":\"Quota exceeded.\",\"status\":\"RESOURCE_EXHAUSTED\"}}"
+}

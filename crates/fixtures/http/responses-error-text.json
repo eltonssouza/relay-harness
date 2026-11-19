@@ -1,0 +1,50 @@
+{
+	"name": "responses-error-text",
+	"description": "A plain-text body.",
+	"adapter": "responses",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "https://api.openai.com/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-parity"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 403,
+		"body": "Forbidden by proxy",
+		"headers": {
+			"content-type": "text/plain"
+		},
+		"statusText": "Forbidden"
+	},
+	"stopReason": "error",
+	"errorMessage": "OpenAI API error (403): 403 Forbidden by proxy"
+}

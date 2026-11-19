@@ -1,0 +1,50 @@
+{
+	"name": "completions-error-message-object",
+	"description": "An error whose message is an object.",
+	"adapter": "completions",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-completions",
+		"provider": "openai",
+		"baseUrl": "https://api.openai.com/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-parity"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 400,
+		"body": "{\"error\":{\"message\":{\"text\":\"nested\"},\"code\":400}}",
+		"headers": {
+			"content-type": "application/json"
+		},
+		"statusText": "Bad Request"
+	},
+	"stopReason": "error",
+	"errorMessage": "400: {\"message\":{\"text\":\"nested\"},\"code\":400}"
+}

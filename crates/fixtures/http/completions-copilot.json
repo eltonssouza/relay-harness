@@ -1,0 +1,62 @@
+{
+	"name": "completions-copilot",
+	"description": "GitHub Copilot: a user turn.",
+	"adapter": "completions",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-completions",
+		"provider": "github-copilot",
+		"baseUrl": "https://api.individual.githubcopilot.com",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "copilot-token"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"request": {
+		"method": "POST",
+		"url": "https://api.individual.githubcopilot.com/chat/completions",
+		"headers": {
+			"accept": "application/json",
+			"authorization": "Bearer copilot-token",
+			"content-type": "application/json",
+			"openai-intent": "conversation-edits",
+			"user-agent": "relay (<os>)",
+			"x-initiator": "user"
+		},
+		"omitted": [
+			"x-stainless-arch",
+			"x-stainless-lang",
+			"x-stainless-os",
+			"x-stainless-package-version",
+			"x-stainless-retry-count",
+			"x-stainless-runtime",
+			"x-stainless-runtime-version"
+		],
+		"body": "{\"model\":\"test-model\",\"messages\":[{\"role\":\"system\",\"content\":\"Be brief.\"},{\"role\":\"user\",\"content\":\"Go.\"}],\"stream\":true,\"stream_options\":{\"include_usage\":true},\"store\":false}"
+	}
+}

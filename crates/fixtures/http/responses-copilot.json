@@ -1,0 +1,109 @@
+{
+	"name": "responses-copilot",
+	"description": "GitHub Copilot: an agent turn with an image.",
+	"adapter": "responses",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-responses",
+		"provider": "github-copilot",
+		"baseUrl": "https://api.individual.githubcopilot.com",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "copilot-token"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_1",
+					"name": "read",
+					"arguments": {
+						"path": "a"
+					}
+				}
+			],
+			"api": "openai-completions",
+			"provider": "github-copilot",
+			"model": "test-model",
+			"usage": {
+				"input": 1,
+				"output": 1,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 2,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_1",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		}
+	],
+	"request": {
+		"method": "POST",
+		"url": "https://api.individual.githubcopilot.com/responses",
+		"headers": {
+			"accept": "application/json",
+			"authorization": "Bearer copilot-token",
+			"content-type": "application/json",
+			"copilot-vision-request": "true",
+			"openai-intent": "conversation-edits",
+			"user-agent": "relay (<os>)",
+			"x-initiator": "agent"
+		},
+		"omitted": [
+			"x-stainless-arch",
+			"x-stainless-lang",
+			"x-stainless-os",
+			"x-stainless-package-version",
+			"x-stainless-retry-count",
+			"x-stainless-runtime",
+			"x-stainless-runtime-version"
+		],
+		"body": "{\"model\":\"test-model\",\"input\":[{\"role\":\"system\",\"content\":\"Be brief.\"},{\"role\":\"user\",\"content\":[{\"type\":\"input_text\",\"text\":\"Go.\"}]},{\"type\":\"function_call\",\"call_id\":\"call_1\",\"name\":\"read\",\"arguments\":\"{\\\"path\\\":\\\"a\\\"}\"},{\"type\":\"function_call_output\",\"call_id\":\"call_1\",\"output\":[{\"type\":\"input_image\",\"detail\":\"auto\",\"image_url\":\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==\"}]}],\"stream\":true,\"store\":false}"
+	}
+}

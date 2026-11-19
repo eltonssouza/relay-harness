@@ -1,0 +1,65 @@
+{
+	"name": "anthropic-auth-header",
+	"description": "Auth in a header, as ANTHROPIC_AUTH_TOKEN gives it.",
+	"adapter": "anthropic",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "https://api.anthropic.com",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"headers": {
+			"Authorization": "Bearer token-1"
+		}
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"request": {
+		"method": "POST",
+		"url": "https://api.anthropic.com/v1/messages?beta=true",
+		"headers": {
+			"accept": "application/json",
+			"anthropic-dangerous-direct-browser-access": "true",
+			"anthropic-version": "2023-06-01",
+			"authorization": "Bearer token-1",
+			"content-type": "application/json",
+			"user-agent": "relay (<os>)"
+		},
+		"omitted": [
+			"x-stainless-arch",
+			"x-stainless-lang",
+			"x-stainless-os",
+			"x-stainless-package-version",
+			"x-stainless-retry-count",
+			"x-stainless-runtime",
+			"x-stainless-runtime-version",
+			"x-stainless-timeout"
+		],
+		"body": "{\"model\":\"test-model\",\"messages\":[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"Go.\",\"cache_control\":{\"type\":\"ephemeral\"}}]}],\"max_tokens\":1000,\"stream\":true,\"system\":[{\"type\":\"text\",\"text\":\"Be brief.\",\"cache_control\":{\"type\":\"ephemeral\"}}]}"
+	}
+}

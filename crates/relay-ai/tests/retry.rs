@@ -52,7 +52,7 @@ async fn retries_as_typescript_does() {
                         status: attempt["status"].as_u64().map(|status| status as u16),
                         headers,
                         message: format!("attempt {index} failed"),
-                        body: None,
+                        ..HttpError::default()
                     }))
                 };
                 std::future::ready(result)
