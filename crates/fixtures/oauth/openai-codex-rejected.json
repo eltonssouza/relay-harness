@@ -1,0 +1,34 @@
+{
+	"name": "openai-codex-rejected",
+	"provider": "openai-codex",
+	"credential": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "auth.openai.com/oauth/token",
+			"status": 401,
+			"body": "token revoked",
+			"headers": {
+				"content-type": "text/plain"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://auth.openai.com/oauth/token",
+			"headers": {
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "grant_type=refresh_token&refresh_token=refresh-1&client_id=app_EMoamEEZ73f0CkXaXp7hrann"
+		}
+	],
+	"error": "OpenAI Codex token refresh failed (401): token revoked",
+	"auth": {
+		"apiKey": "access-0"
+	}
+}

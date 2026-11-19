@@ -1,0 +1,40 @@
+{
+	"name": "github-copilot-rejected",
+	"provider": "github-copilot",
+	"credential": {
+		"type": "oauth",
+		"refresh": "gho-github-token",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "api.github.com/copilot_internal/v2/token",
+			"status": 401,
+			"body": "{\"message\":\"Bad credentials\"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "GET",
+			"url": "https://api.github.com/copilot_internal/v2/token",
+			"headers": {
+				"accept": "application/json",
+				"authorization": "Bearer gho-github-token",
+				"copilot-integration-id": "vscode-chat",
+				"editor-plugin-version": "copilot-chat/0.35.0",
+				"editor-version": "vscode/1.107.0",
+				"user-agent": "GitHubCopilotChat/0.35.0"
+			},
+			"body": null
+		}
+	],
+	"error": "401 : {\"message\":\"Bad credentials\"}",
+	"auth": {
+		"apiKey": "access-0",
+		"baseUrl": "https://api.individual.githubcopilot.com"
+	}
+}

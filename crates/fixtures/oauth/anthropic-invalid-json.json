@@ -1,0 +1,32 @@
+{
+	"name": "anthropic-invalid-json",
+	"provider": "anthropic",
+	"credential": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "platform.claude.com",
+			"status": 200,
+			"body": "not json"
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://platform.claude.com/v1/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/json"
+			},
+			"body": "{\"grant_type\":\"refresh_token\",\"client_id\":\"9d1c250a-e61b-44d9-88ed-5944d1962f5e\",\"refresh_token\":\"refresh-1\"}"
+		}
+	],
+	"error": "Anthropic token refresh returned invalid JSON. url=https://platform.claude.com/v1/oauth/token; body=not json; details=SyntaxError: Unexpected token 'o', \"not json\" is not valid JSON",
+	"auth": {
+		"apiKey": "access-0"
+	}
+}

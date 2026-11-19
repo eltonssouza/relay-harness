@@ -1,0 +1,37 @@
+{
+	"name": "kimi-coding-unauthorized",
+	"provider": "kimi-coding",
+	"credential": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "auth.kimi.com/api/oauth/token",
+			"status": 400,
+			"body": "{\"error\":\"invalid_grant\",\"error_description\":\"expired\"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://auth.kimi.com/api/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=17e5f671-d194-4dfb-9706-5516cb48c098&grant_type=refresh_token&refresh_token=refresh-1"
+		}
+	],
+	"error": "Kimi Code token refresh unauthorized (status 400): expired",
+	"auth": {
+		"headers": {
+			"Authorization": "Bearer access-0"
+		}
+	}
+}

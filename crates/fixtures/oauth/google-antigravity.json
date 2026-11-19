@@ -1,0 +1,51 @@
+{
+	"name": "google-antigravity",
+	"provider": "google-antigravity",
+	"credential": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-0",
+		"expires": 1699999999000,
+		"projectId": "project-1",
+		"baseUrl": "https://daily-cloudcode-pa.googleapis.com"
+	},
+	"env": {
+		"RELAY_AI_ANTIGRAVITY_CLIENT_ID": "client-id",
+		"RELAY_AI_ANTIGRAVITY_CLIENT_SECRET": "client-secret"
+	},
+	"answers": [
+		{
+			"match": "oauth2.googleapis.com/token",
+			"status": 200,
+			"body": "{\"access_token\":\"access-1\",\"expires_in\":3599}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://oauth2.googleapis.com/token",
+			"headers": {
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=client-id&client_secret=client-secret&grant_type=refresh_token&refresh_token=refresh-1"
+		}
+	],
+	"result": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-1",
+		"expires": 1700003539000,
+		"projectId": "project-1",
+		"baseUrl": "https://daily-cloudcode-pa.googleapis.com"
+	},
+	"auth": {
+		"apiKey": "access-1",
+		"headers": {
+			"X-Goog-User-Project": "project-1"
+		},
+		"baseUrl": "https://daily-cloudcode-pa.googleapis.com"
+	}
+}

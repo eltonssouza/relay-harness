@@ -1,0 +1,21 @@
+{
+	"name": "openrouter",
+	"provider": "openrouter",
+	"credential": {
+		"type": "oauth",
+		"refresh": "",
+		"access": "sk-or-1",
+		"expires": 9007199254740991
+	},
+	"answers": [],
+	"requests": [],
+	"result": {
+		"type": "oauth",
+		"refresh": "",
+		"access": "sk-or-1",
+		"expires": 9007199254740991
+	},
+	"auth": {
+		"apiKey": "sk-or-1"
+	}
+}

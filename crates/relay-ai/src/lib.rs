@@ -3,6 +3,8 @@
 //! - `message`: the transcript types, what a provider receives and a session file stores.
 //! - `model`: a catalog chat model.
 //! - `catalog`: the built-in models, from the provider files the TypeScript catalog loads.
+//! - `oauth`, `resolve`: each OAuth provider's token refresh and request auth, and resolving a
+//!   provider's auth from the request, `auth.json` and the environment.
 //! - `auth`, `auth_file`, `config_value`: credentials, each built-in provider's API-key
 //!   resolution, the `auth.json` store the TypeScript agent shares, and the `$VAR` and `!command`
 //!   values stored keys may be.
@@ -44,6 +46,7 @@ pub mod http;
 pub mod json;
 pub mod message;
 pub mod model;
+pub mod oauth;
 pub mod openai_completions;
 pub mod openai_completions_stream;
 pub mod openai_responses;
@@ -51,6 +54,7 @@ pub mod openai_responses_stream;
 mod openai_sdk;
 pub mod options;
 pub mod provider_request;
+pub mod resolve;
 pub mod retry;
 pub mod simple;
 pub mod sse;
