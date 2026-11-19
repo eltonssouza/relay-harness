@@ -1,0 +1,360 @@
+{
+	"name": "responses-not-reasoning",
+	"description": "A level on a model without reasoning is off.",
+	"adapter": "responses",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1,
+			"output": 2,
+			"cacheRead": 0.1,
+			"cacheWrite": 1.25
+		},
+		"contextWindow": 200000,
+		"maxTokens": 64000
+	},
+	"options": {
+		"reasoning": "high"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "",
+			"sections": {
+				"preamble": "You are an expert coding assistant operating inside relay, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.",
+				"tools": "<tools>\n- read: Read file contents\n- bash: Execute bash commands (ls, grep, find, etc.)\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n- write: Create or overwrite files\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n</tools>",
+				"rules": "<rules>\n- Use bash for file operations like ls, rg, find\n- Use read to examine files instead of cat or sed.\n- You can inspect RELAY_* environment variables for current model and session details.\n- Use edit for precise changes (edits[].oldText must match exactly)\n- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\n- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\n- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n- Use write only for new files or complete rewrites.\n- The developer owns the what and the why; you own the how. If the goal or the reason behind a request is unclear, ask before building\n- Prefer the simplest design that meets the stated requirements; propose a more complex one only by naming the requirement that needs it\n- Treat context the developer gives about their environment, services, or domain as authoritative over your assumptions, even when it contradicts common practice\n- Be concise in your responses\n- Show file paths clearly when working with files\n</rules>",
+				"docs": "<docs>\nRelay documentation (read only when the user asks about relay itself, its SDK, extensions, themes, skills, or TUI):\n- Main documentation: <package>/README.md\n- Additional docs: <package>/docs\n- Examples: <package>/examples (extensions, custom tools, SDK)\n- When reading relay docs or examples, resolve docs/... under Additional docs and examples/... under Examples, not the current working directory\n- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), relay packages (docs/packages.md), environment variables (docs/environment-variables.md), MCP servers (docs/mcp.md), codemode scripts and non-LLM models such as classifiers and image models (docs/codemode.md)\n- When working on relay topics, read the docs and examples, and follow .md cross-references before implementing\n- Always read relay .md files completely and follow links to related docs (e.g., tui.md for TUI API details)\n</docs>",
+				"cwd": "<cwd>\n<cwd>\n</cwd>"
+			},
+			"timestamp": 0,
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.",
+					"parameters": {
+						"type": "object",
+						"required": [
+							"path"
+						],
+						"properties": {
+							"path": {
+								"type": "string",
+								"description": "Path to the file to read (relative or absolute)"
+							},
+							"offset": {
+								"type": "number",
+								"description": "Line number to start reading from (1-indexed)"
+							},
+							"limit": {
+								"type": "number",
+								"description": "Maximum number of lines to read"
+							}
+						}
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				},
+				{
+					"name": "bash",
+					"description": "Execute a bash command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.",
+					"parameters": {
+						"type": "object",
+						"required": [
+							"command"
+						],
+						"properties": {
+							"command": {
+								"type": "string",
+								"description": "Shell command to execute"
+							},
+							"timeout": {
+								"type": "number",
+								"description": "Timeout in seconds (optional, no default timeout)"
+							}
+						}
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				},
+				{
+					"name": "edit",
+					"description": "Edit a single file using exact text replacement. Every edits[].oldText must match a unique, non-overlapping region of the original file. If two changes affect the same block or nearby lines, merge them into one edit instead of emitting overlapping edits. Do not include large unchanged regions just to connect distant changes.",
+					"parameters": {
+						"type": "object",
+						"required": [
+							"path",
+							"edits"
+						],
+						"properties": {
+							"path": {
+								"type": "string",
+								"description": "Path to the file to edit (relative or absolute)"
+							},
+							"edits": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"required": [
+										"oldText",
+										"newText"
+									],
+									"properties": {
+										"oldText": {
+											"type": "string",
+											"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+										},
+										"newText": {
+											"type": "string",
+											"description": "Replacement text for this targeted edit."
+										}
+									}
+								},
+								"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+							}
+						}
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				},
+				{
+					"name": "write",
+					"description": "Write content to a file. Creates the file if it doesn't exist, overwrites if it does. Automatically creates parent directories.",
+					"parameters": {
+						"type": "object",
+						"required": [
+							"path",
+							"content"
+						],
+						"properties": {
+							"path": {
+								"type": "string",
+								"description": "Path to the file to write (relative or absolute)"
+							},
+							"content": {
+								"type": "string",
+								"description": "Content to write to the file"
+							}
+						}
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				}
+			]
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": "When is the release? It says in notes.txt."
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_1",
+					"name": "read",
+					"arguments": {
+						"path": "notes.txt"
+					}
+				}
+			],
+			"api": "faux",
+			"provider": "faux",
+			"model": "faux-1",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_1",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "The release is on Friday.\n"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "test-model",
+		"input": [
+			{
+				"role": "system",
+				"content": "You are an expert coding assistant operating inside relay, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\n<tools>\n- read: Read file contents\n- bash: Execute bash commands (ls, grep, find, etc.)\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n- write: Create or overwrite files\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n</tools>\n\n<rules>\n- Use bash for file operations like ls, rg, find\n- Use read to examine files instead of cat or sed.\n- You can inspect RELAY_* environment variables for current model and session details.\n- Use edit for precise changes (edits[].oldText must match exactly)\n- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\n- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\n- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n- Use write only for new files or complete rewrites.\n- The developer owns the what and the why; you own the how. If the goal or the reason behind a request is unclear, ask before building\n- Prefer the simplest design that meets the stated requirements; propose a more complex one only by naming the requirement that needs it\n- Treat context the developer gives about their environment, services, or domain as authoritative over your assumptions, even when it contradicts common practice\n- Be concise in your responses\n- Show file paths clearly when working with files\n</rules>\n\n<docs>\nRelay documentation (read only when the user asks about relay itself, its SDK, extensions, themes, skills, or TUI):\n- Main documentation: <package>/README.md\n- Additional docs: <package>/docs\n- Examples: <package>/examples (extensions, custom tools, SDK)\n- When reading relay docs or examples, resolve docs/... under Additional docs and examples/... under Examples, not the current working directory\n- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), relay packages (docs/packages.md), environment variables (docs/environment-variables.md), MCP servers (docs/mcp.md), codemode scripts and non-LLM models such as classifiers and image models (docs/codemode.md)\n- When working on relay topics, read the docs and examples, and follow .md cross-references before implementing\n- Always read relay .md files completely and follow links to related docs (e.g., tui.md for TUI API details)\n</docs>\n\n<cwd>\n<cwd>\n</cwd>"
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "input_text",
+						"text": "When is the release? It says in notes.txt."
+					}
+				]
+			},
+			{
+				"type": "function_call",
+				"call_id": "call_1",
+				"name": "read",
+				"arguments": "{\"path\":\"notes.txt\"}"
+			},
+			{
+				"type": "function_call_output",
+				"call_id": "call_1",
+				"output": "The release is on Friday.\n"
+			}
+		],
+		"stream": true,
+		"store": false,
+		"max_output_tokens": 64000,
+		"tools": [
+			{
+				"type": "function",
+				"name": "read",
+				"description": "Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.",
+				"parameters": {
+					"type": "object",
+					"required": [
+						"path"
+					],
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "Path to the file to read (relative or absolute)"
+						},
+						"offset": {
+							"type": "number",
+							"description": "Line number to start reading from (1-indexed)"
+						},
+						"limit": {
+							"type": "number",
+							"description": "Maximum number of lines to read"
+						}
+					}
+				}
+			},
+			{
+				"type": "function",
+				"name": "bash",
+				"description": "Execute a bash command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.",
+				"parameters": {
+					"type": "object",
+					"required": [
+						"command"
+					],
+					"properties": {
+						"command": {
+							"type": "string",
+							"description": "Shell command to execute"
+						},
+						"timeout": {
+							"type": "number",
+							"description": "Timeout in seconds (optional, no default timeout)"
+						}
+					}
+				}
+			},
+			{
+				"type": "function",
+				"name": "edit",
+				"description": "Edit a single file using exact text replacement. Every edits[].oldText must match a unique, non-overlapping region of the original file. If two changes affect the same block or nearby lines, merge them into one edit instead of emitting overlapping edits. Do not include large unchanged regions just to connect distant changes.",
+				"parameters": {
+					"type": "object",
+					"required": [
+						"path",
+						"edits"
+					],
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "Path to the file to edit (relative or absolute)"
+						},
+						"edits": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"required": [
+									"oldText",
+									"newText"
+								],
+								"properties": {
+									"oldText": {
+										"type": "string",
+										"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+									},
+									"newText": {
+										"type": "string",
+										"description": "Replacement text for this targeted edit."
+									}
+								}
+							},
+							"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+						}
+					}
+				}
+			},
+			{
+				"type": "function",
+				"name": "write",
+				"description": "Write content to a file. Creates the file if it doesn't exist, overwrites if it does. Automatically creates parent directories.",
+				"parameters": {
+					"type": "object",
+					"required": [
+						"path",
+						"content"
+					],
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "Path to the file to write (relative or absolute)"
+						},
+						"content": {
+							"type": "string",
+							"description": "Content to write to the file"
+						}
+					}
+				}
+			}
+		]
+	}
+}

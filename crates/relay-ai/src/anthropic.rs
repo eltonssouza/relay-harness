@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 
+use crate::json::js_number;
 use crate::message::{AssistantMessage, InputBlock, Message, OutputBlock, Tool, ToolResultMessage};
 use crate::model::Model;
 use crate::options::resolve_cache_retention;
@@ -702,7 +703,7 @@ pub fn build_request(
     if let Some(temperature) = options.temperature {
         if options.thinking_enabled != Some(true) && !compat.mid_convo_effort && compat.temperature
         {
-            body.insert("temperature".into(), json!(temperature));
+            body.insert("temperature".into(), js_number(temperature));
         }
     }
 

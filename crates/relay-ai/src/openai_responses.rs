@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 
+use crate::json::js_number;
 use crate::message::{AssistantMessage, InputBlock, Message, OutputBlock, Tool};
 use crate::model::Model;
 use crate::options::{resolve_cache_retention, CacheRetention};
@@ -561,7 +562,7 @@ pub fn build_request(
         }
     }
     if let Some(temperature) = options.temperature.filter(|_| !omit_unsupported) {
-        body.insert("temperature".into(), json!(temperature));
+        body.insert("temperature".into(), js_number(temperature));
     }
     if let Some(tier) = &options.service_tier {
         body.insert("service_tier".into(), tier.clone());

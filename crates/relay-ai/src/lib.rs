@@ -12,14 +12,16 @@
 //! - `google`, `google_stream`: the Google Gemini request (the SDK parameters, the URL and the
 //!   HTTP body), and reading its stream.
 //! - `options`: request options adapters share.
+//! - `simple`: the provider-neutral options (`streamSimple`) mapped to each adapter's, and the
+//!   context estimate that limits the output.
 //! - `json`, `sse`: provider output helpers (JSON repair and partial parsing, server-sent events).
 //!
 //! The tests compare against what the TypeScript code does, recorded in `crates/fixtures/`
 //! (`npm run parity:record`): `tests/scenarios.rs` reads the agent's messages back unchanged,
-//! `tests/anthropic.rs`, `tests/openai_responses.rs` and `tests/openai_completions.rs` build the
-//! same bodies byte for byte,
-//! `tests/anthropic_stream.rs`, `tests/openai_responses_stream.rs` and
-//! `tests/openai_completions_stream.rs` decode the same streams into the same events, and `tests/json.rs` parses as the TypeScript helpers do.
+//! `tests/anthropic.rs`, `tests/openai_responses.rs`, `tests/openai_completions.rs` and
+//! `tests/google.rs` build the same requests, `tests/simple.rs` the same requests from the
+//! provider-neutral options, `tests/*_stream.rs` decode the same streams into the same events,
+//! and `tests/json.rs` parses as the TypeScript helpers do.
 
 pub mod anthropic;
 pub mod anthropic_stream;
@@ -35,6 +37,7 @@ pub mod openai_responses;
 pub mod openai_responses_stream;
 mod openai_sdk;
 pub mod options;
+pub mod simple;
 pub mod sse;
 pub mod strict;
 pub mod text;
