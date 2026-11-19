@@ -33,7 +33,6 @@ export interface CompactionSettings {
 	modelOverrides?: Record<string, CompactionModelOverride>; // exact "provider/modelId" keys
 }
 
-/** The three harness pillars. Each defaults to enabled; changes apply to sessions created afterwards. */
 /** Limits of the `agent` tool's subagents. */
 export interface SubagentSettings {
 	/** Sessions in a delegation chain, the developer's included (default: 3: main, orchestrator, specialist). */
@@ -46,6 +45,7 @@ export interface SubagentSettings {
 	timeoutMs?: number;
 }
 
+/** The three harness pillars. Each defaults to enabled; changes apply to sessions created afterwards. */
 export interface HarnessCoreSettings {
 	alignment?: boolean; // default: true - developer constraints, authorization gate, question scope guard
 	authorizationGate?: boolean; // default: true - require authorization for destructive and external commands
@@ -57,6 +57,33 @@ export interface HarnessCoreSettings {
 	verifyCommands?: string[]; // default: [] - the project's checks; when set, only these count as verification
 	maxChangedLines?: number; // default: 500 - changed lines per request before the agent is asked to close the slice; 0 disables
 	maxFileLines?: number; // default: 1000 - lines per file before growth is flagged; 0 disables
+}
+
+const HARNESS_SWITCHES = new Set(["alignment", "authorizationGate", "scopeGuard", "evidence", "context"]);
+/** Count settings and their smallest value. */
+const HARNESS_COUNTS: Record<string, number> = {
+	contextKeepRecent: 1,
+	contextBatchSize: 1,
+	maxChangedLines: 0,
+	maxFileLines: 0,
+};
+
+/** Why `value` cannot be the harness setting `key`, or undefined when it can. */
+export function harnessSettingProblem(key: string, value: unknown): string | undefined {
+	if (HARNESS_SWITCHES.has(key))
+		return typeof value === "boolean" ? undefined : `harnessCore.${key} must be true or false`;
+	const minimum = HARNESS_COUNTS[key];
+	if (minimum !== undefined) {
+		return Number.isInteger(value) && (value as number) >= minimum
+			? undefined
+			: `harnessCore.${key} must be an integer of at least ${minimum}`;
+	}
+	if (key === "verifyCommands") {
+		return Array.isArray(value) && value.every((command) => typeof command === "string" && command.trim() !== "")
+			? undefined
+			: "harnessCore.verifyCommands must be a list of commands";
+	}
+	return `harnessCore.${key} is not a harness setting`;
 }
 
 export interface BranchSummarySettings {
@@ -959,6 +986,19 @@ export class SettingsManager {
 			maxChangedLines: settings?.maxChangedLines ?? 500,
 			maxFileLines: settings?.maxFileLines ?? 1000,
 		};
+	}
+
+	/**
+	 * Change one harness setting in the global settings, for sessions created afterwards. The value
+	 * is checked first: pillars and guards are booleans, counts are non-negative integers (the
+	 * context window and batch at least 1), and verification commands are strings.
+	 */
+	setHarnessCoreSetting<K extends keyof HarnessCoreSettings>(key: K, value: HarnessCoreSettings[K]): void {
+		const problem = harnessSettingProblem(key, value);
+		if (problem) throw new Error(problem);
+		this.globalSettings.harnessCore = { ...this.globalSettings.harnessCore, [key]: value };
+		this.markModified("harnessCore", key);
+		this.save();
 	}
 
 	setCompactionEnabled(enabled: boolean): void {

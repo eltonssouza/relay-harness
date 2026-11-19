@@ -52,13 +52,16 @@ export class HarnessPanel {
 	private readonly agentRows = new Map<string, { row: HTMLElement; status: HTMLElement; detail: HTMLElement }>();
 	private readonly onForget: (id: string) => void;
 
-	constructor(onForget: (id: string) => void) {
+	constructor(onForget: (id: string) => void, onSettings: () => void) {
 		this.onForget = onForget;
 		this.element = element("aside", "panel");
 		this.element.setAttribute("aria-label", "Harness");
 		this.harness = element("div", "panel-harness");
 		this.agents = element("div", "agent-list");
-		this.element.append(this.harness, section("Agents", this.agents));
+		const settings = element("button", "btn", "Harness settings");
+		settings.type = "button";
+		settings.addEventListener("click", onSettings);
+		this.element.append(settings, this.harness, section("Agents", this.agents));
 		this.renderAgentsEmpty();
 	}
 

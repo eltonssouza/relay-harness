@@ -12,7 +12,7 @@ import type { BashResult } from "../../core/bash-executor.ts";
 import type { CompactionResult } from "../../core/compaction/index.ts";
 import type { HarnessSnapshot } from "../../core/harness-core.ts";
 import type { SessionEntry, SessionTreeNode } from "../../core/session-manager.ts";
-import type { Settings } from "../../core/settings-manager.ts";
+import type { HarnessCoreSettings, Settings } from "../../core/settings-manager.ts";
 import type { JsonAgentSessionEvent } from "../json-event.ts";
 import { attachJsonlLineReader, serializeJsonLine } from "./jsonl.ts";
 import type { RpcCommand, RpcResponse, RpcSessionInfo, RpcSessionState, RpcSlashCommand } from "./rpc-types.ts";
@@ -475,6 +475,21 @@ export class RpcClient {
 	async harnessForget(constraintId: string): Promise<boolean> {
 		const response = await this.send({ type: "harness_forget", constraintId });
 		return this.getData<{ removed: boolean }>(response).removed;
+	}
+
+	/** The harness settings with their defaults applied. */
+	async getHarnessSettings(): Promise<Required<HarnessCoreSettings>> {
+		const response = await this.send({ type: "get_harness_settings" });
+		return this.getData(response);
+	}
+
+	/** Change one harness setting for sessions created afterwards; returns the settings after the change. */
+	async setHarnessSetting<K extends keyof HarnessCoreSettings>(
+		key: K,
+		value: HarnessCoreSettings[K],
+	): Promise<Required<HarnessCoreSettings>> {
+		const response = await this.send({ type: "set_harness_setting", key, value });
+		return this.getData(response);
 	}
 
 	/** Drop every recorded constraint and correction of the current branch. */

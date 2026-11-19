@@ -527,6 +527,37 @@ code {
 	outline-offset: 2px;
 }
 
+.setting {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+}
+
+.setting.count,
+.setting.commands {
+	justify-content: space-between;
+}
+
+.setting.commands {
+	flex-direction: column;
+	align-items: stretch;
+}
+
+.setting input[type="number"] {
+	width: 88px;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--text);
+	font: inherit;
+	padding: 3px 6px;
+}
+
+.setting input[aria-invalid="true"] {
+	border-color: var(--bad);
+}
+
 .agent-list {
 	display: grid;
 	gap: 8px;

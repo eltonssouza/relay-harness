@@ -26,6 +26,7 @@ import {
 	writeRawStdout,
 } from "../../core/output-guard.ts";
 import { SessionManager } from "../../core/session-manager.ts";
+import { type HarnessCoreSettings, harnessSettingProblem } from "../../core/settings-manager.ts";
 import { killTrackedDetachedChildren } from "../../utils/shell.ts";
 import { type Theme, theme } from "../interactive/theme/theme.ts";
 import { toJsonEvent } from "../json-event.ts";
@@ -690,6 +691,20 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 				return success(id, "harness_forget", {
 					removed: session.harnessCore.forgetConstraint(command.constraintId),
 				});
+			}
+
+			case "get_harness_settings": {
+				return success(id, "get_harness_settings", session.settingsManager.getHarnessCoreSettings());
+			}
+
+			case "set_harness_setting": {
+				const problem = harnessSettingProblem(command.key, command.value);
+				if (problem) return error(id, "set_harness_setting", problem);
+				session.settingsManager.setHarnessCoreSetting(
+					command.key as keyof HarnessCoreSettings,
+					command.value as HarnessCoreSettings[keyof HarnessCoreSettings],
+				);
+				return success(id, "set_harness_setting", session.settingsManager.getHarnessCoreSettings());
 			}
 
 			case "harness_clear": {

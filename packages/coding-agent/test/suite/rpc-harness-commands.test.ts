@@ -134,6 +134,27 @@ describe("RPC harness, session and settings commands", () => {
 				settings: { harnessCore?: { verifyCommands?: string[] } };
 			};
 			expect(settings.settings.harnessCore?.verifyCommands).toEqual(["npm test"]);
+
+			const defaults = (await request({ type: "get_harness_settings" })).data as Record<string, unknown>;
+			expect(defaults).toMatchObject({ evidence: true, contextKeepRecent: 6, verifyCommands: ["npm test"] });
+			const changed = await request({ type: "set_harness_setting", key: "evidence", value: false });
+			expect(changed).toMatchObject({ success: true, data: { evidence: false } });
+			expect(harness.settingsManager.getHarnessCoreSettings().evidence).toBe(false);
+			expect(await request({ type: "set_harness_setting", key: "contextBatchSize", value: 0 })).toMatchObject({
+				success: false,
+				error: "harnessCore.contextBatchSize must be an integer of at least 1",
+			});
+			expect(
+				await request({ type: "set_harness_setting", key: "verifyCommands", value: ["npm test", ""] }),
+			).toMatchObject({
+				success: false,
+				error: "harnessCore.verifyCommands must be a list of commands",
+			});
+			expect(await request({ type: "set_harness_setting", key: "shellPath", value: "/bin/sh" })).toMatchObject({
+				success: false,
+				error: "harnessCore.shellPath is not a harness setting",
+			});
+			expect(harness.settingsManager.getHarnessCoreSettings().contextBatchSize).toBe(6);
 		} finally {
 			harness.cleanup();
 			restoreListeners(listenerSnapshot);
@@ -150,6 +171,8 @@ describe("RpcClient harness, session and settings methods", () => {
 			harness_forget: { removed: true },
 			list_sessions: { sessions: [] },
 			get_settings: { settings: { theme: "dark" } },
+			get_harness_settings: { evidence: true },
+			set_harness_setting: { evidence: false },
 		};
 		const privateClient = client as unknown as {
 			send: (command: { type: string }) => Promise<unknown>;
@@ -166,12 +189,16 @@ describe("RpcClient harness, session and settings methods", () => {
 		await client.harnessClear();
 		expect(await client.listSessions()).toEqual([]);
 		expect(await client.getSettings()).toEqual({ theme: "dark" });
+		expect(await client.getHarnessSettings()).toEqual({ evidence: true });
+		expect(await client.setHarnessSetting("evidence", false)).toEqual({ evidence: false });
 		expect(sent).toEqual([
 			{ type: "get_harness_state" },
 			{ type: "harness_forget", constraintId: "c1" },
 			{ type: "harness_clear" },
 			{ type: "list_sessions" },
 			{ type: "get_settings" },
+			{ type: "get_harness_settings" },
+			{ type: "set_harness_setting", key: "evidence", value: false },
 		]);
 	});
 });
