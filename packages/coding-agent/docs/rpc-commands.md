@@ -833,6 +833,79 @@ Each command has:
 
 **Note**: Built-in TUI commands (`/settings`, `/hotkeys`, etc.) are not included. They are handled only in interactive mode and would not execute if sent via `prompt`.
 
+## Harness
+
+### get_harness_state
+
+Get the harness state of the session as data: what `/harness` shows.
+
+```json
+{"type": "get_harness_state"}
+```
+
+Response:
+```json
+{
+  "type": "response",
+  "command": "get_harness_state",
+  "success": true,
+  "data": {
+    "engine": "rust",
+    "pillars": {"alignment": true, "evidence": true, "context": true},
+    "constraints": [{"id": "c1", "text": "Never edit the tests.", "source": "message", "timestamp": 1733234567890}],
+    "corrections": [],
+    "pendingAuthorizations": [],
+    "blockedCalls": [{"toolName": "bash", "reason": "Blocked by the harness alignment policy: ..."}],
+    "latestReport": {"status": "verified", "claimed": true, "changedPaths": ["src/a.ts"], "mutations": 1, "verifications": [], "gated": false},
+    "pendingChanges": [],
+    "contextStats": {"elidedResults": 4, "elidedChars": 18000, "batches": 1},
+    "verifyCommands": ["npm run check"]
+  }
+}
+```
+
+`latestReport`, `pendingChanges`, and `contextStats` are absent when their pillar is disabled or has nothing to report. `engine` is `typescript` when `RELAY_HARNESS_ENGINE=typescript` is set.
+
+### harness_forget
+
+Drop one recorded constraint by its id, like `/harness forget <id>`.
+
+```json
+{"type": "harness_forget", "constraintId": "c1"}
+```
+
+Response: `{"type": "response", "command": "harness_forget", "success": true, "data": {"removed": true}}`. `removed` is `false` when no constraint has that id.
+
+### harness_clear
+
+Drop every recorded constraint and correction of the current branch, like `/harness clear`.
+
+```json
+{"type": "harness_clear"}
+```
+
+## Sessions and settings
+
+### list_sessions
+
+List the sessions of the session's working directory, newest first.
+
+```json
+{"type": "list_sessions"}
+```
+
+Response: `{"type": "response", "command": "list_sessions", "success": true, "data": {"sessions": [...]}}`. Each entry has the session file `path`, its `id`, `cwd`, `name`, `parentSessionPath` for a fork, the `created` and `modified` times, the `messageCount`, and the `firstMessage`. Open one with `switch_session`.
+
+### get_settings
+
+Get the effective settings: global settings with the project's applied.
+
+```json
+{"type": "get_settings"}
+```
+
+Response: `{"type": "response", "command": "get_settings", "success": true, "data": {"settings": {...}}}`. See [Settings](settings.md) for the fields.
+
 ## Model object
 
 Model commands return the complete configured model definition. Costs are in US dollars per million tokens.

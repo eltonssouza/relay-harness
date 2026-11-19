@@ -10,7 +10,9 @@ import type { ImageContent, Model } from "@relay-harness/ai";
 import type { PromptDisposition, QueuedInputDisposition, SessionStats } from "../../core/agent-session.ts";
 import type { BashResult } from "../../core/bash-executor.ts";
 import type { CompactionResult } from "../../core/compaction/index.ts";
-import type { SessionEntry, SessionTreeNode } from "../../core/session-manager.ts";
+import type { HarnessSnapshot } from "../../core/harness-core.ts";
+import type { SessionEntry, SessionInfo, SessionTreeNode } from "../../core/session-manager.ts";
+import type { Settings } from "../../core/settings-manager.ts";
 import type { SourceInfo } from "../../core/source-info.ts";
 
 // ============================================================================
@@ -71,7 +73,16 @@ export type RpcCommand =
 	| { id?: string; type: "get_messages" }
 
 	// Commands (available for invocation via prompt)
-	| { id?: string; type: "get_commands" };
+	| { id?: string; type: "get_commands" }
+
+	// Harness
+	| { id?: string; type: "get_harness_state" }
+	| { id?: string; type: "harness_forget"; constraintId: string }
+	| { id?: string; type: "harness_clear" }
+
+	// Sessions and settings
+	| { id?: string; type: "list_sessions" }
+	| { id?: string; type: "get_settings" };
 
 // ============================================================================
 // RPC Slash Command (for get_commands response)
@@ -88,6 +99,9 @@ export interface RpcSlashCommand {
 	/** Source metadata for the owning resource */
 	sourceInfo: SourceInfo;
 }
+
+/** A session in `list_sessions`: its metadata without the text of every message. */
+export type RpcSessionInfo = Omit<SessionInfo, "allMessagesText">;
 
 // ============================================================================
 // RPC State
@@ -240,6 +254,15 @@ export type RpcResponse =
 			success: true;
 			data: { commands: RpcSlashCommand[] };
 	  }
+
+	// Harness
+	| { id?: string; type: "response"; command: "get_harness_state"; success: true; data: HarnessSnapshot }
+	| { id?: string; type: "response"; command: "harness_forget"; success: true; data: { removed: boolean } }
+	| { id?: string; type: "response"; command: "harness_clear"; success: true }
+
+	// Sessions and settings
+	| { id?: string; type: "response"; command: "list_sessions"; success: true; data: { sessions: RpcSessionInfo[] } }
+	| { id?: string; type: "response"; command: "get_settings"; success: true; data: { settings: Settings } }
 
 	// Error response (any command can fail)
 	| { id?: string; type: "response"; command: string; success: false; error: string };
