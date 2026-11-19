@@ -884,6 +884,44 @@ Drop every recorded constraint and correction of the current branch, like `/harn
 {"type": "harness_clear"}
 ```
 
+## Accounts
+
+### get_auth_providers
+
+List the providers the developer can sign in to, sorted by name.
+
+```json
+{"type": "get_auth_providers"}
+```
+
+Each provider has `id`, `name`, `oauth` (signing in with an account is offered), `apiKey` (entering a key is offered), `configured`, and, when configured, `method` (`oauth` or `api_key`) and `source` (where the credential comes from, such as `stored` or `environment`).
+
+### login
+
+Sign in to a provider with `oauth` or `api_key`. The response arrives when the login ends, which can take minutes.
+
+```json
+{"type": "login", "provider": "anthropic", "method": "oauth"}
+```
+
+While it runs, the login's questions arrive as `extension_ui_request` events: `input` for text, with `"secret": true` for a key to mask, and `select` for a choice. Its progress arrives as `auth_event` events, for example `{"type": "auth_event", "provider": "anthropic", "event": {"type": "auth_url", "url": "https://...", "instructions": "..."}}`; `event.type` is also `device_code` (`userCode`, `verificationUri`), `info` or `progress` (`message`). Cancelling a question, or `cancel_login`, ends the login with the error `Login cancelled`. Only one login per provider runs at a time.
+
+### cancel_login
+
+```json
+{"type": "cancel_login", "provider": "anthropic"}
+```
+
+Response data: `{"cancelled": true}` when a login to that provider was running.
+
+### logout
+
+Remove a provider's stored credential.
+
+```json
+{"type": "logout", "provider": "anthropic"}
+```
+
 ### get_harness_settings
 
 Get the harness settings with their defaults applied (`alignment`, `authorizationGate`, `scopeGuard`, `evidence`, `context`, `contextKeepRecent`, `contextBatchSize`, `verifyCommands`, `maxChangedLines`, `maxFileLines`; see [Settings](settings.md#harness-core)).

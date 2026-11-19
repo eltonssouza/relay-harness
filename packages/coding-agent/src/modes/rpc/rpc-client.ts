@@ -15,7 +15,14 @@ import type { SessionEntry, SessionTreeNode } from "../../core/session-manager.t
 import type { HarnessCoreSettings, Settings } from "../../core/settings-manager.ts";
 import type { JsonAgentSessionEvent } from "../json-event.ts";
 import { attachJsonlLineReader, serializeJsonLine } from "./jsonl.ts";
-import type { RpcCommand, RpcResponse, RpcSessionInfo, RpcSessionState, RpcSlashCommand } from "./rpc-types.ts";
+import type {
+	RpcAuthProvider,
+	RpcCommand,
+	RpcResponse,
+	RpcSessionInfo,
+	RpcSessionState,
+	RpcSlashCommand,
+} from "./rpc-types.ts";
 
 // ============================================================================
 // Types
@@ -477,6 +484,32 @@ export class RpcClient {
 		return this.getData<{ removed: boolean }>(response).removed;
 	}
 
+	/** Providers the developer can sign in to, with how each is configured. */
+	async getAuthProviders(): Promise<RpcAuthProvider[]> {
+		const response = await this.send({ type: "get_auth_providers" });
+		return this.getData<{ providers: RpcAuthProvider[] }>(response).providers;
+	}
+
+	/**
+	 * Sign in to a provider. Its prompts arrive as `extension_ui_request` events (answer them like
+	 * any UI request) and its progress as `auth_event` events; resolves when the login ends.
+	 */
+	async login(provider: string, method: "oauth" | "api_key"): Promise<void> {
+		// The developer may take minutes in the browser; the usual 30-second limit would cut them off.
+		await this.send({ type: "login", provider, method }, 10 * 60_000);
+	}
+
+	/** Stop a running login. Returns whether one was running. */
+	async cancelLogin(provider: string): Promise<boolean> {
+		const response = await this.send({ type: "cancel_login", provider });
+		return this.getData<{ cancelled: boolean }>(response).cancelled;
+	}
+
+	/** Remove the stored credential of a provider. */
+	async logout(provider: string): Promise<void> {
+		await this.send({ type: "logout", provider });
+	}
+
 	/** The harness settings with their defaults applied. */
 	async getHarnessSettings(): Promise<Required<HarnessCoreSettings>> {
 		const response = await this.send({ type: "get_harness_settings" });
@@ -602,7 +635,7 @@ export class RpcClient {
 		this.pendingRequests.clear();
 	}
 
-	private async send(command: RpcCommandBody): Promise<RpcResponse> {
+	private async send(command: RpcCommandBody, timeoutMs = 30000): Promise<RpcResponse> {
 		const childProcess = this.process;
 		const stdin = childProcess?.stdin;
 		if (!childProcess || !stdin) {
@@ -629,7 +662,7 @@ export class RpcClient {
 			const timeout = setTimeout(() => {
 				this.pendingRequests.delete(id);
 				reject(new Error(`Timeout waiting for response to ${command.type}. Stderr: ${this.stderr}`));
-			}, 30000);
+			}, timeoutMs);
 
 			this.pendingRequests.set(id, {
 				resolve: (response) => {
