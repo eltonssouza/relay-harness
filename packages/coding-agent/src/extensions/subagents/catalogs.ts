@@ -24,7 +24,7 @@ export interface CatalogPin {
 export const GENERAL_AGENTS: CatalogPin = {
 	name: "general-agents",
 	repository: "https://github.com/eltonssouza/general-agents.git",
-	commit: "b1abe85ab2381f99b8517e9cb7f619e40a4c6772",
+	commit: "fdf6282b73f4ff8112f0e6bd69df6c0ee7c2f72f",
 };
 
 /** Written into an installed catalog: where it came from. */

@@ -1,7 +1,7 @@
 {
 	"source": {
 		"repository": "eltonssouza/general-agents",
-		"commit": "b1abe85ab2381f99b8517e9cb7f619e40a4c6772"
+		"commit": "fdf6282b73f4ff8112f0e6bd69df6c0ee7c2f72f"
 	},
 	"python": "3.13.15",
 	"agents": [
