@@ -1,38 +1,49 @@
-//! The parts of a catalog model (`Model` in `packages/ai/src/types.ts`) that request building
-//! reads. Unknown fields are ignored, so a full catalog entry reads as well.
+//! A catalog chat model (`Model` in `packages/ai/src/types.ts`). A built-in catalog entry reads
+//! and writes back unchanged; unknown fields are dropped.
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
+
+use crate::json::serialize_js_f64;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Model {
     pub id: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    /// `chat` for catalog chat models; absent means chat.
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub model_type: Option<String>,
     pub api: String,
     pub provider: String,
     pub base_url: String,
     pub reasoning: bool,
     /// `"text"` and, for vision models, `"image"`.
     pub input: Vec<String>,
+    /// Request size and image limits, and how images are resized before they enter the history.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub input_limits: Option<InputLimits>,
     pub max_tokens: u64,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub context_window: Option<u64>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost: Option<ModelCost>,
     /// Headers sent with every request; a `null` value removes a header.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub headers: Option<Map<String, Value>>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub compat: Option<ModelCompat>,
     /// Provider levels per Relay thinking level; `off: null` means thinking cannot be turned off.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub thinking_level_map: Option<Map<String, Value>>,
+    /// Prompt cache lifetimes in seconds per retention (`short`, `long`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prompt_cache: Option<Map<String, Value>>,
     /// Sampling parameters sent with every request, before the thinking level's and the request's.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sampling_params: Option<Map<String, Value>>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sampling_params_by_thinking_level: Option<Map<String, Value>>,
 }
 
@@ -125,59 +136,144 @@ pub const THINKING_LEVELS: [&str; 7] = ["off", "minimal", "low", "medium", "high
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ModelCompat {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_eager_tool_input_streaming: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_long_cache_retention: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_cache_control_on_tools: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_temperature: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub force_adaptive_thinking: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_empty_signature: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_strict_tools: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_mid_convo_effort: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_mid_convo_system_messages: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_mid_convo_tool_changes: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allowed_fallback_models: Option<Vec<FallbackModel>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_developer_role: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_strict_mode: Option<bool>,
-    #[serde(rename = "supportsOpenAIGrammarTools")]
+    #[serde(
+        rename = "supportsOpenAIGrammarTools",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub supports_openai_grammar_tools: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_additional_tools: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_tool_search: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_explicit_prompt_cache_mode: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_max_output_tokens: Option<bool>,
     // OpenAI Chat Completions servers.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_tools: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_store: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_reasoning_effort: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_usage_in_streaming: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_finish_reason: Option<bool>,
     /// `max_completion_tokens` or `max_tokens`.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub max_tokens_field: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub requires_tool_result_name: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub requires_assistant_after_tool_result: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub requires_thinking_as_text: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub requires_reasoning_content_on_assistant_messages: Option<bool>,
     /// How the server takes reasoning settings: `openai`, `deepseek`, `zai`, `qwen`, and others.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub thinking_format: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub chat_template_kwargs: Option<Map<String, Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub chat_template_args: Option<Map<String, Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub open_router_routing: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub vercel_gateway_routing: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zai_tool_stream: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub thinking_token_budget_field: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_thinking_token_budget: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supports_mid_convo_tool_additions: Option<bool>,
+    /// Send session affinity headers with the session id (OpenAI-compatible servers).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub send_session_affinity_headers: Option<bool>,
+    /// `openai`, `openai-nosession` or `openrouter`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub session_affinity_format: Option<String>,
     /// `anthropic` for servers that take Anthropic-style cache markers.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cache_control_format: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub vllm_priority: Option<Value>,
+}
+
+/// `ModelInputLimits`: what a provider request may hold.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InputLimits {
+    /// The largest serialized request, in bytes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_request_bytes: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub images: Option<ImageInputLimits>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImageInputLimits {
+    /// How an image is resized before it enters the conversation, so the cached prefix stays the
+    /// same.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resize: Option<ImageResize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_per_message: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_per_request: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImageResize {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_width: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_height: Option<u64>,
+    /// The largest base64 payload, in bytes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_bytes: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jpeg_quality: Option<u64>,
 }
 
 /// A model Anthropic may answer with instead, and its price for such answers.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FallbackModel {
     pub model: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub provider: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost: Option<ModelCost>,
 }
 
@@ -185,22 +281,31 @@ pub struct FallbackModel {
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ModelCost {
+    #[serde(serialize_with = "serialize_js_f64")]
     pub input: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub output: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub cache_read: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub cache_write: f64,
     /// Request-wide tiers; the highest threshold the input exceeds prices the whole request.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tiers: Option<Vec<CostTier>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CostTier {
+    #[serde(serialize_with = "serialize_js_f64")]
     pub input_tokens_above: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub input: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub output: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub cache_read: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub cache_write: f64,
 }
 

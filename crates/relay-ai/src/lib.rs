@@ -1,7 +1,8 @@
 //! Relay's model layer in Rust, ported from `packages/ai`.
 //!
 //! - `message`: the transcript types, what a provider receives and a session file stores.
-//! - `model`: the catalog fields request building reads.
+//! - `model`: a catalog chat model.
+//! - `catalog`: the built-in models, from the provider files the TypeScript catalog loads.
 //! - `transcript`, `transform`, `strict`, `text`: the shared steps every adapter applies.
 //! - `anthropic`, `anthropic_stream`: the Anthropic Messages request body, and reading its
 //!   response stream into `event::AssistantEvent`s.
@@ -25,6 +26,7 @@
 
 pub mod anthropic;
 pub mod anthropic_stream;
+pub mod catalog;
 pub mod event;
 pub mod google;
 pub mod google_stream;
@@ -45,4 +47,7 @@ pub mod transcript;
 pub mod transform;
 
 pub use message::*;
-pub use model::{calculate_cost, CostTier, FallbackModel, Model, ModelCompat, ModelCost};
+pub use model::{
+    calculate_cost, CostTier, FallbackModel, ImageInputLimits, ImageResize, InputLimits, Model,
+    ModelCompat, ModelCost,
+};

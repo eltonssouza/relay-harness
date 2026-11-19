@@ -11,6 +11,8 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{Map, Value};
 
+use crate::json::{serialize_js_f64, serialize_js_f64_option};
+
 pub type JsonObject = Map<String, Value>;
 
 /// One message of the transcript, tagged by `role`. The assistant message, the largest by far, is
@@ -263,10 +265,15 @@ pub struct Usage {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Cost {
+    #[serde(serialize_with = "serialize_js_f64")]
     pub input: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub output: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub cache_read: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub cache_write: f64,
+    #[serde(serialize_with = "serialize_js_f64")]
     pub total: f64,
 }
 
@@ -330,7 +337,11 @@ pub struct NestedToolCallRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub arguments_bytes: Option<u64>,
     pub status: NestedCallStatus,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "serialize_js_f64_option"
+    )]
     pub duration_ms: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
