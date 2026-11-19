@@ -2,8 +2,9 @@
 //! (`iterateSseMessages`): UTF-8 decoded incrementally like `TextDecoder`, lines split at `\r`,
 //! `\n` or `\r\n`, events dispatched at a blank line.
 //!
-//! One quirk is kept: a `\r\n` pair split between two chunks reads as two line ends, so the `\n`
-//! dispatches the event early, as the TypeScript decoder does.
+//! The Anthropic decoder keeps one quirk: a `\r\n` pair split between two chunks reads as two line
+//! ends, so the `\n` dispatches the event early. The OpenAI SDK's decoder
+//! (`SseDecoder::joining_split_crlf`) reads such a pair as one line end.
 
 /// One event: its `event` field and its `data` lines joined with `\n`.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -66,12 +67,30 @@ pub struct SseDecoder {
     event: Option<String>,
     data: Vec<String>,
     raw: Vec<String>,
+    /// Read a `\r\n` pair split between chunks as one line end.
+    joins_split_crlf: bool,
+    /// The last chunk ended with a `\r` line end, so a `\n` starting the next one belongs to it.
+    after_cr: bool,
 }
 
 impl SseDecoder {
+    /// The OpenAI SDK's line splitting: `\r`, `\n` or `\r\n`, wherever the chunks break.
+    pub fn joining_split_crlf() -> Self {
+        SseDecoder {
+            joins_split_crlf: true,
+            ..SseDecoder::default()
+        }
+    }
+
     /// The events completed by this chunk.
     pub fn push(&mut self, bytes: &[u8]) -> Vec<ServerSentEvent> {
-        let text = self.utf8.decode(bytes, false);
+        let mut text = self.utf8.decode(bytes, false);
+        if self.after_cr && !text.is_empty() {
+            self.after_cr = false;
+            if text.starts_with('\n') {
+                text.remove(0);
+            }
+        }
         self.buffer.push_str(&text);
         self.consume_lines()
     }
@@ -94,10 +113,12 @@ impl SseDecoder {
         while let Some(line_end) = self.buffer.find(['\r', '\n']) {
             let line = self.buffer[..line_end].to_string();
             let mut next = line_end + 1;
-            if self.buffer.as_bytes()[line_end] == b'\r'
-                && self.buffer.as_bytes().get(next) == Some(&b'\n')
-            {
-                next += 1;
+            if self.buffer.as_bytes()[line_end] == b'\r' {
+                match self.buffer.as_bytes().get(next) {
+                    Some(b'\n') => next += 1,
+                    None => self.after_cr = self.joins_split_crlf,
+                    Some(_) => {}
+                }
             }
             self.buffer.drain(..next);
             events.extend(self.decode_line(&line));

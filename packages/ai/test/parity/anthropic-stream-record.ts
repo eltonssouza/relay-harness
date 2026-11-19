@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stream } from "../../src/api/anthropic-messages.ts";
 import type { Message, Model, Tool, TranscriptContext } from "../../src/types.ts";
+import { bodyChunks, byteOffset, everyBytes, sseFetch, zeroTimes } from "./stream-helpers.ts";
 
 export const ANTHROPIC_STREAM_DIR = fileURLToPath(
 	new URL("../../../../crates/fixtures/anthropic-stream/", import.meta.url),
@@ -94,20 +95,6 @@ export interface StreamCase {
 	sse: string;
 	/** Byte offsets where the body is split into chunks. */
 	splits: number[];
-}
-
-/** The UTF-8 byte offset of `part` in `text`. */
-function byteOffset(text: string, part: string): number {
-	const index = text.indexOf(part);
-	if (index === -1) throw new Error(`${part} is not in the stream`);
-	return new TextEncoder().encode(text.slice(0, index)).length;
-}
-
-function everyBytes(sseText: string, step: number): number[] {
-	const length = new TextEncoder().encode(sseText).length;
-	const splits: number[] = [];
-	for (let offset = step; offset < length; offset += step) splits.push(offset);
-	return splits;
 }
 
 export function streamCases(): StreamCase[] {
@@ -382,38 +369,9 @@ export function streamCases(): StreamCase[] {
 	];
 }
 
-function bodyChunks(sseText: string, splits: number[]): Uint8Array[] {
-	const bytes = new TextEncoder().encode(sseText);
-	const chunks: Uint8Array[] = [];
-	let start = 0;
-	for (const split of [...splits, bytes.length]) {
-		if (split > start) chunks.push(bytes.slice(start, split));
-		start = Math.max(start, split);
-	}
-	return chunks;
-}
-
-function zeroTimes(value: unknown, key?: string): unknown {
-	if (key === "timestamp" && typeof value === "number") return 0;
-	if (Array.isArray(value)) return value.map((item) => zeroTimes(item));
-	if (value !== null && typeof value === "object") {
-		return Object.fromEntries(Object.entries(value).map(([name, item]) => [name, zeroTimes(item, name)]));
-	}
-	return value;
-}
-
 export async function decode(testCase: StreamCase): Promise<{ events: unknown[] }> {
 	const chunks = bodyChunks(testCase.sse, testCase.splits);
-	const fetch = async () =>
-		new Response(
-			new ReadableStream<Uint8Array>({
-				start(controller) {
-					for (const chunk of chunks) controller.enqueue(chunk);
-					controller.close();
-				},
-			}),
-			{ status: 200, headers: { "content-type": "text/event-stream" } },
-		);
+	const fetch = sseFetch(chunks);
 	const events: unknown[] = [];
 	const output = stream(testCase.model, { messages: testCase.messages } as TranscriptContext, {
 		apiKey: testCase.apiKey,

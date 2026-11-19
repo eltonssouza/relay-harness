@@ -1,0 +1,205 @@
+{
+	"name": "reasoning-text-and-tool",
+	"description": "A reasoning summary, text and a function call; cached and reasoning tokens.",
+	"model": {
+		"id": "gpt-test",
+		"name": "GPT Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1.25,
+			"output": 10,
+			"cacheRead": 0.125,
+			"cacheWrite": 0
+		},
+		"contextWindow": 400000,
+		"maxTokens": 128000
+	},
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "apply_patch",
+					"description": "Apply a patch.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"patch": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"patch"
+						]
+					},
+					"constrainedSampling": {
+						"type": "grammar",
+						"variants": {
+							"openai_lark": "start: \"*** Begin Patch\" /[\\s\\S]*/"
+						}
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"sse": "event: response.created\ndata: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_1\",\"status\":\"in_progress\"}}\n\nevent: response.output_item.added\ndata: {\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{\"type\":\"reasoning\",\"id\":\"rs_1\",\"summary\":[]}}\n\nevent: response.reasoning_summary_text.delta\ndata: {\"type\":\"response.reasoning_summary_text.delta\",\"output_index\":0,\"summary_index\":0,\"delta\":\"First \"}\n\nevent: response.reasoning_summary_text.delta\ndata: {\"type\":\"response.reasoning_summary_text.delta\",\"output_index\":0,\"summary_index\":0,\"delta\":\"part.\"}\n\nevent: response.reasoning_summary_part.done\ndata: {\"type\":\"response.reasoning_summary_part.done\",\"output_index\":0,\"summary_index\":0}\n\nevent: response.reasoning_summary_text.delta\ndata: {\"type\":\"response.reasoning_summary_text.delta\",\"output_index\":0,\"summary_index\":1,\"delta\":\"Second part.\"}\n\nevent: response.output_item.done\ndata: {\"type\":\"response.output_item.done\",\"output_index\":0,\"item\":{\"type\":\"reasoning\",\"id\":\"rs_1\",\"summary\":[{\"type\":\"summary_text\",\"text\":\"First part.\"},{\"type\":\"summary_text\",\"text\":\"Second part.\"}],\"encrypted_content\":\"enc-1\"}}\n\nevent: response.output_item.added\ndata: {\"type\":\"response.output_item.added\",\"output_index\":1,\"item\":{\"type\":\"message\",\"id\":\"msg_1\",\"role\":\"assistant\",\"status\":\"in_progress\",\"content\":[]}}\n\nevent: response.output_text.delta\ndata: {\"type\":\"response.output_text.delta\",\"output_index\":1,\"content_index\":0,\"delta\":\"Reading \"}\n\nevent: response.output_text.delta\ndata: {\"type\":\"response.output_text.delta\",\"output_index\":1,\"content_index\":0,\"delta\":\"the file.\"}\n\nevent: response.output_item.done\ndata: {\"type\":\"response.output_item.done\",\"output_index\":1,\"item\":{\"type\":\"message\",\"id\":\"msg_1\",\"role\":\"assistant\",\"status\":\"completed\",\"content\":[{\"type\":\"output_text\",\"text\":\"Reading the file.\",\"annotations\":[]}],\"phase\":\"commentary\"}}\n\nevent: response.output_item.added\ndata: {\"type\":\"response.output_item.added\",\"output_index\":2,\"item\":{\"type\":\"function_call\",\"id\":\"fc_call_1\",\"call_id\":\"call_1\",\"name\":\"read\",\"arguments\":\"\"}}\n\nevent: response.function_call_arguments.delta\ndata: {\"type\":\"response.function_call_arguments.delta\",\"output_index\":2,\"delta\":\"{\\\"pa\"}\n\nevent: response.function_call_arguments.delta\ndata: {\"type\":\"response.function_call_arguments.delta\",\"output_index\":2,\"delta\":\"th\\\":\\\"a.ts\\\"}\"}\n\nevent: response.function_call_arguments.done\ndata: {\"type\":\"response.function_call_arguments.done\",\"output_index\":2,\"arguments\":\"{\\\"path\\\":\\\"a.ts\\\"}\"}\n\nevent: response.output_item.done\ndata: {\"type\":\"response.output_item.done\",\"output_index\":2,\"item\":{\"type\":\"function_call\",\"id\":\"fc_call_1\",\"call_id\":\"call_1\",\"name\":\"read\",\"arguments\":\"{\\\"path\\\":\\\"a.ts\\\"}\"}}\n\nevent: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\",\"usage\":{\"input_tokens\":1000,\"input_tokens_details\":{\"cached_tokens\":600,\"cache_write_tokens\":100},\"output_tokens\":300,\"output_tokens_details\":{\"reasoning_tokens\":120},\"total_tokens\":1300}}}\n\n",
+	"splits": [],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "thinking_start",
+			"contentIndex": 0
+		},
+		{
+			"type": "thinking_delta",
+			"contentIndex": 0,
+			"delta": "First "
+		},
+		{
+			"type": "thinking_delta",
+			"contentIndex": 0,
+			"delta": "part."
+		},
+		{
+			"type": "thinking_delta",
+			"contentIndex": 0,
+			"delta": "\n\n"
+		},
+		{
+			"type": "thinking_delta",
+			"contentIndex": 0,
+			"delta": "Second part."
+		},
+		{
+			"type": "thinking_end",
+			"contentIndex": 0,
+			"content": "First part.\n\nSecond part."
+		},
+		{
+			"type": "text_start",
+			"contentIndex": 1
+		},
+		{
+			"type": "text_delta",
+			"contentIndex": 1,
+			"delta": "Reading "
+		},
+		{
+			"type": "text_delta",
+			"contentIndex": 1,
+			"delta": "the file."
+		},
+		{
+			"type": "text_end",
+			"contentIndex": 1,
+			"content": "Reading the file."
+		},
+		{
+			"type": "toolcall_start",
+			"contentIndex": 2
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 2,
+			"delta": "{\"pa"
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 2,
+			"delta": "th\":\"a.ts\"}"
+		},
+		{
+			"type": "toolcall_end",
+			"contentIndex": 2,
+			"toolCall": {
+				"type": "toolCall",
+				"id": "call_1|fc_call_1",
+				"name": "read",
+				"arguments": {
+					"path": "a.ts"
+				}
+			}
+		},
+		{
+			"type": "done",
+			"reason": "toolUse",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "First part.\n\nSecond part.",
+						"thinkingSignature": "{\"type\":\"reasoning\",\"id\":\"rs_1\",\"summary\":[{\"type\":\"summary_text\",\"text\":\"First part.\"},{\"type\":\"summary_text\",\"text\":\"Second part.\"}],\"encrypted_content\":\"enc-1\"}"
+					},
+					{
+						"type": "text",
+						"text": "Reading the file.",
+						"textSignature": "{\"v\":1,\"id\":\"msg_1\",\"phase\":\"commentary\"}"
+					},
+					{
+						"type": "toolCall",
+						"id": "call_1|fc_call_1",
+						"name": "read",
+						"arguments": {
+							"path": "a.ts"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "gpt-test",
+				"usage": {
+					"input": 300,
+					"output": 300,
+					"cacheRead": 600,
+					"cacheWrite": 100,
+					"reasoning": 120,
+					"totalTokens": 1300,
+					"cost": {
+						"input": 0.000375,
+						"output": 0.003,
+						"cacheRead": 0.000075,
+						"cacheWrite": 0,
+						"total": 0.00345
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"responseId": "resp_1",
+				"rawStopReason": "completed"
+			}
+		}
+	]
+}
