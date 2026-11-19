@@ -884,6 +884,24 @@ Drop every recorded constraint and correction of the current branch, like `/harn
 {"type": "harness_clear"}
 ```
 
+### get_harness_settings
+
+Get the harness settings with their defaults applied (`alignment`, `authorizationGate`, `scopeGuard`, `evidence`, `context`, `contextKeepRecent`, `contextBatchSize`, `verifyCommands`, `maxChangedLines`, `maxFileLines`; see [Settings](settings.md#harness-core)).
+
+```json
+{"type": "get_harness_settings"}
+```
+
+### set_harness_setting
+
+Change one harness setting in the global settings, for sessions started afterwards. Switches take `true` or `false`; counts take integers (`contextKeepRecent` and `contextBatchSize` at least 1); `verifyCommands` takes a list of non-empty commands. Any other key or value fails without changing anything.
+
+```json
+{"type": "set_harness_setting", "key": "evidence", "value": false}
+```
+
+Response: the settings after the change, as `get_harness_settings` returns them. Failure: `{"type": "response", "command": "set_harness_setting", "success": false, "error": "harnessCore.contextBatchSize must be an integer of at least 1"}`.
+
 ## Sessions and settings
 
 ### list_sessions

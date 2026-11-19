@@ -12,7 +12,7 @@ import type { BashResult } from "../../core/bash-executor.ts";
 import type { CompactionResult } from "../../core/compaction/index.ts";
 import type { HarnessSnapshot } from "../../core/harness-core.ts";
 import type { SessionEntry, SessionInfo, SessionTreeNode } from "../../core/session-manager.ts";
-import type { Settings } from "../../core/settings-manager.ts";
+import type { HarnessCoreSettings, Settings } from "../../core/settings-manager.ts";
 import type { SourceInfo } from "../../core/source-info.ts";
 
 // ============================================================================
@@ -79,6 +79,8 @@ export type RpcCommand =
 	| { id?: string; type: "get_harness_state" }
 	| { id?: string; type: "harness_forget"; constraintId: string }
 	| { id?: string; type: "harness_clear" }
+	| { id?: string; type: "get_harness_settings" }
+	| { id?: string; type: "set_harness_setting"; key: string; value: unknown }
 
 	// Sessions and settings
 	| { id?: string; type: "list_sessions" }
@@ -259,6 +261,13 @@ export type RpcResponse =
 	| { id?: string; type: "response"; command: "get_harness_state"; success: true; data: HarnessSnapshot }
 	| { id?: string; type: "response"; command: "harness_forget"; success: true; data: { removed: boolean } }
 	| { id?: string; type: "response"; command: "harness_clear"; success: true }
+	| {
+			id?: string;
+			type: "response";
+			command: "get_harness_settings" | "set_harness_setting";
+			success: true;
+			data: Required<HarnessCoreSettings>;
+	  }
 
 	// Sessions and settings
 	| { id?: string; type: "response"; command: "list_sessions"; success: true; data: { sessions: RpcSessionInfo[] } }

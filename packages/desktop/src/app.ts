@@ -8,6 +8,7 @@ import type { Bridge } from "./bridge.ts";
 import { HarnessPanel, type HarnessSnapshot } from "./panel.ts";
 import { type ChatMessage, chip, element, messageText, relativeTime, renderMessage, settleTool } from "./render.ts";
 import { RpcConnection, type RpcEvent } from "./rpc.ts";
+import { type HarnessSettings, openSettingsDialog } from "./settings.ts";
 
 interface SessionInfo {
 	path: string;
@@ -118,7 +119,10 @@ export class App {
 
 		this.toasts = element("div", "toasts");
 		this.toasts.setAttribute("role", "status");
-		this.panel = new HarnessPanel((id) => void this.forgetConstraint(id));
+		this.panel = new HarnessPanel(
+			(id) => void this.forgetConstraint(id),
+			() => void this.openSettings(),
+		);
 		root.replaceChildren(sidebar, chat, this.panel.element, this.toasts);
 		root.classList.add("app");
 	}
@@ -190,6 +194,18 @@ export class App {
 
 	private async refreshHarness(): Promise<void> {
 		this.panel.render(await this.rpc.request<HarnessSnapshot>({ type: "get_harness_state" }));
+	}
+
+	private async openSettings(): Promise<void> {
+		const settings = await this.rpc.request<HarnessSettings>({ type: "get_harness_settings" });
+		openSettingsDialog(this.root, settings, async (key, value) => {
+			try {
+				return await this.rpc.request<HarnessSettings>({ type: "set_harness_setting", key, value });
+			} catch (error) {
+				this.toast(error instanceof Error ? error.message : String(error), "bad");
+				return undefined;
+			}
+		});
 	}
 
 	private async forgetConstraint(id: string): Promise<void> {

@@ -173,6 +173,19 @@ const FIXTURES: Fixtures = {
 		},
 		get_available_thinking_levels: { levels: ["off", "low", "medium", "high"] },
 		set_model: { provider: "anthropic", id: "claude-opus-5-5" },
+		get_harness_settings: {
+			alignment: true,
+			authorizationGate: true,
+			scopeGuard: true,
+			evidence: true,
+			context: true,
+			contextKeepRecent: 6,
+			contextBatchSize: 6,
+			verifyCommands: [],
+			maxChangedLines: 500,
+			maxFileLines: 1000,
+		},
+		set_harness_setting: { evidence: false },
 	},
 };
 
@@ -401,5 +414,35 @@ describe("the desktop screen", () => {
 			);
 		await page.getByRole("combobox", { name: "Thinking level" }).selectOption("high");
 		await expect.poll(sent).toContainEqual(expect.objectContaining({ type: "set_thinking_level", level: "high" }));
+	});
+
+	it("changes harness settings through relay", async () => {
+		await page.getByRole("button", { name: "Harness settings" }).click();
+		const dialog = page.getByRole("dialog", { name: "Harness settings" });
+		const evidence = dialog.getByRole("checkbox", { name: "Ask for a check before accepting a claim of completion" });
+		expect(await evidence.isChecked()).toBe(true);
+		await evidence.uncheck();
+		await expect
+			.poll(sent)
+			.toContainEqual(expect.objectContaining({ type: "set_harness_setting", key: "evidence", value: false }));
+
+		const window = dialog.getByRole("spinbutton", { name: "Tool results always sent in full" });
+		await window.fill("0");
+		await window.press("Tab");
+		expect(await window.getAttribute("aria-invalid")).toBe("true");
+		expect((await sent()).some((command) => command.key === "contextKeepRecent")).toBe(false);
+
+		const checks = dialog.getByRole("textbox");
+		await checks.fill("npm run check\n\n./test.sh ");
+		await checks.press("Tab");
+		await expect.poll(sent).toContainEqual(
+			expect.objectContaining({
+				type: "set_harness_setting",
+				key: "verifyCommands",
+				value: ["npm run check", "./test.sh"],
+			}),
+		);
+		await dialog.press("Escape");
+		expect(await page.getByRole("dialog", { name: "Harness settings" }).count()).toBe(0);
 	});
 });
