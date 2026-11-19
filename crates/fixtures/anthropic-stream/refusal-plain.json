@@ -1,0 +1,92 @@
+{
+	"name": "refusal-plain",
+	"description": "A refusal without an explanation.",
+	"model": {
+		"id": "claude-test",
+		"name": "Claude Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "http://127.0.0.1:9",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 3,
+			"output": 15,
+			"cacheRead": 0.3,
+			"cacheWrite": 3.75
+		},
+		"contextWindow": 200000,
+		"maxTokens": 64000
+	},
+	"apiKey": "sk-ant-api03-parity",
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Read a.ts.",
+			"timestamp": 0
+		}
+	],
+	"sse": "event: message_start\ndata: {\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"claude-test\",\"content\":[],\"stop_reason\":null,\"usage\":{\"input_tokens\":120,\"output_tokens\":1}}}\n\nevent: message_delta\ndata: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"refusal\"},\"usage\":{\"output_tokens\":30}}\n\nevent: message_stop\ndata: {\"type\":\"message_stop\"}\n\n",
+	"splits": [],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "error",
+			"reason": "error",
+			"error": {
+				"role": "assistant",
+				"content": [],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 120,
+					"output": 30,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 150,
+					"cost": {
+						"input": 0.00036,
+						"output": 0.00045,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.00081
+					},
+					"cacheWrite1h": 0
+				},
+				"stopReason": "error",
+				"timestamp": 0,
+				"responseId": "msg_1",
+				"rawStopReason": "refusal",
+				"errorMessage": "The model refused to complete the request"
+			}
+		}
+	]
+}

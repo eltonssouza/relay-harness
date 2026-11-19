@@ -1,0 +1,121 @@
+{
+	"name": "framing",
+	"description": "CRLF, comments, pings, unknown events, fields without a space or a value, multi-line data.",
+	"model": {
+		"id": "claude-test",
+		"name": "Claude Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "http://127.0.0.1:9",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 3,
+			"output": 15,
+			"cacheRead": 0.3,
+			"cacheWrite": 3.75
+		},
+		"contextWindow": 200000,
+		"maxTokens": 64000
+	},
+	"apiKey": "sk-ant-api03-parity",
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Read a.ts.",
+			"timestamp": 0
+		}
+	],
+	"sse": ": comment line\r\nevent: ping\r\ndata: {}\r\n\r\nevent: message_start\r\ndata: {\"type\":\"message_start\",\"message\":{\"id\":\"msg_2\",\"model\":\"claude-test\",\"usage\":{\"input_tokens\":9,\"output_tokens\":0}}}\r\n\r\nevent:content_block_start\ndata:{\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"\"}}\n\nevent: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0,\ndata: \"delta\": {\"type\": \"text_delta\", \"text\": \"café 🙈 \"}}\n\nevent: unknown_event\ndata: {\"type\": \"unknown_event\"}\n\nretry\nid: 7\nevent: content_block_delta\ndata: {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"done\"}}\n\nevent: content_block_stop\ndata: {\"type\":\"content_block_stop\",\"index\":0}\n\nevent: message_delta\ndata: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"},\"usage\":{\"output_tokens\":4}}\n\nevent: message_stop\ndata: {\"type\": \"message_stop\"}",
+	"splits": [
+		1,
+		38,
+		432,
+		435,
+		437
+	],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "text_start",
+			"contentIndex": 0
+		},
+		{
+			"type": "text_delta",
+			"contentIndex": 0,
+			"delta": "café 🙈 "
+		},
+		{
+			"type": "text_delta",
+			"contentIndex": 0,
+			"delta": "done"
+		},
+		{
+			"type": "text_end",
+			"contentIndex": 0,
+			"content": "café 🙈 done"
+		},
+		{
+			"type": "done",
+			"reason": "stop",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "café 🙈 done"
+					}
+				],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 9,
+					"output": 4,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 13,
+					"cost": {
+						"input": 0.000027,
+						"output": 0.00006,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.000087
+					},
+					"cacheWrite1h": 0
+				},
+				"stopReason": "stop",
+				"timestamp": 0,
+				"responseId": "msg_2",
+				"rawStopReason": "end_turn"
+			}
+		}
+	]
+}

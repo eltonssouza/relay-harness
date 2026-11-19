@@ -1,0 +1,89 @@
+{
+	"name": "empty-stream",
+	"description": "A body with no events.",
+	"model": {
+		"id": "claude-test",
+		"name": "Claude Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "http://127.0.0.1:9",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 3,
+			"output": 15,
+			"cacheRead": 0.3,
+			"cacheWrite": 3.75
+		},
+		"contextWindow": 200000,
+		"maxTokens": 64000
+	},
+	"apiKey": "sk-ant-api03-parity",
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Read a.ts.",
+			"timestamp": 0
+		}
+	],
+	"sse": ": nothing here\n\n",
+	"splits": [],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "error",
+			"reason": "error",
+			"error": {
+				"role": "assistant",
+				"content": [],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "error",
+				"timestamp": 0,
+				"errorMessage": "Anthropic stream ended without a stop reason"
+			}
+		}
+	]
+}
