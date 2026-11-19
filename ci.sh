@@ -10,6 +10,11 @@ npm --version
 npm ci --ignore-scripts
 npm run build:offline
 npm run check
+# The Rust harness core: formatting, lints and tests, including its classification of every
+# reference command against the TypeScript harness (tests/fixtures/classification.json).
+cargo fmt --all --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --locked
 node scripts/publish.mjs --dry-run
 ./test.sh
 npm run check:package-install

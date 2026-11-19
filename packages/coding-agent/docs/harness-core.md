@@ -12,7 +12,7 @@ All three are enabled by default. Inspect them with `/harness`; configure them w
 
 ## Alignment
 
-**Constraints.** Sentences in your messages that state a standing rule ("Never use `any`", "Não altere os testes", "Use pnpm instead of npm") are recorded as constraints. Each request restates them next to your latest message, where the model weighs them most. Constraints are saved in the session file, so they survive compaction and resume. Code blocks and expanded skills or files are ignored. Only your own messages count: a prompt an extension sends for you (`/init`, `/goal`, `/agent`) and the harness's own requests carry an origin and state no constraints, grant no approvals and correct nothing.
+**Constraints.** Sentences in your messages that state a standing rule ("Never use `any`", "Não altere os testes", "Use pnpm instead of npm") are recorded as constraints. "Always" and "only" ("sempre", "apenas") state a rule only before an action verb ("Always run the tests", not "Always seems to break"), and "Keep going" or "Não consegui rodar os testes" state none. Each request restates them next to your latest message, where the model weighs them most. Constraints are saved in the session file, so they survive compaction and resume. Code blocks and expanded skills or files are ignored. Only your own messages count: a prompt an extension sends for you (`/init`, `/goal`, `/agent`) and the harness's own requests carry an origin and state no constraints, grant no approvals and correct nothing.
 
 **Authorization.** Commands that are hard to reverse or that change state outside the workspace need your approval:
 
@@ -31,7 +31,7 @@ Otherwise, in the interactive TUI and RPC modes, Relay asks with a confirmation 
 
 **Corrections.** A message that pushes back on the agent's approach after it has worked ("Não, simplifica…", "Para, isso tá complicado demais", "That's too complex", "Actually, use…") is recorded as a correction. The next request reminds the model to adopt it, prefer the simplest design that satisfies it, and not reintroduce what you rejected. Ordinary openings such as "Para o módulo X…" or "Não sei por que…" are not corrections.
 
-**Learnings and the living AGENTS.md.** Constraints and corrections are kept in the session file, so they survive compaction and resume, but a new session starts without them. `/harness` lists them under "Learnings (candidates for AGENTS.md)". Recording the lasting ones in AGENTS.md, as a "Common hurdles" entry with the symptom, cause, solution, and how to verify it, means the next session, with any model, starts with them. Relay never edits AGENTS.md on its own; ask the agent to record the entry, or use a prompt template such as this repository's [`.relay/prompts/hurdle.md`](../../../.relay/prompts/hurdle.md).
+**Learnings and the living AGENTS.md.** Constraints and corrections are kept in the session file, so they survive compaction and resume, but a new session starts without them. `/harness` lists them under "Learnings (candidates for AGENTS.md)". `/harness forget <id>` removes one constraint by the id `/harness` shows (`c3`), and `/harness clear` removes every recorded constraint and correction of the current branch. Recording the lasting ones in AGENTS.md, as a "Common hurdles" entry with the symptom, cause, solution, and how to verify it, means the next session, with any model, starts with them. Relay never edits AGENTS.md on its own; ask the agent to record the entry, or use a prompt template such as this repository's [`.relay/prompts/hurdle.md`](../../../.relay/prompts/hurdle.md).
 
 **Question turns.** When your message only asks a question ("Why does the build fail on Windows?"), the first file edit in that turn is blocked with a request to answer first and propose the change. An edit made through the shell (`sed -i`, `>`, `git apply`) counts like one made with the `edit` and `write` tools. "Why does it fail? Please fix it." and "Why is this slow? Make it faster." are requests: a later sentence that starts with an action verb makes the message one. Relay judges intent in English and Portuguese only; a message in any other language is never treated as a question, so it is never blocked.
 
@@ -67,7 +67,7 @@ For `unverified`, `contradicted`, and `no-effect`, Relay sends the agent one `[h
 - **Change size**: lines changed in the git working tree since your request began, against the last commit (added plus deleted lines; all lines of new untracked files). Above `harnessCore.maxChangedLines` (default 500), the agent is asked to verify and report this slice before starting more, and to propose how to split the rest.
 - **File growth**: when an edit takes a file past `harnessCore.maxFileLines` (default 1000), or grows a file already past it by 200 lines or more, the agent is asked to extract a cohesive part before adding more. A small edit to an already large file is not flagged.
 
-Outside a git repository the change-size signal is off; file growth still works. `/harness` shows the current numbers.
+Relay measures after edits, shell commands that write files, checks and risky operations; a plain command such as `ls` or `git status` costs no measurement. A failed measurement is retried in the next request; after three requests in a row fail (outside a git repository), the change-size signal is off. File growth still works. `/harness` shows the current numbers.
 
 ## Context
 
@@ -78,6 +78,8 @@ At each request, before the provider call:
 - A digest of the replaced calls is restated next to your latest message, so the agent keeps track of progress.
 
 The session file is never changed; only the request is. Replacing an old message invalidates the provider's prompt cache after it, so replacement happens in batches of `harnessCore.contextBatchSize` results (default 6). Between batches the request prefix stays identical and the cache keeps hitting. Compaction still applies when the context approaches the model's limit; the context pillar makes that happen later.
+
+The harness state (constraints, a correction, pending changes, the digest) is restated on the newest message of each request and is gone from the next one. Relay marks it as volatile, and providers with explicit cache breakpoints (the Anthropic API) place the breakpoint before it and send it after the tool results, so restating it rewrites nothing the provider cached. On a recorded session with one constraint recorded, `npm run bench:harness` counts 6 requests that rewrote cached messages, all from elision batches; with the state inside the cached prefix it would be 460 of 461.
 
 ## Skill audit
 
@@ -103,7 +105,17 @@ const uninstall = new HarnessCore({
 }).install(agent);
 ```
 
-In Relay, `session.harnessCore.core` exposes the constraint ledger, evidence ledger, and context policy.
+An engine runs the pillars. `HarnessCore` uses the TypeScript pillars unless it is given another engine; the Rust engine compiled to WebAssembly is a separate entry, so the main entry does not carry the module:
+
+```typescript
+import { createHarnessWasmEngine } from "@relay-harness/agent-core/harness-wasm";
+
+const core = new HarnessCore({ engine: createHarnessWasmEngine });
+```
+
+Both engines decide the same way: the HarnessCore tests run on both and check that a session sends the provider identical requests. Relay runs the Rust engine; `RELAY_HARNESS_ENGINE=typescript` runs the TypeScript pillars instead, a fallback kept for one release.
+
+In Relay, `session.harnessCore.core.engine` exposes the constraints, corrections, latest completion report, pending changes and context statistics.
 
 ## Sources
 
@@ -113,4 +125,4 @@ In Relay, `session.harnessCore.core` exposes the constraint ledger, evidence led
 
 ## Measuring the rules
 
-`npm run bench:harness` replays labelled cases and one recorded session offline, with no model: risky and safe commands, developer requests and answers that should or should not authorize a call, checks and look-alikes (also with declared verification commands), completion scenarios, question turns, recorded constraints, and the context pillar on a real transcript. It reports how often the harness stops fine work, how often it lets unverified work through, how much context it saves and how often it rewrites cached messages. The same cases run as tests with floors, so a rule change that trades one error for another fails. The cases live in `packages/coding-agent/test/harness-bench/corpus.json`, so any implementation of the harness can be measured against them. Known gaps are listed in the report instead of hidden. A case marked `open` reproduces a known defect: it stays out of the floors, a test checks that it still reproduces, and the fix removes the marker. Formatters that rewrite files (`prettier --write`, `eslint --fix`), build tools that generate sources, and edits made by a script the harness cannot read are not counted as changes. Task pass rate with a model in the loop is not measured there; that needs real runs.
+`npm run bench:harness` replays labelled cases and one recorded session offline, with no model: risky and safe commands, developer requests and answers that should or should not authorize a call, checks and look-alikes (also with declared verification commands), completion scenarios, question turns, recorded constraints, and the context pillar on a real transcript. It reports how often the harness stops fine work, how often it lets unverified work through, how much context it saves and how often it rewrites cached messages. The same cases run as tests with floors, so a rule change that trades one error for another fails. The cases live in `packages/coding-agent/test/harness-bench/corpus.json`, so any implementation of the harness can be measured against them. `crates/harness-core` is a Rust port of the harness: the classification (the shell lexer, risky operations, deletion targets and check detection), the alignment, evidence and context pillars, the slice probe and an engine that composes them as `HarnessCore` does. `crates/harness-core/tests/fixtures/classification.json` and `pillars.json` hold the TypeScript results for every corpus case and edge case, and the Rust tests must match them (`npm run harness:golden` regenerates the files after a rule change). `crates/harness-wasm` compiles the engine to WebAssembly behind a JSON interface; `npm run build:harness-wasm` writes the module into `packages/agent/src/harness-wasm/module.generated.ts`, loaded from `@relay-harness/agent-core/harness-wasm`. The module is committed, so building the npm packages needs no Rust toolchain, and `harness-wasm.test.ts` runs it against the same reference files, so a stale module fails. Known gaps are listed in the report instead of hidden. A case marked `open` reproduces a known defect: it stays out of the floors, a test checks that it still reproduces, and the fix removes the marker. Formatters that rewrite files (`prettier --write`, `eslint --fix`), build tools that generate sources, and edits made by a script the harness cannot read are not counted as changes. Task pass rate with a model in the loop is not measured there; that needs real runs.

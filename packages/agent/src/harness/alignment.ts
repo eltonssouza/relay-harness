@@ -38,29 +38,45 @@ export interface DeveloperConstraint {
 	timestamp: number;
 }
 
-/** Sentences that begin with a standing directive. */
+/**
+ * Sentences that begin with a standing directive. "Always", "only", "sempre", "apenas" and
+ * "somente" also open descriptions ("Only the Windows job fails", "Always seems to break"), so they
+ * state a rule only before an action verb, which {@link DIRECTIVE_INNER} recognizes.
+ */
 const DIRECTIVE_START = new RegExp(
 	`^(?:please\\s+|por favor,?\\s+)?${
-		wordsPattern([
-			"never",
-			"always",
-			"only",
-			"avoid",
-			"keep",
-			"prefer",
-			"stick to",
-			"nunca",
-			"sempre",
-			"apenas",
-			"somente",
-			"jamais",
-			"evite",
-			"mantenha",
-			"prefira",
-		]).source
+		wordsPattern(["never", "avoid", "keep", "prefer", "stick to", "nunca", "jamais", "evite", "mantenha", "prefira"])
+			.source
 	}`,
 	"iu",
 );
+
+/** "Keep" that asks the agent to go on, not to preserve something. */
+const KEEP_GOING = /^(?:please\s+)?keep\s+(?:going|on|it up|at it|trying|working|up)(?![\p{L}])/iu;
+
+/** Words after "não" that make a statement ("não consegui rodar"), not a rule ("não deve rodar"). */
+const STATEMENT_WORDS = [
+	"consegui",
+	"consigo",
+	"conseguimos",
+	"conseguiu",
+	"pude",
+	"posso",
+	"sei",
+	"vou",
+	"vai",
+	"estou",
+	"está",
+	"esta",
+	"estava",
+	"era",
+	"foi",
+	"tenho",
+	"tem",
+	"deu",
+	"dá",
+	"sabe",
+];
 
 const CONSTRAINED_VERBS = [
 	"use",
@@ -161,6 +177,7 @@ const DIRECTIVE_INNER = phrasePattern(
 		"só",
 	],
 	CONSTRAINED_VERBS,
+	STATEMENT_WORDS,
 );
 
 /** "use X instead of Y". */
@@ -178,7 +195,9 @@ export function extractConstraints(text: string): string[] {
 		.filter((sentence) => sentence.length >= 8 && sentence.length <= 240 && !sentence.endsWith("?"));
 	return sentences.filter(
 		(sentence) =>
-			DIRECTIVE_START.test(sentence) || DIRECTIVE_INNER.test(sentence) || DIRECTIVE_PREFERENCE.test(sentence),
+			(DIRECTIVE_START.test(sentence) && !KEEP_GOING.test(sentence)) ||
+			DIRECTIVE_INNER.test(sentence) ||
+			DIRECTIVE_PREFERENCE.test(sentence),
 	);
 }
 

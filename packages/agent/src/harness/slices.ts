@@ -17,6 +17,9 @@
  * runtime supplies a {@link WorkspaceProbe}. Without one, the signals are off.
  */
 
+/** Requests in a row that fail to measure change size before the signal stops asking. */
+const MAX_FAILED_REQUESTS = 3;
+
 /** Workspace measurements supplied by the runtime. */
 export interface WorkspaceProbe {
 	/**
@@ -55,6 +58,8 @@ export class SliceDiscipline {
 	private baseline: Promise<ReadonlyMap<string, number> | undefined> | undefined;
 	/** Set when the probe cannot measure change size (not a repository), so it is not asked again. */
 	private changeSizeUnavailable = false;
+	/** Requests in a row whose change-size measurement failed. */
+	private failedRequests = 0;
 	private changedLines = 0;
 	private changedFiles = 0;
 	/** The latest change-size measurement, started when a tool call finished. */
@@ -74,6 +79,9 @@ export class SliceDiscipline {
 
 	/** A developer request starts. */
 	beginRequest(): void {
+		// One failed measurement (a git timeout, a lock) is retried in the next request; only a
+		// workspace that fails request after request (not a repository) stops being asked.
+		if (this.failedRequests < MAX_FAILED_REQUESTS) this.changeSizeUnavailable = false;
 		this.changedLines = 0;
 		this.changedFiles = 0;
 		this.baseline = undefined;
@@ -90,7 +98,11 @@ export class SliceDiscipline {
 	async beforeChange(toolCallId: string, paths: readonly string[]): Promise<void> {
 		if (this.maxChangedLines > 0 && !this.changeSizeUnavailable && !this.baseline) {
 			this.baseline = this.probe.changedLines();
-			if (!(await this.baseline)) this.changeSizeUnavailable = true;
+			if (await this.baseline) this.failedRequests = 0;
+			else {
+				this.changeSizeUnavailable = true;
+				this.failedRequests++;
+			}
 		}
 		if (this.maxFileLines <= 0) return;
 		for (const path of paths) this.before.set(`${toolCallId}\0${path}`, await this.probe.fileLines(path));

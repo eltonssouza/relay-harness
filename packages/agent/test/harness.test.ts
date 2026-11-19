@@ -18,6 +18,7 @@ import {
 	extractConstraints,
 	HarnessCore,
 	type HarnessCoreEvent,
+	type HarnessEngineFactory,
 	isCorrection,
 	isQuestionOnly,
 	messageOrigin,
@@ -27,6 +28,7 @@ import {
 	type WorkspaceProbe,
 } from "../src/harness/index.ts";
 import { parseShell } from "../src/harness/shell.ts";
+import { createHarnessWasmEngine } from "../src/harness-wasm/index.ts";
 import type { AgentMessage, AgentTool, AgentToolCall, StreamFn } from "../src/types.ts";
 
 class MockAssistantStream extends EventStream<AssistantMessageEvent, AssistantMessage> {
@@ -98,6 +100,12 @@ function tool(name: string, isError = false): AgentTool {
 		execute: async () => ({ content: [{ type: "text", text: `${name} ok` }], details: {}, isError }),
 	};
 }
+
+/** Both engines run the pillars: the TypeScript classes and the Rust engine compiled to WebAssembly. */
+const ENGINES: Array<[string, HarnessEngineFactory | undefined]> = [
+	["TypeScript", undefined],
+	["Rust", createHarnessWasmEngine],
+];
 
 function lastText(context: TranscriptContext): string {
 	const last = context.messages.at(-1);
@@ -192,13 +200,50 @@ describe("slices", () => {
 				fileLines: async () => undefined,
 			},
 		});
-		for (const id of ["1", "2", "3"]) {
+		for (const id of ["1", "2", "3", "4", "5"]) {
 			slices.beginRequest();
 			await slices.beforeChange(id, []);
+			await slices.beforeChange(`${id}b`, []);
 			await slices.afterChange(id, [], false);
 			await slices.refresh();
 		}
-		expect(measurements).toBe(1);
+		// Once per request, and no more after three requests in a row failed: a transient failure is
+		// retried, a workspace that is not a repository stops being asked.
+		expect(measurements).toBe(3);
+	});
+
+	it("measures only around calls that may change files", async () => {
+		let measurements = 0;
+		const requests: TranscriptContext[] = [];
+		const agent = new Agent({
+			initialState: { systemPrompt: "test", tools: [tool("bash"), tool("edit")] },
+			streamFn: scripted(
+				[
+					[call("1", "bash", { command: "ls -la" }), call("2", "bash", { command: "git status" })],
+					[call("3", "edit", { path: "src/a.ts" })],
+					[{ type: "text", text: "I changed src/a.ts and did not run the tests." }],
+				],
+				requests,
+			),
+		});
+		new HarnessCore({
+			alignment: false,
+			slices: {
+				probe: {
+					changedLines: async () => {
+						measurements++;
+						return new Map();
+					},
+					fileLines: async () => 10,
+				},
+			},
+		}).install(agent);
+
+		await agent.prompt("Fix src/a.ts");
+
+		// `ls` and `git status` cost no git measurement; the edit costs a baseline and one measurement.
+		expect(requests).toHaveLength(3);
+		expect(measurements).toBe(2);
 	});
 
 	it("flags a file that crosses the guideline or grows a lot, not a small edit to a large file", async () => {
@@ -559,9 +604,26 @@ describe("context", () => {
 		expect(JSON.stringify(projected[1])).toContain("stale");
 		expect(projected[3]).toBe(messages[3]);
 	});
+
+	it("marks a read stale after a shell edit or an edit through another spelling of the path", () => {
+		const stale = (editCall: ReturnType<typeof call>) => {
+			const policy = new ContextWindowPolicy({ keepRecent: 1, batchSize: 1, minElideChars: 100, cwd: "/repo" });
+			const projected = policy.transform([
+				assistant([call("r", "read", { path: "src/a.ts" })]),
+				toolResult("r", "read", "y".repeat(300)),
+				assistant([editCall]),
+				toolResult(editCall.id, editCall.name, "done"),
+			]);
+			return JSON.stringify(projected[1]).includes("stale");
+		};
+		expect(stale(call("e", "bash", { command: "sed -i 's/a/b/' src/a.ts" }))).toBe(true);
+		expect(stale(call("e", "edit", { path: "/repo/src/a.ts" }))).toBe(true);
+		expect(stale(call("e", "edit", { path: "./src/a.ts" }))).toBe(true);
+		expect(stale(call("e", "edit", { path: "src/b.ts" }))).toBe(false);
+	});
 });
 
-describe("HarnessCore on an Agent", () => {
+describe.each(ENGINES)("HarnessCore on an Agent (%s engine)", (_name, engine) => {
 	it("sends one verification request when completion is claimed without evidence", async () => {
 		const requests: TranscriptContext[] = [];
 		const events: HarnessCoreEvent[] = [];
@@ -577,7 +639,7 @@ describe("HarnessCore on an Agent", () => {
 				requests,
 			),
 		});
-		new HarnessCore({ onEvent: (event) => events.push(event) }).install(agent);
+		new HarnessCore({ engine, onEvent: (event) => events.push(event) }).install(agent);
 
 		await agent.prompt("Fix the bug in src/a.ts");
 
@@ -599,7 +661,7 @@ describe("HarnessCore on an Agent", () => {
 				requests,
 			),
 		});
-		new HarnessCore().install(agent);
+		new HarnessCore({ engine }).install(agent);
 
 		await agent.prompt("Update the changelog. Never commit without asking.");
 
@@ -628,6 +690,7 @@ describe("HarnessCore on an Agent", () => {
 			if (event.type === "tool_execution_end") changed.set("src/a.ts", 600);
 		});
 		new HarnessCore({
+			engine,
 			evidence: false,
 			slices: { probe: { changedLines: async () => new Map(changed), fileLines: async () => 10 } },
 		}).install(agent);
@@ -638,13 +701,91 @@ describe("HarnessCore on an Agent", () => {
 		expect(lastText(requests[1])).toContain("This request has changed about 600 lines in 1 files");
 	});
 
+	it("asks the authorizer and runs the call it approves", async () => {
+		const events: HarnessCoreEvent[] = [];
+		const asked: string[] = [];
+		const agent = new Agent({
+			initialState: { systemPrompt: "test", tools: [tool("bash")] },
+			streamFn: scripted(
+				[[call("1", "bash", { command: "git push origin main" })], [{ type: "text", text: "Pushed." }]],
+				[],
+			),
+		});
+		new HarnessCore({
+			engine,
+			evidence: false,
+			alignment: {
+				authorize: async (request) => {
+					asked.push(request.fingerprint);
+					return true;
+				},
+			},
+			onEvent: (event) => events.push(event),
+		}).install(agent);
+
+		await agent.prompt("Update the changelog");
+
+		expect(asked).toHaveLength(1);
+		expect(events.some((event) => event.type === "tool_authorized" && event.via === "authorizer")).toBe(true);
+		const result = agent.state.messages.find((message) => message.role === "toolResult");
+		expect(result?.role === "toolResult" && result.isError).toBe(false);
+	});
+
 	it("restores the previous hooks on uninstall", () => {
 		const agent = new Agent({ streamFn: scripted([], []) });
 		const before = agent.beforeToolCall;
-		const uninstall = new HarnessCore().install(agent);
+		const uninstall = new HarnessCore({ engine }).install(agent);
 		expect(agent.beforeToolCall).not.toBe(before);
 		uninstall();
 		expect(agent.beforeToolCall).toBe(before);
+	});
+});
+
+describe("the Rust engine", () => {
+	it("sends the provider the same requests as the TypeScript pillars", async () => {
+		const read: AgentTool = {
+			...tool("read"),
+			execute: async () => ({ content: [{ type: "text", text: "x".repeat(3000) }], details: {}, isError: false }),
+		};
+		const run = async (engine: HarnessEngineFactory | undefined) => {
+			const requests: TranscriptContext[] = [];
+			const events: unknown[] = [];
+			const agent = new Agent({
+				initialState: { systemPrompt: "test", tools: [read, tool("edit"), tool("bash")] },
+				streamFn: scripted(
+					[
+						[call("1", "read", { path: "src/a.ts" })],
+						[call("2", "read", { path: "src/b.ts" })],
+						[call("3", "edit", { path: "src/a.ts" })],
+						[call("4", "bash", { command: "git push origin main" })],
+						[{ type: "text", text: "Done, the bug is fixed." }],
+						[call("5", "bash", { command: "npm test" })],
+						[{ type: "text", text: "Fixed; all tests pass." }],
+					],
+					requests,
+				),
+			});
+			const core = new HarnessCore({
+				engine,
+				context: { keepRecent: 1, batchSize: 1, minElideChars: 100 },
+				// A copy: the TypeScript pillars keep updating the stats object they report.
+				onEvent: (event) => events.push(JSON.parse(JSON.stringify(event))),
+			});
+			core.install(agent);
+			await agent.prompt("Fix the bug in src/a.ts. Never commit without asking.");
+			core.dispose();
+			const withoutTimestamps = (key: string, value: unknown) => (key === "timestamp" ? undefined : value);
+			return { requests: JSON.stringify(requests, withoutTimestamps), events };
+		};
+
+		const typescript = await run(undefined);
+		const rust = await run(createHarnessWasmEngine);
+
+		expect(typescript.requests).toContain("Result elided to keep context focused");
+		expect(typescript.requests).toContain("Blocked by the harness alignment policy");
+		expect(typescript.requests).toContain("[harness:evidence] Completion check");
+		expect(rust.requests).toBe(typescript.requests);
+		expect(rust.events).toEqual(typescript.events);
 	});
 });
 
@@ -891,7 +1032,7 @@ describe("intent", () => {
 	});
 });
 
-describe("message origin", () => {
+describe.each(ENGINES)("message origin (%s engine)", (_name, engine) => {
 	it("tells developer, extension and harness messages apart", () => {
 		const text = (value: string) => [{ type: "text" as const, text: value }];
 		expect(messageOrigin({ role: "user", content: text("hi"), timestamp: 0 })).toBe("developer");
@@ -907,7 +1048,7 @@ describe("message origin", () => {
 			initialState: { systemPrompt: "test", tools: [] },
 			streamFn: scripted([[{ type: "text", text: "ok" }], [{ type: "text", text: "ok" }]], []),
 		});
-		const core = new HarnessCore({ evidence: false, context: false });
+		const core = new HarnessCore({ engine, evidence: false, context: false });
 		core.install(agent);
 		await agent.prompt({
 			role: "user",
@@ -917,11 +1058,9 @@ describe("message origin", () => {
 			timestamp: 0,
 			origin: "extension",
 		});
-		expect(core.alignment?.constraints.list()).toEqual([]);
+		expect(core.engine.constraints()).toEqual([]);
 		await agent.prompt("Never touch the lockfile.");
-		expect(core.alignment?.constraints.list().map((constraint) => constraint.text)).toEqual([
-			"Never touch the lockfile.",
-		]);
+		expect(core.engine.constraints().map((constraint) => constraint.text)).toEqual(["Never touch the lockfile."]);
 	});
 
 	it("starts an evidence request for an extension's prompt", async () => {
@@ -937,7 +1076,7 @@ describe("message origin", () => {
 				[],
 			),
 		});
-		new HarnessCore({ onEvent: (event) => events.push(event) }).install(agent);
+		new HarnessCore({ engine, onEvent: (event) => events.push(event) }).install(agent);
 		await agent.prompt({
 			role: "user",
 			content: [{ type: "text", text: "Implement the plan" }],
@@ -950,9 +1089,9 @@ describe("message origin", () => {
 	});
 });
 
-describe("resync after the conversation moves to another branch", () => {
+describe.each(ENGINES)("resync after the conversation moves to another branch (%s engine)", (_name, engine) => {
 	it("drops the context digest and conversation-bound alignment state", async () => {
-		const core = new HarnessCore({ context: { keepRecent: 1, batchSize: 1, minElideChars: 10 } });
+		const core = new HarnessCore({ engine, context: { keepRecent: 1, batchSize: 1, minElideChars: 10 } });
 		const messages: AgentMessage[] = [
 			assistant([call("a", "read", { path: "src/a.ts" })]),
 			toolResult("a", "read", "x".repeat(200)),
@@ -960,15 +1099,15 @@ describe("resync after the conversation moves to another branch", () => {
 			toolResult("b", "read", "y".repeat(200)),
 		];
 		core.transformContext(messages);
-		expect(core.context?.renderProgress()).toContain("read src/a.ts");
+		expect(core.renderState()).toContain("- read src/a.ts: ok");
 		core.observeDeveloperMessage("Fix it");
-		await core.alignment?.check("bash", { kind: "external", paths: [], command: "git push" });
-		expect(core.alignment?.pendingAuthorizations()).toHaveLength(1);
+		await core.engine.check("bash", { kind: "external", paths: [], command: "git push" });
+		expect(core.engine.pendingAuthorizations()).toHaveLength(1);
 
 		core.resync();
 
-		expect(core.context?.renderProgress()).toBeUndefined();
-		expect(core.alignment?.pendingAuthorizations()).toEqual([]);
+		expect(core.renderState() ?? "").not.toContain("Earlier tool results elided");
+		expect(core.engine.pendingAuthorizations()).toEqual([]);
 	});
 });
 

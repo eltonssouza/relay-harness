@@ -56,11 +56,17 @@ export function wordsPattern(words: readonly string[]): RegExp {
 
 /**
  * Case-insensitive Unicode regex for `lead` words, optionally one more word, then `verbs`:
- * "do not use", "não altere", "never directly push".
+ * "do not use", "não altere", "never directly push". The optional word is never one of
+ * `excluded`, so "não consegui rodar" can be kept apart from "não deve rodar".
  */
-export function phrasePattern(lead: readonly string[], verbs: readonly string[]): RegExp {
+export function phrasePattern(
+	lead: readonly string[],
+	verbs: readonly string[],
+	excluded: readonly string[] = [],
+): RegExp {
+	const middle = excluded.length > 0 ? `(?!(?:${excluded.join("|")})${WORD_END})` : "";
 	return new RegExp(
-		`${WORD_START}(?:${lead.join("|")})\\s+(?:[\\p{L}']+\\s+)?(?:${verbs.join("|")})${WORD_END}`,
+		`${WORD_START}(?:${lead.join("|")})\\s+(?:${middle}[\\p{L}']+\\s+)?(?:${verbs.join("|")})${WORD_END}`,
 		"iu",
 	);
 }

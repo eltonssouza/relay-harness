@@ -19,6 +19,7 @@
 			"@relay-harness/ai/*": ["./packages/ai/src/*.ts", "./packages/ai/src/providers/*.ts"],
 			"@relay-harness/ai/dist/*": ["./packages/ai/src/*"],
 			"@relay-harness/agent-core": ["./packages/agent/src/index.ts"],
+			"@relay-harness/agent-core/harness-wasm": ["./packages/agent/src/harness-wasm/index.ts"],
 			"@relay-harness/coding-agent": ["./packages/coding-agent/src/index.ts"],
 			"@relay-harness/coding-agent/hooks": ["./packages/coding-agent/src/core/hooks/index.ts"],
 			"@relay-harness/coding-agent/*": ["./packages/coding-agent/src/*"],

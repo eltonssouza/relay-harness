@@ -51,6 +51,14 @@
 - Context7, Playwright and Chrome DevTools are installed stdio MCP servers, registered only on demand through `native_mcp`. Resolve entrypoints through `src/config.ts`; standalone distributions copy the new servers' installed dependency closure with `scripts/copy-native-mcp.mjs`. Keep both binary asset-copy paths updated. Standalone MCP execution requires Node on PATH; browser operations require system Chrome.
 - Validate changes with the focused Ollama, task lifecycle and native MCP tests plus `npm run check`. Native MCP handshake tests use an isolated temporary distribution and no provider APIs. On Windows, temporary MCP distribution cleanup uses `rmSync` retries to tolerate observed transient `EPERM` errors after process shutdown.
 
+## Rust Harness Core
+
+- `crates/harness-core` ports the harness core of `packages/agent/src/harness` to Rust. The toolchain is pinned by `rust-toolchain.toml`; direct crate dependencies are pinned to exact versions and `Cargo.lock` is committed and reviewed like `package-lock.json`.
+- `bash ./ci.sh` runs `cargo fmt --all --check`, `cargo clippy --all-targets --locked -- -D warnings` and `cargo test --locked`. Run them after changing Rust code.
+- `crates/harness-wasm` compiles the engine to WebAssembly. After changing Rust code, run `npm run build:harness-wasm` and commit `packages/agent/src/harness-wasm/module.generated.ts`; `harness-wasm.test.ts` runs the committed module against the reference files below.
+- `HarnessCore` runs its pillars through a `HarnessEngine` (`packages/agent/src/harness/engine.ts`): the TypeScript pillars or `createHarnessWasmEngine`. Relay uses the Rust engine; `RELAY_HARNESS_ENGINE=typescript` falls back for one release. `harness.test.ts` runs the HarnessCore scenarios on both engines and checks that they send identical requests.
+- `crates/harness-core/tests/fixtures/classification.json` holds the TypeScript classification of every corpus command and edge case, and `pillars.json` the alignment decisions, text readings and completion reports. After changing a rule in `packages/agent/src/harness`, run `npm run harness:golden` and make the Rust tests pass; `golden.test.ts` fails while the files are behind the TypeScript code.
+
 ## Dependency and Install Security
 
 - Treat npm dep and lockfile changes as reviewed code. Direct external deps stay pinned to exact versions.

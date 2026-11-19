@@ -214,6 +214,69 @@ describe("Cache Retention (RELAY_CACHE_RETENTION)", () => {
 			expect(lastBlock.cache_control).toEqual({ type: "ephemeral" });
 		});
 
+		it("keeps the cache breakpoint before volatile text and moves that text out of the tool result", async () => {
+			const baseModel = getModel("anthropic", "claude-haiku-4-5");
+			let capturedPayload: any = null;
+			const toolContext = normalizeContext({
+				systemPrompt: "You are a helpful assistant.",
+				messages: [
+					{ role: "user", content: "Read a.ts", timestamp: 0 },
+					{
+						role: "assistant",
+						content: [{ type: "toolCall", id: "call_1", name: "read", arguments: { path: "a.ts" } }],
+						api: "anthropic-messages",
+						provider: "anthropic",
+						model: baseModel.id,
+						usage: {
+							input: 0,
+							output: 0,
+							cacheRead: 0,
+							cacheWrite: 0,
+							totalTokens: 0,
+							cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+						},
+						stopReason: "toolUse",
+						timestamp: 1,
+					},
+					{
+						role: "toolResult",
+						toolCallId: "call_1",
+						toolName: "read",
+						content: [
+							{ type: "text", text: "export const a = 1;" },
+							{ type: "text", text: "<harness_state>\nconstraints\n</harness_state>", volatile: true },
+						],
+						isError: false,
+						timestamp: 2,
+					},
+				],
+			});
+
+			try {
+				const s = streamAnthropic(baseModel, toolContext, {
+					apiKey: "fake-key",
+					onPayload: stopAfterPayload((payload) => {
+						capturedPayload = payload;
+					}),
+				});
+				for await (const event of s) {
+					if (event.type === "error") break;
+				}
+			} catch {
+				// Expected to fail
+			}
+
+			expect(capturedPayload).not.toBeNull();
+			const lastMessage = capturedPayload.messages[capturedPayload.messages.length - 1];
+			expect(lastMessage.content.map((block: { type: string }) => block.type)).toEqual(["tool_result", "text"]);
+			const [toolResult, state] = lastMessage.content;
+			expect(toolResult.content).toBe("export const a = 1;");
+			// The next request sends the same tool result without the state, so the cached prefix ends at it.
+			expect(toolResult.cache_control).toEqual({ type: "ephemeral" });
+			expect(state.text).toContain("<harness_state>");
+			expect(state.cache_control).toBeUndefined();
+		});
+
 		it("should set 1h cache TTL when cacheRetention is long", async () => {
 			const baseModel = getModel("anthropic", "claude-haiku-4-5");
 			let capturedPayload: any = null;

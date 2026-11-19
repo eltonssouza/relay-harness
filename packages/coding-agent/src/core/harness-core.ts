@@ -13,10 +13,19 @@ import {
 	type HarnessCoreEvent,
 	type ToolEffect,
 } from "@relay-harness/agent-core";
+import { createHarnessWasmEngine } from "@relay-harness/agent-core/harness-wasm";
 import type { ExtensionMode, ExtensionUIContext, ToolAnnotations } from "./extensions/index.ts";
 import type { SessionManager } from "./session-manager.ts";
 import type { SettingsManager } from "./settings-manager.ts";
 import { createGitWorkspaceProbe } from "./workspace-probe.ts";
+
+/**
+ * The engine that runs the pillars: the Rust engine (WebAssembly) unless `RELAY_HARNESS_ENGINE` is
+ * `typescript`, which keeps the TypeScript pillars for one release as a fallback.
+ */
+function harnessEngine() {
+	return process.env.RELAY_HARNESS_ENGINE === "typescript" ? undefined : createHarnessWasmEngine;
+}
 
 /** Session entry type that persists developer constraints and corrections across resumes and compaction. */
 export const HARNESS_CONSTRAINTS_ENTRY = "harness-core:constraints";
@@ -67,6 +76,8 @@ export class CodingHarnessCore {
 	private readonly blocked: Array<{ toolName: string; reason: string }> = [];
 	private readonly sessionManager: SessionManager;
 	private readonly uninstall: () => void;
+	/** Saves the current constraints and corrections to the session; absent without the alignment pillar. */
+	private persistLearnings?: () => void;
 
 	constructor(options: CodingHarnessCoreOptions) {
 		const settings = options.settingsManager.getHarnessCoreSettings();
@@ -105,34 +116,45 @@ export class CodingHarnessCore {
 			workspace: { cwd: options.cwd, home: homedir(), tempDir: tmpdir() },
 			classifyEffect: (toolCall) => annotatedEffect(toolCall, options.getToolAnnotations(toolCall.name)),
 			onEvent: (event) => this.handleEvent(event, getUI),
+			engine: harnessEngine(),
 		});
 
-		const alignment = this.core.alignment;
-		if (alignment) {
+		const { engine } = this.core;
+		if (engine.pillars.alignment) {
 			this.restoreFromBranch();
 			const persist = () => {
 				sessionManager.appendCustomEntry(HARNESS_CONSTRAINTS_ENTRY, {
-					constraints: [...alignment.constraints.list()],
-					corrections: [...alignment.corrections()],
+					constraints: [...engine.constraints()],
+					corrections: [...engine.corrections()],
 				} satisfies ConstraintsEntryData);
 			};
-			alignment.constraints.onChange = persist;
-			alignment.onCorrection = persist;
+			this.core.onLearningsChange = persist;
+			this.persistLearnings = persist;
 		}
 
 		this.uninstall = this.core.install(options.agent);
 	}
 
+	/** Drop one recorded constraint by its id (`c3`), for `/harness forget`. Returns whether it existed. */
+	forgetConstraint(id: string): boolean {
+		return this.core.engine.removeConstraint(id);
+	}
+
+	/** Drop every recorded constraint and correction of the current branch, for `/harness clear`. */
+	clearLearnings(): void {
+		if (!this.core.engine.pillars.alignment) return;
+		this.core.engine.restoreLearnings([], []);
+		this.persistLearnings?.();
+	}
+
 	/** Constraints and corrections the current branch recorded last, or none. */
 	private restoreFromBranch(): void {
-		const alignment = this.core.alignment;
-		if (!alignment) return;
+		if (!this.core.engine.pillars.alignment) return;
 		const persisted = this.sessionManager
 			.getBranch()
 			.findLast((entry) => entry.type === "custom" && entry.customType === HARNESS_CONSTRAINTS_ENTRY);
 		const data = persisted?.type === "custom" ? (persisted.data as ConstraintsEntryData | undefined) : undefined;
-		alignment.constraints.restore(data?.constraints ?? []);
-		alignment.restoreCorrections(data?.corrections ?? []);
+		this.core.engine.restoreLearnings(data?.constraints ?? [], data?.corrections ?? []);
 	}
 
 	/**
@@ -146,6 +168,7 @@ export class CodingHarnessCore {
 
 	dispose(): void {
 		this.uninstall();
+		this.core.dispose();
 	}
 
 	/** Collaboration rules the system prompt adds while the alignment pillar is enabled. */
@@ -170,12 +193,12 @@ export class CodingHarnessCore {
 
 	/** Plain-text status of every pillar, as sections of lines, for `/harness`. */
 	describe(): Array<{ title: string; lines: string[] }> {
-		const { alignment, evidence, context } = this.core;
+		const { engine } = this.core;
 		const sections: Array<{ title: string; lines: string[] }> = [];
 
-		if (alignment) {
-			const constraints = alignment.constraints.list();
-			const pending = alignment.pendingAuthorizations();
+		if (engine.pillars.alignment) {
+			const constraints = engine.constraints();
+			const pending = engine.pendingAuthorizations();
 			sections.push({
 				title: "Alignment",
 				lines: [
@@ -186,7 +209,7 @@ export class CodingHarnessCore {
 					...this.blocked.slice(-5).map((call) => `blocked ${call.toolName}: ${call.reason.split(". ")[0]}`),
 				],
 			});
-			const corrections = alignment.corrections();
+			const corrections = engine.corrections();
 			if (constraints.length > 0 || corrections.length > 0) {
 				sections.push({
 					title: "Learnings (candidates for AGENTS.md)",
@@ -201,9 +224,9 @@ export class CodingHarnessCore {
 			sections.push({ title: "Alignment", lines: ["disabled"] });
 		}
 
-		if (evidence) {
-			const report = evidence.latestReport();
-			const pending = evidence.pendingChanges();
+		if (engine.pillars.evidence) {
+			const report = engine.latestReport();
+			const pending = engine.pendingChanges();
 			sections.push({
 				title: "Evidence",
 				lines: [
@@ -226,8 +249,8 @@ export class CodingHarnessCore {
 			sections.push({ title: "Evidence", lines: ["disabled"] });
 		}
 
-		if (context) {
-			const stats = context.getStats();
+		const stats = engine.contextStats();
+		if (stats) {
 			sections.push({
 				title: "Context",
 				lines: [

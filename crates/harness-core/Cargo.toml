@@ -1,0 +1,17 @@
+[package]
+name = "relay-harness-core"
+version = "0.0.0"
+description = "The model-independent harness core of Relay: classification, alignment and evidence."
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+fancy-regex = { version = "=0.20.2", default-features = false, features = ["std"] }
+regex = { version = "=1.13.2", default-features = false, features = ["std", "unicode-perl", "unicode-case", "unicode-gencat"] }
+
+[dev-dependencies]
+serde_json = "=1.0.154"

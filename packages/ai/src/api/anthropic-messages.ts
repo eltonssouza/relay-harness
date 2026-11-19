@@ -1295,7 +1295,7 @@ function convertToolResult(msg: ToolResultMessage): ContentBlockParam {
 	return {
 		type: "tool_result",
 		tool_use_id: msg.toolCallId,
-		content: convertContentBlocks(msg.content),
+		content: convertContentBlocks(msg.content.filter((block) => block.type !== "text" || !block.volatile)),
 		is_error: msg.isError,
 	};
 }
@@ -1316,6 +1316,8 @@ function convertMessages(
 ): ConvertedAnthropicMessages {
 	const params: MessageParam[] = [];
 	const assistantLevels = new Map<number, AnthropicEffort>();
+	/** Blocks from volatile text, which the cache breakpoint must not include. */
+	const volatileBlocks = new WeakSet<object>();
 	// Later system messages are held back and emitted directly before the next assistant
 	// message (or at the end of the transcript). Anthropic requires `tool_result` blocks to
 	// immediately follow their `tool_use`, so a system message between them is rejected; this
@@ -1363,10 +1365,9 @@ function convertMessages(
 			} else {
 				const blocks: ContentBlockParam[] = msg.content.map((item) => {
 					if (item.type === "text") {
-						return {
-							type: "text",
-							text: sanitizeSurrogates(item.text),
-						};
+						const block: ContentBlockParam = { type: "text", text: sanitizeSurrogates(item.text) };
+						if (item.volatile) volatileBlocks.add(block);
+						return block;
 					} else {
 						return {
 							type: "image",
@@ -1462,9 +1463,19 @@ function convertMessages(
 		} else if (msg.role === "toolResult") {
 			// Collect all consecutive toolResult messages, needed for z.ai Anthropic endpoint.
 			const toolResults: ContentBlockParam[] = [];
+			// Volatile text leaves the tool result, which would otherwise change in the next request,
+			// and follows the results as its own block.
+			const volatileTexts: ContentBlockParam[] = [];
 			let j = i;
 			while (j < transformedMessages.length && transformedMessages[j].role === "toolResult") {
-				toolResults.push(convertToolResult(transformedMessages[j] as ToolResultMessage));
+				const toolResult = transformedMessages[j] as ToolResultMessage;
+				toolResults.push(convertToolResult(toolResult));
+				for (const block of toolResult.content) {
+					if (block.type !== "text" || !block.volatile || block.text.trim().length === 0) continue;
+					const text: ContentBlockParam = { type: "text", text: sanitizeSurrogates(block.text) };
+					volatileBlocks.add(text);
+					volatileTexts.push(text);
+				}
 				j++;
 			}
 
@@ -1473,19 +1484,21 @@ function convertMessages(
 
 			params.push({
 				role: "user",
-				content: toolResults,
+				content: [...toolResults, ...volatileTexts],
 			});
 		}
 	}
 
 	flushPendingSystemMessages();
 
-	// Add cache_control to the last user or system message to cache conversation history
+	// Add cache_control to the last user or system message to cache conversation history. The
+	// breakpoint goes on the last block that is not volatile: volatile text is gone from the next
+	// request, and a breakpoint after it would leave nothing that request could read from the cache.
 	if (cacheControl && params.length > 0) {
 		const lastMessage = params[params.length - 1];
 		if (lastMessage.role === "user" || lastMessage.role === "system") {
 			if (Array.isArray(lastMessage.content)) {
-				const lastBlock = lastMessage.content[lastMessage.content.length - 1];
+				const lastBlock = lastMessage.content.findLast((block) => !volatileBlocks.has(block));
 				if (
 					lastBlock &&
 					(lastBlock.type === "text" ||

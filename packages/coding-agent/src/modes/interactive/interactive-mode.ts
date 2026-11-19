@@ -3215,8 +3215,8 @@ export class InteractiveMode {
 				this.editor.setText("");
 				return;
 			}
-			if (text === "/harness") {
-				this.handleHarnessCommand();
+			if (text === "/harness" || text.startsWith("/harness ")) {
+				this.handleHarnessCommand(text.slice("/harness".length).trim());
 				this.editor.setText("");
 				return;
 			}
@@ -6634,10 +6634,23 @@ export class InteractiveMode {
 		this.ui.requestRender();
 	}
 
-	private handleHarnessCommand(): void {
-		const sections = this.session.harnessCore.describe();
+	/** `/harness` shows the pillars; `/harness forget <id>` and `/harness clear` remove recorded learnings first. */
+	private handleHarnessCommand(args = ""): void {
+		const harness = this.session.harnessCore;
+		const [action, id] = args.split(/\s+/);
+		let notice: string | undefined;
+		if (action === "forget" && id) {
+			notice = harness.forgetConstraint(id) ? `Forgot constraint ${id}.` : `No constraint ${id}.`;
+		} else if (action === "clear") {
+			harness.clearLearnings();
+			notice = "Cleared the recorded constraints and corrections.";
+		} else if (action) {
+			notice = "Usage: /harness, /harness forget <constraint id>, /harness clear";
+		}
+		const sections = harness.describe();
 		const renderInfo = (): string => {
 			let info = `${theme.bold("Harness Core")}\n`;
+			if (notice) info += `${notice}\n`;
 			for (const section of sections) {
 				info += `\n${theme.bold(section.title)}\n`;
 				for (const line of section.lines) info += `${theme.fg("dim", "-")} ${line}\n`;
