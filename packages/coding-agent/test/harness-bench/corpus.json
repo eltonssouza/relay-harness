@@ -1101,18 +1101,51 @@
 		},
 		{
 			"text": "Keep going.",
-			"expected": [],
-			"open": "constraint-false-positives"
+			"expected": []
 		},
 		{
 			"text": "Não consegui rodar os testes aqui.",
-			"expected": [],
-			"open": "constraint-false-positives"
+			"expected": []
 		},
 		{
 			"text": "Only the Windows job fails.",
-			"expected": [],
-			"open": "constraint-false-positives"
+			"expected": []
+		},
+		{
+			"text": "Keep the public API backward compatible.",
+			"expected": [
+				"Keep the public API backward compatible."
+			]
+		},
+		{
+			"text": "Always run the tests before committing.",
+			"expected": [
+				"Always run the tests before committing."
+			]
+		},
+		{
+			"text": "Não deve alterar os testes.",
+			"expected": [
+				"Não deve alterar os testes."
+			]
+		},
+		{
+			"text": "Sempre rode o lint antes do commit.",
+			"expected": [
+				"Sempre rode o lint antes do commit."
+			]
+		},
+		{
+			"text": "Always seems to break after a rebase.",
+			"expected": []
+		},
+		{
+			"text": "Keep going with the next file.",
+			"expected": []
+		},
+		{
+			"text": "Não sei por que o build falha.",
+			"expected": []
 		}
 	]
 }

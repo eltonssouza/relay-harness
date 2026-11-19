@@ -67,6 +67,8 @@ export class CodingHarnessCore {
 	private readonly blocked: Array<{ toolName: string; reason: string }> = [];
 	private readonly sessionManager: SessionManager;
 	private readonly uninstall: () => void;
+	/** Saves the current constraints and corrections to the session; absent without the alignment pillar. */
+	private persistLearnings?: () => void;
 
 	constructor(options: CodingHarnessCoreOptions) {
 		const settings = options.settingsManager.getHarnessCoreSettings();
@@ -118,9 +120,24 @@ export class CodingHarnessCore {
 			};
 			alignment.constraints.onChange = persist;
 			alignment.onCorrection = persist;
+			this.persistLearnings = persist;
 		}
 
 		this.uninstall = this.core.install(options.agent);
+	}
+
+	/** Drop one recorded constraint by its id (`c3`), for `/harness forget`. Returns whether it existed. */
+	forgetConstraint(id: string): boolean {
+		return this.core.alignment?.constraints.remove(id) ?? false;
+	}
+
+	/** Drop every recorded constraint and correction of the current branch, for `/harness clear`. */
+	clearLearnings(): void {
+		const alignment = this.core.alignment;
+		if (!alignment) return;
+		alignment.restoreCorrections([]);
+		alignment.constraints.restore([]);
+		this.persistLearnings?.();
 	}
 
 	/** Constraints and corrections the current branch recorded last, or none. */

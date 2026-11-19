@@ -207,6 +207,29 @@ describe("AgentSession harness core", () => {
 			"Never touch package-lock.json.",
 		]);
 	});
+
+	it("forgets one constraint and clears the learnings, and the session remembers it", async () => {
+		const { harness } = await create();
+		harness.setResponses([fauxAssistantMessage("Understood.")]);
+		await harness.session.prompt("Never touch package-lock.json. Always run the tests before committing.");
+		const harnessCore = harness.session.harnessCore;
+		const texts = () => harnessCore.core.alignment?.constraints.list().map((c) => c.text);
+		expect(texts()).toEqual(["Never touch package-lock.json.", "Always run the tests before committing."]);
+
+		expect(harnessCore.forgetConstraint("c1")).toBe(true);
+		expect(harnessCore.forgetConstraint("c9")).toBe(false);
+		expect(texts()).toEqual(["Always run the tests before committing."]);
+		const { harness: resumed } = await create({ sessionManager: harness.sessionManager });
+		expect(resumed.session.harnessCore.core.alignment?.constraints.list().map((c) => c.text)).toEqual([
+			"Always run the tests before committing.",
+		]);
+
+		resumed.session.harnessCore.clearLearnings();
+		const { harness: cleared } = await create({ sessionManager: harness.sessionManager });
+		expect(cleared.session.harnessCore.core.alignment?.constraints.list()).toEqual([]);
+		expect(cleared.session.harnessCore.core.alignment?.corrections()).toEqual([]);
+	});
+
 	it("keeps an extension's prompt out of the developer's constraints", async () => {
 		const { harness } = await create({
 			extensionFactories: [

@@ -53,6 +53,20 @@ function resultText(result: unknown): string {
 		.join("\n");
 }
 
+/**
+ * Whether a call may change workspace files, so the slice signals measure around it: edits, shell
+ * commands that write files, checks (builds and code generators write too), and risky operations.
+ * A plain command such as `ls` or `git status` costs no git measurement.
+ */
+function mayChangeFiles(effect: ToolEffect): boolean {
+	return (effect.kind !== "read" && effect.kind !== "execute") || effect.writes !== undefined;
+}
+
+/** Files a call writes by name: the edit tool's path and the files a shell command edits. */
+function writtenPaths(effect: ToolEffect): string[] {
+	return [...(effect.kind === "write" ? effect.paths : []), ...(effect.writes ?? [])];
+}
+
 export type HarnessCoreEvent =
 	| { type: "tool_blocked"; toolName: string; effect: ToolEffect; kind: "authorization" | "scope"; reason: string }
 	| { type: "tool_authorized"; toolName: string; effect: ToolEffect; via: "request" | "grant" | "authorizer" }
@@ -102,7 +116,11 @@ export class HarnessCore {
 			this.evidence = new EvidenceLedger({ cwd: options.workspace?.cwd, ...options.evidence });
 		}
 		if (options.context !== false) {
-			this.context = new ContextWindowPolicy({ ...options.context, classifyEffect: options.classifyEffect });
+			this.context = new ContextWindowPolicy({
+				cwd: options.workspace?.cwd,
+				...options.context,
+				classifyEffect: options.classifyEffect,
+			});
 		}
 	}
 
@@ -275,9 +293,7 @@ export class HarnessCore {
 					const start = this.evidence?.beginToolCall();
 					if (start !== undefined) startedAt.set(event.toolCallId, start);
 					const effect = this.classify(toolCall);
-					if (effect.kind !== "read") {
-						await this.slices?.beforeChange(toolCall.id, effect.kind === "write" ? effect.paths : []);
-					}
+					if (mayChangeFiles(effect)) await this.slices?.beforeChange(toolCall.id, writtenPaths(effect));
 					break;
 				}
 				case "tool_execution_end": {
@@ -288,13 +304,8 @@ export class HarnessCore {
 					if (!toolCall) break;
 					this.recordToolOutcome(toolCall, event.isError, resultText(event.result), start);
 					const effect = this.classify(toolCall);
-					if (effect.kind !== "read") {
-						await this.slices?.afterChange(
-							toolCall.id,
-							effect.kind === "write" ? effect.paths : [],
-							event.isError,
-						);
-					}
+					if (mayChangeFiles(effect))
+						await this.slices?.afterChange(toolCall.id, writtenPaths(effect), event.isError);
 					break;
 				}
 				case "agent_end": {

@@ -192,13 +192,50 @@ describe("slices", () => {
 				fileLines: async () => undefined,
 			},
 		});
-		for (const id of ["1", "2", "3"]) {
+		for (const id of ["1", "2", "3", "4", "5"]) {
 			slices.beginRequest();
 			await slices.beforeChange(id, []);
+			await slices.beforeChange(`${id}b`, []);
 			await slices.afterChange(id, [], false);
 			await slices.refresh();
 		}
-		expect(measurements).toBe(1);
+		// Once per request, and no more after three requests in a row failed: a transient failure is
+		// retried, a workspace that is not a repository stops being asked.
+		expect(measurements).toBe(3);
+	});
+
+	it("measures only around calls that may change files", async () => {
+		let measurements = 0;
+		const requests: TranscriptContext[] = [];
+		const agent = new Agent({
+			initialState: { systemPrompt: "test", tools: [tool("bash"), tool("edit")] },
+			streamFn: scripted(
+				[
+					[call("1", "bash", { command: "ls -la" }), call("2", "bash", { command: "git status" })],
+					[call("3", "edit", { path: "src/a.ts" })],
+					[{ type: "text", text: "I changed src/a.ts and did not run the tests." }],
+				],
+				requests,
+			),
+		});
+		new HarnessCore({
+			alignment: false,
+			slices: {
+				probe: {
+					changedLines: async () => {
+						measurements++;
+						return new Map();
+					},
+					fileLines: async () => 10,
+				},
+			},
+		}).install(agent);
+
+		await agent.prompt("Fix src/a.ts");
+
+		// `ls` and `git status` cost no git measurement; the edit costs a baseline and one measurement.
+		expect(requests).toHaveLength(3);
+		expect(measurements).toBe(2);
 	});
 
 	it("flags a file that crosses the guideline or grows a lot, not a small edit to a large file", async () => {
@@ -558,6 +595,23 @@ describe("context", () => {
 		const projected = policy.transform(messages);
 		expect(JSON.stringify(projected[1])).toContain("stale");
 		expect(projected[3]).toBe(messages[3]);
+	});
+
+	it("marks a read stale after a shell edit or an edit through another spelling of the path", () => {
+		const stale = (editCall: ReturnType<typeof call>) => {
+			const policy = new ContextWindowPolicy({ keepRecent: 1, batchSize: 1, minElideChars: 100, cwd: "/repo" });
+			const projected = policy.transform([
+				assistant([call("r", "read", { path: "src/a.ts" })]),
+				toolResult("r", "read", "y".repeat(300)),
+				assistant([editCall]),
+				toolResult(editCall.id, editCall.name, "done"),
+			]);
+			return JSON.stringify(projected[1]).includes("stale");
+		};
+		expect(stale(call("e", "bash", { command: "sed -i 's/a/b/' src/a.ts" }))).toBe(true);
+		expect(stale(call("e", "edit", { path: "/repo/src/a.ts" }))).toBe(true);
+		expect(stale(call("e", "edit", { path: "./src/a.ts" }))).toBe(true);
+		expect(stale(call("e", "edit", { path: "src/b.ts" }))).toBe(false);
 	});
 });
 

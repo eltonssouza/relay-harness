@@ -24,7 +24,14 @@
 
 import type { ToolResultMessage } from "@relay-harness/ai";
 import type { AgentMessage, AgentToolCall } from "../types.ts";
-import { classifyToolCall, isMutation, type ToolEffectClassifier } from "./effects.ts";
+import {
+	classifyToolCall,
+	isMutation,
+	normalizePath,
+	relativeToRoot,
+	type ToolEffect,
+	type ToolEffectClassifier,
+} from "./effects.ts";
 import { clip } from "./text.ts";
 
 export interface ContextPolicyOptions {
@@ -39,6 +46,8 @@ export interface ContextPolicyOptions {
 	/** Character weight of one image when sizing a result. Default: 4000. */
 	imageChars?: number;
 	classifyEffect?: ToolEffectClassifier;
+	/** Workspace root, so `/repo/src/a.ts` and `src/a.ts` are known to be the same file. */
+	cwd?: string;
 }
 
 export interface DigestEntry {
@@ -74,6 +83,7 @@ export class ContextWindowPolicy {
 	private readonly maxDigestEntries: number;
 	private readonly imageChars: number;
 	private readonly classifyEffect?: ToolEffectClassifier;
+	private readonly cwd?: string;
 	/** Elision decisions by tool call id. Once elided, a result stays elided. */
 	private readonly elided = new Map<string, ElisionRecord>();
 	private readonly digest: DigestEntry[] = [];
@@ -86,6 +96,20 @@ export class ContextWindowPolicy {
 		this.maxDigestEntries = options.maxDigestEntries ?? 30;
 		this.imageChars = options.imageChars ?? 4000;
 		this.classifyEffect = options.classifyEffect;
+		this.cwd = options.cwd;
+	}
+
+	/** One spelling per file: separators, `./` and `..` normalized, workspace paths made relative. */
+	private samePath(path: string): string {
+		const normalized = normalizePath(path.replace(/\\/g, "/"));
+		return (this.cwd ? relativeToRoot(normalized, this.cwd) : undefined) || normalized;
+	}
+
+	/** Files a call changes by name: the edit tool's paths and the files a shell command edits. */
+	private changedPaths(effect: ToolEffect): string[] {
+		return [...(isMutation(effect.kind) ? effect.paths : []), ...(effect.writes ?? [])].map((path) =>
+			this.samePath(path),
+		);
 	}
 
 	/** Apply the policy to the messages of one request. Returns the input array when nothing changes. */
@@ -170,7 +194,7 @@ export class ContextWindowPolicy {
 			const stale =
 				effect?.kind === "read" &&
 				effect.paths.length > 0 &&
-				this.changedAfter(messages, index, toolCalls, new Set(effect.paths));
+				this.changedAfter(messages, index, toolCalls, new Set(effect.paths.map((path) => this.samePath(path))));
 			const entry: DigestEntry = { tool: message.toolName, call, ok: !message.isError, chars, stale };
 			const stub =
 				`[harness:context] Result elided to keep context focused: ${message.toolName} ${call} ` +
@@ -197,7 +221,7 @@ export class ContextWindowPolicy {
 			const toolCall = toolCalls.get(message.toolCallId);
 			if (!toolCall) continue;
 			const effect = classifyToolCall(toolCall, this.classifyEffect);
-			if (isMutation(effect.kind) && effect.paths.some((path) => paths.has(path))) return true;
+			if (this.changedPaths(effect).some((path) => paths.has(path))) return true;
 		}
 		return false;
 	}
