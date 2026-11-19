@@ -17,7 +17,7 @@ export function messageText(message: AgentMessage): string {
 	return "";
 }
 
-export type MessageOrigin = "developer" | "extension" | "harness";
+export type MessageOrigin = "developer" | "extension" | "harness" | "agent";
 
 /**
  * Who wrote a user-role message, or undefined for other roles. The typed `origin` decides; a

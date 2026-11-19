@@ -549,10 +549,11 @@ export interface UserMessage {
 	content: string | (TextContent | ImageContent)[];
 	timestamp: number; // Unix timestamp in milliseconds
 	/**
-	 * Who wrote the message when it was not the developer: an extension (`sendUserMessage`) or the
-	 * harness itself. Absent means the developer. Harness rules that read developer intent skip the others.
+	 * Who wrote the message when it was not the developer: an extension (`sendUserMessage`), the
+	 * harness itself, or an agent that delegated the task (a subagent's brief, written by a model).
+	 * Absent means the developer. Harness rules that read developer intent skip the others.
 	 */
-	origin?: "extension" | "harness";
+	origin?: "extension" | "harness" | "agent";
 }
 
 export interface AssistantMessage {
