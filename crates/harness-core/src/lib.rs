@@ -14,7 +14,10 @@
 //! `tests/golden.rs` and `tests/pillars.rs` compare every result with the TypeScript harness.
 
 pub mod alignment;
+pub mod context;
 pub mod effects;
+pub mod engine;
 pub mod evidence;
 pub mod shell;
+pub mod slices;
 pub mod text;

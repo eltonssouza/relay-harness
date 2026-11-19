@@ -106,6 +106,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "relay-harness-wasm"
+version = "0.0.0"
+dependencies = [
+ "relay-harness-core",
+ "serde_json",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.229"
 source = "registry+https://github.com/rust-lang/crates.io-index"

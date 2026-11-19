@@ -7,14 +7,17 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
+	type AgentMessage,
 	type AgentToolCall,
 	type AlignmentDecision,
 	AlignmentPolicy,
+	ContextWindowPolicy,
 	classifyCommand,
 	classifyToolCall,
 	EvidenceLedger,
 	extractConstraints,
 	formatVerificationRequest,
+	HarnessCore,
 	isCorrection,
 	isQuestionOnly,
 	requestsAction,
@@ -171,6 +174,155 @@ function completionEntry(scenario: (typeof COMPLETION_SCENARIOS)[number]) {
 	};
 }
 
+/** A transcript with reads, shell and tool edits, errors and results on both sides of the elision size. */
+function contextTranscript(): AgentMessage[] {
+	const calls: Array<[string, Record<string, string>, number, boolean]> = [
+		["read", { path: "src/a.ts" }, 4000, false],
+		["bash", { command: "ls -la" }, 200, false],
+		["read", { path: "/work/app/src/b.ts" }, 2500, false],
+		["grep", { pattern: "TODO", path: "src" }, 1800, false],
+		["bash", { command: "sed -i 's/a/b/' src/a.ts" }, 0, false],
+		["read", { path: "src/c.ts" }, 3000, true],
+		["edit", { path: "./src/b.ts" }, 40, false],
+		["bash", { command: "npm test" }, 9000, true],
+		["read", { path: "src/d.ts" }, 1600, false],
+		["bash", { command: "cat README.md" }, 5000, false],
+		["custom_tool", { query: "x" }, 2000, false],
+		["read", { path: "src/e.ts" }, 1499, false],
+		["read", { path: "src/f.ts" }, 7000, false],
+		["edit", { path: "src/f.ts" }, 30, false],
+		["read", { path: "src/g.ts" }, 2200, false],
+		["bash", { command: "npm run check" }, 12000, false],
+		["read", { path: "src/h.ts" }, 2600, false],
+		["read", { path: "src/i.ts" }, 2700, false],
+		["read", { path: "src/j.ts" }, 2800, false],
+		["read", { path: "src/k.ts" }, 2900, false],
+	];
+	const messages: AgentMessage[] = [{ role: "user", content: "Fix the parser.", timestamp: 0 }];
+	calls.forEach(([name, args, chars, isError], index) => {
+		const id = `call${index}`;
+		messages.push({
+			role: "assistant",
+			content: [{ type: "toolCall", id, name, arguments: args }],
+			api: "openai-responses",
+			provider: "openai",
+			model: "golden",
+			usage: {
+				input: 0,
+				output: 0,
+				cacheRead: 0,
+				cacheWrite: 0,
+				totalTokens: 0,
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+			},
+			stopReason: "toolUse",
+			timestamp: 0,
+		});
+		messages.push({
+			role: "toolResult",
+			toolCallId: id,
+			toolName: name,
+			content: [{ type: "text", text: "x".repeat(chars) }],
+			isError,
+			timestamp: 0,
+		});
+		if (index === 9) messages.push({ role: "user", content: "Keep going.", timestamp: 0 });
+	});
+	return messages;
+}
+
+function contextEntry() {
+	const messages = contextTranscript();
+	const options = { keepRecent: 4, batchSize: 3, minElideChars: 1500, cwd: WORKSPACE.cwd };
+	const policy = new ContextWindowPolicy(options);
+	const requests: string[][] = [];
+	let stubs: Record<string, string> = {};
+	for (let length = 1; length <= messages.length; length++) {
+		const last = messages[length - 1];
+		if (last.role !== "user" && last.role !== "toolResult") continue;
+		const projected = policy.transform(messages.slice(0, length));
+		stubs = {};
+		for (const message of projected) {
+			if (message.role !== "toolResult") continue;
+			const text = message.content[0]?.type === "text" ? message.content[0].text : "";
+			if (text.startsWith("[harness:context]")) stubs[message.toolCallId] = text;
+		}
+		requests.push(Object.keys(stubs));
+	}
+	return {
+		options,
+		transcript: messages.map((message) =>
+			message.role === "assistant"
+				? {
+						role: "assistant",
+						toolCalls: message.content.flatMap((block) =>
+							block.type === "toolCall"
+								? [
+										{
+											id: block.id,
+											name: block.name,
+											arguments: block.arguments,
+											argumentsJson: JSON.stringify(block.arguments ?? {}),
+										},
+									]
+								: [],
+						),
+					}
+				: message.role === "toolResult"
+					? {
+							role: "toolResult",
+							toolCallId: message.toolCallId,
+							toolName: message.toolName,
+							chars: message.content.reduce(
+								(sum, block) => sum + (block.type === "text" ? block.text.length : 4000),
+								0,
+							),
+							isError: message.isError,
+						}
+					: { role: message.role },
+		),
+		requests,
+		stubs,
+		stats: policy.getStats(),
+		progress: policy.renderProgress() ?? null,
+	};
+}
+
+/** The state restated next to the latest message after a few developer messages and edits. */
+function stateEntries() {
+	const run = (
+		steps: Array<{ developer?: string; afterWork?: boolean; request?: string; edit?: string; check?: string }>,
+	) => {
+		const core = new HarnessCore({ workspace: WORKSPACE });
+		for (const step of steps) {
+			if (step.request !== undefined) core.beginRequest(step.request);
+			if (step.developer !== undefined) core.observeDeveloperMessage(step.developer, 0, step.afterWork ?? false);
+			if (step.edit !== undefined) {
+				core.recordToolOutcome({ type: "toolCall", id: "e", name: "edit", arguments: { path: step.edit } }, false);
+			}
+			if (step.check !== undefined) {
+				core.recordToolOutcome(
+					{ type: "toolCall", id: "c", name: "bash", arguments: { command: step.check } },
+					false,
+					"ok",
+				);
+			}
+		}
+		return { steps, state: core.renderState() ?? null };
+	};
+	return [
+		run([]),
+		run([{ request: "Fix it", developer: "Never push to main. Use pnpm instead of npm." }]),
+		run([{ request: "Fix it", developer: "Fix it" }, { edit: "src/a.ts" }]),
+		run([{ request: "Fix it", developer: "Fix it" }, { edit: "src/a.ts" }, { check: "npm test" }]),
+		run([
+			{ request: "Fix it", developer: "Fix it" },
+			{ developer: "Não, simplifica isso.", afterWork: true },
+			...Array.from({ length: 10 }, (_, index) => ({ edit: `src/file${index}.ts` })),
+		]),
+	];
+}
+
 export async function pillarsJson(): Promise<string> {
 	const texts = [
 		...new Set([
@@ -193,6 +345,8 @@ export async function pillarsJson(): Promise<string> {
 		texts: texts.map(textEntry),
 		alignment,
 		completion: COMPLETION_SCENARIOS.map(completionEntry),
+		context: contextEntry(),
+		state: stateEntries(),
 	};
 	return `${JSON.stringify(data, null, "\t")}\n`;
 }

@@ -198,3 +198,152 @@ fn judges_completion_as_the_typescript_harness_does() {
     }
     report_differences("completion scenarios", differences, entries.len());
 }
+
+fn tool_call(value: &Value) -> ToolCall {
+    let arguments = value["arguments"]
+        .as_object()
+        .map(|fields| {
+            fields
+                .iter()
+                .filter_map(|(key, value)| {
+                    value.as_str().map(|text| (key.clone(), text.to_string()))
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    ToolCall {
+        name: value["name"].as_str().expect("name").to_string(),
+        arguments,
+    }
+}
+
+#[test]
+fn elides_context_as_the_typescript_harness_does() {
+    use relay_harness_core::context::{
+        ContextMessage, ContextPolicyOptions, ContextToolCall, ContextWindowPolicy,
+    };
+    let fixture = fixture();
+    let context = &fixture["context"];
+    let options = &context["options"];
+    let mut policy = ContextWindowPolicy::new(ContextPolicyOptions {
+        keep_recent: options["keepRecent"].as_u64().expect("keepRecent") as usize,
+        batch_size: options["batchSize"].as_u64().expect("batchSize") as usize,
+        min_elide_chars: options["minElideChars"].as_u64().expect("minElideChars") as usize,
+        max_digest_entries: 30,
+        cwd: options["cwd"].as_str().map(str::to_string),
+    });
+    let transcript = context["transcript"].as_array().expect("transcript");
+    let messages: Vec<ContextMessage> = transcript
+        .iter()
+        .map(|message| match message["role"].as_str() {
+            Some("assistant") => ContextMessage::Assistant {
+                tool_calls: message["toolCalls"]
+                    .as_array()
+                    .expect("toolCalls")
+                    .iter()
+                    .map(|call| ContextToolCall {
+                        id: call["id"].as_str().expect("id").to_string(),
+                        call: tool_call(call),
+                        arguments_json: call["argumentsJson"]
+                            .as_str()
+                            .expect("argumentsJson")
+                            .to_string(),
+                        effect: None,
+                    })
+                    .collect(),
+            },
+            Some("toolResult") => ContextMessage::ToolResult {
+                tool_call_id: message["toolCallId"]
+                    .as_str()
+                    .expect("toolCallId")
+                    .to_string(),
+                tool_name: message["toolName"].as_str().expect("toolName").to_string(),
+                chars: message["chars"].as_u64().expect("chars") as usize,
+                is_error: message["isError"].as_bool().expect("isError"),
+            },
+            _ => ContextMessage::Other,
+        })
+        .collect();
+    let mut requests: Vec<Vec<String>> = Vec::new();
+    let mut stubs = serde_json::Map::new();
+    for length in 1..=messages.len() {
+        let role = transcript[length - 1]["role"].as_str();
+        if role != Some("user") && role != Some("toolResult") {
+            continue;
+        }
+        let elided = policy.transform(&messages[..length]);
+        stubs = elided
+            .iter()
+            .map(|(id, stub)| (id.clone(), json!(stub)))
+            .collect();
+        requests.push(elided.into_iter().map(|(id, _)| id).collect());
+    }
+    let stats = policy.stats();
+    assert_eq!(
+        json!(requests),
+        context["requests"],
+        "elided calls per request"
+    );
+    assert_eq!(Value::Object(stubs), context["stubs"], "stubs");
+    assert_eq!(
+        json!({ "elidedResults": stats.elided_results, "elidedChars": stats.elided_chars, "batches": stats.batches }),
+        context["stats"],
+        "stats"
+    );
+    assert_eq!(
+        json!(policy.render_progress()),
+        context["progress"],
+        "progress digest"
+    );
+}
+
+#[test]
+fn renders_the_harness_state_as_the_typescript_harness_does() {
+    use relay_harness_core::engine::{EngineOptions, HarnessEngine};
+    let fixture = fixture();
+    let workspace = ClassifyContext {
+        cwd: Some("/work/app".into()),
+        home: Some("/home/dev".into()),
+        temp_dir: None,
+    };
+    for entry in fixture["state"].as_array().expect("state") {
+        let mut engine = HarnessEngine::new(EngineOptions {
+            workspace: workspace.clone(),
+            ..EngineOptions::default()
+        });
+        for step in entry["steps"].as_array().expect("steps") {
+            if let Some(request) = step["request"].as_str() {
+                engine.begin_request(request);
+            }
+            if let Some(developer) = step["developer"].as_str() {
+                engine.observe_developer_message(
+                    developer,
+                    0.0,
+                    step["afterWork"].as_bool().unwrap_or(false),
+                );
+            }
+            if let Some(path) = step["edit"].as_str() {
+                let call = ToolCall {
+                    name: "edit".into(),
+                    arguments: vec![("path".into(), path.into())],
+                };
+                let effect = engine.classify(&call, None);
+                engine.record_tool_outcome(&effect, false, "", None);
+            }
+            if let Some(command) = step["check"].as_str() {
+                let call = ToolCall {
+                    name: "bash".into(),
+                    arguments: vec![("command".into(), command.into())],
+                };
+                let effect = engine.classify(&call, None);
+                engine.record_tool_outcome(&effect, false, "ok", None);
+            }
+        }
+        assert_eq!(
+            json!(engine.render_state(None)),
+            entry["state"],
+            "{}",
+            entry["steps"]
+        );
+    }
+}
