@@ -42,13 +42,13 @@ describe("version checks", () => {
 		await expect(checkForNewRelayVersion("1.2.2")).resolves.toEqual({ version: "1.2.3" });
 	});
 
-	it("reads the latest version from the npm registry with a relay user agent", async () => {
+	it("reads the latest version from main's package.json with a relay user agent", async () => {
 		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(getLatestRelayVersion("1.2.3")).resolves.toBe("1.2.4");
 		expect(fetchMock).toHaveBeenCalledWith(
-			"https://registry.npmjs.org/@relay-harness/coding-agent/latest",
+			"https://raw.githubusercontent.com/eltonssouza/relay-harness/main/packages/coding-agent/package.json",
 			expect.objectContaining({
 				headers: expect.objectContaining({
 					"User-Agent": expect.stringMatching(/^relay\/1\.2\.3 /),
@@ -89,31 +89,30 @@ describe("version checks", () => {
 		expect(formatVersionCheckError(error)).toBe("fetch failed (ETIMEDOUT, ENETUNREACH)");
 	});
 
-	it("reads the version from a full registry document", async () => {
-		// The registry's /latest document is the package.json of the version plus dist metadata.
+	it("reads the version from a full package.json", async () => {
+		// GitHub serves the raw file as text/plain; the body is still the package's JSON.
 		vi.stubGlobal(
 			"fetch",
-			vi.fn(async () =>
-				Response.json({
-					name: "@relay-harness/coding-agent",
-					version: "1.2.4",
-					dist: { tarball: "https://x/y.tgz" },
-				}),
+			vi.fn(
+				async () =>
+					new Response(JSON.stringify({ name: "@relay-harness/coding-agent", version: "1.2.4", type: "module" }), {
+						headers: { "content-type": "text/plain; charset=utf-8" },
+					}),
 			),
 		);
 		await expect(getLatestRelayRelease("1.2.3")).resolves.toEqual({ version: "1.2.4" });
 	});
 
-	it("returns undefined when the package is not published", async () => {
+	it("returns undefined when the file is missing", async () => {
 		vi.stubGlobal(
 			"fetch",
-			vi.fn(async () => Response.json({ error: "Not found" }, { status: 404 })),
+			vi.fn(async () => new Response("404: Not Found", { status: 404 })),
 		);
 		await expect(getLatestRelayRelease("1.2.3")).resolves.toBeUndefined();
 		await expect(checkForNewRelayVersion("1.2.2")).resolves.toBeUndefined();
 	});
 
-	it("returns undefined for registry data without a semver version", async () => {
+	it("returns undefined for data without a semver version", async () => {
 		const fetchMock = vi
 			.fn()
 			.mockResolvedValueOnce(Response.json({ name: "no version" }))

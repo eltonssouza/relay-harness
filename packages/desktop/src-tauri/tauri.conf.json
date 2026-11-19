@@ -36,8 +36,11 @@
 			"icons/icon.icns",
 			"icons/icon.ico"
 		],
+		"resources": {
+			"resources/relay": "relay"
+		},
 		"category": "DeveloperTool",
 		"shortDescription": "Relay, the coding agent",
-		"longDescription": "A desktop window for Relay. It runs relay --mode rpc, which must be installed and on PATH."
+		"longDescription": "A desktop window for Relay. It runs the relay binary it carries in RPC mode."
 	}
 }

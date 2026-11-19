@@ -128,7 +128,7 @@ import { getCwdRelativePath } from "../../utils/paths.ts";
 import { killTrackedDetachedChildren } from "../../utils/shell.ts";
 import { loadAllHighlightLanguages } from "../../utils/syntax-highlight.ts";
 import { ensureTool, type ToolStatus } from "../../utils/tools-manager.ts";
-import { checkForNewRelayVersion, type LatestRelayRelease } from "../../utils/version-check.ts";
+import { checkForNewRelayVersion, type LatestRelayRelease, RELEASES_URL } from "../../utils/version-check.ts";
 import { reportBug } from "./bug-report.ts";
 import { createChatViewport } from "./chat-viewport.ts";
 import { ArminComponent } from "./components/armin.ts";
@@ -4578,10 +4578,11 @@ export class InteractiveMode {
 	}
 
 	showNewVersionNotification(release: LatestRelayRelease): void {
-		const packageUrl = "https://www.npmjs.com/package/@relay-harness/coding-agent";
-		const linkLine = (label: string, url: string) => () => {
-			const link = getCapabilities().hyperlinks ? hyperlink(theme.fg("accent", url), url) : theme.fg("accent", url);
-			return theme.fg("muted", label) + link;
+		const downloadLine = () => {
+			const url = theme.fg("accent", RELEASES_URL);
+			return (
+				theme.fg("muted", "Download it from ") + (getCapabilities().hyperlinks ? hyperlink(url, RELEASES_URL) : url)
+			);
 		};
 
 		this.chatContainer.addChild(new Spacer(1));
@@ -4594,16 +4595,7 @@ export class InteractiveMode {
 				0,
 			),
 		);
-		this.chatContainer.addChild(
-			new ThemedText(
-				() =>
-					theme.fg("muted", "Update with ") +
-					theme.fg("accent", "npm install -g --ignore-scripts @relay-harness/coding-agent"),
-				1,
-				0,
-			),
-		);
-		this.chatContainer.addChild(new ThemedText(linkLine("Package: ", packageUrl), 1, 0));
+		this.chatContainer.addChild(new ThemedText(downloadLine, 1, 0));
 		this.chatContainer.addChild(new DynamicBorder((text) => theme.fg("warning", text)));
 		this.ui.requestRender();
 	}
