@@ -17,12 +17,12 @@ pub struct ServerSentEvent {
 
 /// UTF-8 decoding across chunk boundaries; invalid bytes become U+FFFD.
 #[derive(Debug, Default)]
-struct Utf8Decoder {
+pub(crate) struct Utf8Decoder {
     pending: Vec<u8>,
 }
 
 impl Utf8Decoder {
-    fn decode(&mut self, bytes: &[u8], last: bool) -> String {
+    pub(crate) fn decode(&mut self, bytes: &[u8], last: bool) -> String {
         self.pending.extend_from_slice(bytes);
         let mut text = String::new();
         let mut rest: &[u8] = &self.pending;

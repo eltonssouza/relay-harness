@@ -1,0 +1,202 @@
+{
+	"name": "generated-ids",
+	"description": "Tool calls without ids, or with a repeated one, get generated ids.",
+	"model": {
+		"id": "gemini-2.5-flash",
+		"name": "Gemini",
+		"api": "google-generative-ai",
+		"provider": "google",
+		"baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0.3,
+			"output": 2.5,
+			"cacheRead": 0.075,
+			"cacheWrite": 0
+		},
+		"contextWindow": 1048576,
+		"maxTokens": 65536
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"sse": "data: {\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"functionCall\":{\"name\":\"read\",\"args\":{\"path\":\"a\"}}},{\"functionCall\":{\"name\":\"read\",\"args\":{\"path\":\"b\"},\"id\":\"dup\"}},{\"functionCall\":{\"name\":\"read\",\"args\":{\"path\":\"c\"},\"id\":\"dup\"}},{\"functionCall\":{\"args\":{}}}]},\"finishReason\":\"STOP\",\"index\":0}],\"modelVersion\":\"gemini-2.5-flash\",\"responseId\":\"resp-1\"}\n\n",
+	"splits": [],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "toolcall_start",
+			"contentIndex": 0
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 0,
+			"delta": "{\"path\":\"a\"}"
+		},
+		{
+			"type": "toolcall_end",
+			"contentIndex": 0,
+			"toolCall": {
+				"type": "toolCall",
+				"id": "read_0_1",
+				"name": "read",
+				"arguments": {
+					"path": "a"
+				}
+			}
+		},
+		{
+			"type": "toolcall_start",
+			"contentIndex": 1
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 1,
+			"delta": "{\"path\":\"b\"}"
+		},
+		{
+			"type": "toolcall_end",
+			"contentIndex": 1,
+			"toolCall": {
+				"type": "toolCall",
+				"id": "dup",
+				"name": "read",
+				"arguments": {
+					"path": "b"
+				}
+			}
+		},
+		{
+			"type": "toolcall_start",
+			"contentIndex": 2
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 2,
+			"delta": "{\"path\":\"c\"}"
+		},
+		{
+			"type": "toolcall_end",
+			"contentIndex": 2,
+			"toolCall": {
+				"type": "toolCall",
+				"id": "read_0_2",
+				"name": "read",
+				"arguments": {
+					"path": "c"
+				}
+			}
+		},
+		{
+			"type": "toolcall_start",
+			"contentIndex": 3
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 3,
+			"delta": "{}"
+		},
+		{
+			"type": "toolcall_end",
+			"contentIndex": 3,
+			"toolCall": {
+				"type": "toolCall",
+				"id": "undefined_0_3",
+				"name": "",
+				"arguments": {}
+			}
+		},
+		{
+			"type": "done",
+			"reason": "toolUse",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "read_0_1",
+						"name": "read",
+						"arguments": {
+							"path": "a"
+						}
+					},
+					{
+						"type": "toolCall",
+						"id": "dup",
+						"name": "read",
+						"arguments": {
+							"path": "b"
+						}
+					},
+					{
+						"type": "toolCall",
+						"id": "read_0_2",
+						"name": "read",
+						"arguments": {
+							"path": "c"
+						}
+					},
+					{
+						"type": "toolCall",
+						"id": "undefined_0_3",
+						"name": "",
+						"arguments": {}
+					}
+				],
+				"api": "google-generative-ai",
+				"provider": "google",
+				"model": "gemini-2.5-flash",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"responseId": "resp-1",
+				"rawStopReason": "STOP"
+			}
+		}
+	]
+}

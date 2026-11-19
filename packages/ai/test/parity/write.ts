@@ -1,7 +1,7 @@
 /**
  * Writes the `packages/ai` reference files in `crates/fixtures/` for the Rust port to match:
  * the JSON helpers, the Anthropic, OpenAI Responses and OpenAI Chat Completions request bodies
- * and stream decoding, and the Google Gemini requests. Run through
+ * and stream decoding, and the Google Gemini requests and stream decoding. Run through
  * `npm run parity:record`, after the agent scenarios, which the Anthropic bodies read.
  */
 
@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { ANTHROPIC_DIR, anthropicCases, anthropicJson } from "./anthropic-record.ts";
 import { ANTHROPIC_STREAM_DIR, streamCaseJson, streamCases } from "./anthropic-stream-record.ts";
 import { GOOGLE_DIR, googleCases, googleJson } from "./google-record.ts";
+import { GOOGLE_STREAM_DIR, googleStreamCases, googleStreamJson } from "./google-stream-record.ts";
 import { JSON_DIR, jsonFixtureText } from "./json-record.ts";
 import { completionsCases, completionsJson, OPENAI_COMPLETIONS_DIR } from "./openai-completions-record.ts";
 import {
@@ -40,6 +41,7 @@ await writeCases(RESPONSES_STREAM_DIR, responsesStreamCases(), responsesStreamJs
 await writeCases(OPENAI_COMPLETIONS_DIR, completionsCases(), completionsJson);
 await writeCases(COMPLETIONS_STREAM_DIR, completionsStreamCases(), completionsStreamJson);
 await writeCases(GOOGLE_DIR, googleCases(), googleJson);
+await writeCases(GOOGLE_STREAM_DIR, googleStreamCases(), googleStreamJson);
 console.log(
-	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams and ${googleCases().length} Google requests to crates/fixtures/`,
+	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests and ${googleStreamCases().length} Google streams to crates/fixtures/`,
 );
