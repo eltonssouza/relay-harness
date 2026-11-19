@@ -813,7 +813,10 @@ describe("completion is judged by evidence, not by the words of the final messag
 		const ledger = new EvidenceLedger();
 		ledger.beginRequest(true);
 		ledger.recordToolOutcome(edit, false);
-		expect(ledger.assess("Should I also update the tests?").status).toBe("no-claim");
+		const report = ledger.assess("Should I also update the tests?");
+		// Not a completion report, so not gated; the developer is told the changes are unverified.
+		expect(report).toMatchObject({ status: "question", claimed: false });
+		expect(ledger.shouldGate(report)).toBe(false);
 	});
 
 	it("still accepts an honest statement that the work is unverified", () => {
@@ -1081,5 +1084,95 @@ describe("Angular CLI, docker and remote copies", () => {
 		"rsync -a src/ dst/",
 	])("does not ask before %s", (command) => {
 		expect(requiresAuthorization(classifyCommand(command).kind)).toBe(false);
+	});
+});
+
+describe("a check is evidence only for what it ran on, after it ran", () => {
+	const PASS = "Tests  5 passed (5)";
+	const write = (path: string) => ({ kind: "write" as const, paths: [path] });
+	const check = (command: string) => ({ ...classifyCommand(command), paths: [] });
+
+	it("does not let a check that started before an edit finished cover it", () => {
+		const ledger = new EvidenceLedger();
+		ledger.beginRequest(true);
+		// The agent runs an edit and the tests in parallel; the edit ends after the tests started.
+		const editStart = ledger.beginToolCall();
+		const testStart = ledger.beginToolCall();
+		ledger.recordToolOutcome(write("src/a.ts"), false, "", editStart);
+		ledger.recordToolOutcome(check("npm test"), false, PASS, testStart);
+		expect(ledger.assess("Done.").status).toBe("unverified");
+
+		ledger.recordToolOutcome(check("npm test"), false, PASS);
+		expect(ledger.assess("Done.").status).toBe("verified");
+	});
+
+	it("matches declared verification commands word by word", () => {
+		const declared = ["npm run check"];
+		expect(classifyCommand("npm run check", declared).kind).toBe("verify");
+		expect(classifyCommand("env CI=1 npm run check -- --max-warnings 0", declared).kind).toBe("verify");
+		for (const command of [
+			"npm run check:browser-smoke",
+			"echo npm run check",
+			'grep -n "npm run check" AGENTS.md',
+			"npm run check &",
+		]) {
+			expect(classifyCommand(command, declared).kind).toBe("execute");
+		}
+	});
+
+	it("does not count a check sent to the background", () => {
+		expect(classifyCommand("npm test &").kind).toBe("execute");
+		expect(classifyCommand("npm run dev & npm test").kind).toBe("verify");
+	});
+
+	it("covers only the files a check names", () => {
+		expect(classifyCommand("npx vitest run test/other.test.ts").files).toEqual(["test/other.test.ts"]);
+		expect(classifyCommand("tsc -p packages/a/tsconfig.json").files).toBeUndefined();
+		expect(classifyCommand("pytest tests/").files).toBeUndefined();
+		const verdict = (command: string) => {
+			const ledger = new EvidenceLedger();
+			ledger.beginRequest(true);
+			ledger.recordToolOutcome(write("src/config.ts"), false);
+			ledger.recordToolOutcome(check(command), false, PASS);
+			return ledger.assess("Done.").status;
+		};
+		expect(verdict("npx vitest run test/other.test.ts")).toBe("unverified");
+		expect(verdict("npx eslint src/other.ts")).toBe("unverified");
+		expect(verdict("npx vitest run test/config.test.ts")).toBe("verified");
+		expect(verdict("npm test")).toBe("verified");
+	});
+
+	it("matches a check's scope against the workspace, not a substring of the path", () => {
+		const verdict = (path: string) => {
+			const ledger = new EvidenceLedger({ cwd: "/work/app" });
+			ledger.beginRequest(true);
+			ledger.recordToolOutcome(write(path), false);
+			ledger.recordToolOutcome(check("cd src && npm test"), false, PASS);
+			return ledger.assess("Done.").status;
+		};
+		expect(verdict("packages/a/src/x.ts")).toBe("unverified");
+		expect(verdict("/work/app/packages/a/src/x.ts")).toBe("unverified");
+		expect(verdict("src/x.ts")).toBe("verified");
+		expect(verdict("/work/app/src/x.ts")).toBe("verified");
+	});
+
+	it("reads a past-tense failure as an acknowledgement only when the last check failed", () => {
+		const ledger = new EvidenceLedger();
+		ledger.beginRequest(true);
+		ledger.recordToolOutcome(write("src/a.ts"), false);
+		expect(ledger.assess("Fixed it: the tests failed before because of a typo.").status).toBe("unverified");
+		ledger.recordToolOutcome(check("npm test"), true, "2 failed");
+		expect(ledger.assess("I changed the parser, but the tests failed on two assertions.").status).toBe(
+			"acknowledged",
+		);
+	});
+
+	it("reports a question with unverified changes without treating it as a completion report", () => {
+		const ledger = new EvidenceLedger();
+		ledger.beginRequest(true);
+		ledger.recordToolOutcome(write("src/a.ts"), false);
+		const report = ledger.assess("I updated parseConfig. Want me to run the tests?");
+		expect(report.status).toBe("question");
+		expect(ledger.shouldGate(report)).toBe(false);
 	});
 });

@@ -98,7 +98,9 @@ export class HarnessCore {
 		this.verifyCommands = (options.verifyCommands ?? []).filter((command) => command.trim().length > 0);
 		if (options.slices) this.slices = new SliceDiscipline(options.slices);
 		if (options.alignment !== false) this.alignment = new AlignmentPolicy(options.alignment);
-		if (options.evidence !== false) this.evidence = new EvidenceLedger(options.evidence);
+		if (options.evidence !== false) {
+			this.evidence = new EvidenceLedger({ cwd: options.workspace?.cwd, ...options.evidence });
+		}
 		if (options.context !== false) {
 			this.context = new ContextWindowPolicy({ ...options.context, classifyEffect: options.classifyEffect });
 		}
@@ -146,9 +148,12 @@ export class HarnessCore {
 		return AlignmentPolicy.toHookResult(decision);
 	}
 
-	/** Record the outcome of an executed (or blocked) tool call. `output` is its text result. */
-	recordToolOutcome(toolCall: AgentToolCall, isError: boolean, output?: string): void {
-		this.evidence?.recordToolOutcome(this.classify(toolCall), isError, output);
+	/**
+	 * Record the outcome of an executed (or blocked) tool call. `output` is its text result;
+	 * `startedAt` is what {@link EvidenceLedger.beginToolCall} returned when the call started.
+	 */
+	recordToolOutcome(toolCall: AgentToolCall, isError: boolean, output?: string, startedAt?: number): void {
+		this.evidence?.recordToolOutcome(this.classify(toolCall), isError, output, startedAt);
 	}
 
 	/**
@@ -228,6 +233,8 @@ export class HarnessCore {
 		const previousTransformContext = agent.transformContext;
 		const previousFinishTurn = agent.finishTurn;
 		const toolCalls = new Map<string, AgentToolCall>();
+		/** When each running call started, so a check run in parallel with an edit does not cover it. */
+		const startedAt = new Map<string, number>();
 		let awaitingRequest = false;
 		// A resumed conversation already contains the agent's work.
 		let agentHasResponded = agent.state.messages.some((message) => message.role === "assistant");
@@ -265,6 +272,8 @@ export class HarnessCore {
 						arguments: event.args ?? {},
 					};
 					toolCalls.set(event.toolCallId, toolCall);
+					const start = this.evidence?.beginToolCall();
+					if (start !== undefined) startedAt.set(event.toolCallId, start);
 					const effect = this.classify(toolCall);
 					if (effect.kind !== "read") {
 						await this.slices?.beforeChange(toolCall.id, effect.kind === "write" ? effect.paths : []);
@@ -273,9 +282,11 @@ export class HarnessCore {
 				}
 				case "tool_execution_end": {
 					const toolCall = toolCalls.get(event.toolCallId);
+					const start = startedAt.get(event.toolCallId);
 					toolCalls.delete(event.toolCallId);
+					startedAt.delete(event.toolCallId);
 					if (!toolCall) break;
-					this.recordToolOutcome(toolCall, event.isError, resultText(event.result));
+					this.recordToolOutcome(toolCall, event.isError, resultText(event.result), start);
 					const effect = this.classify(toolCall);
 					if (effect.kind !== "read") {
 						await this.slices?.afterChange(

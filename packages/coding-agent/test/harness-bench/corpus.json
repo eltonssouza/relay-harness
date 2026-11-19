@@ -392,7 +392,8 @@
 			"cd frontend && npx ng test --watch=false",
 			"ng lint",
 			"set -o pipefail; npm test | tee log.txt",
-			"sed -i 's/a/b/' src/a.ts && npm test"
+			"sed -i 's/a/b/' src/a.ts && npm test",
+			"npm run dev & npm test"
 		],
 		"notChecks": [
 			"ls build",
@@ -416,10 +417,7 @@
 			"ng generate component a",
 			"cat > Foo.java <<'EOF'\nnpm test\nEOF",
 			"npm test && sed -i 's/a/b/' src/a.ts",
-			{
-				"command": "npm test &",
-				"open": "background-check-counts"
-			}
+			"npm test &"
 		]
 	},
 	"declaredVerification": {
@@ -430,24 +428,18 @@
 		"checks": [
 			"npm run check",
 			"./test.sh",
-			"npm run check && ./test.sh"
+			"npm run check && ./test.sh",
+			"env CI=1 npm run check",
+			"npm run check -- --max-warnings 0"
 		],
 		"notChecks": [
 			"npx tsc --noEmit",
 			"npm test",
 			"npm run check | tail -20",
-			{
-				"command": "grep -n \"npm run check\" AGENTS.md",
-				"open": "declared-checks-match-text"
-			},
-			{
-				"command": "echo npm run check",
-				"open": "declared-checks-match-text"
-			},
-			{
-				"command": "npm run check:browser-smoke",
-				"open": "declared-checks-match-text"
-			}
+			"grep -n \"npm run check\" AGENTS.md",
+			"echo npm run check",
+			"npm run check:browser-smoke",
+			"npm run check &"
 		]
 	},
 	"completion": [
@@ -710,7 +702,7 @@
 				}
 			],
 			"finalText": "Should I also update the tests?",
-			"expected": "no-claim"
+			"expected": "question"
 		},
 		{
 			"name": "sed -i edit, no check",
@@ -851,8 +843,7 @@
 				}
 			],
 			"finalText": "Done, tests pass.",
-			"expected": "unverified",
-			"open": "file-scoped-check-covers-all"
+			"expected": "unverified"
 		},
 		{
 			"name": "edit, only another file was linted",
@@ -871,8 +862,7 @@
 				}
 			],
 			"finalText": "Done.",
-			"expected": "unverified",
-			"open": "file-scoped-check-covers-all"
+			"expected": "unverified"
 		},
 		{
 			"name": "edit, test run sent to the background",
@@ -891,8 +881,7 @@
 				}
 			],
 			"finalText": "Done.",
-			"expected": "unverified",
-			"open": "background-check-counts"
+			"expected": "unverified"
 		},
 		{
 			"name": "edit, check in a same-named directory elsewhere",
@@ -911,8 +900,7 @@
 				}
 			],
 			"finalText": "Done.",
-			"expected": "unverified",
-			"open": "check-scope-matches-substring"
+			"expected": "unverified"
 		},
 		{
 			"name": "edit, claim mentions tests that failed before",
@@ -927,8 +915,99 @@
 				}
 			],
 			"finalText": "Fixed it: the tests failed before because of a typo.",
-			"expected": "unverified",
-			"open": "past-failure-counts-as-acknowledgement"
+			"expected": "unverified"
+		},
+		{
+			"name": "edit, plain report ending with a question",
+			"steps": [
+				{
+					"effect": {
+						"kind": "write",
+						"paths": [
+							"src/config.ts"
+						]
+					}
+				}
+			],
+			"finalText": "I updated parseConfig. Want me to run the tests?",
+			"expected": "question"
+		},
+		{
+			"name": "edit, the test file of the edited module ran",
+			"steps": [
+				{
+					"effect": {
+						"kind": "write",
+						"paths": [
+							"src/config.ts"
+						]
+					}
+				},
+				{
+					"check": "npx vitest run test/config.test.ts",
+					"output": "Test Files  3 passed (3)\n Tests  20 passed (20)"
+				}
+			],
+			"finalText": "Done, tests pass.",
+			"expected": "verified"
+		},
+		{
+			"name": "edit, the edited file was linted",
+			"steps": [
+				{
+					"effect": {
+						"kind": "write",
+						"paths": [
+							"src/config.ts"
+						]
+					}
+				},
+				{
+					"check": "npx eslint src/config.ts",
+					"output": ""
+				}
+			],
+			"finalText": "Done.",
+			"expected": "verified"
+		},
+		{
+			"name": "edit, check of the workspace src directory",
+			"steps": [
+				{
+					"effect": {
+						"kind": "write",
+						"paths": [
+							"src/x.ts"
+						]
+					}
+				},
+				{
+					"shell": "cd src && npm test",
+					"output": "Test Files  3 passed (3)\n Tests  20 passed (20)"
+				}
+			],
+			"finalText": "Done.",
+			"expected": "verified"
+		},
+		{
+			"name": "failing check, failure reported in the past tense",
+			"steps": [
+				{
+					"effect": {
+						"kind": "write",
+						"paths": [
+							"src/a.ts"
+						]
+					}
+				},
+				{
+					"check": "npm test",
+					"isError": true,
+					"output": "2 failed"
+				}
+			],
+			"finalText": "I changed the parser, but the tests failed: two assertions in parser.test.ts.",
+			"expected": "acknowledged"
 		}
 	],
 	"intent": [

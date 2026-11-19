@@ -44,10 +44,11 @@ During each request Relay records which files changed and which checks ran (test
 | Status | Meaning |
 |---|---|
 | `verified` | Changes were made and a check that covers them passed after them, or only documentation changed. |
-| `unverified` | The turn ends with changes no passing check covers. An explicit claim is not needed: "I updated the function" ends the turn the same way. A message that asks you a question is not a completion report. |
+| `unverified` | The turn ends with changes no passing check covers. An explicit claim is not needed: "I updated the function" ends the turn the same way. |
+| `question` | The message asks you something while changes no passing check covers are pending ("I updated it. Want me to run the tests?"). It is not a completion report, so Relay does not ask the agent to verify, but it shows a warning so you know before you answer. |
 | `contradicted` | The message says checks pass, but the last check failed or none ran; or it says all tests pass, but the last check selected tests by name (`-t`, `--grep`, `-k`). |
 | `no-effect` | You requested a change and the message reports it done, but the tool calls only read state. |
-| `acknowledged` | The message states what was not verified or that tests still fail. Mentioning that an earlier run failed does not count. |
+| `acknowledged` | The message states what was not verified or that tests still fail. A failure in the past tense ("the tests failed") counts only when the last check of the request did fail, so "the tests failed before, now it is fixed" with no check run is a claim. |
 
 For `unverified`, `contradicted`, and `no-effect`, Relay sends the agent one `[harness:evidence]` verification request instead of ending the run. That message appears in the transcript. If the next answer is still flagged, the run ends and Relay shows a warning.
 
@@ -55,11 +56,11 @@ For `unverified`, `contradicted`, and `no-effect`, Relay sends the agent one `[h
 
 **Edits made through the shell.** The `edit` and `write` tools are not the only way to change a file, and models often use `sed -i`. Relay also counts as changes the files a shell command edits in place (`sed -i`, `perl -i`), writes (`>`, `>>`, `tee`, `cat > file <<EOF`), moves or copies (`mv`, `cp`), or patches (`patch`, `git apply`, which name no file). Writes to `/dev`, the system temp directory and files outside the workspace do not count, nor does a check's own log (`npm test > out.log`, `npm test | tee out.log`). When one command line edits a file and then runs a check, the check can cover the edit; an edit after the check is not covered by it.
 
-**Coverage.** A check covers the files it ran on. `cd packages/b && npm test` after an edit in `packages/a` leaves that edit unverified, and each change needs a passing check after it, not only the last change. A check with no directory in its command covers the whole workspace.
+**Coverage.** A check covers the files it ran on. `cd packages/b && npm test` after an edit in `packages/a` leaves that edit unverified, and `cd src && npm test` covers the workspace's own `src`, not `packages/a/src`. Each change needs a passing check after it, not only the last change, and a check that started before an edit finished (tools run in parallel) does not cover it. A check that names source or test files (`vitest run test/a.test.ts`, `eslint src/a.ts`) covers only changes to files of the same name, so `a.ts` is covered by `a.test.ts` but not by `other.test.ts`. A check that names no file, or only a directory (`pytest tests/`), covers its whole scope, and one with no directory in its command covers the whole workspace.
 
-**Declared verification commands.** By default, common test, type-check, build, and lint commands count as checks. A project can declare its own with `harnessCore.verifyCommands`, for example `["npm run check", "./test.sh"]`. Then only commands that run one of them count, so `npx tsc` on one package does not stand in for the project's full check, and the verification request names the declared commands.
+**Declared verification commands.** By default, common test, type-check, build, and lint commands count as checks. A project can declare its own with `harnessCore.verifyCommands`, for example `["npm run check", "./test.sh"]`. Then only commands that begin with the declared words count, past wrappers such as `env` and `npx`: `npm run check -- --max-warnings 0` counts, while `npm run check:browser-smoke`, `echo npm run check` and `grep "npm run check" AGENTS.md` do not, `npx tsc` on one package does not stand in for the project's full check, and the verification request names the declared commands.
 
-**Masked exit codes.** A check counts only if its exit code reaches the tool. What follows the check can replace it: a pipe (`npm run check | tail`, unless `pipefail` is set), `||` (`npm test || true`), or a later command (`npm test; echo done`). Each of these exits 0 when the check fails, so such a run is not evidence. `&&` keeps the failure: `npm test && echo ok` counts.
+**Masked exit codes.** A check counts only if its exit code reaches the tool. What follows the check can replace it: a pipe (`npm run check | tail`, unless `pipefail` is set), `||` (`npm test || true`), a later command (`npm test; echo done`), or `&`, which sends the check to the background so the command exits before it finishes (`npm test &`). Each of these exits 0 when the check fails, so such a run is not evidence. `&&` keeps the failure: `npm test && echo ok` counts.
 
 **Small slices.** Two signals, shown next to your latest message when they fire:
 

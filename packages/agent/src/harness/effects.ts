@@ -43,6 +43,11 @@ export interface ToolEffect {
 	 */
 	scope?: string[];
 	/**
+	 * For `verify`: the source and test files the check names (`vitest run test/a.test.ts`). Absent
+	 * when it names none and covers its whole scope.
+	 */
+	files?: string[];
+	/**
 	 * For shell commands: workspace files the command modifies (`sed -i`, `tee`, `> file`, `mv`, `patch`).
 	 * An empty list means it edits files it does not name (`git apply`). With `verify`, every write
 	 * comes before the check, so the check can cover it.
@@ -621,35 +626,73 @@ interface LocatedCheck {
 	/** Position of the check among the command's simple commands. */
 	index: number;
 	scope?: string[];
+	files?: string[];
 }
 
-/** The last check in `command`, by the program it runs, or undefined when it runs none. */
+/** Extensions of source and test files: a check that names such files runs on them only. */
+const CODE_FILE = /\.(?:[cm]?[jt]sx?|py|rb|go|rs|java|kts?|cs|php|swift|scala|vue|svelte|dart|exs?)$/i;
+/** Options whose value is a configuration, a directory or an output, not a file the check runs on. */
+const VALUE_OPTIONS = new Set([
+	"-c",
+	"--config",
+	"-p",
+	"--project",
+	"--prefix",
+	"--cwd",
+	"-C",
+	"--dir",
+	"--root",
+	"--rootDir",
+	"-w",
+	"--workspace",
+	"-F",
+	"--filter",
+	"--manifest-path",
+	"--reporter",
+	"-o",
+	"--outfile",
+	"--output",
+]);
+
+/**
+ * Source and test files a check names (`vitest run test/a.test.ts`, `eslint src/a.ts`), or undefined
+ * when it names none and runs on its whole scope. A directory (`pytest tests/`) names no file.
+ */
+function checkFiles(argv: readonly string[]): string[] | undefined {
+	const words = stripWrappers(argv);
+	const files: string[] = [];
+	for (let index = 1; index < words.length; index++) {
+		const word = words[index];
+		if (VALUE_OPTIONS.has(word)) index++;
+		else if (!word.startsWith("-") && CODE_FILE.test(word)) files.push(word.replace(/\\/g, "/").replace(/^\.\//, ""));
+	}
+	return files.length > 0 ? files : undefined;
+}
+
+/**
+ * The last check in `command`, or undefined when it runs none. Without `verifyCommands` a check is
+ * recognized by the program it runs; with them, a simple command is a check when the declared words
+ * begin it (past wrappers such as `env` and `npx`): `npm run check -- --fix` runs `npm run check`,
+ * while `npm run check:browser-smoke`, `echo npm run check` and `grep "npm run check" AGENTS.md` do not.
+ */
 function lastCheck(command: string, verifyCommands: readonly string[]): LocatedCheck | undefined {
 	const commands = parseShell(command);
-	if (verifyCommands.length === 0) {
-		for (let index = commands.length - 1; index >= 0; index--) {
-			if (isCheckCommand(commands[index].argv))
-				return { end: commands[index].end, index, scope: checkScope(commands, index) };
-		}
-		return undefined;
+	const declared = verifyCommands
+		.map((item) => stripWrappers(item.trim().split(/\s+/).filter(Boolean)))
+		.filter((tokens) => tokens.length > 0);
+	const isCheck =
+		declared.length === 0
+			? isCheckCommand
+			: (argv: readonly string[]) => {
+					const words = stripWrappers(argv);
+					return declared.some((tokens) => tokens.every((token, index) => words[index] === token));
+				};
+	for (let index = commands.length - 1; index >= 0; index--) {
+		if (!isCheck(commands[index].argv)) continue;
+		const files = checkFiles(commands[index].argv);
+		return { end: commands[index].end, index, scope: checkScope(commands, index), ...(files ? { files } : {}) };
 	}
-	let end = -1;
-	let matchStart = -1;
-	for (const declared of verifyCommands) {
-		// Tokens match literally; any run of whitespace between them matches any other.
-		const tokens = declared.trim().split(/\s+/).filter(Boolean);
-		if (tokens.length === 0) continue;
-		const pattern = new RegExp(tokens.map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s+"), "g");
-		for (const match of command.matchAll(pattern)) {
-			if (match.index + match[0].length > end) {
-				end = match.index + match[0].length;
-				matchStart = match.index;
-			}
-		}
-	}
-	if (end < 0) return undefined;
-	const index = commands.findIndex((item) => item.start <= matchStart && matchStart < item.end);
-	return { end, index, scope: index >= 0 ? checkScope(commands, index) : undefined };
+	return undefined;
 }
 
 /** Inline interpreter code (`python -c`, `node -e`) that needs authorization, if any. */
@@ -902,9 +945,17 @@ export function classifyCommand(
 	const writes = shellWrites(commands, context);
 	const written = writes ? { writes: writes.paths } : {};
 	const check = lastCheck(command, verifyCommands);
-	// A file changed after the check in the same line is not covered by it.
-	if (check && !masksExitCode(command, check.end) && !(writes && writes.last > check.index)) {
-		return { kind: "verify", command, ...(check.scope ? { scope: check.scope } : {}), ...written };
+	// A check sent to the background (`npm test &`) has not finished when the command exits, so its
+	// exit code never reaches the tool. A file changed after the check in the same line is not covered by it.
+	const backgrounded = check !== undefined && commands[check.index]?.next === "&";
+	if (check && !backgrounded && !masksExitCode(command, check.end) && !(writes && writes.last > check.index)) {
+		return {
+			kind: "verify",
+			command,
+			...(check.scope ? { scope: check.scope } : {}),
+			...(check.files ? { files: check.files } : {}),
+			...written,
+		};
 	}
 	return { kind: "execute", command, ...written };
 }
@@ -956,6 +1007,15 @@ function isWithin(path: string, root: string): boolean {
 	const full = comparablePath(path);
 	const base = comparablePath(root);
 	return full === base || full.startsWith(`${base}/`);
+}
+
+/** The absolute `path` relative to `root`, with `/` separators, or undefined when it is not inside `root`. */
+export function relativeToRoot(path: string, root: string): string | undefined {
+	const full = comparablePath(path);
+	const base = comparablePath(root);
+	if (full === base) return "";
+	if (!full.startsWith(`${base}/`)) return undefined;
+	return normalizePath(path.replace(/\\/g, "/")).slice(base.length + 1);
 }
 
 /** Whether the absolute `path` is in a temporary directory: `/tmp` and its kin, or the system one the runtime names. */

@@ -30,7 +30,7 @@ export interface CompletionScenario {
 	steps: Step[];
 	finalText: string;
 	/** What the harness should conclude. */
-	expected: "verified" | "unverified" | "contradicted" | "acknowledged" | "no-claim";
+	expected: "verified" | "unverified" | "contradicted" | "acknowledged" | "question" | "no-claim";
 	open?: string;
 }
 
