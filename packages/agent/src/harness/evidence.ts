@@ -24,7 +24,7 @@
  * verification request back to the agent instead of ending the run.
  */
 
-import { isMutation, type ToolEffect } from "./effects.ts";
+import { isMutation, normalizePath, relativeToRoot, type ToolEffect } from "./effects.ts";
 import { clip, wordsPattern } from "./text.ts";
 
 export type CompletionStatus =
@@ -38,6 +38,11 @@ export type CompletionStatus =
 	| "no-effect"
 	/** The final message states what was not verified or that the work failed. */
 	| "acknowledged"
+	/**
+	 * The final message asks the developer something while changes no passing check covers are
+	 * pending. It is not a completion report, so it is not gated, but the developer is told.
+	 */
+	| "question"
 	/** The final message makes no completion claim that needs evidence. */
 	| "no-claim";
 
@@ -45,6 +50,7 @@ export interface VerificationRecord {
 	command: string;
 	/** Exit status was successful and the run executed at least one test. */
 	passed: boolean;
+	/** When the check started: it covers the changes that ended before. */
 	step: number;
 	/** The command ran only tests matching a name pattern (`-t`, `--grep`, `-k`, ...). */
 	nameFiltered: boolean;
@@ -52,6 +58,8 @@ export interface VerificationRecord {
 	empty: boolean;
 	/** Directories the check covers; absent when it covers the whole workspace. */
 	scope?: string[];
+	/** Source and test files the check named; it covers only changes to files of the same name. */
+	files?: string[];
 }
 
 /** Output of a test run that executed nothing: a green exit that proves nothing. */
@@ -142,13 +150,22 @@ const ACKNOWLEDGEMENT = wordsPattern([
 	"unverified",
 	"(?:could not|couldn't|unable to|did not|didn't|haven't|have not|hasn't|has not) (?:run|verify|test|validate)",
 	"still fail(?:s|ing)?",
-	"(?:tests?|checks?|builds?|lint|type ?checks?) (?:still )?fail(?:s|ed|ing)?",
+	"(?:tests?|checks?|builds?|lint|type ?checks?) (?:still )?fail(?:s|ing)?",
 	"não (?:foi |foram )?(?:verificad|testad|rodad|executad|validad)[oa]s?",
 	"não (?:consegui|pude) (?:rodar|executar|testar|verificar|validar)",
 	"não (?:verifiquei|testei|rodei|executei|validei)",
 	"sem verificação",
-	"(?:testes?|checks?|builds?|lint) (?:ainda )?(?:falh(?:a|am|ou|aram|ando))",
+	"(?:testes?|checks?|builds?|lint) (?:ainda )?(?:falh(?:a|am|ando))",
 	"ainda falha",
+]);
+
+/**
+ * A failure reported in the past tense. It acknowledges a failure only when the last check of the
+ * request did fail: "the tests failed before, now it is fixed" with no check run is a claim.
+ */
+const PAST_FAILURE = wordsPattern([
+	"(?:tests?|checks?|builds?|lint|type ?checks?) failed",
+	"(?:testes?|checks?|builds?|lint) (?:falhou|falharam)",
 ]);
 
 /** Changes to these files cannot be checked by running code; they need no verification command. */
@@ -157,6 +174,8 @@ const DOCUMENTATION_PATH = /\.(?:md|mdx|markdown|txt|rst|adoc)$/i;
 export interface EvidenceLedgerOptions {
 	/** Verification requests per developer request before a flagged report is accepted. Default: 1. */
 	maxGatesPerRequest?: number;
+	/** Workspace root, so an absolute edit path can be compared with a check's relative scope. */
+	cwd?: string;
 }
 
 /** A mutation of one path (or of unknown paths) at a step of the request. */
@@ -166,22 +185,50 @@ interface Change {
 	documentation: boolean;
 }
 
-/** Whether a check scoped to `scope` covers `path`. A check without scope covers everything. */
-function covers(scope: readonly string[] | undefined, path: string | undefined): boolean {
-	if (!scope || scope.length === 0 || path === undefined) return true;
-	const file = path.replace(/\\/g, "/");
-	return scope.some((dir) => {
-		if (file.startsWith(`${dir}/`) || file.includes(`/${dir}/`)) return true;
-		// A relative edit path against an absolute scope: some ancestor directory ends the scope.
-		if (dir.startsWith("/") && !file.startsWith("/")) {
-			const parts = file.split("/");
-			parts.pop();
-			for (let length = parts.length; length > 0; length--) {
-				if (dir.endsWith(`/${parts.slice(0, length).join("/")}`)) return true;
-			}
-		}
-		return false;
-	});
+/** The name of a source or test file without its extension and test markers: `parser.test.ts`, `test_parser.py` and `ParserTest.java` are all `parser`. */
+function codeStem(path: string): string {
+	const name = (path.split("/").pop() ?? path).replace(/\.[^.]+$/, "");
+	return name
+		.replace(/[._-](?:test|tests|spec|specs)$/i, "")
+		.replace(/^(?:test|spec)[._-]/i, "")
+		.replace(/(?:Test|Tests|Spec|IT)$/, "")
+		.toLowerCase();
+}
+
+/** Whether the workspace-relative or absolute `file` is in the scope directory `dir`. */
+function inScope(file: string, dir: string, cwd: string | undefined): boolean {
+	const scope = normalizePath(dir);
+	const absoluteFile = /^(?:\/|[A-Za-z]:\/)/.test(file);
+	const absoluteScope = /^(?:\/|[A-Za-z]:\/)/.test(scope);
+	if (absoluteFile === absoluteScope) return file === scope || file.startsWith(`${scope}/`);
+	if (absoluteFile) {
+		// The scope is relative to the workspace: compare it with the file's path inside the workspace.
+		const relative = cwd ? relativeToRoot(file, cwd) : undefined;
+		return relative !== undefined
+			? relative === scope || relative.startsWith(`${scope}/`)
+			: file.includes(`/${scope}/`);
+	}
+	// A relative edit path against an absolute scope: some ancestor directory ends the scope.
+	const parts = file.split("/");
+	parts.pop();
+	for (let length = parts.length; length > 0; length--) {
+		if (scope.endsWith(`/${parts.slice(0, length).join("/")}`)) return true;
+	}
+	return false;
+}
+
+/**
+ * Whether `check` covers a change of `path`: the path is in the check's scope (a check without scope
+ * covers the whole workspace) and, when the check named files, has the name of one of them.
+ * `cd src && npm test` covers `src/a.ts`, not `packages/a/src/a.ts`.
+ */
+function covers(check: VerificationRecord, path: string | undefined, cwd: string | undefined): boolean {
+	if (path === undefined) return true;
+	const file = normalizePath(path.replace(/\\/g, "/"));
+	if (check.scope && check.scope.length > 0 && !check.scope.some((dir) => inScope(file, dir, cwd))) return false;
+	if (!check.files) return true;
+	const stem = codeStem(file);
+	return check.files.some((named) => codeStem(named) === stem);
 }
 
 /** Whether a message ends by asking the developer something, so it is not a completion report. */
@@ -192,7 +239,9 @@ function endsWithQuestion(text: string): boolean {
 /** Tracks what the tool calls of one developer request actually did. */
 export class EvidenceLedger {
 	private readonly maxGates: number;
-	private step = 0;
+	private readonly cwd?: string;
+	/** Ticks once when a tool call starts and once when it ends, so parallel calls are ordered. */
+	private clock = 0;
 	private mutations = 0;
 	/** Successful calls whose effect is unknown: commands and unrecognized tools. */
 	private opaqueEffects = 0;
@@ -205,11 +254,12 @@ export class EvidenceLedger {
 
 	constructor(options: EvidenceLedgerOptions = {}) {
 		this.maxGates = options.maxGatesPerRequest ?? 1;
+		this.cwd = options.cwd;
 	}
 
 	/** Start a developer request. `actionRequested` marks requests for a change rather than an answer. */
 	beginRequest(actionRequested: boolean): void {
-		this.step = 0;
+		this.clock = 0;
 		this.mutations = 0;
 		this.opaqueEffects = 0;
 		this.changes = [];
@@ -221,24 +271,35 @@ export class EvidenceLedger {
 	}
 
 	/**
+	 * A tool call starts. Returns its start time, to pass to {@link recordToolOutcome} when it ends:
+	 * a check covers only the changes that ended before it started, so a test run in parallel with an
+	 * edit does not cover the edit.
+	 */
+	beginToolCall(): number {
+		return this.clock++;
+	}
+
+	/**
 	 * Record the outcome of an executed tool call. Blocked calls should not be recorded. `output` is
 	 * the call's text result; a green test run whose output says no test ran is not evidence.
+	 * `startedAt` comes from {@link beginToolCall}; without it the call is taken to start now, after
+	 * every call recorded before it.
 	 */
-	recordToolOutcome(effect: ToolEffect, isError: boolean, output = ""): void {
-		let step = this.step++;
-		const record = (paths: readonly string[]) => {
+	recordToolOutcome(effect: ToolEffect, isError: boolean, output = "", startedAt = this.beginToolCall()): void {
+		const endedAt = this.clock++;
+		const record = (paths: readonly string[], step: number) => {
 			this.mutations++;
 			for (const path of paths.length > 0 ? paths : [undefined]) {
 				this.changes.push({ path, step, documentation: path !== undefined && DOCUMENTATION_PATH.test(path) });
 				if (path !== undefined) this.changed.add(path);
 			}
 		};
-		if (isMutation(effect.kind) && !isError) record(effect.paths);
-		// Files a shell command edited before its own check: the check can cover them. A failed check
-		// still ran after the edit; any other failed command may not have reached it.
+		if (isMutation(effect.kind) && !isError) record(effect.paths, endedAt);
+		// Files a shell command edited before its own check: the check can cover them, so they count from
+		// the command's start and the check from just after. A failed check still ran after the edit;
+		// any other failed command may not have reached it.
 		if (effect.writes && (!isError || effect.kind === "verify")) {
-			record(effect.writes);
-			if (effect.kind === "verify") step = this.step++;
+			record(effect.writes, effect.kind === "verify" ? startedAt : endedAt);
 		}
 		if (effect.kind === "execute" && !isError) this.opaqueEffects++;
 		if (effect.kind === "verify") {
@@ -247,10 +308,11 @@ export class EvidenceLedger {
 			this.verifications.push({
 				command: clip(command, 120),
 				passed: !isError && !empty,
-				step,
+				step: effect.writes ? startedAt + 0.5 : startedAt,
 				nameFiltered: NAME_FILTER.test(command),
 				empty,
 				...(effect.scope ? { scope: effect.scope } : {}),
+				...(effect.files ? { files: effect.files } : {}),
 			});
 		}
 	}
@@ -261,7 +323,7 @@ export class EvidenceLedger {
 			(change) =>
 				!change.documentation &&
 				!this.verifications.some(
-					(check) => check.passed && check.step > change.step && covers(check.scope, change.path),
+					(check) => check.passed && check.step > change.step && covers(check, change.path, this.cwd),
 				),
 		);
 	}
@@ -286,12 +348,14 @@ export class EvidenceLedger {
 
 	/**
 	 * Compare the final message of a turn with the recorded evidence. A turn that ends with changes
-	 * no passing check covers is a completion report whatever its wording, unless it asks a question.
+	 * no passing check covers is a completion report whatever its wording, unless it asks a question:
+	 * then it is a `question`, surfaced to the developer but not gated.
 	 */
 	assess(finalText: string): CompletionReport {
 		const pending = this.pendingChanges();
 		const explicit = COMPLETION_CLAIM.test(finalText) || CHECK_CLAIM.test(finalText);
-		const claimed = explicit || (pending !== undefined && !endsWithQuestion(finalText));
+		const asks = endsWithQuestion(finalText);
+		const claimed = explicit || (pending !== undefined && !asks);
 		const base = {
 			claimed,
 			changedPaths: [...this.changed],
@@ -299,11 +363,21 @@ export class EvidenceLedger {
 			verifications: this.verifications.slice(),
 			gated: false,
 		};
+		const lastCheck = this.verifications.at(-1);
 		const report = ((): CompletionReport => {
-			if (!claimed) return { ...base, status: "no-claim" };
-			if (ACKNOWLEDGEMENT.test(finalText)) return { ...base, status: "acknowledged" };
+			if (!claimed) {
+				return pending && asks
+					? {
+							...base,
+							status: "question",
+							detail: `the message asks a question while changes no passing check covers are pending: ${pending.slice(0, 3).join(", ")}`,
+						}
+					: { ...base, status: "no-claim" };
+			}
+			if (ACKNOWLEDGEMENT.test(finalText) || (PAST_FAILURE.test(finalText) && lastCheck && !lastCheck.passed)) {
+				return { ...base, status: "acknowledged" };
+			}
 
-			const lastCheck = this.verifications.at(-1);
 			if (ALL_TESTS_CLAIM.test(finalText) && lastCheck?.passed && lastCheck.nameFiltered) {
 				return {
 					...base,

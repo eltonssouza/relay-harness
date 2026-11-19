@@ -252,12 +252,14 @@ export class CodingHarnessCore {
 				const { report } = event;
 				const flagged =
 					report.status === "unverified" || report.status === "contradicted" || report.status === "no-effect";
-				// A gated report goes back to the agent; only a report that stands is surfaced.
-				if (flagged && !report.gated) {
-					getUI().ui?.notify(
-						`Harness: completion reported without evidence (${report.detail ?? report.status}).`,
-						"warning",
-					);
+				// A gated report goes back to the agent; only a report that stands is surfaced. A question
+				// with unverified changes is not gated, so the developer is told before answering it.
+				if ((flagged && !report.gated) || report.status === "question") {
+					const what =
+						report.status === "question"
+							? "the agent asks a question with unverified changes"
+							: "completion reported without evidence";
+					getUI().ui?.notify(`Harness: ${what} (${report.detail ?? report.status}).`, "warning");
 				}
 				break;
 			}
