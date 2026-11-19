@@ -1,0 +1,132 @@
+{
+	"name": "custom-tool-changed",
+	"description": "Custom tool input that changes non-monotonically is an error.",
+	"model": {
+		"id": "gpt-test",
+		"name": "GPT Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1.25,
+			"output": 10,
+			"cacheRead": 0.125,
+			"cacheWrite": 0
+		},
+		"contextWindow": 400000,
+		"maxTokens": 128000,
+		"compat": {
+			"supportsOpenAIGrammarTools": true
+		}
+	},
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "apply_patch",
+					"description": "Apply a patch.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"patch": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"patch"
+						]
+					},
+					"constrainedSampling": {
+						"type": "grammar",
+						"variants": {
+							"openai_lark": "start: \"*** Begin Patch\" /[\\s\\S]*/"
+						}
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"sse": "event: response.created\ndata: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_1\",\"status\":\"in_progress\"}}\n\nevent: response.output_item.added\ndata: {\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{\"type\":\"custom_tool_call\",\"id\":\"ctc_2\",\"call_id\":\"call_q\",\"name\":\"apply_patch\",\"input\":\"\"}}\n\nevent: response.custom_tool_call_input.delta\ndata: {\"type\":\"response.custom_tool_call_input.delta\",\"output_index\":0,\"delta\":\"abc\"}\n\nevent: response.custom_tool_call_input.done\ndata: {\"type\":\"response.custom_tool_call_input.done\",\"output_index\":0,\"input\":\"xyz\"}\n\nevent: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"total_tokens\":120}}}\n\n",
+	"splits": [],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "toolcall_start",
+			"contentIndex": 0
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 0,
+			"delta": "{\"patch\":\"abc"
+		},
+		{
+			"type": "error",
+			"reason": "error",
+			"error": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call_q|ctc_2",
+						"name": "apply_patch",
+						"arguments": {
+							"patch": "abc"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "gpt-test",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "error",
+				"timestamp": 0,
+				"responseId": "resp_1",
+				"errorMessage": "grammar tool input for property \"patch\" changed non-monotonically"
+			}
+		}
+	]
+}

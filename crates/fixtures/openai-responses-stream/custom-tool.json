@@ -1,0 +1,155 @@
+{
+	"name": "custom-tool",
+	"description": "A grammar tool call: input deltas become JSON argument deltas.",
+	"model": {
+		"id": "gpt-test",
+		"name": "GPT Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1.25,
+			"output": 10,
+			"cacheRead": 0.125,
+			"cacheWrite": 0
+		},
+		"contextWindow": 400000,
+		"maxTokens": 128000,
+		"compat": {
+			"supportsOpenAIGrammarTools": true
+		}
+	},
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "apply_patch",
+					"description": "Apply a patch.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"patch": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"patch"
+						]
+					},
+					"constrainedSampling": {
+						"type": "grammar",
+						"variants": {
+							"openai_lark": "start: \"*** Begin Patch\" /[\\s\\S]*/"
+						}
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"sse": "event: response.created\ndata: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_1\",\"status\":\"in_progress\"}}\n\nevent: response.output_item.added\ndata: {\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{\"type\":\"custom_tool_call\",\"id\":\"ctc_1\",\"call_id\":\"call_p\",\"name\":\"apply_patch\",\"input\":\"\"}}\n\nevent: response.custom_tool_call_input.delta\ndata: {\"type\":\"response.custom_tool_call_input.delta\",\"output_index\":0,\"delta\":\"*** Begin \"}\n\nevent: response.custom_tool_call_input.delta\ndata: {\"type\":\"response.custom_tool_call_input.delta\",\"output_index\":0,\"delta\":\"Patch\\n\\\"q\\\"\"}\n\nevent: response.custom_tool_call_input.done\ndata: {\"type\":\"response.custom_tool_call_input.done\",\"output_index\":0,\"input\":\"*** Begin Patch\\n\\\"q\\\"\\tend\"}\n\nevent: response.output_item.done\ndata: {\"type\":\"response.output_item.done\",\"output_index\":0,\"item\":{\"type\":\"custom_tool_call\",\"id\":\"ctc_1\",\"call_id\":\"call_p\",\"name\":\"apply_patch\",\"input\":\"*** Begin Patch\\n\\\"q\\\"\\tend\"}}\n\nevent: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"total_tokens\":120}}}\n\n",
+	"splits": [],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "toolcall_start",
+			"contentIndex": 0
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 0,
+			"delta": "{\"patch\":\"*** Begin "
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 0,
+			"delta": "Patch\\n\\\"q\\\""
+		},
+		{
+			"type": "toolcall_delta",
+			"contentIndex": 0,
+			"delta": "\\tend\"}"
+		},
+		{
+			"type": "toolcall_end",
+			"contentIndex": 0,
+			"toolCall": {
+				"type": "toolCall",
+				"id": "call_p|ctc_1",
+				"name": "apply_patch",
+				"arguments": {
+					"patch": "*** Begin Patch\n\"q\"\tend"
+				}
+			}
+		},
+		{
+			"type": "done",
+			"reason": "toolUse",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call_p|ctc_1",
+						"name": "apply_patch",
+						"arguments": {
+							"patch": "*** Begin Patch\n\"q\"\tend"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "gpt-test",
+				"usage": {
+					"input": 100,
+					"output": 20,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"reasoning": 0,
+					"totalTokens": 120,
+					"cost": {
+						"input": 0.000125,
+						"output": 0.0002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.000325
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"responseId": "resp_1",
+				"rawStopReason": "completed"
+			}
+		}
+	]
+}

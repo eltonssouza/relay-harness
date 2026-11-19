@@ -1,0 +1,141 @@
+{
+	"name": "backfill-encrypted-reasoning",
+	"description": "Encrypted reasoning only in response.completed is backfilled into the signature.",
+	"model": {
+		"id": "gpt-test",
+		"name": "GPT Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1.25,
+			"output": 10,
+			"cacheRead": 0.125,
+			"cacheWrite": 0
+		},
+		"contextWindow": 400000,
+		"maxTokens": 128000
+	},
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "apply_patch",
+					"description": "Apply a patch.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"patch": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"patch"
+						]
+					},
+					"constrainedSampling": {
+						"type": "grammar",
+						"variants": {
+							"openai_lark": "start: \"*** Begin Patch\" /[\\s\\S]*/"
+						}
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"sse": "event: response.created\ndata: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_1\",\"status\":\"in_progress\"}}\n\nevent: response.output_item.done\ndata: {\"type\":\"response.output_item.done\",\"output_index\":0,\"item\":{\"type\":\"reasoning\",\"id\":\"rs_3\",\"summary\":[{\"type\":\"summary_text\",\"text\":\"Think.\"}]}}\n\nevent: response.output_item.added\ndata: {\"type\":\"response.output_item.added\",\"output_index\":1,\"item\":{\"type\":\"message\",\"id\":\"msg_1\",\"role\":\"assistant\",\"status\":\"in_progress\",\"content\":[]}}\n\nevent: response.output_item.done\ndata: {\"type\":\"response.output_item.done\",\"output_index\":1,\"item\":{\"type\":\"message\",\"id\":\"msg_1\",\"role\":\"assistant\",\"status\":\"completed\",\"content\":[{\"type\":\"output_text\",\"text\":\"Ok\",\"annotations\":[]}]}}\n\nevent: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"total_tokens\":120},\"output\":[{\"type\":\"reasoning\",\"id\":\"rs_3\",\"summary\":[],\"encrypted_content\":\"late-enc\"}]}}\n\n",
+	"splits": [],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "thinking_start",
+			"contentIndex": 0
+		},
+		{
+			"type": "thinking_end",
+			"contentIndex": 0,
+			"content": "Think."
+		},
+		{
+			"type": "text_start",
+			"contentIndex": 1
+		},
+		{
+			"type": "text_end",
+			"contentIndex": 1,
+			"content": "Ok"
+		},
+		{
+			"type": "done",
+			"reason": "stop",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Think.",
+						"thinkingSignature": "{\"type\":\"reasoning\",\"id\":\"rs_3\",\"summary\":[{\"type\":\"summary_text\",\"text\":\"Think.\"}],\"encrypted_content\":\"late-enc\"}"
+					},
+					{
+						"type": "text",
+						"text": "Ok",
+						"textSignature": "{\"v\":1,\"id\":\"msg_1\"}"
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "gpt-test",
+				"usage": {
+					"input": 100,
+					"output": 20,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"reasoning": 0,
+					"totalTokens": 120,
+					"cost": {
+						"input": 0.000125,
+						"output": 0.0002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.000325
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 0,
+				"responseId": "resp_1",
+				"rawStopReason": "completed"
+			}
+		}
+	]
+}
