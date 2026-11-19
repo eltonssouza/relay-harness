@@ -12,6 +12,7 @@
 	"devDependencies": {
 		"@types/node": "22.19.19",
 		"playwright-core": "1.64.0-alpha-1790635538000",
-		"vitest": "4.1.11"
+		"vitest": "4.1.11",
+		"yaml": "2.9.0"
 	}
 }
