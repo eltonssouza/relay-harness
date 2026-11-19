@@ -1,0 +1,86 @@
+{
+	"name": "anthropic-abort-before-response",
+	"adapter": "anthropic",
+	"failure": "abort-before-response",
+	"model": {
+		"id": "claude-test",
+		"name": "Claude Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "http://127.0.0.1:9",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 3,
+			"output": 15,
+			"cacheRead": 0.3,
+			"cacheWrite": 3.75
+		},
+		"contextWindow": 200000,
+		"maxTokens": 64000
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Read a.ts.",
+			"timestamp": 0
+		}
+	],
+	"apiKey": "sk-ant-api03-parity",
+	"sse": "",
+	"events": [
+		{
+			"type": "error",
+			"reason": "aborted",
+			"error": {
+				"role": "assistant",
+				"content": [],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "aborted",
+				"timestamp": 0,
+				"errorMessage": "Request aborted"
+			}
+		}
+	]
+}
