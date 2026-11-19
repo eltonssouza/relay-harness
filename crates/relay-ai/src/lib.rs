@@ -23,6 +23,7 @@
 //! - `stream`: each adapter's `stream()`, sending the request and decoding the response.
 //! - `simple`: the provider-neutral options (`streamSimple`) mapped to each adapter's, and the
 //!   context estimate that limits the output.
+//! - `validation`: tool arguments checked against their JSON Schema as TypeBox checks them.
 //! - `json`, `sse`: provider output helpers (JSON repair and partial parsing, server-sent events).
 //!
 //! The tests compare against what the TypeScript code does, recorded in `crates/fixtures/`
@@ -63,6 +64,7 @@ pub mod strict;
 pub mod text;
 pub mod transcript;
 pub mod transform;
+pub mod validation;
 
 pub use message::*;
 pub use model::{

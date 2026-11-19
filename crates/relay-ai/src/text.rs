@@ -131,9 +131,162 @@ pub fn js_parse_float(text: &str) -> f64 {
     text[..end].parse().unwrap_or(f64::NAN)
 }
 
+/// `Number(text)` (StringToNumber): the whole string, trimmed, as a decimal, `Infinity`, or a
+/// `0x`/`0o`/`0b` integer; empty is 0, anything else NaN.
+pub fn js_string_to_number(text: &str) -> f64 {
+    let text = js_trim(text);
+    if text.is_empty() {
+        return 0.0;
+    }
+    let radix = match text.get(..2) {
+        Some("0x" | "0X") => Some(16),
+        Some("0o" | "0O") => Some(8),
+        Some("0b" | "0B") => Some(2),
+        _ => None,
+    };
+    if let Some(radix) = radix {
+        let digits = &text[2..];
+        if digits.is_empty() || !digits.chars().all(|digit| digit.is_digit(radix)) {
+            return f64::NAN;
+        }
+        return digits.chars().fold(0.0, |total, digit| {
+            total * f64::from(radix) + f64::from(digit.to_digit(radix).unwrap_or(0))
+        });
+    }
+    let (negative, unsigned) = match text.as_bytes()[0] {
+        b'-' => (true, &text[1..]),
+        b'+' => (false, &text[1..]),
+        _ => (false, text),
+    };
+    if unsigned == "Infinity" {
+        return if negative {
+            f64::NEG_INFINITY
+        } else {
+            f64::INFINITY
+        };
+    }
+    let bytes = unsigned.as_bytes();
+    let digits = |from: usize| {
+        bytes[from..]
+            .iter()
+            .take_while(|byte| byte.is_ascii_digit())
+            .count()
+    };
+    let integer = digits(0);
+    let mut end = integer;
+    let mut fraction = 0;
+    if bytes.get(end) == Some(&b'.') {
+        fraction = digits(end + 1);
+        end += 1 + fraction;
+    }
+    if integer == 0 && fraction == 0 {
+        return f64::NAN;
+    }
+    if matches!(bytes.get(end), Some(b'e' | b'E')) {
+        let sign = usize::from(matches!(bytes.get(end + 1), Some(b'+' | b'-')));
+        let exponent = digits(end + 1 + sign);
+        if exponent == 0 {
+            return f64::NAN;
+        }
+        end += 1 + sign + exponent;
+    }
+    if end != bytes.len() {
+        return f64::NAN;
+    }
+    let value: f64 = unsigned.parse().unwrap_or(f64::NAN);
+    if negative {
+        -value
+    } else {
+        value
+    }
+}
+
+/// `String(number)` (Number::toString): the shortest digits that read back as the number, with an
+/// exponent from 1e21 up and below 1e-6.
+pub fn js_number_to_string(number: f64) -> String {
+    if number.is_nan() {
+        return "NaN".into();
+    }
+    if number == 0.0 {
+        return "0".into();
+    }
+    if number.is_infinite() {
+        return if number < 0.0 {
+            "-Infinity"
+        } else {
+            "Infinity"
+        }
+        .into();
+    }
+    if number < 0.0 {
+        return format!("-{}", js_number_to_string(-number));
+    }
+    // `{:e}` writes the shortest round-trip digits: d.ddde±x.
+    let scientific = format!("{number:e}");
+    let (mantissa, exponent) = scientific.split_once('e').unwrap_or((&scientific, "0"));
+    let digits: String = mantissa.chars().filter(char::is_ascii_digit).collect();
+    let digits = digits.trim_end_matches('0');
+    let digits = if digits.is_empty() { "0" } else { digits };
+    let k = digits.len() as i64;
+    let n = exponent.parse::<i64>().unwrap_or(0) + 1;
+    if k <= n && n <= 21 {
+        format!("{digits}{}", "0".repeat((n - k) as usize))
+    } else if 0 < n && n <= 21 {
+        format!("{}.{}", &digits[..n as usize], &digits[n as usize..])
+    } else if -6 < n && n <= 0 {
+        format!("0.{}{digits}", "0".repeat((-n) as usize))
+    } else {
+        let sign = if n - 1 < 0 { "-" } else { "+" };
+        let exponent = (n - 1).abs();
+        if k == 1 {
+            format!("{digits}e{sign}{exponent}")
+        } else {
+            format!("{}.{}e{sign}{exponent}", &digits[..1], &digits[1..])
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn converts_numbers_as_javascript_does() {
+        for (text, expected) in [
+            ("", 0.0),
+            (" 12 ", 12.0),
+            ("1e3", 1000.0),
+            (".5", 0.5),
+            ("5.", 5.0),
+            ("-0x10", f64::NAN),
+            ("0x10", 16.0),
+            ("0b101", 5.0),
+            ("-Infinity", f64::NEG_INFINITY),
+            ("1e", f64::NAN),
+            ("12px", f64::NAN),
+            ("inf", f64::NAN),
+        ] {
+            let value = js_string_to_number(text);
+            assert!(
+                value == expected || (value.is_nan() && expected.is_nan()),
+                "{text:?} -> {value}"
+            );
+        }
+        for (number, expected) in [
+            (1.0, "1"),
+            (1.5, "1.5"),
+            (-2.25, "-2.25"),
+            (1e21, "1e+21"),
+            (123456789012345680000.0, "123456789012345680000"),
+            (0.000001, "0.000001"),
+            (1e-7, "1e-7"),
+            (1.5e-7, "1.5e-7"),
+            (0.1 + 0.2, "0.30000000000000004"),
+            (2.5e25, "2.5e+25"),
+        ] {
+            assert_eq!(js_number_to_string(number), expected);
+        }
+    }
 
     #[test]
     fn trims_like_javascript() {
