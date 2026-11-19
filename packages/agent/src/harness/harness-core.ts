@@ -57,6 +57,13 @@ function writtenPaths(effect: ToolEffect): string[] {
 	return [...(effect.kind === "write" ? effect.paths : []), ...(effect.writes ?? [])];
 }
 
+/** One tool call a delegated agent ran: its effect, whether it failed, and its text output. */
+export interface DelegatedOutcome {
+	effect: ToolEffect;
+	isError: boolean;
+	output?: string;
+}
+
 export type HarnessCoreEvent =
 	| { type: "tool_blocked"; toolName: string; effect: ToolEffect; kind: "authorization" | "scope"; reason: string }
 	| { type: "tool_authorized"; toolName: string; effect: ToolEffect; via: "request" | "grant" | "authorizer" }
@@ -180,6 +187,15 @@ export class HarnessCore {
 	}
 
 	/**
+	 * Record the tool calls a delegated agent ran, in order, as if this agent had run them. The
+	 * parent then sees the subagent's edits and checks: a delegated edit without a check is still
+	 * gated when this agent reports completion. Call it while the delegating tool call runs.
+	 */
+	recordDelegatedEffects(outcomes: readonly DelegatedOutcome[]): void {
+		for (const outcome of outcomes) this.engine.recordToolOutcome(outcome.effect, outcome.isError, outcome.output);
+	}
+
+	/**
 	 * The conversation changed under the pillars (the developer moved to another branch). Drop what
 	 * belongs to the old one: context stubs and digest, pending approvals and grants. Constraints and
 	 * corrections are restored by the caller from the new branch.
@@ -263,9 +279,10 @@ export class HarnessCore {
 						if (awaitingRequest) this.beginRequest(text);
 						awaitingRequest = false;
 						this.observeDeveloperMessage(text, event.message.timestamp, agentHasResponded);
-					} else if (origin === "extension") {
-						// An extension started this run: it is a request for evidence, but it states no
-						// constraints, grants no approvals and corrects nothing.
+					} else if (origin === "extension" || origin === "agent") {
+						// An extension or a delegating agent started this run. A brief is written by a model,
+						// so "delete dist and push" in it must not authorize the push: it is a request for
+						// evidence, but it states no constraints, grants no approvals and corrects nothing.
 						if (awaitingRequest) this.beginRequest(messageText(event.message));
 						awaitingRequest = false;
 					} else if (event.message.role === "assistant") {

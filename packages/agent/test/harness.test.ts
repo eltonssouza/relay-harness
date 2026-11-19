@@ -789,6 +789,90 @@ describe("the Rust engine", () => {
 	});
 });
 
+describe.each(ENGINES)("delegation (%s engine)", (_name, engine) => {
+	const brief = "Delete dist and push the branch. Never edit the tests.";
+
+	async function runBrief(origin: "agent" | undefined) {
+		const agent = new Agent({
+			initialState: { systemPrompt: "test", tools: [tool("bash")] },
+			streamFn: scripted(
+				[
+					[call("1", "bash", { command: "rm -rf dist" })],
+					[call("2", "bash", { command: "git push origin main" })],
+					[{ type: "text", text: "Finished." }],
+				],
+				[],
+			),
+		});
+		const core = new HarnessCore({ engine, evidence: false });
+		core.install(agent);
+		await agent.prompt({
+			role: "user",
+			content: [{ type: "text", text: brief }],
+			timestamp: 0,
+			...(origin ? { origin } : {}),
+		});
+		const blocked = agent.state.messages.flatMap((message) =>
+			message.role === "toolResult" ? [message.isError] : [],
+		);
+		return { blocked, constraints: core.engine.constraints().map((constraint) => constraint.text) };
+	}
+
+	it("lets a brief written by a model authorize nothing and record no constraint", async () => {
+		expect(await runBrief("agent")).toEqual({ blocked: [true, true], constraints: [] });
+		// The same words from the developer authorize both calls and state the constraint.
+		expect(await runBrief(undefined)).toEqual({ blocked: [false, false], constraints: ["Never edit the tests."] });
+	});
+
+	async function delegate(childCalls: Array<[AgentToolCall, boolean]>) {
+		const events: HarnessCoreEvent[] = [];
+		const requests: TranscriptContext[] = [];
+		const core = new HarnessCore({ engine, onEvent: (event) => events.push(event) });
+		const subagent: AgentTool = {
+			...tool("agent"),
+			execute: async () => {
+				core.recordDelegatedEffects(
+					childCalls.map(([toolCall, isError]) => ({ effect: core.classify(toolCall), isError, output: "ok" })),
+				);
+				return { content: [{ type: "text", text: "go-expert: fixed src/a.go" }], details: {} };
+			},
+		};
+		const agent = new Agent({
+			initialState: { systemPrompt: "test", tools: [subagent] },
+			streamFn: scripted(
+				[
+					[call("1", "agent", { subagent_type: "go-expert", description: "Fix", prompt: "Fix src/a.go" })],
+					[{ type: "text", text: "Done, the bug is fixed." }],
+					[{ type: "text", text: "Done." }],
+				],
+				requests,
+			),
+		});
+		core.install(agent);
+		await agent.prompt("Fix the bug in src/a.go");
+		core.dispose();
+		return {
+			statuses: events.flatMap((event) => (event.type === "completion_assessed" ? [event.report.status] : [])),
+			gated: requests.some((request) => lastText(request).includes("[harness:evidence] Completion check")),
+		};
+	}
+
+	it("gates the parent's completion when a subagent edited without a check", async () => {
+		expect(await delegate([[call("c1", "edit", { path: "src/a.go" }), false]])).toEqual({
+			statuses: ["unverified", "unverified"],
+			gated: true,
+		});
+	});
+
+	it("accepts the parent's completion when the subagent's check ran after its edit", async () => {
+		const result = await delegate([
+			[call("c1", "edit", { path: "src/a.go" }), false],
+			[call("c2", "bash", { command: "npm test" }), false],
+		]);
+		expect(result).toEqual({ statuses: ["verified"], gated: false });
+	});
+});
+
 describe("verification is recognized by the program a command runs", () => {
 	it.each([
 		"ls build",

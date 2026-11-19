@@ -12,7 +12,7 @@ All three are enabled by default. Inspect them with `/harness`; configure them w
 
 ## Alignment
 
-**Constraints.** Sentences in your messages that state a standing rule ("Never use `any`", "Não altere os testes", "Use pnpm instead of npm") are recorded as constraints. "Always" and "only" ("sempre", "apenas") state a rule only before an action verb ("Always run the tests", not "Always seems to break"), and "Keep going" or "Não consegui rodar os testes" state none. Each request restates them next to your latest message, where the model weighs them most. Constraints are saved in the session file, so they survive compaction and resume. Code blocks and expanded skills or files are ignored. Only your own messages count: a prompt an extension sends for you (`/init`, `/goal`, `/agent`) and the harness's own requests carry an origin and state no constraints, grant no approvals and correct nothing.
+**Constraints.** Sentences in your messages that state a standing rule ("Never use `any`", "Não altere os testes", "Use pnpm instead of npm") are recorded as constraints. "Always" and "only" ("sempre", "apenas") state a rule only before an action verb ("Always run the tests", not "Always seems to break"), and "Keep going" or "Não consegui rodar os testes" state none. Each request restates them next to your latest message, where the model weighs them most. Constraints are saved in the session file, so they survive compaction and resume. Code blocks and expanded skills or files are ignored. Only your own messages count: a prompt an extension sends for you (`/init`, `/goal`, `/agent`), the brief an agent writes for a subagent (origin `agent`) and the harness's own requests carry an origin and state no constraints, grant no approvals and correct nothing. A brief saying "delete dist and push the branch" therefore authorizes neither.
 
 **Authorization.** Commands that are hard to reverse or that change state outside the workspace need your approval:
 
@@ -114,6 +114,8 @@ const core = new HarnessCore({ engine: createHarnessWasmEngine });
 ```
 
 Both engines decide the same way: the HarnessCore tests run on both and check that a session sends the provider identical requests. Relay runs the Rust engine; `RELAY_HARNESS_ENGINE=typescript` runs the TypeScript pillars instead, a fallback kept for one release.
+
+A runtime that delegates work to a subagent reports the subagent's tool calls with `core.recordDelegatedEffects(outcomes)` while the delegating call runs. The parent's evidence then includes the subagent's edits and checks, in order, so a delegated edit without a check is gated when the parent reports completion.
 
 In Relay, `session.harnessCore.core.engine` exposes the constraints, corrections, latest completion report, pending changes and context statistics.
 
