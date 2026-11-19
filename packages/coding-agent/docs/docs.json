@@ -173,6 +173,10 @@
           "path": "goals.md"
         },
         {
+          "title": "Subagents",
+          "path": "subagents.md"
+        },
+        {
           "title": "Native Memory",
           "path": "native-memory.md"
         },

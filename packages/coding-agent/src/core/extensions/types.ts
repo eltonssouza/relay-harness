@@ -14,6 +14,8 @@ import type {
 	AgentToolCallOutcome,
 	AgentToolResult,
 	AgentToolUpdateCallback,
+	DelegatedOutcome,
+	DeveloperConstraint,
 	ThinkingLevel,
 	ToolExecutionMode,
 } from "@relay-harness/agent-core";
@@ -392,6 +394,13 @@ export interface ExtensionToolContext extends ExtensionContext {
 	 * errors come back as `isError: true`.
 	 */
 	executeTool(name: string, args: unknown, options?: ExecuteToolOptions): Promise<AgentToolCallOutcome>;
+	/** The developer's constraints the session's harness recorded, to hand to a delegated agent. */
+	harnessConstraints(): readonly DeveloperConstraint[];
+	/**
+	 * Report the tool calls a delegated agent ran, in order, so the session's harness counts the
+	 * agent's edits and checks as evidence. Call it before the tool returns.
+	 */
+	recordDelegatedEffects(outcomes: readonly DelegatedOutcome[]): void;
 }
 
 /**
@@ -1123,8 +1132,8 @@ export interface UserBashEvent {
 // Input Events
 // ============================================================================
 
-/** Source of user input */
-export type InputSource = "interactive" | "rpc" | "extension";
+/** Source of user input. `agent` is a brief a delegating agent wrote for a subagent session. */
+export type InputSource = "interactive" | "rpc" | "extension" | "agent";
 
 /** Fired when user input is received, before agent processing */
 export interface InputEvent {
@@ -2186,6 +2195,10 @@ export interface ExtensionContextActions {
 	) => Promise<AgentToolCallOutcome>;
 	/** Backs `ExtensionToolContext.tools`. */
 	getCallableTools?: () => readonly AgentTool[];
+	/** Backs `ExtensionToolContext.harnessConstraints()`. */
+	getHarnessConstraints?: () => readonly DeveloperConstraint[];
+	/** Backs `ExtensionToolContext.recordDelegatedEffects()`. */
+	recordDelegatedEffects?: (outcomes: readonly DelegatedOutcome[]) => void;
 }
 
 /**

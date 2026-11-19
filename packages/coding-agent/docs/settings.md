@@ -14,6 +14,7 @@ This reference lists user-configurable settings, their types, defaults, and purp
 | `modelThinkingLevels` | object | None | Per-model startup thinking levels keyed by exact `provider/modelId`. |
 | `thinkingBudgets` | object | Built-in budgets | Token budgets for `minimal`, `low`, `medium`, and `high` thinking levels. |
 | `enabledModels` | `string[]` | All available models | Model patterns used for startup selection and model cycling. Uses the same format as `--models`. |
+| `modelTiers` | object | Derived from catalog prices | Models per capability tier (`fast`, `balanced`, `strong`, `frontier`) as `provider/model` lists in preference order, for agent definitions that name a tier. See [Subagents](subagents.md#model-tiers). |
 | `hideThinkingBlock` | boolean | `false` | Hide thinking blocks in the transcript. |
 | `showCacheMissNotices` | boolean | `false` | Show notices for significant cache misses, successful cache warming, compaction usage, and provider recovery. |
 | `cacheWarming` | `"off" \| "streaming" \| "idle"` | `"streaming"` | Keep eligible provider prompt caches warm during active runs or, with `"idle"`, between runs. Global setting only. |
@@ -94,6 +95,17 @@ See [Compaction Reference](compaction.md) for trigger, summarization, and valida
 | `harnessCore.maxFileLines` | number | `1000` | Lines per file before an edit that crosses it, or grows the file by 200 lines or more, is flagged. `0` disables. |
 
 Changes apply to sessions created afterwards. See [Harness Core](harness-core.md).
+
+### Subagents
+
+| Setting | Type | Default | Description |
+|---|---|---|---|
+| `subagents.maxDepth` | number | `3` | Sessions in one delegation chain, the developer's included. |
+| `subagents.maxConcurrency` | number | `4` | Subagents running at once. |
+| `subagents.maxTokens` | number | `400000` | Tokens one subagent may spend before it is stopped. |
+| `subagents.timeoutMs` | number | `1200000` | Milliseconds one subagent may run before it is stopped. |
+
+See [Subagents](subagents.md).
 
 ### Branch summaries
 

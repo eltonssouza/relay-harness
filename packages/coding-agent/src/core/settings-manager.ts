@@ -14,6 +14,7 @@ import { CONFIG_DIR_NAME, getAgentDir } from "../config.ts";
 import { normalizePath, resolvePath } from "../utils/paths.ts";
 import { stripBom } from "../utils/text.ts";
 import { DEFAULT_HTTP_IDLE_TIMEOUT_MS, parseHttpIdleTimeoutMs } from "./http-dispatcher.ts";
+import type { ModelTiers } from "./model-tiers.ts";
 
 export interface CompactionModelOverride {
 	reserveTokens?: number;
@@ -33,6 +34,18 @@ export interface CompactionSettings {
 }
 
 /** The three harness pillars. Each defaults to enabled; changes apply to sessions created afterwards. */
+/** Limits of the `agent` tool's subagents. */
+export interface SubagentSettings {
+	/** Sessions in a delegation chain, the developer's included (default: 3: main, orchestrator, specialist). */
+	maxDepth?: number;
+	/** Subagents running at once (default: 4). */
+	maxConcurrency?: number;
+	/** Tokens one subagent may spend before it is stopped (default: 400000). */
+	maxTokens?: number;
+	/** Milliseconds one subagent may run before it is stopped (default: 1200000). */
+	timeoutMs?: number;
+}
+
 export interface HarnessCoreSettings {
 	alignment?: boolean; // default: true - developer constraints, authorization gate, question scope guard
 	authorizationGate?: boolean; // default: true - require authorization for destructive and external commands
@@ -156,6 +169,8 @@ export interface Settings {
 	theme?: string;
 	compaction?: CompactionSettings;
 	harnessCore?: HarnessCoreSettings;
+	modelTiers?: ModelTiers; // models per capability tier as `provider/model`, for agent definitions that name a tier
+	subagents?: SubagentSettings;
 	branchSummary?: BranchSummarySettings;
 	retry?: RetrySettings;
 	hideThinkingBlock?: boolean;

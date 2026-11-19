@@ -8,6 +8,7 @@ import nativeMcpExtension from "./native-mcp/index.ts";
 import nativeMemoryExtension from "./native-memory/index.ts";
 import ollamaExtension from "./ollama/index.ts";
 import projectMemoryExtension from "./project-memory/index.ts";
+import subagentsExtension from "./subagents/index.ts";
 import toolSearchExtension from "./tool-search/index.ts";
 
 export const builtInExtensions: InlineExtension[] = [
@@ -17,6 +18,7 @@ export const builtInExtensions: InlineExtension[] = [
 	{ name: "ollama", factory: ollamaExtension, builtin: true },
 	{ name: "project-memory", factory: projectMemoryExtension, builtin: true },
 	{ name: "goal", factory: goalExtension, builtin: true },
+	{ name: "subagents", factory: subagentsExtension, builtin: true },
 	// Opt-in (--native-memory or RELAY_NATIVE_MEMORY=1): persistent memories, knowledge graph and user model.
 	{ name: "native-memory", factory: nativeMemoryExtension, builtin: true },
 	// Replaceable: an extension that registers `codemode`, `tool_search`, or `/mcp` (such as a third-party

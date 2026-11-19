@@ -2,7 +2,7 @@
  * Extension runner - executes extensions and manages their lifecycle.
  */
 
-import type { AgentMessage, AgentTool } from "@relay-harness/agent-core";
+import type { AgentMessage, AgentTool, DelegatedOutcome, DeveloperConstraint } from "@relay-harness/agent-core";
 import {
 	getCurrentSystemMessage,
 	type ImageContent,
@@ -378,6 +378,8 @@ export class ExtensionRunner {
 		normalizeBuildSystemPromptOptions({ cwd: this.cwd });
 	private executeToolFn: ExtensionContextActions["executeTool"];
 	private getCallableToolsFn: () => readonly AgentTool[] = () => [];
+	private getHarnessConstraintsFn: () => readonly DeveloperConstraint[] = () => [];
+	private recordDelegatedEffectsFn: (outcomes: readonly DelegatedOutcome[]) => void = () => {};
 	/** Registered MCP servers already reported as unhandled. */
 	private readonly reportedMcpServers = new Set<string>();
 	private newSessionHandler: NewSessionHandler = async () => ({ cancelled: false });
@@ -452,6 +454,8 @@ export class ExtensionRunner {
 			contextActions.getSystemPromptOptions ?? (() => normalizeBuildSystemPromptOptions({ cwd: this.cwd }));
 		this.executeToolFn = contextActions.executeTool;
 		this.getCallableToolsFn = contextActions.getCallableTools ?? (() => []);
+		this.getHarnessConstraintsFn = contextActions.getHarnessConstraints ?? (() => []);
+		this.recordDelegatedEffectsFn = contextActions.recordDelegatedEffects ?? (() => {});
 
 		// Servers registered from now on reach the extension that connects them right away. Servers
 		// registered during loading are read on session_start.
@@ -982,6 +986,18 @@ export class ExtensionRunner {
 						};
 					}
 					return runner.executeToolFn(toolCallId, name, args, { ...options, signal: options.signal ?? signal });
+				},
+			},
+			harnessConstraints: {
+				value: () => {
+					runner.assertActive();
+					return runner.getHarnessConstraintsFn();
+				},
+			},
+			recordDelegatedEffects: {
+				value: (outcomes: readonly DelegatedOutcome[]) => {
+					runner.assertActive();
+					runner.recordDelegatedEffectsFn(outcomes);
 				},
 			},
 		});

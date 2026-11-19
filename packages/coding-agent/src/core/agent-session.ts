@@ -181,6 +181,11 @@ export function parseSkillBlock(text: string): ParsedSkillBlock | null {
 	};
 }
 
+/** The `origin` a user message gets from its input source: the developer's own input carries none. */
+function messageOriginOf(source: InputSource | undefined): { origin?: "extension" | "agent" } {
+	return source === "extension" || source === "agent" ? { origin: source } : {};
+}
+
 /** Tool execution events of calls a tool made through `ctx.executeTool()` carry `parentToolCallId`. */
 type WithParentToolCallId<E> = E extends {
 	type: "tool_execution_start" | "tool_execution_update" | "tool_execution_end";
@@ -2093,7 +2098,7 @@ export class AgentSession {
 			role: "user",
 			content: userContent,
 			timestamp: Date.now(),
-			...(options?.source === "extension" ? { origin: "extension" as const } : {}),
+			...messageOriginOf(options?.source),
 		});
 
 		// Inject any pending "nextTurn" messages as context alongside the user message
@@ -2257,7 +2262,7 @@ export class AgentSession {
 			role: "user",
 			content,
 			timestamp: Date.now(),
-			...(source === "extension" ? { origin: "extension" as const } : {}),
+			...messageOriginOf(source),
 		});
 	}
 
@@ -2275,7 +2280,7 @@ export class AgentSession {
 			role: "user",
 			content,
 			timestamp: Date.now(),
-			...(source === "extension" ? { origin: "extension" as const } : {}),
+			...messageOriginOf(source),
 		});
 	}
 
@@ -3486,6 +3491,8 @@ export class AgentSession {
 				getSystemPromptOptions: () => this._baseSystemPromptOptions,
 				executeTool: (callerId, name, args, options) => this._executeNestedToolCall(callerId, name, args, options),
 				getCallableTools: () => this._getCallableTools(),
+				getHarnessConstraints: () => this._harnessCore.core.engine.constraints(),
+				recordDelegatedEffects: (outcomes) => this._harnessCore.core.recordDelegatedEffects(outcomes),
 			},
 			{
 				registerProvider: (name, config) => {
