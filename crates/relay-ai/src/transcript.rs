@@ -131,6 +131,67 @@ pub fn collapse_system_messages(messages: &[Message]) -> Vec<Message> {
         .collect()
 }
 
+/// Every tool definition the transcript names, in first-declaration order; a later definition
+/// under the same name replaces the earlier one in place.
+pub fn declared_tools(messages: &[Message]) -> Vec<Tool> {
+    let mut tools: Vec<Tool> = Vec::new();
+    for message in messages {
+        let Message::System(system) = message else {
+            continue;
+        };
+        for added in system.tools_added.iter().flatten() {
+            match tools.iter_mut().find(|tool| tool.name == added.name) {
+                Some(existing) => *existing = added.clone(),
+                None => tools.push(added.clone()),
+            }
+        }
+    }
+    tools
+}
+
+/// Whether a tool was removed or declared again, which a transport that only adds tools
+/// cannot replay.
+pub fn has_non_additive_tool_changes(messages: &[Message]) -> bool {
+    let mut declared: Vec<&str> = Vec::new();
+    for message in messages {
+        let Message::System(system) = message else {
+            continue;
+        };
+        if system
+            .tools_removed
+            .as_ref()
+            .is_some_and(|removed| !removed.is_empty())
+        {
+            return true;
+        }
+        for added in system.tools_added.iter().flatten() {
+            if declared.contains(&added.name.as_str()) {
+                return true;
+            }
+            declared.push(&added.name);
+        }
+    }
+    false
+}
+
+/// The tools for the request's tool field, and whether later system messages load their own
+/// additions in place. Only additions can be loaded in place, so a removal or a redeclaration
+/// sends the current tool list instead.
+pub fn resolve_transcript_tools(
+    messages: &[Message],
+    supports_tool_additions: bool,
+) -> (Vec<Tool>, bool) {
+    let anchors_additions = supports_tool_additions && !has_non_additive_tool_changes(messages);
+    let request_tools = if anchors_additions {
+        initial_system_message(messages)
+            .and_then(|system| system.tools_added.clone())
+            .unwrap_or_default()
+    } else {
+        current_tools(messages)
+    };
+    (request_tools, anchors_additions)
+}
+
 /// Keep later system messages when the model accepts them; otherwise collapse them.
 pub fn resolve_transcript(
     messages: &[Message],

@@ -1,0 +1,561 @@
+{
+	"name": "edge-no-developer-role",
+	"description": "A reasoning model without the developer role.",
+	"model": {
+		"id": "gpt-test",
+		"name": "GPT Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1,
+			"output": 4,
+			"cacheRead": 0.1,
+			"cacheWrite": 0
+		},
+		"contextWindow": 400000,
+		"maxTokens": 128000,
+		"compat": {
+			"supportsDeveloperRole": false
+		}
+	},
+	"apiKey": "sk-parity",
+	"options": {
+		"sessionId": "session-1"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Base prompt.",
+			"sections": {
+				"rules": "<rules>Be brief.</rules>"
+			},
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"limit": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "write",
+					"description": "The write tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"content": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": "Look."
+				},
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Plan.",
+					"thinkingSignature": "{\"type\":\"reasoning\",\"id\":\"rs_1\",\"summary\":[],\"encrypted_content\":\"enc\"}"
+				},
+				{
+					"type": "thinking",
+					"thinking": "No signature."
+				},
+				{
+					"type": "text",
+					"text": "Signed v1.",
+					"textSignature": "{\"v\":1,\"id\":\"msg_1\",\"phase\":\"commentary\"}"
+				},
+				{
+					"type": "text",
+					"text": "Legacy id.",
+					"textSignature": "msg_legacy"
+				},
+				{
+					"type": "text",
+					"text": "Long id.",
+					"textSignature": "msg_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+				},
+				{
+					"type": "text",
+					"text": "No signature."
+				},
+				{
+					"type": "toolCall",
+					"id": "call_1|fc_item1",
+					"name": "read",
+					"arguments": {
+						"path": "a.ts",
+						"limit": 20
+					}
+				},
+				{
+					"type": "toolCall",
+					"id": "call_2|bad_item",
+					"name": "read",
+					"arguments": {
+						"path": "b.ts"
+					},
+					"namespace": "files"
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "gpt-test",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_1|fc_item1",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "a"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_2|bad_item",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "with image"
+				},
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "system",
+			"content": "Later instructions.",
+			"toolsAdded": [
+				{
+					"name": "search",
+					"description": "The search tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"query": {
+								"type": "string"
+							},
+							"kind": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"query"
+						]
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				}
+			],
+			"toolsRemoved": [
+				{
+					"name": "write"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_3|fc_item3",
+					"name": "read",
+					"arguments": {
+						"path": "c.ts"
+					}
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "gpt-other",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_3|fc_item3",
+			"toolName": "read",
+			"content": [],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "From Claude."
+				},
+				{
+					"type": "toolCall",
+					"id": "toolu_01AbC",
+					"name": "read",
+					"arguments": {
+						"path": "d.ts"
+					}
+				},
+				{
+					"type": "toolCall",
+					"id": "call_9|item+9/🙈",
+					"name": "read",
+					"arguments": {
+						"path": "e.ts"
+					}
+				}
+			],
+			"api": "anthropic-messages",
+			"provider": "anthropic",
+			"model": "claude-test",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "toolu_01AbC",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Continue.",
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "gpt-test",
+		"input": [
+			{
+				"role": "system",
+				"content": "Base prompt.\n\nLater instructions.\n\n<rules>Be brief.</rules>"
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "input_text",
+						"text": "Look."
+					},
+					{
+						"type": "input_image",
+						"detail": "auto",
+						"image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+					}
+				]
+			},
+			{
+				"type": "reasoning",
+				"id": "rs_1",
+				"summary": [],
+				"encrypted_content": "enc"
+			},
+			{
+				"type": "message",
+				"role": "assistant",
+				"content": [
+					{
+						"type": "output_text",
+						"text": "Signed v1.",
+						"annotations": []
+					}
+				],
+				"status": "completed",
+				"id": "msg_1",
+				"phase": "commentary"
+			},
+			{
+				"type": "message",
+				"role": "assistant",
+				"content": [
+					{
+						"type": "output_text",
+						"text": "Legacy id.",
+						"annotations": []
+					}
+				],
+				"status": "completed",
+				"id": "msg_legacy"
+			},
+			{
+				"type": "message",
+				"role": "assistant",
+				"content": [
+					{
+						"type": "output_text",
+						"text": "Long id.",
+						"annotations": []
+					}
+				],
+				"status": "completed",
+				"id": "msg_1f43gnm1wcb1pr"
+			},
+			{
+				"type": "message",
+				"role": "assistant",
+				"content": [
+					{
+						"type": "output_text",
+						"text": "No signature.",
+						"annotations": []
+					}
+				],
+				"status": "completed",
+				"id": "msg_pi_1_3"
+			},
+			{
+				"type": "function_call",
+				"id": "fc_item1",
+				"call_id": "call_1",
+				"name": "read",
+				"arguments": "{\"path\":\"a.ts\",\"limit\":20}"
+			},
+			{
+				"type": "function_call",
+				"call_id": "call_2",
+				"name": "read",
+				"arguments": "{\"path\":\"b.ts\"}",
+				"namespace": "files"
+			},
+			{
+				"type": "function_call_output",
+				"call_id": "call_1",
+				"output": "a"
+			},
+			{
+				"type": "function_call_output",
+				"call_id": "call_2",
+				"output": [
+					{
+						"type": "input_text",
+						"text": "with image"
+					},
+					{
+						"type": "input_image",
+						"detail": "auto",
+						"image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+					}
+				]
+			},
+			{
+				"type": "function_call",
+				"call_id": "call_3",
+				"name": "read",
+				"arguments": "{\"path\":\"c.ts\"}"
+			},
+			{
+				"type": "function_call_output",
+				"call_id": "call_3",
+				"output": "(no tool output)"
+			},
+			{
+				"type": "message",
+				"role": "assistant",
+				"content": [
+					{
+						"type": "output_text",
+						"text": "From Claude.",
+						"annotations": []
+					}
+				],
+				"status": "completed",
+				"id": "msg_pi_6"
+			},
+			{
+				"type": "function_call",
+				"call_id": "toolu_01AbC",
+				"name": "read",
+				"arguments": "{\"path\":\"d.ts\"}"
+			},
+			{
+				"type": "function_call",
+				"id": "fc_1y5udxk2jwzle",
+				"call_id": "call_9",
+				"name": "read",
+				"arguments": "{\"path\":\"e.ts\"}"
+			},
+			{
+				"type": "function_call_output",
+				"call_id": "toolu_01AbC",
+				"output": [
+					{
+						"type": "input_image",
+						"detail": "auto",
+						"image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+					}
+				]
+			},
+			{
+				"type": "function_call_output",
+				"call_id": "call_9",
+				"output": "No result provided"
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "input_text",
+						"text": "Continue."
+					}
+				]
+			}
+		],
+		"stream": true,
+		"prompt_cache_key": "session-1",
+		"store": false,
+		"tools": [
+			{
+				"type": "function",
+				"name": "read",
+				"description": "The read tool.",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string"
+						},
+						"limit": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"path"
+					]
+				}
+			},
+			{
+				"type": "function",
+				"name": "search",
+				"description": "The search tool.",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"query": {
+							"type": "string"
+						},
+						"kind": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"query"
+					]
+				}
+			}
+		],
+		"reasoning": {
+			"effort": "none"
+		}
+	}
+}

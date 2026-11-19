@@ -29,6 +29,11 @@ pub struct Model {
     /// Provider levels per Relay thinking level; `off: null` means thinking cannot be turned off.
     #[serde(default)]
     pub thinking_level_map: Option<Map<String, Value>>,
+    /// Sampling parameters sent with every request, before the thinking level's and the request's.
+    #[serde(default)]
+    pub sampling_params: Option<Map<String, Value>>,
+    #[serde(default)]
+    pub sampling_params_by_thinking_level: Option<Map<String, Value>>,
 }
 
 impl Model {
@@ -39,7 +44,82 @@ impl Model {
     pub fn compat(&self) -> ModelCompat {
         self.compat.clone().unwrap_or_default()
     }
+
+    /// `thinkingLevelMap[level]`: `None` when absent, `Some(Value::Null)` when unsupported.
+    pub fn thinking_level(&self, level: &str) -> Option<&Value> {
+        self.thinking_level_map
+            .as_ref()
+            .and_then(|map| map.get(level))
+    }
+
+    /// The thinking levels the model accepts (`getSupportedThinkingLevels`).
+    pub fn supported_thinking_levels(&self) -> Vec<&'static str> {
+        if !self.reasoning {
+            return vec!["off"];
+        }
+        THINKING_LEVELS
+            .into_iter()
+            .filter(|level| match self.thinking_level(level) {
+                Some(Value::Null) => false,
+                mapped if matches!(*level, "xhigh" | "max") => mapped.is_some(),
+                _ => true,
+            })
+            .collect()
+    }
+
+    /// The nearest accepted level: the requested one, else the next higher, else the next lower
+    /// (`clampThinkingLevel`).
+    pub fn clamp_thinking_level(&self, level: &str) -> &'static str {
+        let available = self.supported_thinking_levels();
+        if let Some(found) = available.iter().find(|candidate| **candidate == level) {
+            return found;
+        }
+        let first = available.first().copied().unwrap_or("off");
+        let Some(requested) = THINKING_LEVELS
+            .iter()
+            .position(|candidate| *candidate == level)
+        else {
+            return first;
+        };
+        THINKING_LEVELS[requested..]
+            .iter()
+            .chain(THINKING_LEVELS[..requested].iter().rev())
+            .find(|candidate| available.contains(candidate))
+            .copied()
+            .unwrap_or(first)
+    }
+
+    /// The sampling parameters for a request (`resolveSamplingParams`): the model's, then its
+    /// thinking level's, then the request's, each key overriding the earlier ones.
+    pub fn sampling_params(
+        &self,
+        thinking_level: &str,
+        request: Option<&Map<String, Value>>,
+    ) -> Option<Map<String, Value>> {
+        let level = self.clamp_thinking_level(thinking_level);
+        let by_level = self
+            .sampling_params_by_thinking_level
+            .as_ref()
+            .and_then(|levels| levels.get(level))
+            .and_then(Value::as_object);
+        if self.sampling_params.is_none() && by_level.is_none() && request.is_none() {
+            return None;
+        }
+        let mut merged = Map::new();
+        for source in [self.sampling_params.as_ref(), by_level, request]
+            .into_iter()
+            .flatten()
+        {
+            for (key, value) in source {
+                merged.insert(key.clone(), value.clone());
+            }
+        }
+        Some(merged)
+    }
 }
+
+/// Relay's thinking levels, lowest first.
+pub const THINKING_LEVELS: [&str; 7] = ["off", "minimal", "low", "medium", "high", "xhigh", "max"];
 
 /// Provider compatibility switches. Each is optional; the adapter decides the default.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -56,6 +136,14 @@ pub struct ModelCompat {
     pub supports_mid_convo_system_messages: Option<bool>,
     pub supports_mid_convo_tool_changes: Option<bool>,
     pub allowed_fallback_models: Option<Vec<FallbackModel>>,
+    pub supports_developer_role: Option<bool>,
+    pub supports_strict_mode: Option<bool>,
+    #[serde(rename = "supportsOpenAIGrammarTools")]
+    pub supports_openai_grammar_tools: Option<bool>,
+    pub supports_additional_tools: Option<bool>,
+    pub supports_tool_search: Option<bool>,
+    pub supports_explicit_prompt_cache_mode: Option<bool>,
+    pub supports_max_output_tokens: Option<bool>,
 }
 
 /// A model Anthropic may answer with instead, and its price for such answers.

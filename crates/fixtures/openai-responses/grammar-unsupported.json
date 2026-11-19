@@ -1,0 +1,228 @@
+{
+	"name": "grammar-unsupported",
+	"description": "The same transcript on a model without grammar tools.",
+	"model": {
+		"id": "gpt-test",
+		"name": "GPT Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1,
+			"output": 4,
+			"cacheRead": 0.1,
+			"cacheWrite": 0
+		},
+		"contextWindow": 400000,
+		"maxTokens": 128000
+	},
+	"apiKey": "sk-parity",
+	"options": {
+		"sessionId": "session-1"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Patch files.",
+			"toolsAdded": [
+				{
+					"name": "apply_patch",
+					"description": "The apply_patch tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"patch": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"patch"
+						]
+					},
+					"constrainedSampling": {
+						"type": "grammar",
+						"variants": {
+							"openai_lark": "start: \"*** Begin Patch\" /[\\s\\S]*/"
+						}
+					}
+				},
+				{
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"limit": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Fix it.",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_p|ctc_1",
+					"name": "apply_patch",
+					"arguments": {
+						"patch": "*** Begin Patch\n..."
+					}
+				},
+				{
+					"type": "toolCall",
+					"id": "call_r|fc_2",
+					"name": "read",
+					"arguments": {
+						"path": "a.ts"
+					}
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "gpt-test",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_p|ctc_1",
+			"toolName": "apply_patch",
+			"content": [
+				{
+					"type": "text",
+					"text": "applied"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_r|fc_2",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "a"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "gpt-test",
+		"input": [
+			{
+				"role": "system",
+				"content": "Patch files."
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "input_text",
+						"text": "Fix it."
+					}
+				]
+			},
+			{
+				"type": "function_call",
+				"call_id": "call_p",
+				"name": "apply_patch",
+				"arguments": "{\"patch\":\"*** Begin Patch\\n...\"}"
+			},
+			{
+				"type": "function_call",
+				"id": "fc_2",
+				"call_id": "call_r",
+				"name": "read",
+				"arguments": "{\"path\":\"a.ts\"}"
+			},
+			{
+				"type": "function_call_output",
+				"call_id": "call_p",
+				"output": "applied"
+			},
+			{
+				"type": "function_call_output",
+				"call_id": "call_r",
+				"output": "a"
+			}
+		],
+		"stream": true,
+		"prompt_cache_key": "session-1",
+		"store": false,
+		"tools": [
+			{
+				"type": "function",
+				"name": "apply_patch",
+				"description": "The apply_patch tool.",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"patch": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"patch"
+					]
+				}
+			},
+			{
+				"type": "function",
+				"name": "read",
+				"description": "The read tool.",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string"
+						},
+						"limit": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"path"
+					]
+				}
+			}
+		]
+	}
+}

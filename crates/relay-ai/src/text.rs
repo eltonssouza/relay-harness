@@ -28,22 +28,63 @@ pub fn is_blank(text: &str) -> bool {
     text.chars().all(is_js_whitespace)
 }
 
-/// Replace every UTF-16 code unit outside `[A-Za-z0-9_-]` with `_` and keep the first 64 code
-/// units, as `id.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64)` does: a character outside the
-/// Basic Multilingual Plane is two code units, so it becomes `__`.
-pub fn normalize_tool_call_id(id: &str) -> String {
-    let mut normalized = String::with_capacity(id.len());
-    for character in id.chars() {
+/// `text.replace(/[^a-zA-Z0-9_-]/g, "_")`: every UTF-16 code unit outside the set becomes `_`, so
+/// a character outside the Basic Multilingual Plane becomes `__`. The result is ASCII.
+pub fn replace_non_id_characters(text: &str) -> String {
+    let mut replaced = String::with_capacity(text.len());
+    for character in text.chars() {
         if character.is_ascii_alphanumeric() || character == '_' || character == '-' {
-            normalized.push(character);
+            replaced.push(character);
         } else {
             for _ in 0..character.len_utf16() {
-                normalized.push('_');
+                replaced.push('_');
             }
         }
     }
+    replaced
+}
+
+/// Anthropic's tool call id rule: the id characters, at most 64.
+pub fn normalize_tool_call_id(id: &str) -> String {
+    let mut normalized = replace_non_id_characters(id);
     normalized.truncate(64);
     normalized
+}
+
+/// `text.length`: the length in UTF-16 code units.
+pub fn js_length(text: &str) -> usize {
+    text.encode_utf16().count()
+}
+
+/// `shortHash` from `packages/ai/src/utils/hash.ts`: a fast hash of the UTF-16 code units,
+/// written as two base-36 numbers.
+pub fn short_hash(text: &str) -> String {
+    let mut h1: u32 = 0xdead_beef;
+    let mut h2: u32 = 0x41c6_ce57;
+    for unit in text.encode_utf16() {
+        let unit = u32::from(unit);
+        h1 = (h1 ^ unit).wrapping_mul(2_654_435_761);
+        h2 = (h2 ^ unit).wrapping_mul(1_597_334_677);
+    }
+    h1 = (h1 ^ (h1 >> 16)).wrapping_mul(2_246_822_507)
+        ^ (h2 ^ (h2 >> 13)).wrapping_mul(3_266_489_909);
+    h2 = (h2 ^ (h2 >> 16)).wrapping_mul(2_246_822_507)
+        ^ (h1 ^ (h1 >> 13)).wrapping_mul(3_266_489_909);
+    format!("{}{}", base36(h2), base36(h1))
+}
+
+fn base36(mut value: u32) -> String {
+    const DIGITS: &[u8; 36] = b"0123456789abcdefghijklmnopqrstuvwxyz";
+    if value == 0 {
+        return "0".to_string();
+    }
+    let mut digits = Vec::new();
+    while value > 0 {
+        digits.push(DIGITS[(value % 36) as usize]);
+        value /= 36;
+    }
+    digits.reverse();
+    String::from_utf8(digits).unwrap_or_default()
 }
 
 #[cfg(test)]

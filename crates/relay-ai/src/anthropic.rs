@@ -10,8 +10,10 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 
-use crate::message::{InputBlock, Message, OutputBlock, Tool, ToolResultMessage};
+use crate::message::{AssistantMessage, InputBlock, Message, OutputBlock, Tool, ToolResultMessage};
 use crate::model::Model;
+use crate::options::resolve_cache_retention;
+pub use crate::options::CacheRetention;
 use crate::strict::{json_schema_tool_parameters, resolve_json_schema_strict_sampling};
 use crate::text::{is_blank, js_trim, normalize_tool_call_id};
 use crate::transcript::{
@@ -76,14 +78,6 @@ const STRICT_STRING_FORMATS: [&str; 10] = [
     "ipv6",
     "uuid",
 ];
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum CacheRetention {
-    None,
-    Short,
-    Long,
-}
 
 /// The options of `AnthropicOptions` that shape the body.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -153,28 +147,8 @@ pub fn uses_oauth(model: &Model, api_key: &str) -> bool {
     model.provider != "github-copilot" && is_oauth_token(api_key)
 }
 
-fn provider_env(name: &str, options: &AnthropicOptions) -> Option<String> {
-    options
-        .env
-        .as_ref()
-        .and_then(|env| env.get(name))
-        .filter(|value| !value.is_empty())
-        .cloned()
-        .or_else(|| std::env::var(name).ok().filter(|value| !value.is_empty()))
-}
-
-fn cache_retention(options: &AnthropicOptions) -> CacheRetention {
-    match options.cache_retention {
-        Some(retention) => retention,
-        None if provider_env("RELAY_CACHE_RETENTION", options).as_deref() == Some("long") => {
-            CacheRetention::Long
-        }
-        None => CacheRetention::Short,
-    }
-}
-
 fn cache_control(compat: &Compat, options: &AnthropicOptions) -> Option<Value> {
-    match cache_retention(options) {
+    match resolve_cache_retention(options.cache_retention, options.env.as_ref()) {
         CacheRetention::None => None,
         retention => {
             let mut control = Map::new();
@@ -645,7 +619,7 @@ pub fn build_request(
     let cache_control = cache_control(&compat, options);
     let initial = initial_system_message(&messages);
     let initial_text = initial.map(system_message_text).unwrap_or_default();
-    let normalize = |id: &str| normalize_tool_call_id(id);
+    let normalize = |id: &str, _: &AssistantMessage| normalize_tool_call_id(id);
     let transformed = transform_messages(&messages, model, Some(&normalize));
     let conversation = if initial.is_some() {
         &transformed[1..]
