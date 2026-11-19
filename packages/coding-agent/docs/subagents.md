@@ -45,6 +45,8 @@ Relay installs the commit pinned in its source, not a branch, so the agents read
 
 The agents' skill and lookup scripts need Python 3 on PATH. Without it the agents still run, and the install says that the scripts are unavailable.
 
+Routing does not need Python. The orchestrator ranks specialists with general-agents' `route.py`; Relay runs the same ranking in its Rust core as the `route_agent` tool, which reads the installed package's `scripts/catalog.json` and `scripts/vocab_pt.json` and answers what `route.py --json` prints. It is checked against `route.py` on the orchestrator's 180 routing cases, in English and Portuguese. Sessions with an installed catalog that ships routing data get the tool, and so does every subagent that can delegate.
+
 ## Model tiers
 
 A tier resolves to the first model in the `modelTiers` setting that has credentials, for example `"modelTiers": { "fast": ["anthropic/claude-haiku-5-5"] }`. Without one, Relay derives the tiers of the session's provider from catalog prices, keeps the session's model when it belongs to the tier, and otherwise falls back to the session's model.

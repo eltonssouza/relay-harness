@@ -31,6 +31,7 @@
 		"eval": "npm run eval --workspace=@relay-harness/evals --",
 		"bench:harness": "node --import ./scripts/source-resolver.ts packages/coding-agent/test/harness-bench/report.ts",
 		"harness:golden": "node --import ./scripts/source-resolver.ts packages/coding-agent/test/harness-bench/golden.ts --write",
+		"harness:route-golden": "node scripts/generate-route-golden.mjs",
 		"build:harness-wasm": "node scripts/build-harness-wasm.mjs",
 		"profile:tui": "node scripts/profile-coding-agent-node.mjs --mode tui",
 		"profile:rpc": "node scripts/profile-coding-agent-node.mjs --mode rpc",

@@ -1,5 +1,6 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
 	fauxAssistantMessage,
 	fauxToolCall,
@@ -10,6 +11,9 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import subagentsExtension from "../../src/extensions/subagents/index.ts";
 import { createHarness, createTestUiContext, getToolResult, getUserTexts, type Harness } from "./harness.ts";
+
+/** general-agents' routing catalog, as the router tests use it. */
+const ROUTE_FILE = fileURLToPath(new URL("../../../../crates/harness-core/tests/fixtures/route.json", import.meta.url));
 
 /** Text of the newest message of a request, harness state included. */
 function lastMessageText(context: TranscriptContext): string {
@@ -209,5 +213,50 @@ describe("subagents", () => {
 		const harness = await setup({ scout: definition("scout", "Read", "You are scout.") });
 		await harness.session.bindExtensions({});
 		expect(harness.session.getActiveToolNames()).toContain("agent");
+	});
+
+	it("gives a delegating subagent the route_agent tool when an installed catalog ships routing data", async () => {
+		const harness = await setup({});
+		const route = JSON.parse(readFileSync(ROUTE_FILE, "utf8")) as { agents: Array<{ name: string }> };
+		const catalog = join(agentHome, "agent-catalogs", "mini");
+		const orchestrator = join(catalog, "00_orchestration", "_agents", "orch");
+		mkdirSync(join(catalog, ".claude-plugin"), { recursive: true });
+		mkdirSync(join(orchestrator, "agents"), { recursive: true });
+		mkdirSync(join(orchestrator, "scripts"), { recursive: true });
+		writeFileSync(
+			join(catalog, ".claude-plugin", "marketplace.json"),
+			JSON.stringify({ plugins: [{ name: "orch", source: "./00_orchestration/_agents/orch" }] }),
+		);
+		writeFileSync(join(orchestrator, "agents", "orch.md"), definition("orch", "Agent, Read", "You route work."));
+		writeFileSync(join(orchestrator, "scripts", "catalog.json"), JSON.stringify({ agents: route.agents }));
+		writeFileSync(join(orchestrator, "scripts", "vocab_pt.json"), JSON.stringify({ words: {}, phrases: {} }));
+		await harness.session.bindExtensions({});
+		expect(harness.session.getActiveToolNames()).toEqual(expect.arrayContaining(["agent", "route_agent"]));
+		let tools: string[] = [];
+		let routed = "";
+		harness.setResponses([
+			fauxAssistantMessage(
+				fauxToolCall("agent", { subagent_type: "orch", description: "Route", prompt: "Route it" }),
+			),
+			(context) => {
+				tools = toolNames(context);
+				return fauxAssistantMessage(fauxToolCall("route_agent", { request: "what changed in Go 1.24" }));
+			},
+			(context) => {
+				routed = lastMessageText(context);
+				return fauxAssistantMessage("go-expert covers it.");
+			},
+			fauxAssistantMessage("Routed."),
+		]);
+
+		await harness.session.prompt("Which agent covers Go releases?");
+
+		expect(tools).toEqual(["agent", "read", "route_agent"]);
+		const result = JSON.parse(routed.slice(0, routed.lastIndexOf("}") + 1)) as {
+			clear_specialist: boolean;
+			candidates: Array<{ name: string }>;
+		};
+		expect(result.clear_specialist).toBe(true);
+		expect(result.candidates[0].name).toBe("go-expert");
 	});
 });
