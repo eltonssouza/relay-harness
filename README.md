@@ -131,6 +131,6 @@ Dependency changes are reviewed as code.
 
 ## Credits and license
 
-Relay is a fork of [pi](https://github.com/earendil-works/pi), the coding agent by Mario Zechner and Earendil Works, released under the MIT license. Relay adds the model-independent harness core, the `laya/auto` adaptive router, and its own release line on npm.
+Relay is a fork of [pi](https://github.com/earendil-works/pi), the coding agent by Mario Zechner and Earendil Works, released under the MIT license. Relay adds the model-independent harness core and its own release line on npm.
 
 MIT. See [LICENSE](LICENSE).

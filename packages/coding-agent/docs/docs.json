@@ -177,14 +177,6 @@
           "path": "native-memory.md"
         },
         {
-          "title": "Adaptive Execution with Laya",
-          "path": "laya.md"
-        },
-        {
-          "title": "Adaptive Cognition Modes",
-          "path": "adaptive-cognition.md"
-        },
-        {
           "title": "JSON Event Stream",
           "path": "json.md"
         },

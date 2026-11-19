@@ -647,6 +647,34 @@ describe("authorization sees through the usual shell detours", () => {
 		}
 	});
 
+	it("treats the system temporary directory and drive letters as Windows does", () => {
+		const context = { cwd: "C:\\work\\repo", home: "C:\\Users\\me", tempDir: "C:\\Users\\me\\AppData\\Local\\Temp" };
+		const write = (path: string) =>
+			classifyToolCall({ type: "toolCall", id: "1", name: "write", arguments: { path } }, undefined, [], context);
+		expect(write("C:\\Users\\me\\AppData\\Local\\Temp\\relay\\AGENTS.md").kind).toBe("write");
+		expect(write("c:/work/repo/src/a.ts").kind).toBe("write");
+		expect(write("C:\\work\\other\\a.ts")).toMatchObject({
+			kind: "external",
+			reason: "writes outside the workspace",
+		});
+		expect(write("C:\\Users\\me\\Documents\\a.ts")).toMatchObject({ kind: "external" });
+	});
+
+	it("counts shell writes in a workspace that lives in the temporary directory", () => {
+		const effect = classifyToolCall(
+			{
+				type: "toolCall",
+				id: "1",
+				name: "bash",
+				arguments: { command: "echo x > /tmp/suite/src/a.ts && echo y > /tmp/out.txt" },
+			},
+			undefined,
+			[],
+			{ cwd: "/tmp/suite" },
+		);
+		expect(effect.writes).toEqual(["/tmp/suite/src/a.ts"]);
+	});
+
 	it("allows a risky write when the request names the file", async () => {
 		const policy = new AlignmentPolicy();
 		const effect = {
