@@ -13,6 +13,10 @@ use crate::model::Model;
 use crate::text::is_blank;
 use crate::Content;
 
+/// Rewrites another model's tool call id for this API, given the id and the message that made
+/// the call.
+pub type NormalizeToolCallId<'a> = &'a dyn Fn(&str, &AssistantMessage) -> String;
+
 const NON_VISION_USER_IMAGE_PLACEHOLDER: &str = "(image omitted: model does not support images)";
 const NON_VISION_TOOL_IMAGE_PLACEHOLDER: &str =
     "(tool image omitted: model does not support images)";
@@ -76,7 +80,7 @@ fn downgrade_images(messages: &[Message], model: &Model) -> Vec<Message> {
 fn transform_assistant(
     message: &AssistantMessage,
     model: &Model,
-    normalize_tool_call_id: Option<&dyn Fn(&str) -> String>,
+    normalize_tool_call_id: Option<NormalizeToolCallId<'_>>,
     tool_call_ids: &mut HashMap<String, String>,
 ) -> AssistantMessage {
     let same_model =
@@ -117,7 +121,7 @@ fn transform_assistant(
                 if !same_model {
                     call.thought_signature = None;
                     if let Some(normalize) = normalize_tool_call_id {
-                        let normalized = normalize(&call.id);
+                        let normalized = normalize(&call.id, message);
                         if normalized != call.id {
                             tool_call_ids.insert(call.id.clone(), normalized.clone());
                             call.id = normalized;
@@ -134,12 +138,12 @@ fn transform_assistant(
     }
 }
 
-/// `normalize_tool_call_id` rewrites the ids of another model's tool calls for this API; their
-/// results follow the new ids.
+/// `normalize_tool_call_id` rewrites the ids of another model's tool calls for this API, given
+/// the id and the message that made the call; their results follow the new ids.
 pub fn transform_messages(
     messages: &[Message],
     model: &Model,
-    normalize_tool_call_id: Option<&dyn Fn(&str) -> String>,
+    normalize_tool_call_id: Option<NormalizeToolCallId<'_>>,
 ) -> Vec<Message> {
     let mut tool_call_ids = HashMap::new();
     let transformed: Vec<Message> = downgrade_images(messages, model)

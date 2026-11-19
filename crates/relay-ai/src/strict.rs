@@ -238,3 +238,123 @@ pub fn resolve_json_schema_strict_sampling(
     }
     Ok(false)
 }
+
+/// A grammar tool: its syntax (`lark` or `regex`), the grammar, and the one string property its
+/// input fills.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Grammar {
+    pub syntax: &'static str,
+    pub definition: String,
+    pub input_property: String,
+}
+
+fn grammar_input_property(tool: &Tool) -> Result<String, String> {
+    let schema = &tool.parameters;
+    if schema.get("type") != Some(&json!("object")) {
+        return Err("grammar constrained sampling requires an object parameter schema".into());
+    }
+    let property = match schema.get("required").and_then(Value::as_array) {
+        Some(required) if required.len() == 1 && required[0].is_string() => {
+            required[0].as_str().unwrap_or_default().to_string()
+        }
+        _ => {
+            return Err(
+                "grammar constrained sampling requires exactly one required string property".into(),
+            )
+        }
+    };
+    let entry = schema
+        .get("properties")
+        .and_then(|properties| properties.get(&property));
+    let truthy = match entry {
+        None | Some(Value::Null) | Some(Value::Bool(false)) => false,
+        Some(Value::String(text)) => !text.is_empty(),
+        Some(Value::Number(number)) => number.as_f64() != Some(0.0),
+        Some(_) => true,
+    };
+    if !truthy {
+        return Err(format!(
+            "grammar constrained sampling requires a properties entry for {property}"
+        ));
+    }
+    if entry.and_then(|entry| entry.get("type")) != Some(&json!("string")) {
+        return Err(format!(
+            "grammar constrained sampling property {property} must have type string"
+        ));
+    }
+    Ok(property)
+}
+
+/// The grammar to send a tool with, when it asks for one and the model takes OpenAI grammar
+/// tools. Fails when the tool's grammar configuration cannot be used.
+pub fn resolve_grammar_constrained_sampling(
+    tool: &Tool,
+    supports_openai_grammar_tools: bool,
+) -> Result<Option<Grammar>, String> {
+    let Some(Value::Object(config)) = &tool.constrained_sampling else {
+        return Ok(None);
+    };
+    if config.get("type") != Some(&json!("grammar")) || !supports_openai_grammar_tools {
+        return Ok(None);
+    }
+    let variant = |name: &str| {
+        config
+            .get("variants")
+            .and_then(|variants| variants.get(name))
+            .and_then(Value::as_str)
+            .filter(|definition| !crate::text::is_blank(definition))
+            .map(str::to_string)
+    };
+    let (syntax, definition) = match (variant("openai_lark"), variant("openai_regex")) {
+        (Some(lark), _) => ("lark", lark),
+        (None, Some(regex)) => ("regex", regex),
+        (None, None) => {
+            return Err(format!(
+                "Tool \"{}\" cannot use grammar constrained sampling: no supported grammar variant was provided.",
+                tool.name
+            ))
+        }
+    };
+    let input_property = grammar_input_property(tool).map_err(|reason| {
+        format!(
+            "Tool \"{}\" cannot use grammar constrained sampling: {reason}.",
+            tool.name
+        )
+    })?;
+    Ok(Some(Grammar {
+        syntax,
+        definition,
+        input_property,
+    }))
+}
+
+/// The input property of every grammar tool, by tool name.
+pub fn grammar_tool_input_properties(
+    tools: &[Tool],
+    supports_openai_grammar_tools: bool,
+) -> Result<Vec<(String, String)>, String> {
+    let mut properties: Vec<(String, String)> = Vec::new();
+    for tool in tools {
+        if let Some(grammar) =
+            resolve_grammar_constrained_sampling(tool, supports_openai_grammar_tools)?
+        {
+            properties.retain(|(name, _)| name != &tool.name);
+            properties.push((tool.name.clone(), grammar.input_property));
+        }
+    }
+    Ok(properties)
+}
+
+/// A grammar tool call's input: the string in its input property.
+pub fn grammar_tool_input(
+    tool_name: &str,
+    arguments: &Map<String, Value>,
+    input_property: &str,
+) -> Result<String, String> {
+    match arguments.get(input_property) {
+        Some(Value::String(input)) => Ok(input.clone()),
+        _ => Err(format!(
+            "Grammar tool call \"{tool_name}\" requires argument \"{input_property}\" to be a string."
+        )),
+    }
+}
