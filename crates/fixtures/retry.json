@@ -1,0 +1,642 @@
+{
+	"now": 1700000000000,
+	"cases": [
+		{
+			"name": "no-retries-by-default",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {}
+				},
+				"ok"
+			],
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "Error",
+				"message": "attempt 0 failed"
+			}
+		},
+		{
+			"name": "rate-limit-backoff",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {}
+				},
+				{
+					"status": 429,
+					"headers": {}
+				},
+				{
+					"status": 429,
+					"headers": {}
+				},
+				{
+					"status": 429,
+					"headers": {}
+				}
+			],
+			"maxRetries": 3,
+			"random": 0.5,
+			"tries": 4,
+			"delays": [
+				437.5,
+				875,
+				1750
+			],
+			"error": {
+				"name": "Error",
+				"message": "attempt 3 failed"
+			}
+		},
+		{
+			"name": "backoff-cap",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {}
+				},
+				{
+					"status": 503,
+					"headers": {}
+				},
+				{
+					"status": 503,
+					"headers": {}
+				},
+				{
+					"status": 503,
+					"headers": {}
+				},
+				{
+					"status": 503,
+					"headers": {}
+				},
+				{
+					"status": 503,
+					"headers": {}
+				},
+				{
+					"status": 503,
+					"headers": {}
+				},
+				{
+					"status": 503,
+					"headers": {}
+				}
+			],
+			"maxRetries": 7,
+			"random": 0,
+			"tries": 8,
+			"delays": [
+				500,
+				1000,
+				2000,
+				4000,
+				8000,
+				8000,
+				8000
+			],
+			"error": {
+				"name": "Error",
+				"message": "attempt 7 failed"
+			}
+		},
+		{
+			"name": "full-jitter",
+			"attempts": [
+				{
+					"status": 500,
+					"headers": {}
+				},
+				{
+					"status": 500,
+					"headers": {}
+				},
+				"ok"
+			],
+			"maxRetries": 5,
+			"random": 0.999,
+			"tries": 3,
+			"delays": [
+				375.125,
+				750.25
+			],
+			"result": "attempt 2 succeeded"
+		},
+		{
+			"name": "retryable-statuses",
+			"attempts": [
+				{
+					"status": 408,
+					"headers": {}
+				},
+				{
+					"status": 409,
+					"headers": {}
+				},
+				{
+					"status": 500,
+					"headers": {}
+				},
+				{
+					"status": 599,
+					"headers": {}
+				},
+				"ok"
+			],
+			"maxRetries": 9,
+			"tries": 5,
+			"delays": [
+				437.5,
+				875,
+				1750,
+				3500
+			],
+			"result": "attempt 4 succeeded"
+		},
+		{
+			"name": "connection-failure",
+			"attempts": [
+				{
+					"headers": {}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				437.5
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "client-error",
+			"attempts": [
+				{
+					"status": 400,
+					"headers": {}
+				},
+				"ok"
+			],
+			"maxRetries": 3,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "Error",
+				"message": "attempt 0 failed"
+			}
+		},
+		{
+			"name": "not-found",
+			"attempts": [
+				{
+					"status": 404,
+					"headers": {}
+				},
+				"ok"
+			],
+			"maxRetries": 3,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "Error",
+				"message": "attempt 0 failed"
+			}
+		},
+		{
+			"name": "should-retry-header",
+			"attempts": [
+				{
+					"status": 400,
+					"headers": {
+						"x-should-retry": "true"
+					}
+				},
+				{
+					"status": 503,
+					"headers": {
+						"x-should-retry": "false"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 3,
+			"tries": 2,
+			"delays": [
+				437.5
+			],
+			"error": {
+				"name": "Error",
+				"message": "attempt 1 failed"
+			}
+		},
+		{
+			"name": "should-retry-other-value",
+			"attempts": [
+				{
+					"status": 400,
+					"headers": {
+						"x-should-retry": "yes"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 3,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "Error",
+				"message": "attempt 0 failed"
+			}
+		},
+		{
+			"name": "retry-after-ms",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after-ms": "1500"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				1500
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-ms-prefix",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after-ms": "250.5ms"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				250.5
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-ms-invalid",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after-ms": "soon",
+						"retry-after": "3"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				3000
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-seconds",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after": "2"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				2000
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-fraction",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": " 0.25 "
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				250
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-words",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "5 seconds"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				5000
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-negative",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "-1"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				0
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-http-date",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "Tue, 14 Nov 2023 22:13:30 GMT"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				10000
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-past-date",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "Tue, 14 Nov 2023 22:13:00 GMT"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				0
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-rfc850-date",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "Tuesday, 14-Nov-23 22:13:27 GMT"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				7000
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-lowercase-date",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "tue, 14 nov 2023 22:13:22 gmt"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 2,
+			"delays": [
+				2000
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-iso-date",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "2023-11-14T22:13:25.500Z"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "Error",
+				"message": "Server requested 2023s retry delay (max: 60s). attempt 0 failed"
+			}
+		},
+		{
+			"name": "retry-after-garbage",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "later"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"random": 0,
+			"tries": 2,
+			"delays": [
+				500
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-infinity",
+			"attempts": [
+				{
+					"status": 503,
+					"headers": {
+						"retry-after": "Infinity"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 1,
+			"random": 0,
+			"tries": 2,
+			"delays": [
+				500
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "retry-after-too-long",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after": "120"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 2,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "Error",
+				"message": "Server requested 120s retry delay (max: 60s). attempt 0 failed"
+			}
+		},
+		{
+			"name": "retry-after-ms-too-long",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after-ms": "60001"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 2,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "Error",
+				"message": "Server requested 61s retry delay (max: 60s). attempt 0 failed"
+			}
+		},
+		{
+			"name": "retry-after-at-limit",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after": "60"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 2,
+			"tries": 2,
+			"delays": [
+				60000
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "custom-limit",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after": "5"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 2,
+			"maxRetryDelayMs": 4000,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "Error",
+				"message": "Server requested 5s retry delay (max: 4s). attempt 0 failed"
+			}
+		},
+		{
+			"name": "no-limit",
+			"attempts": [
+				{
+					"status": 429,
+					"headers": {
+						"retry-after": "600"
+					}
+				},
+				"ok"
+			],
+			"maxRetries": 2,
+			"maxRetryDelayMs": 0,
+			"tries": 2,
+			"delays": [
+				600000
+			],
+			"result": "attempt 1 succeeded"
+		},
+		{
+			"name": "aborted",
+			"attempts": [
+				{
+					"status": 500,
+					"headers": {}
+				},
+				"ok"
+			],
+			"maxRetries": 3,
+			"abortOnAttempt": 0,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "AbortError",
+				"message": "Request aborted"
+			}
+		},
+		{
+			"name": "aborted-client-error",
+			"attempts": [
+				{
+					"status": 400,
+					"headers": {}
+				},
+				"ok"
+			],
+			"maxRetries": 3,
+			"abortOnAttempt": 0,
+			"tries": 1,
+			"delays": [],
+			"error": {
+				"name": "AbortError",
+				"message": "Request aborted"
+			}
+		}
+	]
+}

@@ -87,6 +87,50 @@ fn base36(mut value: u32) -> String {
     String::from_utf8(digits).unwrap_or_default()
 }
 
+/// `Number.parseFloat(text)`: the longest decimal number at the start, after leading
+/// whitespace (`5 seconds` is 5, `2023-11-14` is 2023), `Infinity` with an optional sign, or NaN.
+pub fn js_parse_float(text: &str) -> f64 {
+    let text = text.trim_start_matches(is_js_whitespace);
+    let bytes = text.as_bytes();
+    let mut end = 0;
+    if matches!(bytes.first(), Some(b'+' | b'-')) {
+        end = 1;
+    }
+    if text[end..].starts_with("Infinity") {
+        return if text.starts_with('-') {
+            f64::NEG_INFINITY
+        } else {
+            f64::INFINITY
+        };
+    }
+    let digits = |from: usize| {
+        bytes[from..]
+            .iter()
+            .take_while(|byte| byte.is_ascii_digit())
+            .count()
+    };
+    let integer = digits(end);
+    end += integer;
+    let mut fraction = 0;
+    if bytes.get(end) == Some(&b'.') {
+        fraction = digits(end + 1);
+        if integer > 0 || fraction > 0 {
+            end += 1 + fraction;
+        }
+    }
+    if integer == 0 && fraction == 0 {
+        return f64::NAN;
+    }
+    if matches!(bytes.get(end), Some(b'e' | b'E')) {
+        let sign = usize::from(matches!(bytes.get(end + 1), Some(b'+' | b'-')));
+        let exponent = digits(end + 1 + sign);
+        if exponent > 0 {
+            end += 1 + sign + exponent;
+        }
+    }
+    text[..end].parse().unwrap_or(f64::NAN)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

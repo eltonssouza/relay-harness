@@ -16,6 +16,7 @@
 //! - `google`, `google_stream`: the Google Gemini request (the SDK parameters, the URL and the
 //!   HTTP body), and reading its stream.
 //! - `options`: request options adapters share.
+//! - `abort`, `retry`, `http`: cancellation, the SDKs' retry policy, and sending requests.
 //! - `simple`: the provider-neutral options (`streamSimple`) mapped to each adapter's, and the
 //!   context estimate that limits the output.
 //! - `json`, `sse`: provider output helpers (JSON repair and partial parsing, server-sent events).
@@ -27,6 +28,7 @@
 //! provider-neutral options, `tests/*_stream.rs` decode the same streams into the same events,
 //! and `tests/json.rs` parses as the TypeScript helpers do.
 
+pub mod abort;
 pub mod anthropic;
 pub mod anthropic_stream;
 pub mod auth;
@@ -36,6 +38,7 @@ pub mod config_value;
 pub mod event;
 pub mod google;
 pub mod google_stream;
+pub mod http;
 pub mod json;
 pub mod message;
 pub mod model;
@@ -45,6 +48,7 @@ pub mod openai_responses;
 pub mod openai_responses_stream;
 mod openai_sdk;
 pub mod options;
+pub mod retry;
 pub mod simple;
 pub mod sse;
 pub mod strict;
