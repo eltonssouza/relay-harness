@@ -1,0 +1,71 @@
+{
+	"name": "github-copilot",
+	"provider": "github-copilot",
+	"credential": {
+		"type": "oauth",
+		"refresh": "gho-github-token",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "api.github.com/copilot_internal/v2/token",
+			"status": 200,
+			"body": "{\"token\":\"tid=1;exp=1700003600;proxy-ep=proxy.individual.githubcopilot.com;sku=x\",\"expires_at\":1700003600}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		},
+		{
+			"match": "api.individual.githubcopilot.com/models",
+			"status": 200,
+			"body": "{\"data\":[{\"id\":\"gpt-5\",\"model_picker_enabled\":true,\"policy\":{\"state\":\"enabled\"}},{\"id\":\"claude-sonnet-4\",\"model_picker_enabled\":true,\"policy\":{\"state\":\"unconfigured\"}},{\"id\":\"disabled-model\",\"model_picker_enabled\":true,\"policy\":{\"state\":\"disabled\"}},{\"id\":\"no-tools\",\"model_picker_enabled\":true,\"capabilities\":{\"supports\":{\"tool_calls\":false}}},{\"id\":\"hidden\",\"model_picker_enabled\":false,\"policy\":{\"state\":\"enabled\"}},{\"model_picker_enabled\":true}]}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "GET",
+			"url": "https://api.github.com/copilot_internal/v2/token",
+			"headers": {
+				"accept": "application/json",
+				"authorization": "Bearer gho-github-token",
+				"copilot-integration-id": "vscode-chat",
+				"editor-plugin-version": "copilot-chat/0.35.0",
+				"editor-version": "vscode/1.107.0",
+				"user-agent": "GitHubCopilotChat/0.35.0"
+			},
+			"body": null
+		},
+		{
+			"method": "GET",
+			"url": "https://api.individual.githubcopilot.com/models",
+			"headers": {
+				"accept": "application/json",
+				"authorization": "Bearer tid=1;exp=1700003600;proxy-ep=proxy.individual.githubcopilot.com;sku=x",
+				"copilot-integration-id": "vscode-chat",
+				"editor-plugin-version": "copilot-chat/0.35.0",
+				"editor-version": "vscode/1.107.0",
+				"user-agent": "GitHubCopilotChat/0.35.0",
+				"x-github-api-version": "2026-06-01"
+			},
+			"body": null
+		}
+	],
+	"result": {
+		"type": "oauth",
+		"refresh": "gho-github-token",
+		"access": "tid=1;exp=1700003600;proxy-ep=proxy.individual.githubcopilot.com;sku=x",
+		"expires": 1700003300000,
+		"availableModelIds": [
+			"gpt-5",
+			"claude-sonnet-4"
+		]
+	},
+	"auth": {
+		"apiKey": "tid=1;exp=1700003600;proxy-ep=proxy.individual.githubcopilot.com;sku=x",
+		"baseUrl": "https://api.individual.githubcopilot.com"
+	}
+}

@@ -1,0 +1,42 @@
+{
+	"name": "meta",
+	"provider": "meta",
+	"credential": {
+		"type": "oauth",
+		"refresh": "identity-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "api.meta.ai/muse-code/key",
+			"status": 200,
+			"body": "{\"api_key\":\"meta-key-1\"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://api.meta.ai/muse-code/key",
+			"headers": {
+				"accept": "application/json",
+				"authorization": "Bearer identity-1",
+				"content-type": "application/json",
+				"x-api-version": "1.0.0"
+			},
+			"body": "{}"
+		}
+	],
+	"result": {
+		"type": "oauth",
+		"refresh": "identity-1",
+		"access": "meta-key-1",
+		"expires": 1700086400000
+	},
+	"auth": {
+		"apiKey": "meta-key-1"
+	}
+}

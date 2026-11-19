@@ -3,8 +3,8 @@
  * the JSON helpers, the Anthropic, OpenAI Responses and OpenAI Chat Completions request bodies
  * and stream decoding, the Google Gemini requests and stream decoding, each adapter's
  * `streamSimple` option mapping, each built-in provider's API-key resolution, the retry policy
- * every adapter wraps its request in, each adapter's HTTP requests and error messages, and the events of
- * failed streams. Run through
+ * every adapter wraps its request in, each adapter's HTTP requests and error messages, the events of
+ * failed streams, and each OAuth provider's token refresh. Run through
  * `npm run parity:record`, after the agent scenarios, which the Anthropic bodies read.
  */
 
@@ -17,6 +17,7 @@ import { GOOGLE_DIR, googleCases, googleJson } from "./google-record.ts";
 import { GOOGLE_STREAM_DIR, googleStreamCases, googleStreamJson } from "./google-stream-record.ts";
 import { HTTP_DIR, httpCases, httpJson } from "./http-record.ts";
 import { JSON_DIR, jsonFixtureText } from "./json-record.ts";
+import { OAUTH_DIR, oauthCases, oauthJson } from "./oauth-record.ts";
 import { completionsCases, completionsJson, OPENAI_COMPLETIONS_DIR } from "./openai-completions-record.ts";
 import {
 	COMPLETIONS_STREAM_DIR,
@@ -55,6 +56,7 @@ await writeCases(AUTH_DIR, authCases(), authJson);
 writeFileSync(RETRY_FILE, await retryJson());
 await writeCases(HTTP_DIR, httpCases(), httpJson);
 await writeCases(STREAM_FAILURE_DIR, streamFailureCases(), streamFailureJson);
+await writeCases(OAUTH_DIR, oauthCases(), oauthJson);
 console.log(
-	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests, ${googleStreamCases().length} Google streams, ${simpleCases().length} simple-option cases, ${authCases().length} provider auth resolutions, the retry policy, ${httpCases().length} HTTP requests and errors and ${streamFailureCases().length} stream failures to crates/fixtures/`,
+	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests, ${googleStreamCases().length} Google streams, ${simpleCases().length} simple-option cases, ${authCases().length} provider auth resolutions, the retry policy, ${httpCases().length} HTTP requests and errors, ${streamFailureCases().length} stream failures and ${oauthCases().length} OAuth refreshes to crates/fixtures/`,
 );

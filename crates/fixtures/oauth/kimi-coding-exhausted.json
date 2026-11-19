@@ -1,0 +1,88 @@
+{
+	"name": "kimi-coding-exhausted",
+	"provider": "kimi-coding",
+	"credential": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "auth.kimi.com",
+			"status": 500,
+			"body": "a",
+			"headers": {
+				"content-type": "text/plain"
+			}
+		},
+		{
+			"match": "auth.kimi.com",
+			"status": 500,
+			"body": "b",
+			"headers": {
+				"content-type": "text/plain"
+			}
+		},
+		{
+			"match": "auth.kimi.com",
+			"status": 500,
+			"body": "c",
+			"headers": {
+				"content-type": "text/plain"
+			}
+		},
+		{
+			"match": "auth.kimi.com",
+			"status": 500,
+			"body": "{\"error\":\"down\"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://auth.kimi.com/api/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=17e5f671-d194-4dfb-9706-5516cb48c098&grant_type=refresh_token&refresh_token=refresh-1"
+		},
+		{
+			"method": "POST",
+			"url": "https://auth.kimi.com/api/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=17e5f671-d194-4dfb-9706-5516cb48c098&grant_type=refresh_token&refresh_token=refresh-1"
+		},
+		{
+			"method": "POST",
+			"url": "https://auth.kimi.com/api/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=17e5f671-d194-4dfb-9706-5516cb48c098&grant_type=refresh_token&refresh_token=refresh-1"
+		},
+		{
+			"method": "POST",
+			"url": "https://auth.kimi.com/api/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=17e5f671-d194-4dfb-9706-5516cb48c098&grant_type=refresh_token&refresh_token=refresh-1"
+		}
+	],
+	"error": "Kimi Code token refresh failed with status 500: {\"error\":\"down\"}",
+	"auth": {
+		"headers": {
+			"Authorization": "Bearer access-0"
+		}
+	}
+}

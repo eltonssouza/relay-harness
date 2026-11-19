@@ -1,0 +1,79 @@
+{
+	"name": "kimi-coding-retried",
+	"provider": "kimi-coding",
+	"credential": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"env": {
+		"KIMI_OAUTH_HOST": "https://kimi.example/"
+	},
+	"answers": [
+		{
+			"match": "kimi.example/api/oauth/token",
+			"status": 503,
+			"body": "{\"error\":\"busy\"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		},
+		{
+			"match": "kimi.example/api/oauth/token",
+			"status": 429,
+			"body": "{\"error\":\"slow\"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		},
+		{
+			"match": "kimi.example/api/oauth/token",
+			"status": 200,
+			"body": "{\"access_token\":\"a\",\"refresh_token\":\"r\",\"expires_in\":60}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://kimi.example/api/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=17e5f671-d194-4dfb-9706-5516cb48c098&grant_type=refresh_token&refresh_token=refresh-1"
+		},
+		{
+			"method": "POST",
+			"url": "https://kimi.example/api/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=17e5f671-d194-4dfb-9706-5516cb48c098&grant_type=refresh_token&refresh_token=refresh-1"
+		},
+		{
+			"method": "POST",
+			"url": "https://kimi.example/api/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "client_id=17e5f671-d194-4dfb-9706-5516cb48c098&grant_type=refresh_token&refresh_token=refresh-1"
+		}
+	],
+	"result": {
+		"type": "oauth",
+		"access": "a",
+		"refresh": "r",
+		"expires": 1700000060000
+	},
+	"auth": {
+		"headers": {
+			"Authorization": "Bearer a"
+		}
+	}
+}

@@ -23,6 +23,13 @@ const STALE: Duration = Duration::from_secs(30);
 /// How long to wait for another process's lock.
 const WAIT: Duration = Duration::from_secs(30);
 
+/// Why `modify_async` failed: the store, or the change itself.
+#[derive(Debug, Clone, PartialEq)]
+pub enum ModifyError<Failure> {
+    Store(String),
+    Change(Failure),
+}
+
 pub struct AuthFile {
     path: PathBuf,
 }
@@ -50,34 +57,71 @@ fn lock(file: &Path) -> Result<Lock, String> {
     lock_with(file, STALE, WAIT)
 }
 
-fn lock_with(file: &Path, stale: Duration, wait: Duration) -> Result<Lock, String> {
-    let mut lock_path = file.as_os_str().to_owned();
-    lock_path.push(".lock");
-    let lock_path = PathBuf::from(lock_path);
-    let deadline = Instant::now() + wait;
-    let mut retry = 0u32;
+fn lock_path(file: &Path) -> PathBuf {
+    let mut path = file.as_os_str().to_owned();
+    path.push(".lock");
+    PathBuf::from(path)
+}
+
+/// One attempt: the lock, or none while another holder's fresh lock stands.
+fn try_lock(lock_path: &Path, stale: Duration) -> Result<Option<Lock>, String> {
     loop {
-        match fs::create_dir(&lock_path) {
-            Ok(()) => return Ok(Lock { path: lock_path }),
+        match fs::create_dir(lock_path) {
+            Ok(()) => {
+                return Ok(Some(Lock {
+                    path: lock_path.to_path_buf(),
+                }))
+            }
             Err(error) if error.kind() == ErrorKind::AlreadyExists => {
-                if is_stale(&lock_path, stale) {
-                    let _ = fs::remove_dir(&lock_path);
-                    continue;
+                if !is_stale(lock_path, stale) {
+                    return Ok(None);
                 }
-                if Instant::now() >= deadline {
-                    return Err(format!(
-                        "Lock file is already being held: {}",
-                        lock_path.display()
-                    ));
-                }
-                // 10 ms doubling to 1 s, as the TypeScript store backs off.
-                let delay = Duration::from_millis((10u64 << retry.min(7)).min(1000));
-                retry += 1;
-                std::thread::sleep(delay.min(deadline - Instant::now()));
+                let _ = fs::remove_dir(lock_path);
             }
             Err(error) => return Err(format!("{}: {error}", lock_path.display())),
         }
     }
+}
+
+/// The wait before the next attempt: 10 ms doubling to 1 s, as the TypeScript store backs off.
+fn backoff(retry: u32, deadline: Instant) -> Duration {
+    Duration::from_millis((10u64 << retry.min(7)).min(1000))
+        .min(deadline.saturating_duration_since(Instant::now()))
+}
+
+fn held(lock_path: &Path) -> String {
+    format!("Lock file is already being held: {}", lock_path.display())
+}
+
+fn lock_with(file: &Path, stale: Duration, wait: Duration) -> Result<Lock, String> {
+    let lock_path = lock_path(file);
+    let deadline = Instant::now() + wait;
+    for retry in 0.. {
+        if let Some(lock) = try_lock(&lock_path, stale)? {
+            return Ok(lock);
+        }
+        if Instant::now() >= deadline {
+            break;
+        }
+        std::thread::sleep(backoff(retry, deadline));
+    }
+    Err(held(&lock_path))
+}
+
+/// `lock_with` for async callers: the waits do not block the thread.
+async fn lock_async(file: &Path) -> Result<Lock, String> {
+    let lock_path = lock_path(file);
+    let deadline = Instant::now() + WAIT;
+    for retry in 0.. {
+        if let Some(lock) = try_lock(&lock_path, STALE)? {
+            return Ok(lock);
+        }
+        if Instant::now() >= deadline {
+            break;
+        }
+        tokio::time::sleep(backoff(retry, deadline)).await;
+    }
+    Err(held(&lock_path))
 }
 
 #[cfg(unix)]
@@ -220,10 +264,8 @@ impl AuthFile {
     }
 
     /// Run `apply` on the stored entries under the lock; it says whether to write them back.
-    fn locked<T>(
-        &self,
-        apply: impl FnOnce(&mut Map<String, Value>) -> Result<(T, bool), String>,
-    ) -> Result<T, String> {
+    /// The directory and an empty file, so the lock has a place.
+    fn prepare(&self) -> Result<(), String> {
         if let Some(directory) = self
             .path
             .parent()
@@ -238,14 +280,55 @@ impl AuthFile {
             write_private(&self.path, "{}")
                 .map_err(|error| format!("{}: {error}", self.path.display()))?;
         }
+        Ok(())
+    }
+
+    fn write(&self, data: &Map<String, Value>) -> Result<(), String> {
+        write_private(&self.path, &stringify(data))
+            .map_err(|error| format!("{}: {error}", self.path.display()))
+    }
+
+    fn locked<T>(
+        &self,
+        apply: impl FnOnce(&mut Map<String, Value>) -> Result<(T, bool), String>,
+    ) -> Result<T, String> {
+        self.prepare()?;
         let _lock = lock(&self.path)?;
         let mut data = self.read_all()?;
         let (result, write) = apply(&mut data)?;
         if write {
-            write_private(&self.path, &stringify(&data))
-                .map_err(|error| format!("{}: {error}", self.path.display()))?;
+            self.write(&data)?;
         }
         Ok(result)
+    }
+
+    /// `modify` for a change that waits, such as an OAuth refresh: the lock is held while it
+    /// runs, so another process neither refreshes the same token nor writes over the result.
+    pub async fn modify_async<Change, Changed, Failure>(
+        &self,
+        provider: &str,
+        change: Change,
+    ) -> Result<Option<Credential>, ModifyError<Failure>>
+    where
+        Change: FnOnce(Option<Credential>) -> Changed,
+        Changed: std::future::Future<Output = Result<Option<Credential>, Failure>>,
+    {
+        self.prepare().map_err(ModifyError::Store)?;
+        let _lock = lock_async(&self.path).await.map_err(ModifyError::Store)?;
+        let mut data = self.read_all().map_err(ModifyError::Store)?;
+        let current = data
+            .get(provider)
+            .and_then(|value| credential(provider, value).ok());
+        match change(current.clone()).await.map_err(ModifyError::Change)? {
+            None => Ok(current),
+            Some(next) => {
+                let value = serde_json::to_value(&next)
+                    .map_err(|error| ModifyError::Store(error.to_string()))?;
+                data.insert(provider.to_string(), value);
+                self.write(&data).map_err(ModifyError::Store)?;
+                Ok(Some(next))
+            }
+        }
     }
 }
 
