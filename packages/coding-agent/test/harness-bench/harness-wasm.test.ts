@@ -6,6 +6,7 @@
  */
 
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { callHarnessWasm, HarnessWasmEngine } from "@relay-harness/agent-core/harness-wasm";
 import { describe, expect, it } from "vitest";
 import { GOLDEN_CONTEXT, GOLDEN_FILE, type GoldenEntry } from "./golden.ts";
@@ -205,6 +206,59 @@ describe("the harness WebAssembly module", () => {
 				engine.dispose();
 			}
 		});
+		expect(differences).toEqual([]);
+	});
+});
+
+/** general-agents' routing catalog and what its `route.py` answered (`npm run harness:route-golden`). */
+const ROUTE_FILE = fileURLToPath(new URL("../../../../crates/harness-core/tests/fixtures/route.json", import.meta.url));
+
+describe("the router in the harness WebAssembly module", () => {
+	it("routes every general-agents case as route.py does", () => {
+		const route = JSON.parse(readFileSync(ROUTE_FILE, "utf8")) as {
+			agents: Array<Record<string, unknown>>;
+			vocabulary: { words: Array<[string, string]>; phrases: Array<[string, string]> };
+			cases: Array<{
+				query: string;
+				top: number;
+				domain?: string;
+				expected: { candidates: Array<{ name: string }> };
+			}>;
+		};
+		const byName = new Map(route.agents.map((agent) => [agent.name, agent]));
+		const differences = route.cases.flatMap((entry) => {
+			const actual = callHarnessWasm({
+				method: "routeAgents",
+				agents: route.agents,
+				vocabulary: route.vocabulary,
+				query: entry.query,
+				top: entry.top,
+				...(entry.domain ? { domain: entry.domain } : {}),
+			}) as { candidates: Array<Record<string, unknown>> };
+			// route.py --json copies these fields of the catalog entry into each candidate.
+			const expected = {
+				...entry.expected,
+				candidates: entry.expected.candidates.map((candidate) => {
+					const agent = byName.get(candidate.name) ?? {};
+					return {
+						...candidate,
+						domain: agent.domain,
+						kind: agent.kind,
+						model: agent.model ?? {},
+						path: agent.path,
+						can_edit: agent.can_edit,
+					};
+				}),
+			};
+			const sorted = (value: unknown) =>
+				JSON.stringify(value, (_key, item) =>
+					item && typeof item === "object" && !Array.isArray(item)
+						? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
+						: item,
+				);
+			return sorted(actual) === sorted(expected) ? [] : [entry.query];
+		});
+		expect(route.cases.length).toBeGreaterThanOrEqual(160);
 		expect(differences).toEqual([]);
 	});
 });

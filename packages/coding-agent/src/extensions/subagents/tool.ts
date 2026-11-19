@@ -24,6 +24,7 @@ import { SessionManager } from "../../core/session-manager.ts";
 import { type Settings, SettingsManager } from "../../core/settings-manager.ts";
 import { combineUsage } from "../../core/usage-totals.ts";
 import { type AgentCatalog, type AgentDefinition, agentPrompt } from "./definitions.ts";
+import { type RouterData, routeAgentTool } from "./route.ts";
 
 export interface SubagentLimits {
 	/** Sessions in a delegation chain, the developer's included: 3 allows main, orchestrator and specialist. */
@@ -55,6 +56,8 @@ export interface AgentToolOptions {
 	limiter: Limiter;
 	/** Receives the outcomes of the subagents this tool ran, so an outer delegation sees them too. */
 	onDelegated?: (outcomes: readonly DelegatedOutcome[]) => void;
+	/** Routing data of the installed catalogs, for the `route_agent` tool of delegating subagents. */
+	router?: () => RouterData | undefined;
 }
 
 export interface AgentToolDetails {
@@ -182,15 +185,24 @@ async function runSubagent(
 	const model = subagentModel(definition, ctx, settings);
 	if (!model) throw new Error("no model is selected");
 	const delegates = definition.tools.includes("agent") && options.depth + 1 < options.limits.maxDepth;
+	// A subagent that delegates also routes, when an installed catalog ships routing data.
+	const routes = delegates && options.router?.() !== undefined;
 	const outcomes: DelegatedOutcome[] = [];
-	const customTools = delegates
-		? [agentTool({ ...options, depth: options.depth + 1, onDelegated: (nested) => outcomes.push(...nested) })]
-		: [];
+	const customTools = [
+		...(delegates
+			? [agentTool({ ...options, depth: options.depth + 1, onDelegated: (nested) => outcomes.push(...nested) })]
+			: []),
+		...(routes && options.router ? [routeAgentTool(options.router)] : []),
+	];
 	const { session } = await createAgentSession({
 		cwd: ctx.cwd,
 		model,
 		modelRuntime: ctx.modelRegistry.modelRuntime,
-		tools: [...definition.tools.filter((tool) => tool !== "agent"), ...(delegates ? ["agent"] : [])],
+		tools: [
+			...definition.tools.filter((tool) => tool !== "agent"),
+			...(delegates ? ["agent"] : []),
+			...(routes ? ["route_agent"] : []),
+		],
 		customTools,
 		resourceLoader: subagentResourceLoader(`${agentPrompt(definition)}\n\nWorking directory: ${ctx.cwd}`),
 		sessionManager: SessionManager.inMemory(ctx.cwd),

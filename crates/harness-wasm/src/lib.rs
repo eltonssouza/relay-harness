@@ -19,6 +19,7 @@ use relay_harness_core::effects::{
 };
 use relay_harness_core::engine::{EngineOptions, HarnessEngine};
 use relay_harness_core::evidence::CompletionReport;
+use relay_harness_core::route::{py_strip, RouteAgent, Router, Vocabulary};
 use serde_json::{json, Map, Value};
 
 thread_local! {
@@ -314,6 +315,63 @@ fn with_engine<T>(
     })
 }
 
+fn string_pairs(value: &Value) -> Vec<(String, String)> {
+    value
+        .as_array()
+        .map(|pairs| {
+            pairs
+                .iter()
+                .filter_map(|pair| {
+                    Some((pair[0].as_str()?.to_string(), pair[1].as_str()?.to_string()))
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// `route.py --json`: rank a catalog's agents for a request. Each candidate carries the catalog
+/// entry's `domain`, `kind`, `model`, `path` and `can_edit`, as the script prints them. The
+/// vocabulary's `words` and `phrases` are `[key, value]` pairs in file order: phrase order decides
+/// which of two overlapping phrases of the same length applies.
+fn route_agents(request: &Value) -> Result<Value> {
+    let entries = request["agents"].as_array().ok_or("missing `agents`")?;
+    let agents = entries
+        .iter()
+        .map(|agent| {
+            Ok(RouteAgent {
+                name: text(agent, "name")?,
+                description: text(agent, "description")?,
+                domain: text(agent, "domain")?,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let vocabulary = Vocabulary::new(
+        &string_pairs(&request["vocabulary"]["words"]),
+        &string_pairs(&request["vocabulary"]["phrases"]),
+    );
+    let query = text(request, "query")?;
+    let top = request["top"].as_u64().unwrap_or(5) as usize;
+    let router = Router::new(agents, vocabulary);
+    let (clear, candidates) = router.route(&query, top, request["domain"].as_str());
+    let field = |index: usize, key: &str| entries[index].get(key).cloned().unwrap_or(Value::Null);
+    Ok(json!({
+        "query": py_strip(&query),
+        "clear_specialist": clear,
+        "candidates": candidates.iter().map(|candidate| json!({
+            "name": router.agents()[candidate.agent].name,
+            "score": candidate.score,
+            "strength": candidate.strength,
+            "domain": field(candidate.agent, "domain"),
+            "kind": field(candidate.agent, "kind"),
+            "model": entries[candidate.agent].get("model").cloned().unwrap_or_else(|| json!({})),
+            "path": field(candidate.agent, "path"),
+            "can_edit": field(candidate.agent, "can_edit"),
+            "terms": candidate.terms,
+            "exclusion_alert": candidate.exclusion_alert,
+        })).collect::<Vec<_>>(),
+    }))
+}
+
 /// Handle one parsed request.
 pub fn handle(request: &Value) -> Result<Value> {
     let method = request["method"].as_str().ok_or("missing `method`")?;
@@ -342,6 +400,7 @@ pub fn handle(request: &Value) -> Result<Value> {
         "isQuestionOnly" => Ok(json!(is_question_only(&text(request, "text")?))),
         "requestsAction" => Ok(json!(requests_action(&text(request, "text")?))),
         "isCorrection" => Ok(json!(is_correction(&text(request, "text")?))),
+        "routeAgents" => route_agents(request),
         "create" => {
             let engine = HarnessEngine::new(engine_options(&request["options"]));
             ENGINES.with(|engines| {

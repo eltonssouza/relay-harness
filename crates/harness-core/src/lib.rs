@@ -10,6 +10,7 @@
 //! - [`alignment`]: constraints, intent, corrections, authorization and the question-turn guard.
 //! - [`evidence`]: the evidence ledger and the completion report.
 //! - [`text`]: the lexicon helpers, on `fancy-regex` for JavaScript-compatible lookaround.
+//! - [`route`]: general-agents' deterministic router (`route.py`), checked against the script.
 //!
 //! `tests/golden.rs` and `tests/pillars.rs` compare every result with the TypeScript harness.
 
@@ -18,6 +19,7 @@ pub mod context;
 pub mod effects;
 pub mod engine;
 pub mod evidence;
+pub mod route;
 pub mod shell;
 pub mod slices;
 pub mod text;
