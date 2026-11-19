@@ -1,11 +1,15 @@
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
+	alignmentMetrics,
 	authorizationMetrics,
 	completionMetrics,
+	constraintMetrics,
 	contextMetrics,
+	declaredVerificationMetrics,
 	formatReport,
 	intentMetrics,
+	openCases,
 	verificationMetrics,
 } from "./bench.ts";
 
@@ -22,8 +26,20 @@ describe("harness benchmark", () => {
 		expect(metrics.falsePrompts.length / metrics.safe).toBeLessThanOrEqual(0.05);
 	});
 
+	it("authorizes only what the developer's request or answer authorizes", async () => {
+		const metrics = await alignmentMetrics();
+		expect(metrics.falseAllows).toEqual([]);
+		expect(metrics.falseBlocks).toEqual([]);
+	});
+
 	it("counts no look-alike as a check and recognizes the common ones", () => {
 		const metrics = verificationMetrics();
+		expect(metrics.falseChecks).toEqual([]);
+		expect(metrics.missedChecks).toEqual([]);
+	});
+
+	it("counts only the declared commands when the project declares them", () => {
+		const metrics = declaredVerificationMetrics();
 		expect(metrics.falseChecks).toEqual([]);
 		expect(metrics.missedChecks).toEqual([]);
 	});
@@ -39,6 +55,18 @@ describe("harness benchmark", () => {
 		expect(metrics.wrong.length / metrics.cases).toBeLessThanOrEqual(0.1);
 	});
 
+	it("records the standing rules a message states and nothing else", () => {
+		expect(constraintMetrics().wrong).toEqual([]);
+	});
+
+	it("still reproduces every open finding", async () => {
+		const fixed = (await openCases())
+			.filter((item) => !item.reproduces)
+			.map((item) => `${item.finding}: ${item.label}`);
+		// A fix that makes an open case pass also removes its `open` field from corpus.json, so the floors cover it.
+		expect(fixed).toEqual([]);
+	});
+
 	it("keeps a recorded session smaller and its cached prefix stable", () => {
 		const metrics = contextMetrics(sessionFile);
 		expect(metrics.reduction).toBeGreaterThanOrEqual(0.4);
@@ -46,9 +74,18 @@ describe("harness benchmark", () => {
 		expect(metrics.cacheBreaksBatched).toBeLessThan(metrics.cacheBreaksOneByOne / 2);
 	});
 
-	it("reports every measure", () => {
-		const report = formatReport(sessionFile);
-		for (const heading of ["Authorization", "Verification", "Completion gate", "Intent", "Context"]) {
+	it("reports every measure", async () => {
+		const report = await formatReport(sessionFile);
+		for (const heading of [
+			"Authorization",
+			"Alignment",
+			"Verification",
+			"Completion gate",
+			"Intent",
+			"Constraints",
+			"Context",
+			"Open findings",
+		]) {
 			expect(report).toContain(heading);
 		}
 	});
