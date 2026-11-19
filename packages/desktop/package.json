@@ -1,0 +1,17 @@
+{
+	"name": "@relay-harness/desktop",
+	"version": "0.5.0",
+	"private": true,
+	"description": "Relay's desktop screen: a Tauri shell around relay --mode rpc",
+	"type": "module",
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
+		"test": "vitest --run"
+	},
+	"devDependencies": {
+		"@types/node": "22.19.19",
+		"playwright-core": "1.64.0-alpha-1790635538000",
+		"vitest": "4.1.11"
+	}
+}

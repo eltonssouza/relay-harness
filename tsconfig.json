@@ -31,5 +31,5 @@
 		}
 	},
 	"include": ["packages/*/src/**/*", "packages/*/test/**/*", "packages/coding-agent/examples/**/*", "packages/agent/examples/**/*"],
-	"exclude": ["**/dist/**"]
+	"exclude": ["**/dist/**", "packages/desktop/**"]
 }

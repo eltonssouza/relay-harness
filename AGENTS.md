@@ -61,6 +61,12 @@
 - `crates/harness-core/src/route.rs` ports general-agents' `scripts/route.py` (the `route_agent` tool). `tests/fixtures/route.json` holds the routing catalog and what `route.py` answered for the orchestrator's routing cases at the pinned commit. After changing the pin in `src/extensions/subagents/catalogs.ts`, run `npm run harness:route-golden -- <general-agents checkout>` (Python 3.12 or later) and make `tests/route.rs` pass.
 - `crates/harness-core/tests/fixtures/classification.json` holds the TypeScript classification of every corpus command and edge case, and `pillars.json` the alignment decisions, text readings and completion reports. After changing a rule in `packages/agent/src/harness`, run `npm run harness:golden` and make the Rust tests pass; `golden.test.ts` fails while the files are behind the TypeScript code.
 
+## Desktop App
+
+- `packages/desktop` is a client of `relay --mode rpc`: the screen (`src/`, TypeScript without a framework or npm runtime dependencies) and the Tauri 2 shell (`src-tauri/`, crate `relay-desktop`). Keep agent logic in relay; a feature the screen needs and RPC lacks becomes an RPC command first.
+- Set model, tool and session text with `textContent` only; `test/app.test.ts` fails when model text becomes markup. Keep the Tauri capability limited to the event listener and `rpc_send`.
+- `relay-desktop` is not a default Cargo member: `cargo clippy -p relay-desktop` needs `packages/desktop/dist` (`npm run build` in the package) and, on Linux, the WebKitGTK packages `pr-ci.yml` installs. `npm test` in the package drives the built screen in the system Chrome with Playwright.
+
 ## Dependency and Install Security
 
 - Treat npm dep and lockfile changes as reviewed code. Direct external deps stay pinned to exact versions.

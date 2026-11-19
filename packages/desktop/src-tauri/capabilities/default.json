@@ -1,0 +1,6 @@
+{
+	"identifier": "default",
+	"description": "The main window sends RPC lines to relay and listens to its output; nothing else.",
+	"windows": ["main"],
+	"permissions": ["core:event:allow-listen", "core:event:allow-unlisten"]
+}

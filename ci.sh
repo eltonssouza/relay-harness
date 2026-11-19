@@ -14,6 +14,8 @@ npm run check
 # reference command against the TypeScript harness (tests/fixtures/classification.json).
 cargo fmt --all --check
 cargo clippy --all-targets --locked -- -D warnings
+# The desktop shell embeds the screen built above (packages/desktop/dist).
+cargo clippy -p relay-desktop --all-targets --locked -- -D warnings
 cargo test --locked
 node scripts/publish.mjs --dry-run
 ./test.sh

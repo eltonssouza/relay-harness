@@ -47,3 +47,4 @@ packages/agent/docs/extensions/relay-server-artifact/index.md
 
 # Rust
 /target/
+packages/desktop/src-tauri/gen/
