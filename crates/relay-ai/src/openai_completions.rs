@@ -12,9 +12,11 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 
+use crate::json::js_number;
 use crate::message::{InputBlock, Message, OutputBlock, Tool};
 use crate::model::Model;
 use crate::options::{resolve_cache_retention, CacheRetention};
+use crate::simple::thinking_budget_for_level;
 use crate::strict::{
     grammar_tool_input, grammar_tool_input_properties, json_schema_tool_parameters,
     resolve_grammar_constrained_sampling, resolve_json_schema_strict_sampling,
@@ -261,28 +263,6 @@ fn mapped_or(model: &Model, level: &str) -> Value {
     match model.thinking_level(level) {
         Some(value) if !value.is_null() => value.clone(),
         _ => json!(level),
-    }
-}
-
-/// The token budget for a thinking level: the request's budgets over the defaults, with
-/// `xhigh` and `max` counted as `high` (`thinkingBudgetForLevel`).
-fn thinking_budget_for_level(level: &str, custom: Option<&Map<String, Value>>) -> Option<i64> {
-    let level = if matches!(level, "xhigh" | "max") {
-        "high"
-    } else {
-        level
-    };
-    if let Some(budget) = custom.and_then(|budgets| budgets.get(level)) {
-        return budget
-            .as_i64()
-            .or_else(|| budget.as_f64().map(|float| float as i64));
-    }
-    match level {
-        "minimal" => Some(1024),
-        "low" => Some(2048),
-        "medium" => Some(8192),
-        "high" => Some(16384),
-        _ => None,
     }
 }
 
@@ -883,7 +863,7 @@ pub fn build_request(
         body.insert(field.into(), json!(max_tokens));
     }
     if let Some(temperature) = options.temperature {
-        body.insert("temperature".into(), json!(temperature));
+        body.insert("temperature".into(), js_number(temperature));
     }
     if let Some(tools) = tools {
         body.insert("tools".into(), Value::Array(tools));

@@ -1,6 +1,7 @@
-//! The JSON helpers adapters apply to provider output, as `packages/ai/src/utils/json-parse.ts`
-//! defines them: repairing malformed string literals, and parsing tool arguments while they
-//! stream, with the `partial-json` 0.1.7 rules (all partial kinds allowed).
+//! JSON helpers. `js_number` writes numbers as JavaScript does. The others apply to provider
+//! output, as `packages/ai/src/utils/json-parse.ts` defines them: repairing malformed string
+//! literals, and parsing tool arguments while they stream, with the `partial-json` 0.1.7 rules
+//! (all partial kinds allowed).
 //!
 //! The partial parser keeps the library's JavaScript behavior, including where it is odd: its
 //! `substring` swaps reversed bounds and its `lastIndexOf` searches the whole input, so a few
@@ -10,6 +11,17 @@
 use serde_json::{Map, Value};
 
 use crate::text::js_trim;
+
+/// A number as JavaScript writes it: whole values without a fraction (`0`, not `0.0`), and
+/// `null` for NaN and the infinities.
+pub fn js_number(number: f64) -> Value {
+    const SAFE: f64 = 9_007_199_254_740_992.0;
+    if number.fract() == 0.0 && number.abs() < SAFE {
+        Value::from(number as i64)
+    } else {
+        serde_json::Number::from_f64(number).map_or(Value::Null, Value::Number)
+    }
+}
 
 /// Escape raw control characters in string literals and double the backslash of an escape JSON
 /// does not have.

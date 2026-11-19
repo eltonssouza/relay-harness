@@ -9,6 +9,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 
+use crate::json::js_number;
 use crate::message::{InputBlock, Message, OutputBlock, Tool};
 use crate::model::Model;
 use crate::strict::{json_schema_tool_parameters, resolve_json_schema_strict_sampling};
@@ -92,7 +93,7 @@ pub fn uses_thinking_level(model: &Model) -> bool {
 }
 
 /// A Relay thinking level resolved to one Google supports, through the model's map.
-fn resolve_thinking_level(model: &Model, level: &str) -> Result<&'static str, String> {
+pub(crate) fn resolve_thinking_level(model: &Model, level: &str) -> Result<&'static str, String> {
     let mapped = model.thinking_level(level);
     let resolved = match mapped {
         Some(Value::String(mapped)) => mapped.to_lowercase(),
@@ -388,7 +389,7 @@ pub fn build_params(
 
     let mut config = Map::new();
     if let Some(temperature) = options.temperature {
-        config.insert("temperature".into(), json!(temperature));
+        config.insert("temperature".into(), js_number(temperature));
     }
     if let Some(max_tokens) = options.max_tokens {
         config.insert("maxOutputTokens".into(), json!(max_tokens));
