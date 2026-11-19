@@ -11,5 +11,6 @@ path = "src/lib.rs"
 
 [dependencies]
 serde = { version = "=1.0.229", default-features = false, features = ["std", "derive"] }
-# Insertion order, as JavaScript objects keep it: request bodies must match the TypeScript ones.
-serde_json = { version = "=1.0.154", default-features = false, features = ["std", "preserve_order"] }
+# Insertion order, as JavaScript objects keep it (request bodies must match the TypeScript ones),
+# and exact float parsing, so recorded numbers read back as the values JavaScript computed.
+serde_json = { version = "=1.0.154", default-features = false, features = ["std", "preserve_order", "float_roundtrip"] }

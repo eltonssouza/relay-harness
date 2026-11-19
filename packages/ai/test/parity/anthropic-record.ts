@@ -6,12 +6,10 @@
  * transcripts are the agent's own request from the read-file scenario (`crates/fixtures/scenarios/`)
  * and two written here to reach the conversion's branches. The files live in
  * `crates/fixtures/anthropic/`; `anthropic.test.ts` fails when they no longer match the TypeScript
- * code, so a change to the adapter regenerates them:
- *
- *   npm run parity:record
+ * code, so a change to the adapter regenerates them with `npm run parity:record`.
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type AnthropicOptions, stream } from "../../src/api/anthropic-messages.ts";
@@ -436,13 +434,4 @@ export async function anthropicJson(testCase: AnthropicCase): Promise<string> {
 
 export function readAnthropicCase(name: string): string {
 	return readFileSync(join(ANTHROPIC_DIR, `${name}.json`), "utf8");
-}
-
-if (process.argv.includes("--write")) {
-	mkdirSync(ANTHROPIC_DIR, { recursive: true });
-	const cases = anthropicCases();
-	for (const testCase of cases) {
-		writeFileSync(join(ANTHROPIC_DIR, `${testCase.name}.json`), await anthropicJson(testCase));
-	}
-	console.log(`wrote ${cases.length} Anthropic cases to ${ANTHROPIC_DIR}`);
 }
