@@ -9,6 +9,7 @@ import { createInterface } from "node:readline";
 import { type ImageContent, modelsAreEqual } from "@relay-harness/ai";
 import { setCapabilityOverrides } from "@relay-harness/tui";
 import chalk from "chalk";
+import { runAgentsCommand } from "./cli/agents-command.ts";
 import { type Args, type Mode, normalizeSessionName, parseArgs, printHelp } from "./cli/args.ts";
 import {
 	type AuthCheckResult,
@@ -602,6 +603,11 @@ export async function main(args: string[], options?: MainOptions) {
 	}
 
 	if (await handleConfigCommand(args, { extensionFactories })) {
+		return;
+	}
+
+	if (args[0] === "agents") {
+		process.exitCode = await runAgentsCommand(args.slice(1), { agentDir, cwd });
 		return;
 	}
 

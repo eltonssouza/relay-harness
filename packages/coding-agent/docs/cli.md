@@ -14,6 +14,7 @@ relay list
 relay config [options]
 relay auth <check|print-api-key|print-bearer-token> [options]
 relay mcp <list|login|logout> [options]
+relay agents <install|list> [options]
 ```
 
 <a id="modes"></a>
@@ -297,6 +298,16 @@ Authentication commands require `--provider <provider>` or `--model <model>`. Se
 | `--min-expiry <duration>` | `print-bearer-token` | Require remaining token lifetime using `ms`, `s`, `m`, or `h`, such as `30m` |
 
 Credential-printing commands write secrets to stdout.
+
+## Agent commands
+
+| Command | Description |
+|---|---|
+| `relay agents install` | Fetch general-agents at the commit pinned in Relay and install it into `~/.relay/agent/agent-catalogs/general-agents/`, replacing an earlier install |
+| `relay agents install --from <path>` | Install a local copy instead, for offline machines; a copy with git history must be at the pinned commit |
+| `relay agents list` | List the agent definitions the `agent` tool can run and the ones that did not load, with the reason |
+
+See [Subagents](subagents.md).
 
 ## MCP commands
 
