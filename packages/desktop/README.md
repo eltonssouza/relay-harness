@@ -16,6 +16,12 @@ The shell runs `relay` from `PATH` (`relay.cmd` on Windows when npm installed it
 
 On Linux the shell needs the WebKitGTK development packages: `libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev`.
 
+## Installers
+
+The release workflow's `desktop-installers` job builds an `.msi` on Windows, a `.dmg` on macOS and an AppImage on Linux with the Tauri CLI, and keeps them as artifacts of the release run. They are not code-signed yet, so Windows SmartScreen and macOS Gatekeeper warn on first launch, and the app still needs `relay` installed and on `PATH`. To build one locally, install the CLI (`cargo install tauri-cli --version 2.12.6 --locked`) and run `cargo tauri build --bundles msi` (or `dmg`, `appimage`) in `src-tauri/`; the bundler downloads its packaging tools (WiX on Windows, linuxdeploy on Linux) on first use.
+
+The app's version is the desktop package's (`tauri.conf.json` points at `package.json`), which the release bumps with every other package. `node scripts/make-icons.mjs` draws the icons in every size the bundlers need.
+
 ## Tests
 
-`npm test` runs the built screen in the system Chrome through Playwright, against a scripted bridge that plays relay's side of the RPC protocol: the conversation and its tool results, streaming, the authorization dialog (focus on Deny, Escape denies), session switching, text that looks like markup, relay stopping, the harness panel and forgetting a constraint, the subagents view, the model and thinking pickers, the settings dialog (a refused value is marked and not sent), masked secret prompts, choices, and signing in and out.
+`npm test` runs the built screen in the system Chrome through Playwright, against a scripted bridge that plays relay's side of the RPC protocol: the conversation and its tool results, streaming, the authorization dialog (focus on Deny, Escape denies), session switching, text that looks like markup, relay stopping, the harness panel and forgetting a constraint, the subagents view, the model and thinking pickers, the settings dialog (a refused value is marked and not sent), masked secret prompts, choices, and signing in and out. `test/bundle.test.ts` checks what the installers are built from without building them: the version source, the icon files and formats, the bundle targets and the release job.
