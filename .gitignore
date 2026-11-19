@@ -44,3 +44,6 @@ plans/
 .relay/memory/
 collect.sh
 packages/agent/docs/extensions/relay-server-artifact/index.md
+
+# Rust
+/target/

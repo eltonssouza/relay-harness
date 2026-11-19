@@ -1,0 +1,16 @@
+[package]
+name = "relay-harness-core"
+version = "0.0.0"
+description = "The model-independent harness core of Relay: shell lexer and tool effect classification."
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+regex = { version = "=1.13.2", default-features = false, features = ["std", "perf"] }
+
+[dev-dependencies]
+serde_json = "=1.0.154"
