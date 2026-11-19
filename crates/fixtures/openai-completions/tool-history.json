@@ -1,0 +1,130 @@
+{
+	"name": "tool-history",
+	"description": "Tool calls in the history without declared tools send an empty tool list.",
+	"model": {
+		"id": "test-model",
+		"name": "Test Model",
+		"api": "openai-completions",
+		"provider": "custom",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1,
+			"output": 2,
+			"cacheRead": 0.1,
+			"cacheWrite": 0
+		},
+		"contextWindow": 128000,
+		"maxTokens": 32000
+	},
+	"apiKey": "sk-parity",
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "No tools now.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Earlier.",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_h",
+					"name": "read",
+					"arguments": {
+						"path": "a.ts"
+					}
+				}
+			],
+			"api": "openai-completions",
+			"provider": "custom",
+			"model": "test-model",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_h",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "a"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Again.",
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "test-model",
+		"messages": [
+			{
+				"role": "system",
+				"content": "No tools now."
+			},
+			{
+				"role": "user",
+				"content": "Earlier."
+			},
+			{
+				"role": "assistant",
+				"content": null,
+				"tool_calls": [
+					{
+						"id": "call_h",
+						"type": "function",
+						"function": {
+							"name": "read",
+							"arguments": "{\"path\":\"a.ts\"}"
+						}
+					}
+				]
+			},
+			{
+				"role": "tool",
+				"content": "a",
+				"tool_call_id": "call_h"
+			},
+			{
+				"role": "user",
+				"content": "Again."
+			}
+		],
+		"stream": true,
+		"stream_options": {
+			"include_usage": true
+		},
+		"store": false,
+		"tools": []
+	}
+}

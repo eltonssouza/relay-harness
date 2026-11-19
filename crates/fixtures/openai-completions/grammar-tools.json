@@ -1,0 +1,195 @@
+{
+	"name": "grammar-tools",
+	"description": "A grammar tool and its call as custom tools.",
+	"model": {
+		"id": "test-model",
+		"name": "Test Model",
+		"api": "openai-completions",
+		"provider": "custom",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1,
+			"output": 2,
+			"cacheRead": 0.1,
+			"cacheWrite": 0
+		},
+		"contextWindow": 128000,
+		"maxTokens": 32000,
+		"compat": {
+			"supportsOpenAIGrammarTools": true
+		}
+	},
+	"apiKey": "sk-parity",
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Patch files.",
+			"toolsAdded": [
+				{
+					"name": "apply_patch",
+					"description": "The apply_patch tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"patch": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"patch"
+						]
+					},
+					"constrainedSampling": {
+						"type": "grammar",
+						"variants": {
+							"openai_regex": "^\\*\\*\\* Begin Patch[\\s\\S]*$"
+						}
+					}
+				},
+				{
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Fix it.",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_p",
+					"name": "apply_patch",
+					"arguments": {
+						"patch": "*** Begin Patch\n..."
+					}
+				}
+			],
+			"api": "openai-completions",
+			"provider": "custom",
+			"model": "test-model",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_p",
+			"toolName": "apply_patch",
+			"content": [
+				{
+					"type": "text",
+					"text": "applied"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "test-model",
+		"messages": [
+			{
+				"role": "system",
+				"content": "Patch files."
+			},
+			{
+				"role": "user",
+				"content": "Fix it."
+			},
+			{
+				"role": "assistant",
+				"content": null,
+				"tool_calls": [
+					{
+						"id": "call_p",
+						"type": "custom",
+						"custom": {
+							"name": "apply_patch",
+							"input": "*** Begin Patch\n..."
+						}
+					}
+				]
+			},
+			{
+				"role": "tool",
+				"content": "applied",
+				"tool_call_id": "call_p"
+			}
+		],
+		"stream": true,
+		"stream_options": {
+			"include_usage": true
+		},
+		"store": false,
+		"tools": [
+			{
+				"type": "custom",
+				"custom": {
+					"name": "apply_patch",
+					"description": "The apply_patch tool.",
+					"format": {
+						"type": "grammar",
+						"grammar": {
+							"syntax": "regex",
+							"definition": "^\\*\\*\\* Begin Patch[\\s\\S]*$"
+						}
+					}
+				}
+			},
+			{
+				"type": "function",
+				"function": {
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			}
+		]
+	}
+}

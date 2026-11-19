@@ -1,0 +1,238 @@
+{
+	"name": "strict-mode",
+	"description": "Strict tools where the model supports them.",
+	"model": {
+		"id": "test-model",
+		"name": "Test Model",
+		"api": "openai-completions",
+		"provider": "custom",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1,
+			"output": 2,
+			"cacheRead": 0.1,
+			"cacheWrite": 0
+		},
+		"contextWindow": 128000,
+		"maxTokens": 32000,
+		"compat": {
+			"supportsStrictMode": true
+		}
+	},
+	"apiKey": "sk-parity",
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Base prompt.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Start.",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "Ready."
+				}
+			],
+			"api": "openai-completions",
+			"provider": "custom",
+			"model": "test-model",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "system",
+			"content": "More tools.",
+			"toolsAdded": [
+				{
+					"name": "write",
+					"description": "The write tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"content": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "search",
+					"description": "The search tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"query": {
+								"type": "string"
+							},
+							"kind": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"query"
+						]
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Write.",
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "test-model",
+		"messages": [
+			{
+				"role": "system",
+				"content": "Base prompt.\n\nMore tools."
+			},
+			{
+				"role": "user",
+				"content": "Start."
+			},
+			{
+				"role": "assistant",
+				"content": "Ready."
+			},
+			{
+				"role": "user",
+				"content": "Write."
+			}
+		],
+		"stream": true,
+		"stream_options": {
+			"include_usage": true
+		},
+		"store": false,
+		"tools": [
+			{
+				"type": "function",
+				"function": {
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					},
+					"strict": false
+				}
+			},
+			{
+				"type": "function",
+				"function": {
+					"name": "write",
+					"description": "The write tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"content": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					},
+					"strict": false
+				}
+			},
+			{
+				"type": "function",
+				"function": {
+					"name": "search",
+					"description": "The search tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"query": {
+								"type": "string"
+							},
+							"kind": {
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"query",
+							"kind"
+						],
+						"additionalProperties": false
+					},
+					"strict": true
+				}
+			}
+		]
+	}
+}

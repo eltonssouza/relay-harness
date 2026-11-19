@@ -144,6 +144,31 @@ pub struct ModelCompat {
     pub supports_tool_search: Option<bool>,
     pub supports_explicit_prompt_cache_mode: Option<bool>,
     pub supports_max_output_tokens: Option<bool>,
+    // OpenAI Chat Completions servers.
+    pub supports_tools: Option<bool>,
+    pub supports_store: Option<bool>,
+    pub supports_reasoning_effort: Option<bool>,
+    pub supports_usage_in_streaming: Option<bool>,
+    pub supports_finish_reason: Option<bool>,
+    /// `max_completion_tokens` or `max_tokens`.
+    pub max_tokens_field: Option<String>,
+    pub requires_tool_result_name: Option<bool>,
+    pub requires_assistant_after_tool_result: Option<bool>,
+    pub requires_thinking_as_text: Option<bool>,
+    pub requires_reasoning_content_on_assistant_messages: Option<bool>,
+    /// How the server takes reasoning settings: `openai`, `deepseek`, `zai`, `qwen`, and others.
+    pub thinking_format: Option<String>,
+    pub chat_template_kwargs: Option<Map<String, Value>>,
+    pub chat_template_args: Option<Map<String, Value>>,
+    pub open_router_routing: Option<Value>,
+    pub vercel_gateway_routing: Option<Value>,
+    pub zai_tool_stream: Option<bool>,
+    pub thinking_token_budget_field: Option<String>,
+    pub supports_thinking_token_budget: Option<bool>,
+    pub supports_mid_convo_tool_additions: Option<bool>,
+    /// `anthropic` for servers that take Anthropic-style cache markers.
+    pub cache_control_format: Option<String>,
+    pub vllm_priority: Option<Value>,
 }
 
 /// A model Anthropic may answer with instead, and its price for such answers.
