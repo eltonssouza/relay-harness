@@ -1,0 +1,138 @@
+{
+	"provider": "minimax-cn",
+	"name": "MiniMax CN",
+	"apiKey": {
+		"name": "MiniMax CN API key",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"MINIMAX_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"MINIMAX_CN_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"MINIMAX_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-MINIMAX_CN_API_KEY"
+				},
+				"source": "MINIMAX_CN_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"MINIMAX_CN_API_KEY": "c-MINIMAX_CN_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"MINIMAX_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"MINIMAX_CN_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"MINIMAX_CN_API_KEY": "c-MINIMAX_CN_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"MINIMAX_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-MINIMAX_CN_API_KEY"
+				},
+				"source": "MINIMAX_CN_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"MINIMAX_CN_API_KEY": "c-MINIMAX_CN_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"MINIMAX_CN_API_KEY": "c-MINIMAX_CN_API_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"MINIMAX_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

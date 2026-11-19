@@ -5,7 +5,8 @@
  * provider received on each call, the session events and the session entries. Values that differ
  * between runs and machines become placeholders (see `normalize`). The files live in
  * `crates/fixtures/scenarios/`; `parity.test.ts` fails when they no longer match the TypeScript
- * code, so a behavior change regenerates them:
+ * code, so a behavior change regenerates them. `--write` also writes the config values
+ * (`config-value-record.ts`) to `crates/fixtures/config-values.json`:
  *
  *   npm run parity:record
  */
@@ -15,6 +16,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type AssistantMessage, fauxAssistantMessage, fauxToolCall, type Message } from "@relay-harness/ai";
 import { createHarness } from "../suite/harness.ts";
+import { CONFIG_VALUES_FILE, configValuesJson } from "./config-value-record.ts";
 
 export const SCENARIOS_DIR = fileURLToPath(new URL("../../../../crates/fixtures/scenarios/", import.meta.url));
 
@@ -159,5 +161,6 @@ if (process.argv.includes("--write")) {
 	for (const scenario of SCENARIOS) {
 		writeFileSync(join(SCENARIOS_DIR, `${scenario.name}.json`), scenarioJson(await record(scenario)));
 	}
-	console.log(`wrote ${SCENARIOS.length} scenario(s) to ${SCENARIOS_DIR}`);
+	writeFileSync(CONFIG_VALUES_FILE, configValuesJson());
+	console.log(`wrote ${SCENARIOS.length} scenario(s) to ${SCENARIOS_DIR} and the config values`);
 }

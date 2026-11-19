@@ -1,0 +1,138 @@
+{
+	"provider": "qwen-token-plan-cn",
+	"name": "Qwen Token Plan CN",
+	"apiKey": {
+		"name": "Qwen Token Plan CN API key",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"QWEN_TOKEN_PLAN_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"QWEN_TOKEN_PLAN_CN_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"QWEN_TOKEN_PLAN_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-QWEN_TOKEN_PLAN_CN_API_KEY"
+				},
+				"source": "QWEN_TOKEN_PLAN_CN_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"QWEN_TOKEN_PLAN_CN_API_KEY": "c-QWEN_TOKEN_PLAN_CN_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"QWEN_TOKEN_PLAN_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"QWEN_TOKEN_PLAN_CN_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"QWEN_TOKEN_PLAN_CN_API_KEY": "c-QWEN_TOKEN_PLAN_CN_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"QWEN_TOKEN_PLAN_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-QWEN_TOKEN_PLAN_CN_API_KEY"
+				},
+				"source": "QWEN_TOKEN_PLAN_CN_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"QWEN_TOKEN_PLAN_CN_API_KEY": "c-QWEN_TOKEN_PLAN_CN_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"QWEN_TOKEN_PLAN_CN_API_KEY": "c-QWEN_TOKEN_PLAN_CN_API_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"QWEN_TOKEN_PLAN_CN_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

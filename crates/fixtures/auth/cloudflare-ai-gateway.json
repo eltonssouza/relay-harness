@@ -1,0 +1,331 @@
+{
+	"provider": "cloudflare-ai-gateway",
+	"name": "Cloudflare AI Gateway",
+	"apiKey": {
+		"name": "Cloudflare API key",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_ACCOUNT_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_GATEWAY_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_API_KEY",
+				"CLOUDFLARE_ACCOUNT_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_API_KEY",
+				"CLOUDFLARE_GATEWAY_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_ACCOUNT_ID",
+				"CLOUDFLARE_GATEWAY_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_API_KEY",
+				"CLOUDFLARE_ACCOUNT_ID",
+				"CLOUDFLARE_GATEWAY_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"cf-aig-authorization": "Bearer v-CLOUDFLARE_API_KEY",
+						"Authorization": null,
+						"x-api-key": null
+					}
+				},
+				"env": {
+					"CLOUDFLARE_ACCOUNT_ID": "v-CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID": "v-CLOUDFLARE_GATEWAY_ID"
+				},
+				"source": "CLOUDFLARE_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_ACCOUNT_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_GATEWAY_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_ACCOUNT_ID",
+				"CLOUDFLARE_GATEWAY_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"cf-aig-authorization": "Bearer stored-key",
+						"Authorization": null,
+						"x-api-key": null
+					}
+				},
+				"env": {
+					"CLOUDFLARE_ACCOUNT_ID": "v-CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID": "v-CLOUDFLARE_GATEWAY_ID"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"CLOUDFLARE_API_KEY": "c-CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID": "c-CLOUDFLARE_GATEWAY_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"CLOUDFLARE_API_KEY": "c-CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID": "c-CLOUDFLARE_GATEWAY_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"cf-aig-authorization": "Bearer v-CLOUDFLARE_API_KEY",
+						"Authorization": null,
+						"x-api-key": null
+					}
+				},
+				"env": {
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID": "c-CLOUDFLARE_GATEWAY_ID"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"CLOUDFLARE_API_KEY": "c-CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID": "c-CLOUDFLARE_GATEWAY_ID"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"cf-aig-authorization": "Bearer stored-key",
+						"Authorization": null,
+						"x-api-key": null
+					}
+				},
+				"env": {
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID": "c-CLOUDFLARE_GATEWAY_ID"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_ACCOUNT_ID",
+					"CLOUDFLARE_GATEWAY_ID"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

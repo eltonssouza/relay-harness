@@ -1,0 +1,3440 @@
+{
+	"provider": "anthropic",
+	"name": "Anthropic",
+	"apiKey": {
+		"name": "Anthropic API key",
+		"login": true
+	},
+	"oauth": {
+		"name": "Anthropic (Claude Pro/Max)",
+		"isSubscription": true
+	},
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"ANTHROPIC_FEDERATION_RULE_ID": "v-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "v-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "v-ANTHROPIC_IDENTITY_TOKEN_FILE"
+				},
+				"source": "workload identity federation"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"ANTHROPIC_FEDERATION_RULE_ID": "v-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "v-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "v-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "v-ANTHROPIC_SERVICE_ACCOUNT_ID"
+				},
+				"source": "workload identity federation"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"ANTHROPIC_FEDERATION_RULE_ID": "v-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "v-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "v-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_WORKSPACE_ID": "v-ANTHROPIC_WORKSPACE_ID"
+				},
+				"source": "workload identity federation"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"ANTHROPIC_FEDERATION_RULE_ID": "v-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "v-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "v-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "v-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "v-ANTHROPIC_WORKSPACE_ID"
+				},
+				"source": "workload identity federation"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"ANTHROPIC_FEDERATION_RULE_ID": "v-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "v-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "v-ANTHROPIC_IDENTITY_TOKEN_FILE"
+				},
+				"source": "workload identity federation"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"ANTHROPIC_FEDERATION_RULE_ID": "v-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "v-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "v-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "v-ANTHROPIC_SERVICE_ACCOUNT_ID"
+				},
+				"source": "workload identity federation"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"ANTHROPIC_FEDERATION_RULE_ID": "v-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "v-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "v-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_WORKSPACE_ID": "v-ANTHROPIC_WORKSPACE_ID"
+				},
+				"source": "workload identity federation"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"ANTHROPIC_FEDERATION_RULE_ID": "v-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "v-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "v-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "v-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "v-ANTHROPIC_WORKSPACE_ID"
+				},
+				"source": "workload identity federation"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_API_KEY"
+				},
+				"source": "ANTHROPIC_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-ANTHROPIC_OAUTH_TOKEN"
+				},
+				"source": "ANTHROPIC_OAUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [
+				"ANTHROPIC_FEDERATION_RULE_ID",
+				"ANTHROPIC_ORGANIZATION_ID",
+				"ANTHROPIC_IDENTITY_TOKEN_FILE",
+				"ANTHROPIC_SERVICE_ACCOUNT_ID",
+				"ANTHROPIC_WORKSPACE_ID",
+				"ANTHROPIC_API_KEY",
+				"ANTHROPIC_OAUTH_TOKEN",
+				"ANTHROPIC_AUTH_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"headers": {
+						"Authorization": "Bearer v-ANTHROPIC_AUTH_TOKEN"
+					}
+				},
+				"source": "ANTHROPIC_AUTH_TOKEN"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"ANTHROPIC_AUTH_TOKEN": "c-ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN": "c-ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY": "c-ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID": "c-ANTHROPIC_FEDERATION_RULE_ID",
+					"ANTHROPIC_ORGANIZATION_ID": "c-ANTHROPIC_ORGANIZATION_ID",
+					"ANTHROPIC_IDENTITY_TOKEN_FILE": "c-ANTHROPIC_IDENTITY_TOKEN_FILE",
+					"ANTHROPIC_SERVICE_ACCOUNT_ID": "c-ANTHROPIC_SERVICE_ACCOUNT_ID",
+					"ANTHROPIC_WORKSPACE_ID": "c-ANTHROPIC_WORKSPACE_ID"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"ANTHROPIC_AUTH_TOKEN",
+					"ANTHROPIC_OAUTH_TOKEN",
+					"ANTHROPIC_API_KEY",
+					"ANTHROPIC_FEDERATION_RULE_ID"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}
