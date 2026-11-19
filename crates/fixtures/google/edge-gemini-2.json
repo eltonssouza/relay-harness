@@ -1,0 +1,610 @@
+{
+	"name": "edge-gemini-2",
+	"description": "Signatures, cross-model thinking, results and images on Gemini 2.5.",
+	"model": {
+		"id": "gemini-2.5-flash",
+		"name": "Gemini",
+		"api": "google-generative-ai",
+		"provider": "google",
+		"baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0.3,
+			"output": 2.5,
+			"cacheRead": 0.075,
+			"cacheWrite": 0
+		},
+		"contextWindow": 1048576,
+		"maxTokens": 65536
+	},
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Base prompt.",
+			"sections": {
+				"rules": "<rules>Be brief.</rules>"
+			},
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": "Look."
+				},
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Signed thought.",
+					"thinkingSignature": "c2lnbmF0dXJlLTE="
+				},
+				{
+					"type": "thinking",
+					"thinking": "Bad signature.",
+					"thinkingSignature": "not base64!"
+				},
+				{
+					"type": "thinking",
+					"thinking": "",
+					"thinkingSignature": "c2lnbmF0dXJlLTE="
+				},
+				{
+					"type": "thinking",
+					"thinking": "   "
+				},
+				{
+					"type": "text",
+					"text": "",
+					"textSignature": "c2lnbmF0dXJlLTE="
+				},
+				{
+					"type": "text",
+					"text": " "
+				},
+				{
+					"type": "text",
+					"text": "Reading.",
+					"textSignature": "bad"
+				},
+				{
+					"type": "toolCall",
+					"id": "call|1+x",
+					"name": "read",
+					"arguments": {
+						"path": "a.ts"
+					},
+					"thoughtSignature": "c2lnbmF0dXJlLTE="
+				},
+				{
+					"type": "toolCall",
+					"id": "call_2",
+					"name": "read",
+					"arguments": {
+						"path": "b.ts"
+					}
+				}
+			],
+			"api": "google-generative-ai",
+			"provider": "google",
+			"model": "gemini-2.5-flash",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call|1+x",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "a"
+				},
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_2",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "missing"
+				}
+			],
+			"isError": true,
+			"timestamp": 0
+		},
+		{
+			"role": "system",
+			"content": "Later instructions.",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Claude's thought.",
+					"thinkingSignature": "sig"
+				},
+				{
+					"type": "text",
+					"text": "From Claude."
+				},
+				{
+					"type": "toolCall",
+					"id": "toolu_01",
+					"name": "read",
+					"arguments": {
+						"path": "c.ts"
+					}
+				}
+			],
+			"api": "anthropic-messages",
+			"provider": "anthropic",
+			"model": "claude-test",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "toolu_01",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Continue.",
+			"timestamp": 0
+		}
+	],
+	"params": {
+		"model": "gemini-2.5-flash",
+		"contents": [
+			{
+				"role": "user",
+				"parts": [
+					{
+						"text": "Look."
+					},
+					{
+						"inlineData": {
+							"mimeType": "image/png",
+							"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+						}
+					}
+				]
+			},
+			{
+				"role": "model",
+				"parts": [
+					{
+						"thought": true,
+						"text": "Signed thought.",
+						"thoughtSignature": "c2lnbmF0dXJlLTE="
+					},
+					{
+						"thought": true,
+						"text": "Bad signature."
+					},
+					{
+						"thought": true,
+						"text": "",
+						"thoughtSignature": "c2lnbmF0dXJlLTE="
+					},
+					{
+						"text": "",
+						"thoughtSignature": "c2lnbmF0dXJlLTE="
+					},
+					{
+						"text": "Reading."
+					},
+					{
+						"functionCall": {
+							"name": "read",
+							"args": {
+								"path": "a.ts"
+							}
+						},
+						"thoughtSignature": "c2lnbmF0dXJlLTE="
+					},
+					{
+						"functionCall": {
+							"name": "read",
+							"args": {
+								"path": "b.ts"
+							}
+						}
+					}
+				]
+			},
+			{
+				"role": "user",
+				"parts": [
+					{
+						"functionResponse": {
+							"name": "read",
+							"response": {
+								"output": "a"
+							}
+						}
+					}
+				]
+			},
+			{
+				"role": "user",
+				"parts": [
+					{
+						"text": "Tool result image:"
+					},
+					{
+						"inlineData": {
+							"mimeType": "image/png",
+							"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+						}
+					}
+				]
+			},
+			{
+				"role": "user",
+				"parts": [
+					{
+						"functionResponse": {
+							"name": "read",
+							"response": {
+								"error": "missing"
+							}
+						}
+					}
+				]
+			},
+			{
+				"role": "model",
+				"parts": [
+					{
+						"text": "Claude's thought."
+					},
+					{
+						"text": "From Claude."
+					},
+					{
+						"functionCall": {
+							"name": "read",
+							"args": {
+								"path": "c.ts"
+							}
+						}
+					}
+				]
+			},
+			{
+				"role": "user",
+				"parts": [
+					{
+						"functionResponse": {
+							"name": "read",
+							"response": {
+								"output": "(see attached image)"
+							}
+						}
+					}
+				]
+			},
+			{
+				"role": "user",
+				"parts": [
+					{
+						"text": "Tool result image:"
+					},
+					{
+						"inlineData": {
+							"mimeType": "image/png",
+							"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+						}
+					}
+				]
+			},
+			{
+				"role": "user",
+				"parts": [
+					{
+						"text": "Continue."
+					}
+				]
+			}
+		],
+		"config": {
+			"systemInstruction": "Base prompt.\n\nLater instructions.\n\n<rules>Be brief.</rules>",
+			"tools": [
+				{
+					"functionDeclarations": [
+						{
+							"name": "read",
+							"description": "The read tool.",
+							"parametersJsonSchema": {
+								"type": "object",
+								"properties": {
+									"path": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"path"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	},
+	"request": {
+		"url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse",
+		"body": {
+			"contents": [
+				{
+					"parts": [
+						{
+							"text": "Look."
+						},
+						{
+							"inlineData": {
+								"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+								"mimeType": "image/png"
+							}
+						}
+					],
+					"role": "user"
+				},
+				{
+					"parts": [
+						{
+							"text": "Signed thought.",
+							"thought": true,
+							"thoughtSignature": "c2lnbmF0dXJlLTE="
+						},
+						{
+							"text": "Bad signature.",
+							"thought": true
+						},
+						{
+							"text": "",
+							"thought": true,
+							"thoughtSignature": "c2lnbmF0dXJlLTE="
+						},
+						{
+							"text": "",
+							"thoughtSignature": "c2lnbmF0dXJlLTE="
+						},
+						{
+							"text": "Reading."
+						},
+						{
+							"functionCall": {
+								"args": {
+									"path": "a.ts"
+								},
+								"name": "read"
+							},
+							"thoughtSignature": "c2lnbmF0dXJlLTE="
+						},
+						{
+							"functionCall": {
+								"args": {
+									"path": "b.ts"
+								},
+								"name": "read"
+							}
+						}
+					],
+					"role": "model"
+				},
+				{
+					"parts": [
+						{
+							"functionResponse": {
+								"name": "read",
+								"response": {
+									"output": "a"
+								}
+							}
+						}
+					],
+					"role": "user"
+				},
+				{
+					"parts": [
+						{
+							"text": "Tool result image:"
+						},
+						{
+							"inlineData": {
+								"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+								"mimeType": "image/png"
+							}
+						}
+					],
+					"role": "user"
+				},
+				{
+					"parts": [
+						{
+							"functionResponse": {
+								"name": "read",
+								"response": {
+									"error": "missing"
+								}
+							}
+						}
+					],
+					"role": "user"
+				},
+				{
+					"parts": [
+						{
+							"text": "Claude's thought."
+						},
+						{
+							"text": "From Claude."
+						},
+						{
+							"functionCall": {
+								"args": {
+									"path": "c.ts"
+								},
+								"name": "read"
+							}
+						}
+					],
+					"role": "model"
+				},
+				{
+					"parts": [
+						{
+							"functionResponse": {
+								"name": "read",
+								"response": {
+									"output": "(see attached image)"
+								}
+							}
+						}
+					],
+					"role": "user"
+				},
+				{
+					"parts": [
+						{
+							"text": "Tool result image:"
+						},
+						{
+							"inlineData": {
+								"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+								"mimeType": "image/png"
+							}
+						}
+					],
+					"role": "user"
+				},
+				{
+					"parts": [
+						{
+							"text": "Continue."
+						}
+					],
+					"role": "user"
+				}
+			],
+			"systemInstruction": {
+				"parts": [
+					{
+						"text": "Base prompt.\n\nLater instructions.\n\n<rules>Be brief.</rules>"
+					}
+				],
+				"role": "user"
+			},
+			"tools": [
+				{
+					"functionDeclarations": [
+						{
+							"name": "read",
+							"description": "The read tool.",
+							"parametersJsonSchema": {
+								"type": "object",
+								"properties": {
+									"path": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"path"
+								]
+							}
+						}
+					]
+				}
+			],
+			"generationConfig": {}
+		}
+	}
+}

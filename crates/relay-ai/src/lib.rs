@@ -9,6 +9,7 @@
 //!   for OpenAI and the servers that speak its API, and reading its stream.
 //! - `openai_responses`, `openai_responses_stream`: the OpenAI Responses request body, and
 //!   reading its stream as the OpenAI SDK parses it.
+//! - `google`: the Google Gemini request (the SDK parameters, the URL and the HTTP body).
 //! - `options`: request options adapters share.
 //! - `json`, `sse`: provider output helpers (JSON repair and partial parsing, server-sent events).
 //!
@@ -22,6 +23,7 @@
 pub mod anthropic;
 pub mod anthropic_stream;
 pub mod event;
+pub mod google;
 pub mod json;
 pub mod message;
 pub mod model;

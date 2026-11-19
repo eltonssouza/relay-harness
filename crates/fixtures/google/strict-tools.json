@@ -1,0 +1,246 @@
+{
+	"name": "strict-tools",
+	"description": "A strict tool on Gemini 3 asks for validated function calling.",
+	"model": {
+		"id": "gemini-3-pro-preview",
+		"name": "Gemini",
+		"api": "google-generative-ai",
+		"provider": "google",
+		"baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0.3,
+			"output": 2.5,
+			"cacheRead": 0.075,
+			"cacheWrite": 0
+		},
+		"contextWindow": 1048576,
+		"maxTokens": 65536
+	},
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Search.",
+			"toolsAdded": [
+				{
+					"name": "search",
+					"description": "The search tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"query": {
+								"type": "string"
+							},
+							"kind": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"query"
+						]
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				},
+				{
+					"name": "lookup",
+					"description": "Look up.",
+					"parameters": {
+						"$schema": "https://json-schema.org/draft/2020-12/schema",
+						"type": "object",
+						"properties": {
+							"key": {
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"type": "number"
+									}
+								]
+							}
+						},
+						"required": [
+							"key"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Find.",
+			"timestamp": 0
+		}
+	],
+	"params": {
+		"model": "gemini-3-pro-preview",
+		"contents": [
+			{
+				"role": "user",
+				"parts": [
+					{
+						"text": "Find."
+					}
+				]
+			}
+		],
+		"config": {
+			"systemInstruction": "Search.",
+			"tools": [
+				{
+					"functionDeclarations": [
+						{
+							"name": "search",
+							"description": "The search tool.",
+							"parametersJsonSchema": {
+								"type": "object",
+								"properties": {
+									"query": {
+										"type": "string"
+									},
+									"kind": {
+										"anyOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "null"
+											}
+										]
+									}
+								},
+								"required": [
+									"query",
+									"kind"
+								],
+								"additionalProperties": false
+							}
+						},
+						{
+							"name": "lookup",
+							"description": "Look up.",
+							"parametersJsonSchema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"key": {
+										"anyOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "number"
+											}
+										]
+									}
+								},
+								"required": [
+									"key"
+								]
+							}
+						}
+					]
+				}
+			],
+			"toolConfig": {
+				"functionCallingConfig": {
+					"mode": "VALIDATED"
+				}
+			}
+		}
+	},
+	"request": {
+		"url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse",
+		"body": {
+			"contents": [
+				{
+					"parts": [
+						{
+							"text": "Find."
+						}
+					],
+					"role": "user"
+				}
+			],
+			"systemInstruction": {
+				"parts": [
+					{
+						"text": "Search."
+					}
+				],
+				"role": "user"
+			},
+			"tools": [
+				{
+					"functionDeclarations": [
+						{
+							"name": "search",
+							"description": "The search tool.",
+							"parametersJsonSchema": {
+								"type": "object",
+								"properties": {
+									"query": {
+										"type": "string"
+									},
+									"kind": {
+										"anyOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "null"
+											}
+										]
+									}
+								},
+								"required": [
+									"query",
+									"kind"
+								],
+								"additionalProperties": false
+							}
+						},
+						{
+							"name": "lookup",
+							"description": "Look up.",
+							"parametersJsonSchema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"key": {
+										"anyOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "number"
+											}
+										]
+									}
+								},
+								"required": [
+									"key"
+								]
+							}
+						}
+					]
+				}
+			],
+			"toolConfig": {
+				"functionCallingConfig": {
+					"mode": "VALIDATED"
+				}
+			},
+			"generationConfig": {}
+		}
+	}
+}
