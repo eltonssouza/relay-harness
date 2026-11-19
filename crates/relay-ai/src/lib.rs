@@ -17,6 +17,7 @@
 //!   HTTP body), and reading its stream.
 //! - `options`: request options adapters share.
 //! - `abort`, `retry`, `http`: cancellation, the SDKs' retry policy, and sending requests.
+//! - `provider_request`: each adapter's URL, headers and wire body, and its HTTP error messages.
 //! - `simple`: the provider-neutral options (`streamSimple`) mapped to each adapter's, and the
 //!   context estimate that limits the output.
 //! - `json`, `sse`: provider output helpers (JSON repair and partial parsing, server-sent events).
@@ -48,6 +49,7 @@ pub mod openai_responses;
 pub mod openai_responses_stream;
 mod openai_sdk;
 pub mod options;
+pub mod provider_request;
 pub mod retry;
 pub mod simple;
 pub mod sse;

@@ -1,0 +1,63 @@
+{
+	"name": "responses-api-key",
+	"description": "An API key, with a session.",
+	"adapter": "responses",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "https://api.openai.com/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-parity",
+		"sessionId": "session-1"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"request": {
+		"method": "POST",
+		"url": "https://api.openai.com/v1/responses",
+		"headers": {
+			"accept": "application/json",
+			"authorization": "Bearer sk-parity",
+			"content-type": "application/json",
+			"session_id": "session-1",
+			"user-agent": "relay (<os>)",
+			"x-client-request-id": "session-1"
+		},
+		"omitted": [
+			"x-stainless-arch",
+			"x-stainless-lang",
+			"x-stainless-os",
+			"x-stainless-package-version",
+			"x-stainless-retry-count",
+			"x-stainless-runtime",
+			"x-stainless-runtime-version"
+		],
+		"body": "{\"model\":\"test-model\",\"input\":[{\"role\":\"system\",\"content\":\"Be brief.\"},{\"role\":\"user\",\"content\":[{\"type\":\"input_text\",\"text\":\"Go.\"}]}],\"stream\":true,\"prompt_cache_key\":\"session-1\",\"store\":false}"
+	}
+}

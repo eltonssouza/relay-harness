@@ -1,0 +1,43 @@
+{
+	"name": "google-error-connection",
+	"description": "No connection.",
+	"adapter": "google",
+	"model": {
+		"id": "gemini-2.5-flash",
+		"name": "Test",
+		"api": "google-generative-ai",
+		"provider": "google",
+		"baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "google-parity-key"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": "connection-failure",
+	"stopReason": "error",
+	"errorMessage": "fetch failed"
+}

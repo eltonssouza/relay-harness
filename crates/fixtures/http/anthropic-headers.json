@@ -1,0 +1,74 @@
+{
+	"name": "anthropic-headers",
+	"description": "Model and request headers; a null removes one; a configured beta list.",
+	"adapter": "anthropic",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "https://api.anthropic.com",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000,
+		"headers": {
+			"x-model": "m",
+			"anthropic-beta": "files-api-2025-04-14, files-api-2025-04-14,b2"
+		}
+	},
+	"options": {
+		"apiKey": "sk-ant-api03-parity",
+		"headers": {
+			"x-request": "r",
+			"x-model": "request wins",
+			"accept": null
+		}
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"request": {
+		"method": "POST",
+		"url": "https://api.anthropic.com/v1/messages?beta=true",
+		"headers": {
+			"anthropic-beta": "files-api-2025-04-14,b2",
+			"anthropic-dangerous-direct-browser-access": "true",
+			"anthropic-version": "2023-06-01",
+			"content-type": "application/json",
+			"user-agent": "relay (<os>)",
+			"x-api-key": "sk-ant-api03-parity",
+			"x-model": "request wins",
+			"x-request": "r"
+		},
+		"omitted": [
+			"x-stainless-arch",
+			"x-stainless-lang",
+			"x-stainless-os",
+			"x-stainless-package-version",
+			"x-stainless-retry-count",
+			"x-stainless-runtime",
+			"x-stainless-runtime-version",
+			"x-stainless-timeout"
+		],
+		"body": "{\"model\":\"test-model\",\"messages\":[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"Go.\",\"cache_control\":{\"type\":\"ephemeral\"}}]}],\"max_tokens\":1000,\"stream\":true,\"system\":[{\"type\":\"text\",\"text\":\"Be brief.\",\"cache_control\":{\"type\":\"ephemeral\"}}]}"
+	}
+}

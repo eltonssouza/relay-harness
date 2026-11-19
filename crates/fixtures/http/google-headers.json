@@ -1,0 +1,61 @@
+{
+	"name": "google-headers",
+	"description": "Model and request headers, and a custom base URL.",
+	"adapter": "google",
+	"model": {
+		"id": "gemini-2.5-flash",
+		"name": "Test",
+		"api": "google-generative-ai",
+		"provider": "google",
+		"baseUrl": "https://proxy.example/gemini/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000,
+		"headers": {
+			"x-model": "m"
+		}
+	},
+	"options": {
+		"apiKey": "google-parity-key",
+		"headers": {
+			"x-request": "r"
+		}
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"request": {
+		"method": "POST",
+		"url": "https://proxy.example/gemini/v1/models/gemini-2.5-flash:streamGenerateContent?alt=sse",
+		"headers": {
+			"content-type": "application/json",
+			"user-agent": "relay (<os>)",
+			"x-goog-api-key": "google-parity-key",
+			"x-model": "m",
+			"x-request": "r"
+		},
+		"omitted": [
+			"x-goog-api-client"
+		],
+		"body": "{\"contents\":[{\"parts\":[{\"text\":\"Go.\"}],\"role\":\"user\"}],\"systemInstruction\":{\"parts\":[{\"text\":\"Be brief.\"}],\"role\":\"user\"},\"generationConfig\":{}}"
+	}
+}

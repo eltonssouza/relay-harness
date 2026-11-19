@@ -1,0 +1,50 @@
+{
+	"name": "completions-error-other-shape",
+	"description": "A server's own error shape.",
+	"adapter": "completions",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-completions",
+		"provider": "ollama",
+		"baseUrl": "http://127.0.0.1:11434/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-parity"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 404,
+		"body": "{\"error\":\"model 'x' not found\"}",
+		"headers": {
+			"content-type": "application/json"
+		},
+		"statusText": "Not Found"
+	},
+	"stopReason": "error",
+	"errorMessage": "404 \"model 'x' not found\""
+}

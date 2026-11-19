@@ -1,0 +1,50 @@
+{
+	"name": "responses-error-subscription-limit",
+	"description": "The ChatGPT subscription limit points at the usage page.",
+	"adapter": "responses",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "https://api.openai.com/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-parity"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 429,
+		"body": "{\"error\":{\"message\":\"Usage limit reached.\",\"code\":\"subscription_sharing_usage_limit_exceeded\"}}",
+		"headers": {
+			"content-type": "application/json"
+		},
+		"statusText": "Too Many Requests"
+	},
+	"stopReason": "error",
+	"errorMessage": "OpenAI API error (429): {\"message\":\"Usage limit reached.\",\"code\":\"subscription_sharing_usage_limit_exceeded\"}\nCheck your ChatGPT usage: https://chatgpt.com/settings/usage"
+}

@@ -200,7 +200,8 @@ async fn an_empty_error_body_says_so() {
     let RequestError::Http(error) = error else {
         panic!("{error:?}")
     };
-    assert_eq!(error.body, None);
+    assert_eq!(error.body.as_deref(), Some("  "));
+    assert_eq!(error.status_text, "Service Unavailable");
     assert_eq!(error.message, "503 status code (no body)");
 }
 

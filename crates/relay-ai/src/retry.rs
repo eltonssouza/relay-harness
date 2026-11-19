@@ -27,10 +27,12 @@ pub struct RetryOptions {
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct HttpError {
     pub status: Option<u16>,
+    /// The reason phrase (`statusText`): an HTTP/1.1 server's, none over HTTP/2.
+    pub status_text: String,
     /// Response headers, names in lowercase.
     pub headers: Vec<(String, String)>,
     pub message: String,
-    /// The response body, when one was read.
+    /// The response body as received, when one was read.
     pub body: Option<String>,
 }
 

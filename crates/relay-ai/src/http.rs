@@ -2,10 +2,9 @@
 //! system's certificates, proxies from the environment), a POST that retries as the SDKs do
 //! (`retry`), and a response body read chunk by chunk until it ends or the signal aborts.
 //!
-//! A response that is not 2xx becomes an `HttpError` with its status, headers and body (the
-//! first 4000 characters, as `MAX_PROVIDER_ERROR_BODY_CHARS` keeps); the adapters word the
-//! message as their SDKs do. A request that gets no response is an `HttpError` without a
-//! status, which the policy retries.
+//! A response that is not 2xx becomes an `HttpError` with its status, reason phrase, headers and
+//! body as received; each adapter words the message as its SDK does (`provider_error`). A request
+//! that gets no response is an `HttpError` without a status, which the policy retries.
 
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -148,20 +147,34 @@ async fn send_once(
             response,
         });
     }
+    let status_text = if response.version() == reqwest::Version::HTTP_2 {
+        String::new()
+    } else {
+        response
+            .status()
+            .canonical_reason()
+            .unwrap_or_default()
+            .to_string()
+    };
     let text = tokio::select! {
         text = response.bytes() => text.map(|bytes| String::from_utf8_lossy(&bytes).into_owned()).unwrap_or_default(),
         _ = signal.aborted() => return Err(RequestError::Aborted),
     };
     let trimmed = crate::text::js_trim(&text);
-    let body = (!trimmed.is_empty()).then(|| truncate_error_text(trimmed, MAX_ERROR_BODY_CHARS));
+    let message = if trimmed.is_empty() {
+        format!("{status} status code (no body)")
+    } else {
+        format!(
+            "{status} {}",
+            truncate_error_text(trimmed, MAX_ERROR_BODY_CHARS)
+        )
+    };
     Err(RequestError::Http(HttpError {
         status: Some(status),
+        status_text,
         headers,
-        message: match &body {
-            Some(body) => format!("{status} {body}"),
-            None => format!("{status} status code (no body)"),
-        },
-        body,
+        message,
+        body: Some(text),
     }))
 }
 
