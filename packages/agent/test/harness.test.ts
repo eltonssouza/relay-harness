@@ -13,6 +13,7 @@ import {
 	ContextWindowPolicy,
 	classifyCommand,
 	classifyToolCall,
+	deletionTargets,
 	EvidenceLedger,
 	extractConstraints,
 	HarnessCore,
@@ -21,6 +22,7 @@ import {
 	isQuestionOnly,
 	messageOrigin,
 	requiresAuthorization,
+	riskyOperations,
 	SliceDiscipline,
 	type WorkspaceProbe,
 } from "../src/harness/index.ts";
@@ -293,6 +295,65 @@ describe("alignment", () => {
 		expect((await policy.check("bash", { kind: "destructive", paths: [], command: "rm -rf dist" })).action).toBe(
 			"allow",
 		);
+	});
+
+	it("lists every risky operation of a command and the paths its deletions name", () => {
+		expect(riskyOperations("git push && git reset --hard HEAD~5").sort()).toEqual(["git-push", "git-reset"]);
+		expect(riskyOperations("ls -la")).toEqual([]);
+		expect(deletionTargets("rm -rf ./dist/ build")).toEqual(["dist", "build"]);
+		expect(deletionTargets("rd /s /q dist")).toEqual(["dist"]);
+		expect(deletionTargets("Remove-Item -Recurse -Force dist")).toEqual(["dist"]);
+		for (const command of [
+			"rm -rf dist ~",
+			"rm -rf *.log",
+			"rm -rf ../x",
+			"rm -rf $DIR",
+			"git ls-files | xargs rm",
+			"find . -name x -delete",
+		]) {
+			expect(deletionTargets(command)).toBeUndefined();
+		}
+	});
+
+	it("needs every risky operation and every deletion target named", async () => {
+		const policy = new AlignmentPolicy();
+		const run = async (command: string) =>
+			(await policy.check("bash", { ...classifyCommand(command), paths: [] })).action;
+		policy.observeDeveloperMessage("Push the branch.");
+		expect(await run("git push && git reset --hard HEAD~5")).toBe("block");
+		policy.observeDeveloperMessage("Delete dist.");
+		expect(await run("rm -rf dist ~")).toBe("block");
+		expect(await run("rm -rf dist build")).toBe("block");
+		policy.observeDeveloperMessage("Remove the unused import in src/index.ts");
+		expect(await run("rm -rf src")).toBe("block");
+		policy.observeDeveloperMessage("Reset the counter in utils.ts");
+		expect(await run("git reset --hard origin/main")).toBe("block");
+		policy.observeDeveloperMessage("Reset the branch to origin/main");
+		expect(await run("git reset --hard origin/main")).toBe("allow");
+		policy.observeDeveloperMessage("Patch the parser bug and post the result");
+		expect(await run("curl -d @notes.txt https://api.example/upload")).toBe("block");
+	});
+
+	it("takes only a short affirmative reply that asks nothing as approval", async () => {
+		const remove = { ...classifyCommand("rm -rf build"), paths: [] };
+		const answer = async (reply: string) => {
+			const policy = new AlignmentPolicy();
+			policy.observeDeveloperMessage("Tidy the workspace");
+			await policy.check("bash", remove);
+			policy.observeDeveloperMessage(reply);
+			return (await policy.check("bash", remove)).action;
+		};
+		for (const reply of [
+			"Isso vai apagar o quê?",
+			"Pode explicar antes o que isso faz",
+			"pode quebrar algo",
+			"ok, what would that overwrite?",
+		]) {
+			expect(await answer(reply)).toBe("block");
+		}
+		for (const reply of ["sim", "Pode.", "pode rodar", "yes, go ahead"]) {
+			expect(await answer(reply)).toBe("allow");
+		}
 	});
 
 	it("uses the authorizer when one is configured", async () => {
