@@ -4,6 +4,25 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- `HarnessCore.alignment`, `evidence` and `context` are getters that return the TypeScript pillar classes only when the TypeScript engine runs. Read constraints, corrections, reports and context statistics through `HarnessCore.engine`.
+
+### Added
+
+- Added `HarnessEngine`, `TypeScriptHarnessEngine` and the `HarnessCore` option `engine`, `onLearningsChange` and `dispose()`.
+- Added the `@relay-harness/agent-core/harness-wasm` entry: the Rust harness core compiled to WebAssembly (`createHarnessWasmEngine`, `callHarnessWasm`, `HarnessWasmEngine`), including general-agents' router (`routeAgents`).
+- Added `HarnessCore.recordDelegatedEffects` and `DelegatedOutcome`, and the message origin `agent` for a brief a delegating agent wrote.
+- Added `riskyOperations` and `deletionTargets`, and the completion status `question`.
+
+### Changed
+
+- Authorization, checkout and restore gating, check coverage, constraint extraction and the cache-friendly harness state changed as described in the coding-agent changelog.
+
+### Fixed
+
+- Fixed the system temp directory on Windows being treated as outside the workspace (`ClassifyContext.tempDir`).
+
 ## [0.5.0] - 2026-10-27
 
 ### Breaking Changes

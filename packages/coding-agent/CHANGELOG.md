@@ -4,6 +4,34 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Removed the Laya router: the `laya/auto` model, the `laya` and `adaptiveCognition` settings, the ONNX, native and Docker runtimes and their Python resources. A saved `laya/auto` default model no longer resolves, and `laya.*` settings are ignored.
+
+### Added
+
+- Added the `agent` tool: it runs agent definitions in the Claude Code format (`subagent_type`, `description`, `prompt`) in this process, each as its own session with the tools, model and system prompt its definition names. `haiku`, `sonnet` and `opus` resolve to capability tiers through the new `modelTiers` setting or catalog prices, and `subagents.*` limits depth, concurrency, tokens and time. The tool is declared only when a definition exists. See [Subagents](docs/subagents.md).
+- Added `relay agents install`, which installs general-agents at a commit pinned in Relay (`--from <path>` installs a local copy offline), and `relay agents list` and `/agents`, which list the loaded definitions and the rejected ones with the reason.
+- Added the `route_agent` tool, general-agents' deterministic router running in the Rust core: the same answer as its `route.py --json`, without Python.
+- Added the desktop app in `packages/desktop`: a Tauri window around `relay --mode rpc` with sessions, the conversation, the authorization dialog, the harness state, running subagents, model and thinking pickers, harness settings and sign-in. The release workflow builds unsigned `.msi`, `.dmg` and AppImage installers. See [packages/desktop](../desktop/README.md).
+- Added RPC commands `get_harness_state`, `harness_forget`, `harness_clear`, `get_harness_settings`, `set_harness_setting`, `list_sessions`, `get_settings`, `get_auth_providers`, `login`, `cancel_login` and `logout`, the `auth_event` event, and `secret` on `input` requests. See [RPC commands](docs/rpc-commands.md).
+- Added `/harness forget <id>` and `/harness clear` to remove recorded constraints and corrections.
+- Added `ctx.harnessConstraints()` and `ctx.recordDelegatedEffects()` for tools that delegate to another agent, and the `agent` input source. See [Extensions](docs/extensions.md).
+
+### Changed
+
+- The harness runs on its Rust engine, compiled to WebAssembly and checked against the TypeScript pillars on every reference case. `RELAY_HARNESS_ENGINE=typescript` runs the TypeScript pillars instead, for this release.
+- A risky command runs without asking only when your request names every risky operation it performs, and a deletion only when every target is named as the command writes it. A question or a reply that only starts like a yes no longer approves a pending operation.
+- The harness asks before `git checkout` of paths or with `--force`, `git restore` of the working tree, wildcard deletes, and moves of workspace files out of the workspace. A shell edit in a question-only turn is blocked like an edit.
+- A check counts as evidence only for the files and directories it ran on, and only after the change: a check sent to the background, one scoped elsewhere, and a declared command that only appears as text no longer count.
+- Restating the harness state no longer invalidates the Anthropic prompt cache on every request.
+- Descriptions and progress messages ("Keep going.", "Only the Windows job fails.") are no longer recorded as constraints, and the change-size signal measures only around calls that can change files.
+- A subagent's brief authorizes nothing and states no constraint; the subagent's edits and checks count in the parent session's evidence.
+
+### Fixed
+
+- Fixed writes to the system temp directory on Windows being gated as writes outside the workspace.
+
 ## [0.5.0] - 2026-10-27
 
 ### New Features
