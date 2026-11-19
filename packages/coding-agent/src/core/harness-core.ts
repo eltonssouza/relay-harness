@@ -3,7 +3,7 @@
  * settings, interactive authorization, constraint persistence, skills, and notifications.
  */
 
-import { homedir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import {
 	type Agent,
 	type AgentToolCall,
@@ -102,7 +102,7 @@ export class CodingHarnessCore {
 						}
 					: false,
 			verifyCommands: settings.verifyCommands,
-			workspace: { cwd: options.cwd, home: homedir() },
+			workspace: { cwd: options.cwd, home: homedir(), tempDir: tmpdir() },
 			classifyEffect: (toolCall) => annotatedEffect(toolCall, options.getToolAnnotations(toolCall.name)),
 			onEvent: (event) => this.handleEvent(event, getUI),
 		});

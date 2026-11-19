@@ -56,6 +56,11 @@ export interface ClassifyContext {
 	cwd?: string;
 	/** Home directory, for `~` paths. */
 	home?: string;
+	/**
+	 * The system temporary directory (`os.tmpdir()`). Writes there are temporary like writes to `/tmp`;
+	 * on Windows, where it is a folder such as `C:\Users\me\AppData\Local\Temp`, this is the only way to know it.
+	 */
+	tempDir?: string;
 }
 
 /** Classifies one tool call. Return undefined to fall back to the default classification. */
@@ -642,11 +647,10 @@ function inWorkspace(path: string, context: ClassifyContext): boolean {
 	const text = path.replace(/\\/g, "/");
 	if (text.startsWith("/dev/") || text === "~" || text.startsWith("~/")) return false;
 	if (!/^(?:\/|[A-Za-z]:\/)/.test(text)) return true;
-	if (TEMP_ROOTS.some((root) => text.startsWith(root))) return false;
-	if (!context.cwd) return true;
-	const root = normalizePath(context.cwd.replace(/\\/g, "/").replace(/\/+$/, ""));
-	const full = normalizePath(text);
-	return full === root || full.startsWith(`${root}/`);
+	// A workspace can itself live in a temporary directory; its files are still the project's.
+	if (context.cwd && isWithin(text, context.cwd)) return true;
+	if (isTemporary(text, context)) return false;
+	return !context.cwd;
 }
 
 /**
@@ -742,6 +746,28 @@ const SENSITIVE_PATHS = [
 
 const TEMP_ROOTS = ["/tmp/", "/var/tmp/", "/private/tmp/", "/private/var/folders/"];
 
+/** A path in a form that compares equal for the same file: normalized, and lowercase with a drive letter, as Windows paths are case-insensitive. */
+function comparablePath(path: string): string {
+	const normalized = normalizePath(path.replace(/\\/g, "/").replace(/\/+$/, ""));
+	return /^[A-Za-z]:\//.test(normalized) ? normalized.toLowerCase() : normalized;
+}
+
+/** Whether the absolute `path` is `root` or inside it. */
+function isWithin(path: string, root: string): boolean {
+	const full = comparablePath(path);
+	const base = comparablePath(root);
+	return full === base || full.startsWith(`${base}/`);
+}
+
+/** Whether the absolute `path` is in a temporary directory: `/tmp` and its kin, or the system one the runtime names. */
+function isTemporary(path: string, context: ClassifyContext): boolean {
+	const text = normalizePath(path.replace(/\\/g, "/"));
+	return (
+		TEMP_ROOTS.some((root) => text.startsWith(root)) ||
+		(context.tempDir !== undefined && isWithin(text, context.tempDir))
+	);
+}
+
 /** Why writing `path` needs authorization, or undefined when it is an ordinary workspace file. */
 export function riskyWritePath(path: string, context: ClassifyContext = {}): string | undefined {
 	let resolved = path.replace(/\\/g, "/");
@@ -753,11 +779,8 @@ export function riskyWritePath(path: string, context: ClassifyContext = {}): str
 	const full = normalizePath(absolute || !cwd ? resolved : `${cwd}/${resolved}`);
 	if (SENSITIVE_PATHS.some((pattern) => pattern.test(full)))
 		return "writes a file that runs code or holds credentials";
-	if (cwd && /^(?:\/|[A-Za-z]:\/)/.test(full)) {
-		const root = normalizePath(cwd);
-		const inside = full === root || full.startsWith(`${root}/`);
-		const temporary = TEMP_ROOTS.some((temp) => full.startsWith(temp));
-		if (!inside && !temporary) return "writes outside the workspace";
+	if (cwd && /^(?:\/|[A-Za-z]:\/)/.test(full) && !isWithin(full, cwd) && !isTemporary(full, context)) {
+		return "writes outside the workspace";
 	}
 	return undefined;
 }
