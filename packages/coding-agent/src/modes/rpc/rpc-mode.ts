@@ -25,6 +25,7 @@ import {
 	waitForRawStdoutBackpressure,
 	writeRawStdout,
 } from "../../core/output-guard.ts";
+import { SessionManager } from "../../core/session-manager.ts";
 import { killTrackedDetachedChildren } from "../../utils/shell.ts";
 import { type Theme, theme } from "../interactive/theme/theme.ts";
 import { toJsonEvent } from "../json-event.ts";
@@ -676,6 +677,41 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 			// =================================================================
 			// Commands (available for invocation via prompt)
 			// =================================================================
+
+			// =================================================================
+			// Harness
+			// =================================================================
+
+			case "get_harness_state": {
+				return success(id, "get_harness_state", session.harnessCore.snapshot());
+			}
+
+			case "harness_forget": {
+				return success(id, "harness_forget", {
+					removed: session.harnessCore.forgetConstraint(command.constraintId),
+				});
+			}
+
+			case "harness_clear": {
+				session.harnessCore.clearLearnings();
+				return success(id, "harness_clear");
+			}
+
+			// =================================================================
+			// Sessions and settings
+			// =================================================================
+
+			case "list_sessions": {
+				const sessionManager = session.sessionManager;
+				const sessions = await SessionManager.list(sessionManager.getCwd(), sessionManager.getSessionDir());
+				return success(id, "list_sessions", {
+					sessions: sessions.map(({ allMessagesText: _text, ...info }) => info),
+				});
+			}
+
+			case "get_settings": {
+				return success(id, "get_settings", { settings: session.settingsManager.getSettings() });
+			}
 
 			case "get_commands": {
 				const commands: RpcSlashCommand[] = [];

@@ -10,10 +10,12 @@ import type { ImageContent } from "@relay-harness/ai";
 import type { PromptDisposition, QueuedInputDisposition, SessionStats } from "../../core/agent-session.ts";
 import type { BashResult } from "../../core/bash-executor.ts";
 import type { CompactionResult } from "../../core/compaction/index.ts";
+import type { HarnessSnapshot } from "../../core/harness-core.ts";
 import type { SessionEntry, SessionTreeNode } from "../../core/session-manager.ts";
+import type { Settings } from "../../core/settings-manager.ts";
 import type { JsonAgentSessionEvent } from "../json-event.ts";
 import { attachJsonlLineReader, serializeJsonLine } from "./jsonl.ts";
-import type { RpcCommand, RpcResponse, RpcSessionState, RpcSlashCommand } from "./rpc-types.ts";
+import type { RpcCommand, RpcResponse, RpcSessionInfo, RpcSessionState, RpcSlashCommand } from "./rpc-types.ts";
 
 // ============================================================================
 // Types
@@ -458,6 +460,38 @@ export class RpcClient {
 	async getCommands(): Promise<RpcSlashCommand[]> {
 		const response = await this.send({ type: "get_commands" });
 		return this.getData<{ commands: RpcSlashCommand[] }>(response).commands;
+	}
+
+	/**
+	 * Get the harness state: constraints, corrections, pending approvals, the latest completion
+	 * report, unverified changes and context savings.
+	 */
+	async getHarnessState(): Promise<HarnessSnapshot> {
+		const response = await this.send({ type: "get_harness_state" });
+		return this.getData(response);
+	}
+
+	/** Drop one recorded constraint by its id. Returns whether it existed. */
+	async harnessForget(constraintId: string): Promise<boolean> {
+		const response = await this.send({ type: "harness_forget", constraintId });
+		return this.getData<{ removed: boolean }>(response).removed;
+	}
+
+	/** Drop every recorded constraint and correction of the current branch. */
+	async harnessClear(): Promise<void> {
+		await this.send({ type: "harness_clear" });
+	}
+
+	/** List the sessions of the current working directory, newest first. */
+	async listSessions(): Promise<RpcSessionInfo[]> {
+		const response = await this.send({ type: "list_sessions" });
+		return this.getData<{ sessions: RpcSessionInfo[] }>(response).sessions;
+	}
+
+	/** Get the effective settings: global settings with project settings applied. */
+	async getSettings(): Promise<Settings> {
+		const response = await this.send({ type: "get_settings" });
+		return this.getData<{ settings: Settings }>(response).settings;
 	}
 
 	// =========================================================================

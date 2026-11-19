@@ -7,11 +7,14 @@ import { homedir, tmpdir } from "node:os";
 import {
 	type Agent,
 	type AgentToolCall,
+	type CompletionReport,
+	type ContextPolicyStats,
 	type DeveloperConstraint,
 	type DeveloperCorrection,
 	HarnessCore,
 	type HarnessCoreEvent,
 	type ToolEffect,
+	TypeScriptHarnessEngine,
 } from "@relay-harness/agent-core";
 import { createHarnessWasmEngine } from "@relay-harness/agent-core/harness-wasm";
 import type { ExtensionMode, ExtensionUIContext, ToolAnnotations } from "./extensions/index.ts";
@@ -25,6 +28,23 @@ import { createGitWorkspaceProbe } from "./workspace-probe.ts";
  */
 function harnessEngine() {
 	return process.env.RELAY_HARNESS_ENGINE === "typescript" ? undefined : createHarnessWasmEngine;
+}
+
+/** The harness state of a session as data, for `/harness`-like views outside the terminal (RPC). */
+export interface HarnessSnapshot {
+	engine: "rust" | "typescript";
+	pillars: { alignment: boolean; evidence: boolean; context: boolean };
+	constraints: DeveloperConstraint[];
+	corrections: DeveloperCorrection[];
+	/** Operations blocked until the developer approves them. */
+	pendingAuthorizations: string[];
+	/** Recent calls the alignment policy blocked, newest last. */
+	blockedCalls: Array<{ toolName: string; reason: string }>;
+	latestReport?: CompletionReport;
+	/** Files changed since the last passing check. */
+	pendingChanges?: string[];
+	contextStats?: ContextPolicyStats;
+	verifyCommands: string[];
 }
 
 /** Session entry type that persists developer constraints and corrections across resumes and compaction. */
@@ -179,6 +199,26 @@ export class CodingHarnessCore {
 	/** Recent tool calls the alignment policy blocked, newest last. */
 	getBlockedCalls(): ReadonlyArray<{ toolName: string; reason: string }> {
 		return this.blocked;
+	}
+
+	/** Every pillar's state as data. */
+	snapshot(): HarnessSnapshot {
+		const { engine, verifyCommands } = this.core;
+		const report = engine.latestReport();
+		const pending = engine.pendingChanges();
+		const stats = engine.contextStats();
+		return {
+			engine: engine instanceof TypeScriptHarnessEngine ? "typescript" : "rust",
+			pillars: { ...engine.pillars },
+			constraints: [...engine.constraints()],
+			corrections: [...engine.corrections()],
+			pendingAuthorizations: [...engine.pendingAuthorizations()],
+			blockedCalls: [...this.blocked],
+			...(report ? { latestReport: report } : {}),
+			...(pending ? { pendingChanges: [...pending] } : {}),
+			...(stats ? { contextStats: { ...stats } } : {}),
+			verifyCommands: [...verifyCommands],
+		};
 	}
 
 	private describeSlices(): string[] {
