@@ -72,6 +72,8 @@ describe("harness benchmark", () => {
 		expect(metrics.reduction).toBeGreaterThanOrEqual(0.4);
 		// Elision in batches rewrites cached messages far less often than eliding one result at a time.
 		expect(metrics.cacheBreaksBatched).toBeLessThan(metrics.cacheBreaksOneByOne / 2);
+		// The harness state restated on every request rewrites nothing the provider cached.
+		expect(metrics.cacheBreaksWithState).toBe(metrics.cacheBreaksBatched);
 	});
 
 	it("reports every measure", async () => {

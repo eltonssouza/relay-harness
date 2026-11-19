@@ -79,6 +79,8 @@ At each request, before the provider call:
 
 The session file is never changed; only the request is. Replacing an old message invalidates the provider's prompt cache after it, so replacement happens in batches of `harnessCore.contextBatchSize` results (default 6). Between batches the request prefix stays identical and the cache keeps hitting. Compaction still applies when the context approaches the model's limit; the context pillar makes that happen later.
 
+The harness state (constraints, a correction, pending changes, the digest) is restated on the newest message of each request and is gone from the next one. Relay marks it as volatile, and providers with explicit cache breakpoints (the Anthropic API) place the breakpoint before it and send it after the tool results, so restating it rewrites nothing the provider cached. On a recorded session with one constraint recorded, `npm run bench:harness` counts 6 requests that rewrote cached messages, all from elision batches; with the state inside the cached prefix it would be 460 of 461.
+
 ## Skill audit
 
 Skills are not a pillar: the harness does not change what the agent does with them. The skills section of the system prompt tells the model to treat a skill file as a router and to load the references and scripts it points to when a step needs them. `/skills-audit` checks each `SKILL.md` skill against that structure and lists:

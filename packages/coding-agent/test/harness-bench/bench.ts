@@ -14,6 +14,7 @@ import {
 	classifyToolCall,
 	EvidenceLedger,
 	extractConstraints,
+	HarnessCore,
 	isQuestionOnly,
 	requiresAuthorization,
 	type ToolEffect,
@@ -311,6 +312,27 @@ export interface ContextMetrics {
 	/** Requests that rewrote a message the provider had already cached, with batching and with one-by-one elision. */
 	cacheBreaksBatched: number;
 	cacheBreaksOneByOne: number;
+	/**
+	 * The same with the harness state restated on every request (one constraint recorded): as sent,
+	 * with the state volatile, and as it would be if the cached prefix included the state.
+	 */
+	cacheBreaksWithState: number;
+	cacheBreaksWithStateCached: number;
+}
+
+/**
+ * Each message of a request as a provider's cache compares it. Volatile text is left out when the
+ * provider keeps its breakpoint before it, which is what `honorVolatile` models.
+ */
+function cacheKey(messages: readonly AgentMessage[], honorVolatile: boolean): string[] {
+	return messages.map((message) => {
+		const content = (message as { content?: unknown }).content;
+		if (!Array.isArray(content)) return JSON.stringify(message);
+		const kept = (content as Array<{ type?: string; volatile?: boolean }>)
+			.filter((block) => !(honorVolatile && block.type === "text" && block.volatile))
+			.map(({ volatile: _volatile, ...block }) => block);
+		return JSON.stringify({ ...message, content: kept });
+	});
 }
 
 function toolResultChars(message: AgentMessage): number {
@@ -353,6 +375,22 @@ export function contextMetrics(sessionFile: string, batchSize = 6): ContextMetri
 		return { charsWith, charsWithout, breaks, requests };
 	};
 
+	// The whole projection of a request: context policy plus the state restated on its newest message.
+	const stateReplay = (honorVolatile: boolean) => {
+		const core = new HarnessCore({ evidence: false, context: { batchSize } });
+		core.alignment?.constraints.add("Never use `any` in this project.");
+		let breaks = 0;
+		let previous: string[] | undefined;
+		for (let length = 1; length <= messages.length; length++) {
+			const last = messages[length - 1];
+			if (last.role !== "user" && last.role !== "toolResult") continue;
+			const key = cacheKey(core.transformContext(messages.slice(0, length)), honorVolatile);
+			if (previous?.some((entry, index) => key[index] !== entry)) breaks++;
+			previous = key;
+		}
+		return breaks;
+	};
+
 	const batched = replay(batchSize);
 	const oneByOne = replay(1);
 	return {
@@ -363,6 +401,8 @@ export function contextMetrics(sessionFile: string, batchSize = 6): ContextMetri
 		reduction: batched.charsWithout === 0 ? 0 : 1 - batched.charsWith / batched.charsWithout,
 		cacheBreaksBatched: batched.breaks,
 		cacheBreaksOneByOne: oneByOne.breaks,
+		cacheBreaksWithState: stateReplay(true),
+		cacheBreaksWithStateCached: stateReplay(false),
 	};
 }
 
@@ -415,6 +455,7 @@ export async function formatReport(sessionFile: string): Promise<string> {
 		`  requests: ${context.requests}, tool results: ${context.toolResults}`,
 		`  tool-result characters sent: ${context.charsWithout.toLocaleString()} without, ${context.charsWith.toLocaleString()} with (${percent(context.reduction)} fewer)`,
 		`  requests that rewrote cached messages: ${context.cacheBreaksBatched} batched, ${context.cacheBreaksOneByOne} one by one`,
+		`  with the harness state restated: ${context.cacheBreaksWithState} (${context.cacheBreaksWithStateCached} if the cached prefix included the state)`,
 		"",
 		"Open findings (kept out of the rates above until fixed)",
 		...(findings.length === 0

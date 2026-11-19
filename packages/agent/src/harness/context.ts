@@ -206,12 +206,13 @@ export class ContextWindowPolicy {
 /**
  * Append harness state to the newest user or tool-result message of a request. The tail is the
  * cheapest position for prompt caching and the most salient one for the model. Messages ending
- * in another role are returned unchanged.
+ * in another role are returned unchanged. The block is volatile: the next request restates the
+ * state on its own newest message, so providers keep their cache breakpoint before it.
  */
 export function appendHarnessState(messages: AgentMessage[], state: string): AgentMessage[] {
 	const last = messages.at(-1);
 	if (!last || (last.role !== "user" && last.role !== "toolResult")) return messages;
-	const block = { type: "text" as const, text: `<harness_state>\n${state}\n</harness_state>` };
+	const block = { type: "text" as const, text: `<harness_state>\n${state}\n</harness_state>`, volatile: true };
 	const content = typeof last.content === "string" ? [{ type: "text" as const, text: last.content }] : last.content;
 	return [...messages.slice(0, -1), { ...last, content: [...content, block] } as AgentMessage];
 }
