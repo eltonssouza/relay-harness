@@ -1,0 +1,200 @@
+{
+	"provider": "cloudflare-workers-ai",
+	"name": "Cloudflare Workers AI",
+	"apiKey": {
+		"name": "Cloudflare API key",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_ACCOUNT_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_API_KEY",
+				"CLOUDFLARE_ACCOUNT_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-CLOUDFLARE_API_KEY"
+				},
+				"env": {
+					"CLOUDFLARE_ACCOUNT_ID": "v-CLOUDFLARE_ACCOUNT_ID"
+				},
+				"source": "CLOUDFLARE_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_ACCOUNT_ID"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_ACCOUNT_ID"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_ACCOUNT_ID"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"CLOUDFLARE_ACCOUNT_ID": "v-CLOUDFLARE_ACCOUNT_ID"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"CLOUDFLARE_API_KEY": "c-CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"CLOUDFLARE_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"CLOUDFLARE_API_KEY": "c-CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID"
+				}
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-CLOUDFLARE_API_KEY"
+				},
+				"env": {
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"CLOUDFLARE_API_KEY": "c-CLOUDFLARE_API_KEY",
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"CLOUDFLARE_ACCOUNT_ID": "c-CLOUDFLARE_ACCOUNT_ID"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"CLOUDFLARE_ACCOUNT_ID"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

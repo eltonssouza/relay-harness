@@ -1,0 +1,142 @@
+{
+	"provider": "xai",
+	"name": "xAI",
+	"apiKey": {
+		"name": "xAI API key",
+		"login": true
+	},
+	"oauth": {
+		"name": "xAI (Grok/X subscription)",
+		"isSubscription": true,
+		"loginLabel": "Sign in with SuperGrok or X Premium"
+	},
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"XAI_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"XAI_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"XAI_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-XAI_API_KEY"
+				},
+				"source": "XAI_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"XAI_API_KEY": "c-XAI_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"XAI_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"XAI_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"XAI_API_KEY": "c-XAI_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"XAI_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-XAI_API_KEY"
+				},
+				"source": "XAI_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"XAI_API_KEY": "c-XAI_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"XAI_API_KEY": "c-XAI_API_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"XAI_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

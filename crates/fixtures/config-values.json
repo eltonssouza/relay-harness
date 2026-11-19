@@ -1,0 +1,259 @@
+{
+	"env": {
+		"RELAY_PARITY_A": "alpha",
+		"RELAY_PARITY_B": "beta",
+		"RELAY_PARITY_EMPTY": "",
+		"_RELAY_PARITY_9": "nine"
+	},
+	"cases": [
+		{
+			"config": "plain-key",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "plain-key"
+		},
+		{
+			"config": "",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": ""
+		},
+		{
+			"config": "$RELAY_PARITY_A",
+			"command": false,
+			"envVarName": "RELAY_PARITY_A",
+			"envVarNames": [
+				"RELAY_PARITY_A"
+			],
+			"missing": [],
+			"resolved": "alpha"
+		},
+		{
+			"config": "${RELAY_PARITY_A}",
+			"command": false,
+			"envVarName": "RELAY_PARITY_A",
+			"envVarNames": [
+				"RELAY_PARITY_A"
+			],
+			"missing": [],
+			"resolved": "alpha"
+		},
+		{
+			"config": "prefix-$RELAY_PARITY_A-suffix",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [
+				"RELAY_PARITY_A"
+			],
+			"missing": [],
+			"resolved": "prefix-alpha-suffix"
+		},
+		{
+			"config": "${RELAY_PARITY_A}${RELAY_PARITY_B}",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [
+				"RELAY_PARITY_A",
+				"RELAY_PARITY_B"
+			],
+			"missing": [],
+			"resolved": "alphabeta"
+		},
+		{
+			"config": "$RELAY_PARITY_A$RELAY_PARITY_B",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [
+				"RELAY_PARITY_A",
+				"RELAY_PARITY_B"
+			],
+			"missing": [],
+			"resolved": "alphabeta"
+		},
+		{
+			"config": "$RELAY_PARITY_MISSING",
+			"command": false,
+			"envVarName": "RELAY_PARITY_MISSING",
+			"envVarNames": [
+				"RELAY_PARITY_MISSING"
+			],
+			"missing": [
+				"RELAY_PARITY_MISSING"
+			],
+			"resolved": null
+		},
+		{
+			"config": "x-${RELAY_PARITY_MISSING}",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [
+				"RELAY_PARITY_MISSING"
+			],
+			"missing": [
+				"RELAY_PARITY_MISSING"
+			],
+			"resolved": null
+		},
+		{
+			"config": "$RELAY_PARITY_A and $RELAY_PARITY_MISSING",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [
+				"RELAY_PARITY_A",
+				"RELAY_PARITY_MISSING"
+			],
+			"missing": [
+				"RELAY_PARITY_MISSING"
+			],
+			"resolved": null
+		},
+		{
+			"config": "$RELAY_PARITY_EMPTY",
+			"command": false,
+			"envVarName": "RELAY_PARITY_EMPTY",
+			"envVarNames": [
+				"RELAY_PARITY_EMPTY"
+			],
+			"missing": [
+				"RELAY_PARITY_EMPTY"
+			],
+			"resolved": null
+		},
+		{
+			"config": "$_RELAY_PARITY_9",
+			"command": false,
+			"envVarName": "_RELAY_PARITY_9",
+			"envVarNames": [
+				"_RELAY_PARITY_9"
+			],
+			"missing": [],
+			"resolved": "nine"
+		},
+		{
+			"config": "cost $$5",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "cost $5"
+		},
+		{
+			"config": "$!not-a-command",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "!not-a-command"
+		},
+		{
+			"config": "$$RELAY_PARITY_A",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "$RELAY_PARITY_A"
+		},
+		{
+			"config": "$",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "$"
+		},
+		{
+			"config": "$5",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "$5"
+		},
+		{
+			"config": "a$",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "a$"
+		},
+		{
+			"config": "${",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "${"
+		},
+		{
+			"config": "${RELAY_PARITY_A",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "${RELAY_PARITY_A"
+		},
+		{
+			"config": "${not a name}",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "${not a name}"
+		},
+		{
+			"config": "${}",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "${}"
+		},
+		{
+			"config": "$-x",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": "$-x"
+		},
+		{
+			"config": "café $RELAY_PARITY_A 🙈",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [
+				"RELAY_PARITY_A"
+			],
+			"missing": [],
+			"resolved": "café alpha 🙈"
+		},
+		{
+			"config": "!echo hello",
+			"command": true,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": null
+		},
+		{
+			"config": "!",
+			"command": true,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": null
+		},
+		{
+			"config": " !echo",
+			"command": false,
+			"envVarName": null,
+			"envVarNames": [],
+			"missing": [],
+			"resolved": " !echo"
+		}
+	]
+}

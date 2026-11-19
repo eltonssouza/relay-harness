@@ -1,0 +1,138 @@
+{
+	"provider": "fireworks",
+	"name": "Fireworks",
+	"apiKey": {
+		"name": "Fireworks API key",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"FIREWORKS_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"FIREWORKS_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"FIREWORKS_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-FIREWORKS_API_KEY"
+				},
+				"source": "FIREWORKS_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"FIREWORKS_API_KEY": "c-FIREWORKS_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"FIREWORKS_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"FIREWORKS_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"FIREWORKS_API_KEY": "c-FIREWORKS_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"FIREWORKS_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-FIREWORKS_API_KEY"
+				},
+				"source": "FIREWORKS_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"FIREWORKS_API_KEY": "c-FIREWORKS_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"FIREWORKS_API_KEY": "c-FIREWORKS_API_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"FIREWORKS_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

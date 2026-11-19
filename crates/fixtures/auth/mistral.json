@@ -1,0 +1,138 @@
+{
+	"provider": "mistral",
+	"name": "Mistral",
+	"apiKey": {
+		"name": "Mistral API key",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"MISTRAL_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"MISTRAL_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"MISTRAL_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-MISTRAL_API_KEY"
+				},
+				"source": "MISTRAL_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"MISTRAL_API_KEY": "c-MISTRAL_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"MISTRAL_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"MISTRAL_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"MISTRAL_API_KEY": "c-MISTRAL_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"MISTRAL_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-MISTRAL_API_KEY"
+				},
+				"source": "MISTRAL_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"MISTRAL_API_KEY": "c-MISTRAL_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"MISTRAL_API_KEY": "c-MISTRAL_API_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"MISTRAL_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

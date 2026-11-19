@@ -1,0 +1,138 @@
+{
+	"provider": "typesafe",
+	"name": "TypeSafe",
+	"apiKey": {
+		"name": "TypeSafe API key",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"TYPESAFE_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"TYPESAFE_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"TYPESAFE_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-TYPESAFE_API_KEY"
+				},
+				"source": "TYPESAFE_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"TYPESAFE_API_KEY": "c-TYPESAFE_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"TYPESAFE_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"TYPESAFE_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"TYPESAFE_API_KEY": "c-TYPESAFE_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"TYPESAFE_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-TYPESAFE_API_KEY"
+				},
+				"source": "TYPESAFE_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"TYPESAFE_API_KEY": "c-TYPESAFE_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"TYPESAFE_API_KEY": "c-TYPESAFE_API_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"TYPESAFE_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

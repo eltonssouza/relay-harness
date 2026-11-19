@@ -3,6 +3,9 @@
 //! - `message`: the transcript types, what a provider receives and a session file stores.
 //! - `model`: a catalog chat model.
 //! - `catalog`: the built-in models, from the provider files the TypeScript catalog loads.
+//! - `auth`, `auth_file`, `config_value`: credentials, each built-in provider's API-key
+//!   resolution, the `auth.json` store the TypeScript agent shares, and the `$VAR` and `!command`
+//!   values stored keys may be.
 //! - `transcript`, `transform`, `strict`, `text`: the shared steps every adapter applies.
 //! - `anthropic`, `anthropic_stream`: the Anthropic Messages request body, and reading its
 //!   response stream into `event::AssistantEvent`s.
@@ -26,7 +29,10 @@
 
 pub mod anthropic;
 pub mod anthropic_stream;
+pub mod auth;
+pub mod auth_file;
 pub mod catalog;
+pub mod config_value;
 pub mod event;
 pub mod google;
 pub mod google_stream;

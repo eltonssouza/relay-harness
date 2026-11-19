@@ -1,8 +1,8 @@
 /**
  * Writes the `packages/ai` reference files in `crates/fixtures/` for the Rust port to match:
  * the JSON helpers, the Anthropic, OpenAI Responses and OpenAI Chat Completions request bodies
- * and stream decoding, the Google Gemini requests and stream decoding, and each adapter's
- * `streamSimple` option mapping. Run through
+ * and stream decoding, the Google Gemini requests and stream decoding, each adapter's
+ * `streamSimple` option mapping, and each built-in provider's API-key resolution. Run through
  * `npm run parity:record`, after the agent scenarios, which the Anthropic bodies read.
  */
 
@@ -10,6 +10,7 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ANTHROPIC_DIR, anthropicCases, anthropicJson } from "./anthropic-record.ts";
 import { ANTHROPIC_STREAM_DIR, streamCaseJson, streamCases } from "./anthropic-stream-record.ts";
+import { AUTH_DIR, authCases, authJson } from "./auth-record.ts";
 import { GOOGLE_DIR, googleCases, googleJson } from "./google-record.ts";
 import { GOOGLE_STREAM_DIR, googleStreamCases, googleStreamJson } from "./google-stream-record.ts";
 import { JSON_DIR, jsonFixtureText } from "./json-record.ts";
@@ -45,6 +46,7 @@ await writeCases(COMPLETIONS_STREAM_DIR, completionsStreamCases(), completionsSt
 await writeCases(GOOGLE_DIR, googleCases(), googleJson);
 await writeCases(GOOGLE_STREAM_DIR, googleStreamCases(), googleStreamJson);
 await writeCases(SIMPLE_DIR, simpleCases(), simpleJson);
+await writeCases(AUTH_DIR, authCases(), authJson);
 console.log(
-	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests, ${googleStreamCases().length} Google streams and ${simpleCases().length} simple-option cases to crates/fixtures/`,
+	`wrote the JSON helpers, ${anthropicCases().length} Anthropic bodies, ${streamCases().length} Anthropic streams, ${responsesCases().length} Responses bodies, ${responsesStreamCases().length} Responses streams, ${completionsCases().length} Chat Completions bodies, ${completionsStreamCases().length} Chat Completions streams, ${googleCases().length} Google requests, ${googleStreamCases().length} Google streams, ${simpleCases().length} simple-option cases and ${authCases().length} provider auth resolutions to crates/fixtures/`,
 );
