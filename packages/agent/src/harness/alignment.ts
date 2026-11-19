@@ -858,7 +858,9 @@ export class AlignmentPolicy {
 		if (this.authorizationGate && requiresAuthorization(effect.kind)) {
 			return this.checkAuthorization(toolName, effect, signal);
 		}
-		if (this.scopeGuard && this.questionOnly && !this.scopeWarned && effect.kind === "write") {
+		// A shell command that edits files (`sed -i`, `>`, `git apply`) is an edit like the `edit` tool.
+		const edits = effect.kind === "write" || effect.writes !== undefined;
+		if (this.scopeGuard && this.questionOnly && !this.scopeWarned && edits) {
 			this.scopeWarned = true;
 			return {
 				action: "block",

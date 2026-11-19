@@ -315,6 +315,42 @@ describe("alignment", () => {
 		}
 	});
 
+	it("gates checkouts and restores that overwrite files, wildcard deletes and moves out of the workspace", () => {
+		const context = { cwd: "/work/app" };
+		for (const command of [
+			"git checkout HEAD -- .",
+			"git checkout -- src",
+			"git checkout -f main",
+			"git restore src/",
+			"git restore --staged --worktree src/a.ts",
+			"rm src/*.ts",
+			"mv src /tmp/old-src",
+			"mv lib ../elsewhere/lib",
+		]) {
+			expect(classifyCommand(command, [], context).kind).toBe("destructive");
+		}
+		for (const command of [
+			"git checkout main",
+			"git checkout -b feature/x",
+			"git restore --staged src/a.ts",
+			"rm notes.txt",
+			"mv src/a.ts src/b.ts",
+		]) {
+			expect(["execute", "verify"]).toContain(classifyCommand(command, [], context).kind);
+		}
+	});
+
+	it("stops the first shell edit of a question turn as it stops the edit tool", async () => {
+		const policy = new AlignmentPolicy();
+		policy.observeDeveloperMessage("Why does the build fail on Windows?");
+		const sed = { ...classifyCommand("sed -i 's/a/b/' src/build.ts"), paths: [] };
+		expect(await policy.check("bash", sed)).toMatchObject({ action: "block", kind: "scope" });
+		expect((await policy.check("bash", sed)).action).toBe("allow");
+		expect((await policy.check("bash", { ...classifyCommand("grep -rn win32 src"), paths: [] })).action).toBe(
+			"allow",
+		);
+	});
+
 	it("needs every risky operation and every deletion target named", async () => {
 		const policy = new AlignmentPolicy();
 		const run = async (command: string) =>

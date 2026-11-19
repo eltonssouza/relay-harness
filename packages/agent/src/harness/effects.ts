@@ -98,6 +98,7 @@ export type RiskyOperation =
 	| "remote-write"
 	| "config-write"
 	| "remote-copy"
+	| "move-out"
 	| "inline-code";
 
 interface CommandRule {
@@ -135,15 +136,22 @@ const COMMAND_RULES: CommandRule[] = [
 		operation: "git-discard",
 	},
 	{
-		pattern: git(String.raw`checkout\s+(?:--\s+)?\.(?:\s|$)`),
+		// Paths after `--`, `.`, or `--force`: `git checkout HEAD -- .`, `git checkout -- src`, `git checkout -f main`.
+		// A plain branch switch (`git checkout main`, `git checkout -b x`) keeps local changes and does not ask.
+		pattern: git(
+			String.raw`checkout\b(?:[^\n;&|]*?\s--\s+[^\s;&|]|[^\n;&|]*?\s(?:-f|--force)(?=\s|$)|(?:[^\n;&|]*?\s)?\.(?=\s|$))`,
+		),
 		kind: "destructive",
-		reason: "git checkout . discards uncommitted changes",
+		reason: "git checkout of paths or with --force overwrites uncommitted changes",
 		operation: "git-discard",
 	},
 	{
-		pattern: git(String.raw`restore\s+(?:[^\n;&|]*\s)?\.(?:\s|$)`),
+		// Every restore touches the working tree unless it only unstages (`--staged` without `--worktree`).
+		pattern: git(
+			String.raw`restore\b(?:(?![^\n;&|]*\s(?:--staged|-S)(?=\s|$))|(?=[^\n;&|]*\s(?:--worktree|-W)(?=\s|$)))`,
+		),
 		kind: "destructive",
-		reason: "git restore . discards uncommitted changes",
+		reason: "git restore overwrites uncommitted changes in the working tree",
 		operation: "git-discard",
 	},
 	{
@@ -191,6 +199,13 @@ const COMMAND_RULES: CommandRule[] = [
 	},
 	{ pattern: /\b(?:rmdir|rd)\s+\/s\b/i, kind: "destructive", reason: "recursive delete", operation: "delete" },
 	{ pattern: /\bdel\s+[^\n;&|]*\/s\b/i, kind: "destructive", reason: "recursive delete", operation: "delete" },
+	{
+		// `rm notes.txt` deletes one named file; `rm src/*.ts` deletes whatever the glob matches.
+		pattern: /\b(?:rm|del|erase|Remove-Item)\s[^\n;&|]*?[^\s;&|]*[*?]/i,
+		kind: "destructive",
+		reason: "deletes the files a wildcard matches",
+		operation: "delete",
+	},
 	{ pattern: /\bfind\b[^\n;&|]*\s-delete\b/, kind: "destructive", reason: "find -delete", operation: "delete" },
 	{
 		pattern: /\bfind\b[^\n]*-exec(?:dir)?\s+(?:rm|unlink|shred)\b/,
@@ -685,7 +700,7 @@ function remoteCopyEffect(
  * Every risky operation a command line performs, not only the first one that classifies it:
  * `git push && git reset --hard HEAD~5` both pushes and discards work.
  */
-export function riskyOperations(command: string): RiskyOperation[] {
+export function riskyOperations(command: string, context: ClassifyContext = {}): RiskyOperation[] {
 	const operations = new Set<RiskyOperation>();
 	for (const rule of COMMAND_RULES) {
 		if (rule.pattern.test(command)) operations.add(rule.operation);
@@ -693,7 +708,35 @@ export function riskyOperations(command: string): RiskyOperation[] {
 	const commands = parseShell(command);
 	if (inlineCodeEffect(commands)) operations.add("inline-code");
 	if (remoteCopyEffect(commands)) operations.add("remote-copy");
+	if (moveOutEffect(commands, context)) operations.add("move-out");
 	return [...operations];
+}
+
+/** Programs that move files: `mv`, and `move`/`Move-Item` on Windows. */
+const MOVE_PROGRAMS = new Set(["mv", "move", "move-item", "mi"]);
+
+/**
+ * `mv` of workspace files to a place outside the workspace (`/tmp`, `~`, `../other`), which removes
+ * them from the project as a deletion would. A rename inside the workspace does not ask.
+ */
+function moveOutEffect(
+	commands: readonly ShellCommand[],
+	context: ClassifyContext,
+): { kind: "destructive"; reason: string } | undefined {
+	const outside = (path: string) => {
+		const text = path.replace(/\\/g, "/");
+		return text === ".." || text.startsWith("../") || !inWorkspace(text, context);
+	};
+	for (const { argv } of commands) {
+		const words = stripWrappers(argv);
+		if (words.length === 0 || !MOVE_PROGRAMS.has(programName(words[0]).toLowerCase())) continue;
+		const paths = words.slice(1).filter((word) => !word.startsWith("-") && !/^\/[A-Za-z]$/.test(word));
+		if (paths.length < 2 || !outside(paths[paths.length - 1])) continue;
+		if (paths.slice(0, -1).some((source) => !outside(source))) {
+			return { kind: "destructive", reason: "moves workspace files out of the workspace" };
+		}
+	}
+	return undefined;
 }
 
 /** Programs that delete the paths they are given. */
@@ -854,7 +897,7 @@ export function classifyCommand(
 		if (rule.pattern.test(command)) return { kind: rule.kind, command, reason: rule.reason };
 	}
 	const commands = parseShell(command);
-	const risky = inlineCodeEffect(commands) ?? remoteCopyEffect(commands);
+	const risky = inlineCodeEffect(commands) ?? remoteCopyEffect(commands) ?? moveOutEffect(commands, context);
 	if (risky) return { kind: risky.kind, command, reason: risky.reason };
 	const writes = shellWrites(commands, context);
 	const written = writes ? { writes: writes.paths } : {};

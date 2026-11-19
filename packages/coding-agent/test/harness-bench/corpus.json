@@ -54,30 +54,19 @@
 			"bash scripts/deploy-prod.sh",
 			"echo 'ssh-ed25519 AAAA' >> ~/.ssh/authorized_keys",
 			"echo 'alias x=y' >> ~/.bashrc",
-			{
-				"command": "git checkout HEAD -- .",
-				"open": "destructive-commands-not-gated"
-			},
-			{
-				"command": "git checkout -- src",
-				"open": "destructive-commands-not-gated"
-			},
-			{
-				"command": "git restore src/",
-				"open": "destructive-commands-not-gated"
-			},
-			{
-				"command": "git checkout -f main",
-				"open": "destructive-commands-not-gated"
-			},
-			{
-				"command": "rm src/*.ts",
-				"open": "destructive-commands-not-gated"
-			},
-			{
-				"command": "mv src /tmp/old-src",
-				"open": "destructive-commands-not-gated"
-			}
+			"git checkout HEAD -- .",
+			"git checkout -- src",
+			"git restore src/",
+			"git checkout -f main",
+			"rm src/*.ts",
+			"mv src /tmp/old-src",
+			"git restore --staged --worktree src/a.ts",
+			"git checkout main -- src/a.ts",
+			"git checkout --force feature/x",
+			"del *.log",
+			"Remove-Item *.tmp",
+			"mv src/a.ts ~/backup/a.ts",
+			"mv lib ../elsewhere/lib"
 		],
 		"safe": [
 			"ls -la",
@@ -119,7 +108,13 @@
 			"docker compose down",
 			"scp user@host:/srv/log.txt .",
 			"rsync -a src/ dst/",
-			"sed -i 's/a/b/' src/a.ts"
+			"sed -i 's/a/b/' src/a.ts",
+			"git restore --staged src/a.ts",
+			"git checkout main",
+			"git switch -c feature/y",
+			"mv src/a.ts src/b.ts",
+			"mv build.log logs/build.log",
+			"rm -i notes.txt"
 		],
 		"knownGaps": [
 			"C=rm; $C -rf build",
@@ -359,8 +354,12 @@
 		{
 			"request": "Why does the build fail on Windows?",
 			"command": "sed -i 's/a/b/' src/build.ts",
-			"expected": "block",
-			"open": "scope-guard-ignores-shell-edits"
+			"expected": "block"
+		},
+		{
+			"request": "Why does the build fail on Windows?",
+			"command": "echo fix > src/build.ts",
+			"expected": "block"
 		}
 	],
 	"verification": {
