@@ -17,7 +17,13 @@
  */
 
 import type { BeforeToolCallResult } from "../types.ts";
-import { requiresAuthorization, type ToolEffect } from "./effects.ts";
+import {
+	deletionTargets,
+	type RiskyOperation,
+	requiresAuthorization,
+	riskyOperations,
+	type ToolEffect,
+} from "./effects.ts";
 import { clip, developerProse, phrasePattern, wordsPattern } from "./text.ts";
 
 // ============================================================================
@@ -532,93 +538,134 @@ export type Authorizer = (
 	signal?: AbortSignal,
 ) => Promise<boolean | undefined> | boolean | undefined;
 
-/** Basenames of the non-flag operands after the first deletion verb in a command. */
-function deletionTargets(command: string): string[] {
-	const match = command.match(/\b(?:rm|Remove-Item|rmdir|rd|del)\b([^\n;&|]*)/i);
-	if (!match) return [];
-	return match[1]
-		.split(/\s+/)
-		.filter((token) => token && !token.startsWith("-") && !token.startsWith("/"))
-		.map((token) => token.replace(/["']/g, "").replace(/[\\/]+$/, ""))
-		.map((token) => token.split(/[\\/]/).pop() ?? token)
-		.filter((token) => token.length > 0 && token !== "." && token !== "*");
-}
-
-interface OperationWord {
-	command: RegExp;
-	request: RegExp;
-	/** Operands that must also appear in the request; an operation word alone is not enough. */
-	targets?: (command: string) => string[];
+/**
+ * Whether `request` names `path` exactly, as a whole path: "delete dist" names `dist`, while
+ * "remove the import in src/index.ts" does not name `src`, and "delete src/index.ts" does not name
+ * `index.ts`. Both are lowercase with `/` separators.
+ */
+function namesPath(request: string, path: string): boolean {
+	const escaped = path.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return new RegExp(`(?<![\\p{L}\\p{N}_./-])${escaped}(?![\\p{L}\\p{N}_-]|[/.][\\p{L}\\p{N}_])`, "u").test(request);
 }
 
 /**
- * Operation words that, when present in the developer's latest request, authorize matching
- * commands: "push the branch" authorizes `git push`; "apague o diretório dist" authorizes
- * `rm -r dist` because it names both the operation and the target, while "remove the unused
- * import" authorizes no deletion.
+ * Whether `request` names the file at `path`, by any trailing part of it: `.relay/settings.json`
+ * is named by "edit .relay/settings.json" and by "edit settings.json", but not by
+ * "edit src/settings.json".
  */
-const OPERATION_WORDS: OperationWord[] = [
-	{ command: /\bgh\s+pr\s+merge\b/, request: wordsPattern(["merge", "mergear", "mescle", "mesclar"]) },
-	{
-		command: /\bgit\s+push\b[^\n;&|]*(?:--force|\s-f\b|\s\+\S)/,
-		request: wordsPattern(["force push", "force-push", "push --force", "push -f", "forçar o push", "push forçado"]),
-	},
-	{
-		command: /\b(?:git|docker)\s+push\b(?![^\n;&|]*(?:--force|\s-f\b|\s\+\S))/,
-		request: wordsPattern(["push", "pushe", "faça push", "dê push"]),
-	},
-	{ command: /\bpublish\b/, request: wordsPattern(["publish", "publique", "publicar"]) },
-	{ command: /\bdeploy\b|--prod\b/, request: wordsPattern(["deploy", "implante", "implantar", "ship"]) },
-	{ command: /\breset\b/, request: wordsPattern(["reset", "resete", "resetar"]) },
-	{ command: /\brebase\b/, request: wordsPattern(["rebase"]) },
-	{
-		command: /\b(?:rm|Remove-Item|rmdir|rd|del)\b/i,
-		targets: deletionTargets,
-		request: wordsPattern([
-			"delete",
-			"remove",
-			"rm",
-			"clean",
-			"drop",
-			"wipe",
-			"apague",
-			"apagar",
-			"remova",
-			"remover",
-			"exclua",
-			"excluir",
-			"limpe",
-			"limpar",
-		]),
-	},
-	{
-		command: /\bgh\s+(?:pr\s+(?!merge\b)|issue|release|repo)/,
-		request: phrasePattern(
-			[
-				"create",
-				"open",
-				"close",
-				"comment",
-				"post",
-				"crie",
-				"criar",
-				"abra",
-				"abrir",
-				"feche",
-				"fechar",
-				"comente",
-				"comentar",
-			],
-			["pr", "pull request", "issue", "release", "repo"],
-		),
-	},
-	{
-		command: /\b(?:kubectl|helm|terraform|pulumi|docker)\b/,
-		request: wordsPattern(["kubectl", "helm", "terraform", "pulumi", "docker", "destroy", "infra"]),
-	},
-	{ command: /\bcurl\b/, request: wordsPattern(["curl", "post", "put", "patch"]) },
-];
+function namesFile(request: string, path: string): boolean {
+	const parts = path.replace(/\\/g, "/").toLowerCase().split("/").filter(Boolean);
+	return parts.some((_, index) => namesPath(request, parts.slice(index).join("/")));
+}
 
+const DELETE_REQUEST = wordsPattern([
+	"delete",
+	"remove",
+	"rm",
+	"clean",
+	"drop",
+	"wipe",
+	"apague",
+	"apagar",
+	"remova",
+	"remover",
+	"exclua",
+	"excluir",
+	"limpe",
+	"limpar",
+]);
+const PUSH_REQUEST = wordsPattern(["push", "pushe", "faça push", "dê push"]);
+const FORCE_PUSH_REQUEST = wordsPattern([
+	"force push",
+	"force-push",
+	"push --force",
+	"push -f",
+	"forçar o push",
+	"push forçado",
+]);
+/** "reset" alone also means resetting a counter or a form; the request has to be about git. */
+const RESET_REQUEST = wordsPattern([
+	"git reset",
+	"reset --hard",
+	"hard reset",
+	"reset hard",
+	"reset (?:the |o )?(?:branch|head|repo|repository|repositório)",
+	"resete o (?:branch|repositório)",
+	"resetar o (?:branch|repositório)",
+]);
+const REBASE_REQUEST = wordsPattern(["rebase"]);
+const PUBLISH_REQUEST = wordsPattern(["publish", "publique", "publicar"]);
+const DEPLOY_REQUEST = wordsPattern(["deploy", "implante", "implantar", "ship"]);
+const GITHUB_REQUEST = phrasePattern(
+	[
+		"create",
+		"open",
+		"close",
+		"comment",
+		"post",
+		"crie",
+		"criar",
+		"abra",
+		"abrir",
+		"feche",
+		"fechar",
+		"comente",
+		"comentar",
+	],
+	["pr", "pull request", "issue", "release", "repo"],
+);
+/** "merge" alone also means merging two functions; the request has to name the pull request. */
+const MERGE_REQUEST = phrasePattern(
+	["merge", "mergear", "mergeie", "mescle", "mesclar", "faça o merge", "faça merge", "dê merge"],
+	["pr", "pull request", "#\\d+"],
+);
+const DOCKER_PUSH_REQUEST = wordsPattern([
+	"docker push",
+	"push (?:the |an? )?image",
+	"push (?:da |a )?imagem",
+	"envie a imagem",
+	"publique a imagem",
+]);
+/** Infrastructure changes, which the request must name with the tool and the subcommand: "terraform apply". */
+const INFRA_COMMAND =
+	/\b(?:kubectl\s+(?:apply|delete|scale|rollout)|helm\s+(?:install|upgrade|uninstall)|terraform\s+(?:apply|destroy)|pulumi\s+(?:up|destroy))\b/g;
+
+/**
+ * How the developer's latest request authorizes each risky operation it names. A command runs
+ * without asking only when the request authorizes every operation in it. An operation missing here
+ * always asks: discarding uncommitted work, deleting a branch, rewriting history, recursive
+ * permission changes, low-level disk writes, destructive SQL, commands built at run time,
+ * downloaded code, docker deletions, remote write requests, remote copies, writes to shell or
+ * credential files, and inline interpreter code. A mention is too weak a signal for those.
+ */
+const MENTIONS: Partial<Record<RiskyOperation, (request: string, command: string) => boolean>> = {
+	"git-push": (request) => PUSH_REQUEST.test(request),
+	"git-force-push": (request) => FORCE_PUSH_REQUEST.test(request),
+	"git-reset": (request) => RESET_REQUEST.test(request),
+	"git-rebase": (request) => REBASE_REQUEST.test(request),
+	// The request names the deletion and every target as the command writes it.
+	delete: (request, command) => {
+		const targets = deletionTargets(command);
+		return (
+			DELETE_REQUEST.test(request) && targets !== undefined && targets.every((target) => namesPath(request, target))
+		);
+	},
+	publish: (request) => PUBLISH_REQUEST.test(request),
+	deploy: (request) => DEPLOY_REQUEST.test(request),
+	github: (request) => GITHUB_REQUEST.test(request),
+	"github-merge": (request) => MERGE_REQUEST.test(request),
+	"docker-push": (request) => DOCKER_PUSH_REQUEST.test(request),
+	infra: (request, command) => {
+		const changes = [...command.matchAll(INFRA_COMMAND)].map((match) => match[0].replace(/\s+/g, " ").toLowerCase());
+		return changes.length > 0 && changes.every((change) => request.includes(change));
+	},
+};
+
+/**
+ * Openings of a reply that approves. Portuguese words that also open ordinary sentences ("pode
+ * quebrar algo", "vai apagar tudo", "isso falha") approve only with a following word that makes
+ * them an approval, or alone (see {@link BARE_APPROVAL}).
+ */
 const AFFIRMATIVE = new RegExp(
 	`^\\s*${
 		wordsPattern([
@@ -638,19 +685,45 @@ const AFFIRMATIVE = new RegExp(
 			"approved",
 			"sim",
 			"s",
-			"pode",
-			"manda",
-			"vai",
+			"pode (?:sim|rodar|executar|seguir|continuar|fazer|mandar|ir|apagar|prosseguir)",
+			"vai em frente",
+			"manda ver",
 			"confirmo",
 			"autorizo",
 			"prossiga",
-			"faça",
-			"faca",
-			"isso",
+			"faça isso",
+			"faca isso",
+			"isso mesmo",
 		]).source
 	}`,
 	"iu",
 );
+/** A reply that is only one of these words approves: "Pode.", "Manda!". */
+const BARE_APPROVAL = /^\s*(?:pode|vai|isso|manda|faça|faca)\s*[.!]*\s*$/iu;
+/** Words that make a reply a question or a request for an explanation, so it approves nothing. */
+const QUESTION_WORDS = wordsPattern([
+	"what",
+	"why",
+	"how",
+	"which",
+	"where",
+	"when",
+	"who",
+	"explain",
+	"o que",
+	"o quê",
+	"por que",
+	"porque",
+	"por quê",
+	"como",
+	"qual",
+	"quais",
+	"onde",
+	"quando",
+	"quem",
+	"explica",
+	"explique",
+]);
 const RESERVATION = wordsPattern([
 	"no",
 	"not",
@@ -667,6 +740,19 @@ const RESERVATION = wordsPattern([
 	"exceto",
 	"except",
 ]);
+
+/**
+ * Whether a developer's reply approves the operations waiting for an answer: a short affirmative
+ * reply with no reservation that asks nothing. "Isso vai apagar o quê?" asks what would happen;
+ * it approves nothing.
+ */
+function approvesPending(text: string): boolean {
+	const prose = developerProse(text);
+	if (prose.includes("?") || QUESTION_WORDS.test(prose) || RESERVATION.test(prose)) return false;
+	// A longer message is a new request, not an answer to the pending one.
+	if (prose.split(/\s+/).filter(Boolean).length > 8) return false;
+	return AFFIRMATIVE.test(prose) || BARE_APPROVAL.test(prose);
+}
 
 function fingerprint(toolName: string, effect: ToolEffect): string {
 	return `${toolName}:${(effect.command ?? effect.paths.join(",")).replace(/\s+/g, " ").trim()}`;
@@ -727,7 +813,7 @@ export class AlignmentPolicy {
 			if (this.correctionList.length > 12) this.correctionList.shift();
 			this.onCorrection?.(this.correctionList);
 		}
-		if (this.pending.size > 0 && AFFIRMATIVE.test(text) && !RESERVATION.test(text)) {
+		if (this.pending.size > 0 && approvesPending(text)) {
 			for (const operation of this.pending) this.grants.add(operation);
 		}
 		this.pending.clear();
@@ -813,26 +899,20 @@ export class AlignmentPolicy {
 		// Only affirmative clauses authorize: "não faça push ainda" names the operation to forbid it.
 		const request = this.latestRequest
 			.toLowerCase()
+			.replace(/\\/g, "/")
 			.split(/\.(?=\s|$)|[,;!?\n]|(?<![\p{L}])(?:but|mas|porém|porem)(?![\p{L}])/u)
 			.filter((clause) => !RESERVATION.test(clause))
-			.join(" . ");
-		const named = OPERATION_WORDS.some((word) => {
-			if (!word.command.test(command) || !word.request.test(request)) return false;
-			const targets = word.targets?.(command);
-			return (
-				targets === undefined ||
-				(targets.length > 0 && targets.some((target) => request.includes(target.toLowerCase())))
-			);
-		});
+			.join(" . ")
+			.replace(/(^|\s)(?:\.\/)+/g, "$1");
+		// Every risky operation in the command must be named: "push the branch" authorizes the push
+		// in `git push && git reset --hard`, not the reset.
+		const operations = command ? riskyOperations(command) : [];
+		const named = operations.length > 0 && operations.every((risky) => MENTIONS[risky]?.(request, command) === true);
 		if (named) return { action: "allow", via: "request" };
 
 		// A write to a sensitive or outside path is allowed when the request names that file.
 		const namesTarget =
-			command === "" &&
-			effect.paths.length > 0 &&
-			effect.paths.every((path) =>
-				request.includes((path.replace(/\\/g, "/").split("/").pop() ?? path).toLowerCase()),
-			);
+			command === "" && effect.paths.length > 0 && effect.paths.every((path) => namesFile(request, path));
 		if (namesTarget) return { action: "allow", via: "request" };
 
 		const approved = await this.authorize?.({ toolName, effect, fingerprint: operation }, signal);

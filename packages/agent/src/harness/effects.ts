@@ -70,10 +70,41 @@ const READ_TOOLS = new Set(["read", "grep", "find", "ls", "glob", "search", "lis
 const WRITE_TOOLS = new Set(["write", "edit", "multiedit", "multi_edit", "apply_patch", "patch", "notebook_edit"]);
 const SHELL_TOOLS = new Set(["bash", "shell", "sh", "powershell", "pwsh", "exec", "terminal", "run"]);
 
+/**
+ * The operation a risky command performs, so authorization can ask whether the developer named
+ * each one: `git push && git reset --hard` performs two, and naming the push authorizes only that.
+ */
+export type RiskyOperation =
+	| "git-push"
+	| "git-force-push"
+	| "git-reset"
+	| "git-discard"
+	| "git-branch-delete"
+	| "git-history"
+	| "git-rebase"
+	| "delete"
+	| "permission"
+	| "disk"
+	| "sql"
+	| "eval"
+	| "download-exec"
+	| "publish"
+	| "github"
+	| "github-merge"
+	| "infra"
+	| "docker-push"
+	| "docker-delete"
+	| "deploy"
+	| "remote-write"
+	| "config-write"
+	| "remote-copy"
+	| "inline-code";
+
 interface CommandRule {
 	pattern: RegExp;
 	kind: "destructive" | "external";
 	reason: string;
+	operation: RiskyOperation;
 }
 
 /** `git` with its global options (`-C dir`, `--no-pager`, `--git-dir=x`) before the subcommand. */
@@ -89,128 +120,195 @@ const COMMAND_RULES: CommandRule[] = [
 		pattern: git(String.raw`push\b[^\n;&|]*(?:\s--force\b|\s-f\b|\s--force-with-lease\b|\s\+\S)`),
 		kind: "destructive",
 		reason: "force push rewrites remote history",
+		operation: "git-force-push",
 	},
 	{
 		pattern: git(String.raw`reset\s+[^\n;&|]*--hard\b`),
 		kind: "destructive",
 		reason: "git reset --hard discards uncommitted work",
+		operation: "git-reset",
 	},
 	{
 		pattern: git(String.raw`clean\s+[^\n;&|]*-[a-zA-Z]*f`),
 		kind: "destructive",
 		reason: "git clean -f deletes untracked files",
+		operation: "git-discard",
 	},
 	{
 		pattern: git(String.raw`checkout\s+(?:--\s+)?\.(?:\s|$)`),
 		kind: "destructive",
 		reason: "git checkout . discards uncommitted changes",
+		operation: "git-discard",
 	},
 	{
 		pattern: git(String.raw`restore\s+(?:[^\n;&|]*\s)?\.(?:\s|$)`),
 		kind: "destructive",
 		reason: "git restore . discards uncommitted changes",
+		operation: "git-discard",
 	},
 	{
 		pattern: git(String.raw`stash\s+(?:drop|clear)\b`),
 		kind: "destructive",
 		reason: "git stash drop/clear deletes stashed work",
+		operation: "git-discard",
 	},
 	{
 		pattern: git(String.raw`branch\s+[^\n;&|]*-D\b`),
 		kind: "destructive",
 		reason: "git branch -D deletes an unmerged branch",
+		operation: "git-branch-delete",
 	},
-	{ pattern: git(String.raw`(?:filter-branch|filter-repo)\b`), kind: "destructive", reason: "history rewrite" },
+	{
+		pattern: git(String.raw`(?:filter-branch|filter-repo)\b`),
+		kind: "destructive",
+		reason: "history rewrite",
+		operation: "git-history",
+	},
 	{
 		pattern: git(String.raw`rebase\b(?!\s+--(?:continue|abort|skip|quit)\b)`),
 		kind: "destructive",
 		reason: "rebase rewrites history",
+		operation: "git-rebase",
 	},
-	{ pattern: /\brm\s+(?:-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b/, kind: "destructive", reason: "recursive delete" },
-	{ pattern: /\brm\s+(?:-[a-zA-Z]*f[a-zA-Z]*|--force)\b/, kind: "destructive", reason: "forced delete" },
-	{ pattern: /\b(?:unlink|shred)\s/, kind: "destructive", reason: "irreversible delete" },
-	{ pattern: /\bRemove-Item\b[^\n;|]*-Recurse\b/i, kind: "destructive", reason: "recursive delete" },
-	{ pattern: /\b(?:rmdir|rd)\s+\/s\b/i, kind: "destructive", reason: "recursive delete" },
-	{ pattern: /\bdel\s+[^\n;&|]*\/s\b/i, kind: "destructive", reason: "recursive delete" },
-	{ pattern: /\bfind\b[^\n;&|]*\s-delete\b/, kind: "destructive", reason: "find -delete" },
+	{
+		pattern: /\brm\s+(?:-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b/,
+		kind: "destructive",
+		reason: "recursive delete",
+		operation: "delete",
+	},
+	{
+		pattern: /\brm\s+(?:-[a-zA-Z]*f[a-zA-Z]*|--force)\b/,
+		kind: "destructive",
+		reason: "forced delete",
+		operation: "delete",
+	},
+	{ pattern: /\b(?:unlink|shred)\s/, kind: "destructive", reason: "irreversible delete", operation: "delete" },
+	{
+		pattern: /\bRemove-Item\b[^\n;|]*-Recurse\b/i,
+		kind: "destructive",
+		reason: "recursive delete",
+		operation: "delete",
+	},
+	{ pattern: /\b(?:rmdir|rd)\s+\/s\b/i, kind: "destructive", reason: "recursive delete", operation: "delete" },
+	{ pattern: /\bdel\s+[^\n;&|]*\/s\b/i, kind: "destructive", reason: "recursive delete", operation: "delete" },
+	{ pattern: /\bfind\b[^\n;&|]*\s-delete\b/, kind: "destructive", reason: "find -delete", operation: "delete" },
 	{
 		pattern: /\bfind\b[^\n]*-exec(?:dir)?\s+(?:rm|unlink|shred)\b/,
 		kind: "destructive",
 		reason: "find -exec deletes what it finds",
+		operation: "delete",
 	},
-	{ pattern: /\bxargs\b[^\n;&|]*\b(?:rm|unlink|shred)\b/, kind: "destructive", reason: "xargs deletes its input" },
+	{
+		pattern: /\bxargs\b[^\n;&|]*\b(?:rm|unlink|shred)\b/,
+		kind: "destructive",
+		reason: "xargs deletes its input",
+		operation: "delete",
+	},
 	{
 		pattern: /\b(?:chmod|chown|chgrp)\s+(?:-\S+\s+)*-[a-zA-Z]*R/,
 		kind: "destructive",
 		reason: "recursive permission or ownership change",
+		operation: "permission",
 	},
-	{ pattern: /\b(?:mkfs|shred|dd\s+if=)/, kind: "destructive", reason: "low-level disk write" },
+	{ pattern: /\b(?:mkfs|shred|dd\s+if=)/, kind: "destructive", reason: "low-level disk write", operation: "disk" },
 	{
 		pattern: /\b(?:DROP\s+(?:TABLE|DATABASE|SCHEMA)|TRUNCATE\s+TABLE)\b/i,
 		kind: "destructive",
 		reason: "destructive SQL",
+		operation: "sql",
 	},
-	{ pattern: /\bDELETE\s+FROM\s+\S+\s*(?:;|$|")/i, kind: "destructive", reason: "DELETE without WHERE" },
+	{
+		pattern: /\bDELETE\s+FROM\s+\S+\s*(?:;|$|")/i,
+		kind: "destructive",
+		reason: "DELETE without WHERE",
+		operation: "sql",
+	},
 	{
 		pattern: /\beval\s+["']?(?:\$\(|`)|\bbase64\s+(?:-d|--decode)\b[^\n]*\|\s*(?:ba|z|da)?sh\b/,
 		kind: "destructive",
 		reason: "runs a command built at runtime",
+		operation: "eval",
 	},
 	{
 		pattern: /\b(?:curl|wget)\b[^\n]*\|\s*(?:sudo\s+)?(?:ba|z|da)?sh\b/,
 		kind: "external",
 		reason: "runs downloaded code",
+		operation: "download-exec",
 	},
-	{ pattern: git(String.raw`push\b`), kind: "external", reason: "git push changes the remote" },
-	{ pattern: /\b(?:npm|pnpm|yarn|bun)\s+publish\b/, kind: "external", reason: "package publish" },
+	{ pattern: git(String.raw`push\b`), kind: "external", reason: "git push changes the remote", operation: "git-push" },
+	{
+		pattern: /\b(?:npm|pnpm|yarn|bun)\s+publish\b/,
+		kind: "external",
+		reason: "package publish",
+		operation: "publish",
+	},
 	{
 		pattern: /\b(?:cargo|twine|gem|dotnet\s+nuget)\s+(?:publish|upload|push)\b/,
 		kind: "external",
 		reason: "package publish",
+		operation: "publish",
+	},
+	{
+		pattern: /\bgh\s+pr\s+merge\b/,
+		kind: "external",
+		reason: "GitHub pull request merge",
+		operation: "github-merge",
 	},
 	{
 		pattern:
-			/\bgh\s+(?:pr\s+(?:create|merge|close|comment|review)|issue\s+(?:create|close|comment)|release\s+create|repo\s+(?:create|delete))\b/,
+			/\bgh\s+(?:pr\s+(?:create|close|comment|review)|issue\s+(?:create|close|comment)|release\s+create|repo\s+(?:create|delete))\b/,
 		kind: "external",
 		reason: "GitHub write operation",
+		operation: "github",
 	},
 	{
 		pattern:
 			/\b(?:kubectl\s+(?:apply|delete|scale|rollout)|helm\s+(?:install|upgrade|uninstall)|terraform\s+(?:apply|destroy)|pulumi\s+(?:up|destroy))\b/,
 		kind: "external",
 		reason: "infrastructure change",
+		operation: "infra",
 	},
-	{ pattern: /\bdocker\s+push\b/, kind: "external", reason: "image push" },
+	{ pattern: /\bdocker\s+push\b/, kind: "external", reason: "image push", operation: "docker-push" },
 	{
 		pattern:
 			/\bdocker\s+(?:(?:system|volume|container|image|network|builder)\s+prune|volume\s+rm)\b|\bdocker(?:\s+|-)compose\b[^\n;&|]*\sdown\b[^\n;&|]*\s(?:-v|--volumes)\b/,
 		kind: "destructive",
 		reason: "docker deletes containers, images or volumes",
+		operation: "docker-delete",
 	},
-	{ pattern: /\b(?:vercel|netlify|fly|firebase)\s+deploy\b|\bvercel\s+--prod\b/, kind: "external", reason: "deploy" },
+	{
+		pattern: /\b(?:vercel|netlify|fly|firebase)\s+deploy\b|\bvercel\s+--prod\b/,
+		kind: "external",
+		reason: "deploy",
+		operation: "deploy",
+	},
 	{
 		pattern:
 			/\bcurl\b[^\n;&|]*?(?:\s-[a-zA-Z]*[dFT]\b|\s--(?:data(?:-[\w]+)?|form(?:-string)?|upload-file|json)\b|\s-X\s*(?:POST|PUT|PATCH|DELETE)\b|\s--request[= ]\s*(?:POST|PUT|PATCH|DELETE)\b)/,
 		kind: "external",
 		reason: "remote write request",
+		operation: "remote-write",
 	},
 	{
 		pattern:
 			/\bwget\b[^\n;&|]*(?:--post-(?:data|file)|--body-(?:data|file)|--method[= ]\s*(?:POST|PUT|PATCH|DELETE)\b)/,
 		kind: "external",
 		reason: "remote write request",
+		operation: "remote-write",
 	},
 	{
 		pattern:
 			/(?:>>?|\btee\b(?:\s+-a)?)\s*["']?(?:~|\$HOME|\/root|\/home\/[^/\s]+)\/(?:\.ssh\/|\.bashrc|\.zshrc|\.profile|\.bash_profile|\.npmrc|\.gitconfig|\.relay\/)|(?:>>?|\btee\b(?:\s+-a)?)\s*["']?\/etc\//,
 		kind: "external",
 		reason: "writes a shell, credential or system configuration file",
+		operation: "config-write",
 	},
 	{
 		pattern:
 			/(?:^|[\s;&|(])(?:\.\/|\S*\/)?[\w.-]*(?:deploy|rollout|publish)[\w.-]*\.(?:sh|bash|ps1|py|js|mjs|ts)\b(?![^\n;&|]*--dry-run)/,
 		kind: "external",
 		reason: "runs a script named like a deployment",
+		operation: "deploy",
 	},
 ];
 
@@ -581,6 +679,64 @@ function remoteCopyEffect(
 		}
 	}
 	return undefined;
+}
+
+/**
+ * Every risky operation a command line performs, not only the first one that classifies it:
+ * `git push && git reset --hard HEAD~5` both pushes and discards work.
+ */
+export function riskyOperations(command: string): RiskyOperation[] {
+	const operations = new Set<RiskyOperation>();
+	for (const rule of COMMAND_RULES) {
+		if (rule.pattern.test(command)) operations.add(rule.operation);
+	}
+	const commands = parseShell(command);
+	if (inlineCodeEffect(commands)) operations.add("inline-code");
+	if (remoteCopyEffect(commands)) operations.add("remote-copy");
+	return [...operations];
+}
+
+/** Programs that delete the paths they are given. */
+const DELETE_PROGRAMS = new Set(["rm", "unlink", "shred", "rmdir", "rd", "del", "erase", "remove-item", "ri"]);
+/** `cmd.exe` deletion programs, whose options are `/s`, `/q`. */
+const CMD_DELETE_PROGRAMS = new Set(["rmdir", "rd", "del", "erase"]);
+
+/**
+ * The paths the deletion commands of a command line remove, as written (separators normalized,
+ * without `./` or a trailing `/`). Undefined when a target cannot be named safely, so no request
+ * can authorize it: a glob, `~`, `..`, `.`, `/`, a variable or substitution, or a deletion through
+ * `find` or `xargs`, whose targets are only known at run time.
+ */
+export function deletionTargets(command: string): string[] | undefined {
+	const targets: string[] = [];
+	for (const { argv } of parseShell(command)) {
+		const words = stripWrappers(argv);
+		if (words.length === 0) continue;
+		const name = programName(words[0]).toLowerCase();
+		if (name === "xargs") return undefined;
+		if (name === "find" && words.some((word) => word === "-delete" || word === "-exec" || word === "-execdir")) {
+			return undefined;
+		}
+		if (!DELETE_PROGRAMS.has(name)) continue;
+		for (const word of words.slice(1)) {
+			if (word.startsWith("-") || (CMD_DELETE_PROGRAMS.has(name) && /^\/[A-Za-z]$/.test(word))) continue;
+			const path = word
+				.replace(/\\/g, "/")
+				.replace(/^(?:\.\/)+/, "")
+				.replace(/(.)\/+$/, "$1");
+			const unsafe =
+				path === "" ||
+				path === "." ||
+				path === "/" ||
+				path === "~" ||
+				path.startsWith("~/") ||
+				/(?:^|\/)\.\.(?:\/|$)/.test(path) ||
+				/[*?[\]{}$`]/.test(path);
+			if (unsafe) return undefined;
+			targets.push(path);
+		}
+	}
+	return targets.length > 0 ? targets : undefined;
 }
 
 /** Options that carry the script of `sed` and `perl`, so the next word is not a file. */
