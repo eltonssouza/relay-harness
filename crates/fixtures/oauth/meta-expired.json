@@ -1,0 +1,37 @@
+{
+	"name": "meta-expired",
+	"provider": "meta",
+	"credential": {
+		"type": "oauth",
+		"refresh": "identity-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "api.meta.ai/muse-code/key",
+			"status": 401,
+			"body": "{\"detail\":\" session gone \"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://api.meta.ai/muse-code/key",
+			"headers": {
+				"accept": "application/json",
+				"authorization": "Bearer identity-1",
+				"content-type": "application/json",
+				"x-api-version": "1.0.0"
+			},
+			"body": "{}"
+		}
+	],
+	"error": "Meta session expired (status 401). Run `/login meta` to sign in again.: session gone",
+	"auth": {
+		"apiKey": "access-0"
+	}
+}

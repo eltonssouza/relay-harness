@@ -1,0 +1,69 @@
+{
+	"name": "completions-headers",
+	"description": "Model and request headers on a local server.",
+	"adapter": "completions",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-completions",
+		"provider": "ollama",
+		"baseUrl": "http://127.0.0.1:11434/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000,
+		"headers": {
+			"x-model": "m"
+		}
+	},
+	"options": {
+		"apiKey": "sk-parity",
+		"headers": {
+			"x-request": "r",
+			"x-model": "request wins"
+		}
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"request": {
+		"method": "POST",
+		"url": "http://127.0.0.1:11434/v1/chat/completions",
+		"headers": {
+			"accept": "application/json",
+			"authorization": "Bearer sk-parity",
+			"content-type": "application/json",
+			"user-agent": "relay (<os>)",
+			"x-model": "request wins",
+			"x-request": "r"
+		},
+		"omitted": [
+			"x-stainless-arch",
+			"x-stainless-lang",
+			"x-stainless-os",
+			"x-stainless-package-version",
+			"x-stainless-retry-count",
+			"x-stainless-runtime",
+			"x-stainless-runtime-version"
+		],
+		"body": "{\"model\":\"test-model\",\"messages\":[{\"role\":\"system\",\"content\":\"Be brief.\"},{\"role\":\"user\",\"content\":\"Go.\"}],\"stream\":true,\"stream_options\":{\"include_usage\":true},\"store\":false}"
+	}
+}

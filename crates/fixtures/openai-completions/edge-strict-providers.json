@@ -1,0 +1,521 @@
+{
+	"name": "edge-strict-providers",
+	"description": "Thinking as text, a bridge after tool results, tool result names.",
+	"model": {
+		"id": "test-model",
+		"name": "Test Model",
+		"api": "openai-completions",
+		"provider": "custom",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": true,
+		"input": [
+			"text"
+		],
+		"cost": {
+			"input": 1,
+			"output": 2,
+			"cacheRead": 0.1,
+			"cacheWrite": 0
+		},
+		"contextWindow": 128000,
+		"maxTokens": 32000,
+		"compat": {
+			"requiresThinkingAsText": true,
+			"requiresAssistantAfterToolResult": true,
+			"requiresToolResultName": true
+		}
+	},
+	"apiKey": "sk-parity",
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Base prompt.",
+			"sections": {
+				"rules": "<rules>Be brief.</rules>"
+			},
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": ""
+				},
+				{
+					"type": "text",
+					"text": "Look."
+				},
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Raw reasoning.",
+					"thinkingSignature": "reasoning_content"
+				},
+				{
+					"type": "thinking",
+					"thinking": "More reasoning."
+				},
+				{
+					"type": "text",
+					"text": "Reading. "
+				},
+				{
+					"type": "text",
+					"text": "  "
+				},
+				{
+					"type": "text",
+					"text": "Now."
+				},
+				{
+					"type": "toolCall",
+					"id": "call_1",
+					"name": "read",
+					"arguments": {
+						"path": "a.ts"
+					}
+				}
+			],
+			"api": "openai-completions",
+			"provider": "custom",
+			"model": "test-model",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_1",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "with image"
+				},
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_1b",
+			"toolName": "read",
+			"content": [],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Summarized.",
+					"thinkingSignature": "[{\"type\":\"reasoning.summary\",\"summary\":\"Planned the read.\",\"id\":\"rd_1\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"enc-data\",\"id\":\"rd_2\",\"format\":\"openai-responses-v1\",\"index\":1}]"
+				},
+				{
+					"type": "text",
+					"text": "Next."
+				},
+				{
+					"type": "toolCall",
+					"id": "call_2",
+					"name": "read",
+					"arguments": {
+						"path": "b.ts"
+					}
+				}
+			],
+			"api": "openai-completions",
+			"provider": "custom",
+			"model": "test-model",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_2",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "image",
+					"data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"mimeType": "image/png"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Keep going.",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "   "
+				}
+			],
+			"api": "openai-completions",
+			"provider": "custom",
+			"model": "test-model",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Foreign thought.",
+					"thinkingSignature": "sig"
+				},
+				{
+					"type": "toolCall",
+					"id": "call_abcdefghijklmnopqrstuvwxyz0123456789|fc_very+long/item=id",
+					"name": "read",
+					"arguments": {
+						"path": "c.ts"
+					},
+					"thoughtSignature": "{\"type\":\"reasoning.encrypted\",\"id\":\"enc_1\",\"data\":\"legacy-enc\"}"
+				},
+				{
+					"type": "toolCall",
+					"id": "call_short|fc_x",
+					"name": "read",
+					"arguments": {
+						"path": "d.ts"
+					}
+				},
+				{
+					"type": "toolCall",
+					"id": "toolu_€ünïcödé_id_that_is_quite_a_bit_longer_than_forty",
+					"name": "read",
+					"arguments": {}
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "gpt-x",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_abcdefghijklmnopqrstuvwxyz0123456789|fc_very+long/item=id",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "c"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_short|fc_x",
+			"toolName": "read",
+			"content": [
+				{
+					"type": "text",
+					"text": "d"
+				}
+			],
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Done?",
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "test-model",
+		"messages": [
+			{
+				"role": "developer",
+				"content": "Base prompt.\n\n<rules>Be brief.</rules>"
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Look."
+					},
+					{
+						"type": "text",
+						"text": "(image omitted: model does not support images)"
+					}
+				]
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "Raw reasoning.\n\nMore reasoning."
+					},
+					{
+						"type": "text",
+						"text": "Reading. "
+					},
+					{
+						"type": "text",
+						"text": "Now."
+					}
+				],
+				"tool_calls": [
+					{
+						"id": "call_1",
+						"type": "function",
+						"function": {
+							"name": "read",
+							"arguments": "{\"path\":\"a.ts\"}"
+						}
+					}
+				]
+			},
+			{
+				"role": "tool",
+				"content": "with image\n(tool image omitted: model does not support images)",
+				"tool_call_id": "call_1",
+				"name": "read"
+			},
+			{
+				"role": "tool",
+				"content": "(no tool output)",
+				"tool_call_id": "call_1b",
+				"name": "read"
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "Summarized."
+					},
+					{
+						"type": "text",
+						"text": "Next."
+					}
+				],
+				"tool_calls": [
+					{
+						"id": "call_2",
+						"type": "function",
+						"function": {
+							"name": "read",
+							"arguments": "{\"path\":\"b.ts\"}"
+						}
+					}
+				],
+				"reasoning_details": [
+					{
+						"type": "reasoning.summary",
+						"summary": "Planned the read.",
+						"id": "rd_1",
+						"format": "openai-responses-v1",
+						"index": 0
+					},
+					{
+						"type": "reasoning.encrypted",
+						"data": "enc-data",
+						"id": "rd_2",
+						"format": "openai-responses-v1",
+						"index": 1
+					}
+				]
+			},
+			{
+				"role": "tool",
+				"content": "(tool image omitted: model does not support images)",
+				"tool_call_id": "call_2",
+				"name": "read"
+			},
+			{
+				"role": "assistant",
+				"content": "I have processed the tool results."
+			},
+			{
+				"role": "user",
+				"content": "Keep going."
+			},
+			{
+				"role": "assistant",
+				"content": "Foreign thought.",
+				"tool_calls": [
+					{
+						"id": "call_abcdefghijklmnopqrstuvwxyz_hnygubjc",
+						"type": "function",
+						"function": {
+							"name": "read",
+							"arguments": "{\"path\":\"c.ts\"}"
+						}
+					},
+					{
+						"id": "call_short_fc_x",
+						"type": "function",
+						"function": {
+							"name": "read",
+							"arguments": "{\"path\":\"d.ts\"}"
+						}
+					},
+					{
+						"id": "toolu_€ünïcödé_id_that_is_quite_a_bit_longer_than_forty",
+						"type": "function",
+						"function": {
+							"name": "read",
+							"arguments": "{}"
+						}
+					}
+				]
+			},
+			{
+				"role": "tool",
+				"content": "c",
+				"tool_call_id": "call_abcdefghijklmnopqrstuvwxyz_hnygubjc",
+				"name": "read"
+			},
+			{
+				"role": "tool",
+				"content": "d",
+				"tool_call_id": "call_short_fc_x",
+				"name": "read"
+			},
+			{
+				"role": "tool",
+				"content": "No result provided",
+				"tool_call_id": "toolu_€ünïcödé_id_that_is_quite_a_bit_longer_than_forty",
+				"name": "read"
+			},
+			{
+				"role": "assistant",
+				"content": "I have processed the tool results."
+			},
+			{
+				"role": "user",
+				"content": "Done?"
+			}
+		],
+		"stream": true,
+		"stream_options": {
+			"include_usage": true
+		},
+		"store": false,
+		"tools": [
+			{
+				"type": "function",
+				"function": {
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			}
+		]
+	}
+}

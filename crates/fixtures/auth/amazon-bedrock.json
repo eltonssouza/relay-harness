@@ -1,0 +1,2033 @@
+{
+	"provider": "amazon-bedrock",
+	"name": "Amazon Bedrock",
+	"apiKey": {
+		"name": "AWS credentials or bearer token",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "web identity token"
+			}
+		},
+		{
+			"env": [
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_SECRET_ACCESS_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS access keys"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "web identity token"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS access keys"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_SECRET_ACCESS_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS access keys"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_SECRET_ACCESS_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS access keys"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS access keys"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS access keys"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_SECRET_ACCESS_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS access keys"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "ECS task role"
+			}
+		},
+		{
+			"env": [
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_SECRET_ACCESS_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS access keys"
+			}
+		},
+		{
+			"env": [
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_PROFILE"
+			}
+		},
+		{
+			"env": [
+				"AWS_ACCESS_KEY_ID",
+				"AWS_WEB_IDENTITY_TOKEN_FILE",
+				"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+				"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+				"AWS_SECRET_ACCESS_KEY",
+				"AWS_PROFILE",
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"AWS_BEARER_TOKEN_BEDROCK": "c-AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE": "c-AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID": "c-AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI": "c-AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI": "c-AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE": "c-AWS_WEB_IDENTITY_TOKEN_FILE",
+					"AWS_SECRET_ACCESS_KEY": "c-AWS_SECRET_ACCESS_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"AWS_BEARER_TOKEN_BEDROCK": "c-AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE": "c-AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID": "c-AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI": "c-AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI": "c-AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE": "c-AWS_WEB_IDENTITY_TOKEN_FILE",
+					"AWS_SECRET_ACCESS_KEY": "c-AWS_SECRET_ACCESS_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [
+				"AWS_BEARER_TOKEN_BEDROCK"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"AWS_BEARER_TOKEN_BEDROCK": "c-AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE": "c-AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID": "c-AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI": "c-AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI": "c-AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE": "c-AWS_WEB_IDENTITY_TOKEN_FILE",
+					"AWS_SECRET_ACCESS_KEY": "c-AWS_SECRET_ACCESS_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {},
+				"source": "AWS_BEARER_TOKEN_BEDROCK"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"AWS_BEARER_TOKEN_BEDROCK": "c-AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE": "c-AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID": "c-AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI": "c-AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI": "c-AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE": "c-AWS_WEB_IDENTITY_TOKEN_FILE",
+					"AWS_SECRET_ACCESS_KEY": "c-AWS_SECRET_ACCESS_KEY"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"AWS_BEARER_TOKEN_BEDROCK": "c-AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE": "c-AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID": "c-AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI": "c-AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI": "c-AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE": "c-AWS_WEB_IDENTITY_TOKEN_FILE",
+					"AWS_SECRET_ACCESS_KEY": "c-AWS_SECRET_ACCESS_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"AWS_BEARER_TOKEN_BEDROCK",
+					"AWS_PROFILE",
+					"AWS_ACCESS_KEY_ID",
+					"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+					"AWS_CONTAINER_CREDENTIALS_FULL_URI",
+					"AWS_WEB_IDENTITY_TOKEN_FILE"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

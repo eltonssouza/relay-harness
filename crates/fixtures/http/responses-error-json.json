@@ -1,0 +1,50 @@
+{
+	"name": "responses-error-json",
+	"description": "An OpenAI error body.",
+	"adapter": "responses",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "https://api.openai.com/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-parity"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 400,
+		"body": "{\"error\":{\"message\":\"Invalid input.\",\"type\":\"invalid_request_error\",\"param\":\"input\",\"code\":\"bad\"}}",
+		"headers": {
+			"content-type": "application/json"
+		},
+		"statusText": "Bad Request"
+	},
+	"stopReason": "error",
+	"errorMessage": "OpenAI API error (400): {\"message\":\"Invalid input.\",\"type\":\"invalid_request_error\",\"param\":\"input\",\"code\":\"bad\"}"
+}

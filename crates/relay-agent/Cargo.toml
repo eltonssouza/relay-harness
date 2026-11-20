@@ -1,0 +1,22 @@
+[package]
+name = "relay-agent"
+version = "0.0.0"
+description = "Relay's agent loop, ported from packages/agent: turns, tool calls, hooks and queued messages."
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+relay-ai = { path = "../relay-ai" }
+serde = { version = "=1.0.229", default-features = false, features = ["std", "derive"] }
+serde_json = { version = "=1.0.154", default-features = false, features = ["std", "preserve_order", "float_roundtrip"] }
+# Tool calls of one batch run together (`join_all`); already locked through reqwest.
+futures-util = { version = "=0.3.34", default-features = false, features = ["alloc"] }
+# Tool updates reach the sink while the tool runs; already locked through hyper.
+futures-channel = { version = "=0.3.34", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+tokio = { version = "=1.54.1", default-features = false, features = ["rt", "rt-multi-thread", "time", "sync", "macros", "net", "io-util"] }

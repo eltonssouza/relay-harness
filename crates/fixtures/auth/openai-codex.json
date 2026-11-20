@@ -1,0 +1,10 @@
+{
+	"provider": "openai-codex",
+	"name": "OpenAI Codex (legacy)",
+	"apiKey": null,
+	"oauth": {
+		"name": "OpenAI (ChatGPT Plus/Pro)",
+		"isSubscription": true
+	},
+	"cases": []
+}

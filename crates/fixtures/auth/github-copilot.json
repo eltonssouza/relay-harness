@@ -1,0 +1,141 @@
+{
+	"provider": "github-copilot",
+	"name": "GitHub Copilot",
+	"apiKey": {
+		"name": "GitHub Copilot token",
+		"login": true
+	},
+	"oauth": {
+		"name": "GitHub Copilot",
+		"isSubscription": true
+	},
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"COPILOT_GITHUB_TOKEN"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"COPILOT_GITHUB_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"COPILOT_GITHUB_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-COPILOT_GITHUB_TOKEN"
+				},
+				"source": "COPILOT_GITHUB_TOKEN"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"COPILOT_GITHUB_TOKEN": "c-COPILOT_GITHUB_TOKEN"
+				}
+			},
+			"lookups": {
+				"env": [
+					"COPILOT_GITHUB_TOKEN"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"COPILOT_GITHUB_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"COPILOT_GITHUB_TOKEN": "c-COPILOT_GITHUB_TOKEN"
+				}
+			},
+			"lookups": {
+				"env": [
+					"COPILOT_GITHUB_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-COPILOT_GITHUB_TOKEN"
+				},
+				"source": "COPILOT_GITHUB_TOKEN"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"COPILOT_GITHUB_TOKEN": "c-COPILOT_GITHUB_TOKEN"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"COPILOT_GITHUB_TOKEN": "c-COPILOT_GITHUB_TOKEN"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"COPILOT_GITHUB_TOKEN"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

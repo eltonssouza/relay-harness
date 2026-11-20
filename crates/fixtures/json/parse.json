@@ -1,0 +1,3719 @@
+{
+	"streamed": [
+		{
+			"document": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": -2.5e3}",
+			"results": [
+				{
+					"input": "",
+					"output": {}
+				},
+				{
+					"input": "{",
+					"output": {}
+				},
+				{
+					"input": "{\"",
+					"output": {}
+				},
+				{
+					"input": "{\"p",
+					"output": {}
+				},
+				{
+					"input": "{\"pa",
+					"output": {}
+				},
+				{
+					"input": "{\"pat",
+					"output": {}
+				},
+				{
+					"input": "{\"path",
+					"output": {}
+				},
+				{
+					"input": "{\"path\"",
+					"output": {}
+				},
+				{
+					"input": "{\"path\":",
+					"output": {}
+				},
+				{
+					"input": "{\"path\": ",
+					"output": {}
+				},
+				{
+					"input": "{\"path\": \"",
+					"output": {
+						"path": ""
+					}
+				},
+				{
+					"input": "{\"path\": \"s",
+					"output": {
+						"path": "s"
+					}
+				},
+				{
+					"input": "{\"path\": \"sr",
+					"output": {
+						"path": "sr"
+					}
+				},
+				{
+					"input": "{\"path\": \"src",
+					"output": {
+						"path": "src"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/",
+					"output": {
+						"path": "src/"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a",
+					"output": {
+						"path": "src/a"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.",
+					"output": {
+						"path": "src/a."
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.t",
+					"output": {
+						"path": "src/a.t"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\"",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\",",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", ",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"o",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"of",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"off",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offs",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offse",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\"",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\":",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": ",
+					"output": {
+						"path": "src/a.ts"
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 1",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 1
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10,",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, ",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"l",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"li",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"lim",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limi",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\"",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\":",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": ",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": -",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": -2",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10,
+						"limit": -2
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": -2.",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": -2.5",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10,
+						"limit": -2.5
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": -2.5e",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10,
+						"limit": -2.5
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": -2.5e3",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10,
+						"limit": -2500
+					}
+				},
+				{
+					"input": "{\"path\": \"src/a.ts\", \"offset\": 10, \"limit\": -2.5e3}",
+					"output": {
+						"path": "src/a.ts",
+						"offset": 10,
+						"limit": -2500
+					}
+				}
+			]
+		},
+		{
+			"document": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force\":true}",
+			"results": [
+				{
+					"input": "",
+					"output": {}
+				},
+				{
+					"input": "{",
+					"output": {}
+				},
+				{
+					"input": "{\"",
+					"output": {}
+				},
+				{
+					"input": "{\"c",
+					"output": {}
+				},
+				{
+					"input": "{\"co",
+					"output": {}
+				},
+				{
+					"input": "{\"com",
+					"output": {}
+				},
+				{
+					"input": "{\"comm",
+					"output": {}
+				},
+				{
+					"input": "{\"comma",
+					"output": {}
+				},
+				{
+					"input": "{\"comman",
+					"output": {}
+				},
+				{
+					"input": "{\"command",
+					"output": {}
+				},
+				{
+					"input": "{\"command\"",
+					"output": {}
+				},
+				{
+					"input": "{\"command\":",
+					"output": {}
+				},
+				{
+					"input": "{\"command\":\"",
+					"output": {
+						"command": ""
+					}
+				},
+				{
+					"input": "{\"command\":\"e",
+					"output": {
+						"command": "e"
+					}
+				},
+				{
+					"input": "{\"command\":\"ec",
+					"output": {
+						"command": "ec"
+					}
+				},
+				{
+					"input": "{\"command\":\"ech",
+					"output": {
+						"command": "ech"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo",
+					"output": {
+						"command": "echo"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo ",
+					"output": {
+						"command": "echo"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\",
+					"output": {
+						"command": "echo "
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"",
+					"output": {
+						"command": "echo \""
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"h",
+					"output": {
+						"command": "echo \"h"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi",
+					"output": {
+						"command": "echo \"hi"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\",
+					"output": {
+						"command": "echo \"hi"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\"",
+					"output": {
+						"command": "echo \"hi\""
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" ",
+					"output": {
+						"command": "echo \"hi\""
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" &",
+					"output": {
+						"command": "echo \"hi\" &"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" &&",
+					"output": {
+						"command": "echo \"hi\" &&"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ",
+					"output": {
+						"command": "echo \"hi\" &&"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && l",
+					"output": {
+						"command": "echo \"hi\" && l"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls",
+					"output": {
+						"command": "echo \"hi\" && ls"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\",
+					"output": {
+						"command": "echo \"hi\" && ls"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\"",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"t",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"ti",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"tim",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"time",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeo",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeou",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\"",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":",
+					"output": {
+						"command": "echo \"hi\" && ls\n"
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":n",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":nu",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":nul",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"b",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"ba",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"bac",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"back",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"backg",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"backgr",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"backgro",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"backgrou",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"backgroun",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\"",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":f",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":fa",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":fal",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":fals",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"f",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"fo",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"for",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"forc",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force\"",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force\":",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force\":t",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false,
+						"force": true
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force\":tr",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false,
+						"force": true
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force\":tru",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false,
+						"force": true
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force\":true",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false,
+						"force": true
+					}
+				},
+				{
+					"input": "{\"command\":\"echo \\\"hi\\\" && ls\\n\",\"timeout\":null,\"background\":false,\"force\":true}",
+					"output": {
+						"command": "echo \"hi\" && ls\n",
+						"timeout": null,
+						"background": false,
+						"force": true
+					}
+				}
+			]
+		},
+		{
+			"document": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": 3}]]} }",
+			"results": [
+				{
+					"input": "",
+					"output": {}
+				},
+				{
+					"input": "{",
+					"output": {}
+				},
+				{
+					"input": "{ ",
+					"output": {}
+				},
+				{
+					"input": "{ \"",
+					"output": {}
+				},
+				{
+					"input": "{ \"e",
+					"output": {}
+				},
+				{
+					"input": "{ \"ed",
+					"output": {}
+				},
+				{
+					"input": "{ \"edi",
+					"output": {}
+				},
+				{
+					"input": "{ \"edit",
+					"output": {}
+				},
+				{
+					"input": "{ \"edits",
+					"output": {}
+				},
+				{
+					"input": "{ \"edits\"",
+					"output": {}
+				},
+				{
+					"input": "{ \"edits\":",
+					"output": {}
+				},
+				{
+					"input": "{ \"edits\": ",
+					"output": {}
+				},
+				{
+					"input": "{ \"edits\": [",
+					"output": {
+						"edits": []
+					}
+				},
+				{
+					"input": "{ \"edits\": [ ",
+					"output": {
+						"edits": []
+					}
+				},
+				{
+					"input": "{ \"edits\": [ {",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { ",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"o",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"ol",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"old",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldT",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldTe",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldTex",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\"",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\":",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": ",
+					"output": {
+						"edits": [
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"",
+					"output": {
+						"edits": [
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\t",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\t"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\",",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"n",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"ne",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"new",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newT",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newTe",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newTex",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\":",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"c",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "c"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"ca",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "ca"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "caf"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "caf"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "caf"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u0",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "caf"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "caf"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "caf"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" },",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"o",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"ol",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"old",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldT",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldTe",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldTex",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"n",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"ne",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"new",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newT",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newTe",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newTex",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": ""
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"}",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ]",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ],",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"n",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"ne",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nes",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nest",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"neste",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\":",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						]
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"d",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"de",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"dee",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\":",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": []
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1,",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2,",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"t",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"th",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"thr",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"thre",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\"",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\":",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": 3",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{
+										"three": 3
+									}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": 3}",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{
+										"three": 3
+									}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": 3}]",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{
+										"three": 3
+									}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": 3}]]",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{
+										"three": 3
+									}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": 3}]]}",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{
+										"three": 3
+									}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": 3}]]} ",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{
+										"three": 3
+									}
+								]
+							]
+						}
+					}
+				},
+				{
+					"input": "{ \"edits\": [ { \"oldText\": \"a\\tb\", \"newText\": \"caf\\u00e9 🙈\" }, {\"oldText\":\"\",\"newText\":\"x\"} ], \"nested\": {\"deep\": [1, [2, {\"three\": 3}]]} }",
+					"output": {
+						"edits": [
+							{
+								"oldText": "a\tb",
+								"newText": "café 🙈"
+							},
+							{
+								"oldText": "",
+								"newText": "x"
+							}
+						],
+						"nested": {
+							"deep": [
+								1,
+								[
+									2,
+									{
+										"three": 3
+									}
+								]
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"document": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Users\\dev\"}",
+			"results": [
+				{
+					"input": "",
+					"output": {}
+				},
+				{
+					"input": "{",
+					"output": {}
+				},
+				{
+					"input": "{\"",
+					"output": {}
+				},
+				{
+					"input": "{\"t",
+					"output": {}
+				},
+				{
+					"input": "{\"te",
+					"output": {}
+				},
+				{
+					"input": "{\"tex",
+					"output": {}
+				},
+				{
+					"input": "{\"text",
+					"output": {}
+				},
+				{
+					"input": "{\"text\"",
+					"output": {}
+				},
+				{
+					"input": "{\"text\":",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": ",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"",
+					"output": {
+						"text": ""
+					}
+				},
+				{
+					"input": "{\"text\": \"l",
+					"output": {
+						"text": "l"
+					}
+				},
+				{
+					"input": "{\"text\": \"li",
+					"output": {
+						"text": "li"
+					}
+				},
+				{
+					"input": "{\"text\": \"lin",
+					"output": {
+						"text": "lin"
+					}
+				},
+				{
+					"input": "{\"text\": \"line",
+					"output": {
+						"text": "line"
+					}
+				},
+				{
+					"input": "{\"text\": \"line ",
+					"output": {
+						"text": "line"
+					}
+				},
+				{
+					"input": "{\"text\": \"line o",
+					"output": {
+						"text": "line o"
+					}
+				},
+				{
+					"input": "{\"text\": \"line on",
+					"output": {
+						"text": "line on"
+					}
+				},
+				{
+					"input": "{\"text\": \"line one",
+					"output": {
+						"text": "line one"
+					}
+				},
+				{
+					"input": "{\"text\": \"line one\n",
+					"output": {
+						"text": "line one"
+					}
+				},
+				{
+					"input": "{\"text\": \"line one\nl",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nli",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nlin",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline ",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline t",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline tw",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\"",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\",",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", ",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"p",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"pa",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"pat",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\"",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\":",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": ",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\U",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Us",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Use",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\User",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Users",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Users\\",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Users\\d",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Users\\de",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Users\\dev",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Users\\dev\"",
+					"output": {}
+				},
+				{
+					"input": "{\"text\": \"line one\nline two\", \"path\": \"C:\\Users\\dev\"}",
+					"output": {
+						"text": "line one\nline two",
+						"path": "C:\\Users\\dev"
+					}
+				}
+			]
+		},
+		{
+			"document": "[\"a\", 1, true, null, {\"k\": \"v\"}]",
+			"results": [
+				{
+					"input": "",
+					"output": {}
+				},
+				{
+					"input": "[",
+					"output": []
+				},
+				{
+					"input": "[\"",
+					"output": [
+						""
+					]
+				},
+				{
+					"input": "[\"a",
+					"output": [
+						"a"
+					]
+				},
+				{
+					"input": "[\"a\"",
+					"output": [
+						"a"
+					]
+				},
+				{
+					"input": "[\"a\",",
+					"output": [
+						"a"
+					]
+				},
+				{
+					"input": "[\"a\", ",
+					"output": [
+						"a"
+					]
+				},
+				{
+					"input": "[\"a\", 1",
+					"output": [
+						"a",
+						1
+					]
+				},
+				{
+					"input": "[\"a\", 1,",
+					"output": [
+						"a",
+						1
+					]
+				},
+				{
+					"input": "[\"a\", 1, ",
+					"output": [
+						"a",
+						1
+					]
+				},
+				{
+					"input": "[\"a\", 1, t",
+					"output": [
+						"a",
+						1,
+						true
+					]
+				},
+				{
+					"input": "[\"a\", 1, tr",
+					"output": [
+						"a",
+						1,
+						true
+					]
+				},
+				{
+					"input": "[\"a\", 1, tru",
+					"output": [
+						"a",
+						1,
+						true
+					]
+				},
+				{
+					"input": "[\"a\", 1, true",
+					"output": [
+						"a",
+						1,
+						true
+					]
+				},
+				{
+					"input": "[\"a\", 1, true,",
+					"output": [
+						"a",
+						1,
+						true
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, ",
+					"output": [
+						"a",
+						1,
+						true
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, n",
+					"output": [
+						"a",
+						1,
+						true,
+						null
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, nu",
+					"output": [
+						"a",
+						1,
+						true,
+						null
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, nul",
+					"output": [
+						"a",
+						1,
+						true,
+						null
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null",
+					"output": [
+						"a",
+						1,
+						true,
+						null
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null,",
+					"output": [
+						"a",
+						1,
+						true,
+						null
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, ",
+					"output": [
+						"a",
+						1,
+						true,
+						null
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k\"",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k\":",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k\": ",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k\": \"",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{
+							"k": ""
+						}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k\": \"v",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{
+							"k": "v"
+						}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k\": \"v\"",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{
+							"k": "v"
+						}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k\": \"v\"}",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{
+							"k": "v"
+						}
+					]
+				},
+				{
+					"input": "[\"a\", 1, true, null, {\"k\": \"v\"}]",
+					"output": [
+						"a",
+						1,
+						true,
+						null,
+						{
+							"k": "v"
+						}
+					]
+				}
+			]
+		},
+		{
+			"document": "\"just a string\"",
+			"results": [
+				{
+					"input": "",
+					"output": {}
+				},
+				{
+					"input": "\"",
+					"output": ""
+				},
+				{
+					"input": "\"j",
+					"output": "j"
+				},
+				{
+					"input": "\"ju",
+					"output": "ju"
+				},
+				{
+					"input": "\"jus",
+					"output": "jus"
+				},
+				{
+					"input": "\"just",
+					"output": "just"
+				},
+				{
+					"input": "\"just ",
+					"output": "just"
+				},
+				{
+					"input": "\"just a",
+					"output": "just a"
+				},
+				{
+					"input": "\"just a ",
+					"output": "just a"
+				},
+				{
+					"input": "\"just a s",
+					"output": "just a s"
+				},
+				{
+					"input": "\"just a st",
+					"output": "just a st"
+				},
+				{
+					"input": "\"just a str",
+					"output": "just a str"
+				},
+				{
+					"input": "\"just a stri",
+					"output": "just a stri"
+				},
+				{
+					"input": "\"just a strin",
+					"output": "just a strin"
+				},
+				{
+					"input": "\"just a string",
+					"output": "just a string"
+				},
+				{
+					"input": "\"just a string\"",
+					"output": "just a string"
+				}
+			]
+		},
+		{
+			"document": "  42  ",
+			"results": [
+				{
+					"input": "",
+					"output": {}
+				},
+				{
+					"input": " ",
+					"output": {}
+				},
+				{
+					"input": "  ",
+					"output": {}
+				},
+				{
+					"input": "  4",
+					"output": 4
+				},
+				{
+					"input": "  42",
+					"output": 42
+				},
+				{
+					"input": "  42 ",
+					"output": 42
+				},
+				{
+					"input": "  42  ",
+					"output": 42
+				}
+			]
+		},
+		{
+			"document": "{\"special\": NaN, \"big\": Infinity, \"neg\": -Infinity}",
+			"results": [
+				{
+					"input": "",
+					"output": {}
+				},
+				{
+					"input": "{",
+					"output": {}
+				},
+				{
+					"input": "{\"",
+					"output": {}
+				},
+				{
+					"input": "{\"s",
+					"output": {}
+				},
+				{
+					"input": "{\"sp",
+					"output": {}
+				},
+				{
+					"input": "{\"spe",
+					"output": {}
+				},
+				{
+					"input": "{\"spec",
+					"output": {}
+				},
+				{
+					"input": "{\"speci",
+					"output": {}
+				},
+				{
+					"input": "{\"specia",
+					"output": {}
+				},
+				{
+					"input": "{\"special",
+					"output": {}
+				},
+				{
+					"input": "{\"special\"",
+					"output": {}
+				},
+				{
+					"input": "{\"special\":",
+					"output": {}
+				},
+				{
+					"input": "{\"special\": ",
+					"output": {}
+				},
+				{
+					"input": "{\"special\": N",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": Na",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN,",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, ",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"b",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"bi",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\"",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\":",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": ",
+					"output": {
+						"special": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": I",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": In",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Inf",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infi",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infin",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infini",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinit",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity,",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, ",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"n",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"ne",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\"",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\":",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": ",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -",
+					"output": {
+						"special": null,
+						"big": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -I",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -In",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -Inf",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -Infi",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -Infin",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -Infini",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -Infinit",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -Infinity",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				},
+				{
+					"input": "{\"special\": NaN, \"big\": Infinity, \"neg\": -Infinity}",
+					"output": {
+						"special": null,
+						"big": null,
+						"neg": null
+					}
+				}
+			]
+		}
+	],
+	"repaired": [
+		{
+			"input": "{\"a\": 1}",
+			"output": {
+				"a": 1
+			}
+		},
+		{
+			"input": "{\"text\": \"raw\nnewline\ttab\"}",
+			"output": {
+				"text": "raw\nnewline\ttab"
+			}
+		},
+		{
+			"input": "{\"path\": \"C:\\Users\\dev\\x\"}",
+			"output": {
+				"path": "C:\\Users\\dev\\x"
+			}
+		},
+		{
+			"input": "{\"bad\": \"\\q\"}",
+			"output": {
+				"bad": "\\q"
+			}
+		},
+		{
+			"input": "{\"unicode\": \"\\u00e9 \\uZZZZ\"}",
+			"error": true
+		},
+		{
+			"input": "{\"trailing\": \"\\",
+			"error": true
+		},
+		{
+			"input": "{\"a\": 1,}",
+			"error": true
+		},
+		{
+			"input": "[1, 2",
+			"error": true
+		}
+	]
+}

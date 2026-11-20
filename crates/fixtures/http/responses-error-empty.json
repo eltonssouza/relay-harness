@@ -1,0 +1,47 @@
+{
+	"name": "responses-error-empty",
+	"description": "An error without a body.",
+	"adapter": "responses",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "https://api.openai.com/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-parity"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 503,
+		"body": "",
+		"statusText": "Service Unavailable"
+	},
+	"stopReason": "error",
+	"errorMessage": "OpenAI API error (503): 503 status code (no body)"
+}

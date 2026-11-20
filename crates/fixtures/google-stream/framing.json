@@ -1,0 +1,116 @@
+{
+	"name": "framing",
+	"description": "CR and CRLF delimiters, an event without data, extra spaces, a split multi-byte character.",
+	"model": {
+		"id": "gemini-2.5-flash",
+		"name": "Gemini",
+		"api": "google-generative-ai",
+		"provider": "google",
+		"baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+		"reasoning": true,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0.3,
+			"output": 2.5,
+			"cacheRead": 0.075,
+			"cacheWrite": 0
+		},
+		"contextWindow": 1048576,
+		"maxTokens": 65536
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"sse": ": keep-alive\r\rdata:{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"café \"}]},\"index\":0}]}\r\n\r\nevent: ping\n\ndata:   {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"🙈\"}]},\"finishReason\":\"STOP\",\"index\":0}]}   \n\n",
+	"splits": [
+		68,
+		159,
+		13
+	],
+	"events": [
+		{
+			"type": "start"
+		},
+		{
+			"type": "text_start",
+			"contentIndex": 0
+		},
+		{
+			"type": "text_delta",
+			"contentIndex": 0,
+			"delta": "café "
+		},
+		{
+			"type": "text_delta",
+			"contentIndex": 0,
+			"delta": "🙈"
+		},
+		{
+			"type": "text_end",
+			"contentIndex": 0,
+			"content": "café 🙈"
+		},
+		{
+			"type": "done",
+			"reason": "stop",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "café 🙈"
+					}
+				],
+				"api": "google-generative-ai",
+				"provider": "google",
+				"model": "gemini-2.5-flash",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 0,
+				"rawStopReason": "STOP"
+			}
+		}
+	]
+}

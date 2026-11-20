@@ -1,7 +1,3 @@
-<p align="center">
-  <a href="https://www.npmjs.com/package/@relay-harness/coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@relay-harness/coding-agent?style=flat-square&logo=npm&logoColor=white" /></a>
-</p>
-
 > Open an issue before a pull request, and send pull requests to `develop`. See [CONTRIBUTING.md](https://github.com/eltonssouza/relay-harness/blob/develop/CONTRIBUTING.md).
 
 # Relay
@@ -16,13 +12,7 @@ Use Relay [interactively](docs/usage.md), automate it in [print or JSON mode](do
 
 ## Getting started
 
-Relay requires Node.js 22.19 or newer. Install it from npm:
-
-```bash
-npm install -g --ignore-scripts @relay-harness/coding-agent
-```
-
-Relay does not require dependency lifecycle scripts, so `--ignore-scripts` is safe. To update Relay, run the same command again. `relay update` updates installed packages and model catalogs, not Relay itself.
+Relay is not published to npm. Download the standalone binary for your platform (it needs no Node.js) or the desktop app's installer from a release run of the [release workflow](https://github.com/eltonssouza/relay-harness/actions/workflows/release.yml); the [quickstart](docs/quickstart.md#1-install-relay) explains both. To update Relay, download the new release; Relay tells you when one is out. `relay update` updates installed packages and model catalogs, not Relay itself.
 
 On macOS and Linux, Nix users can install the latest release with `nix profile add github:eltonssouza/relay-harness/stable`. See the [quickstart](docs/quickstart.md#1-install-relay) for updating and pinning releases.
 

@@ -16,9 +16,8 @@ cargo fmt --all --check
 cargo clippy --all-targets --locked -- -D warnings
 # The desktop shell embeds the screen built above (packages/desktop/dist).
 cargo clippy -p relay-desktop --all-targets --locked -- -D warnings
+cargo test -p relay-desktop --locked
 cargo test --locked
-node scripts/publish.mjs --dry-run
 ./test.sh
-npm run check:package-install
 
 printf '\nLocal CI passed. Record the platform, Node version and validated commit in the PR.\n'

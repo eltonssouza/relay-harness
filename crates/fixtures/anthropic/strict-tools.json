@@ -1,0 +1,268 @@
+{
+	"name": "strict-tools",
+	"description": "Strict tool schemas where the model supports them.",
+	"model": {
+		"id": "claude-test",
+		"name": "Claude Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "http://127.0.0.1:9",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 3,
+			"output": 15,
+			"cacheRead": 0.3,
+			"cacheWrite": 3.75
+		},
+		"contextWindow": 200000,
+		"maxTokens": 64000,
+		"compat": {
+			"supportsStrictTools": true
+		}
+	},
+	"apiKey": "sk-ant-api03-parity",
+	"options": {},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Strict tools.",
+			"toolsAdded": [
+				{
+					"name": "search",
+					"description": "Search.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"query": {
+								"type": "string"
+							},
+							"filters": {
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"enum": [
+											"a",
+											"b"
+										]
+									},
+									"tag": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							},
+							"tags": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"query"
+						]
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				},
+				{
+					"name": "page",
+					"description": "Page through results.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"page": {
+								"type": "number",
+								"minimum": 1
+							}
+						},
+						"required": [
+							"page"
+						]
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				},
+				{
+					"name": "read",
+					"description": "Read a file.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string",
+								"description": "File path"
+							},
+							"offset": {
+								"type": "number"
+							},
+							"limit": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Find a.",
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "claude-test",
+		"messages": [
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Find a.",
+						"cache_control": {
+							"type": "ephemeral"
+						}
+					}
+				]
+			}
+		],
+		"max_tokens": 64000,
+		"stream": true,
+		"system": [
+			{
+				"type": "text",
+				"text": "Strict tools.",
+				"cache_control": {
+					"type": "ephemeral"
+				}
+			}
+		],
+		"tools": [
+			{
+				"name": "search",
+				"description": "Search.",
+				"eager_input_streaming": true,
+				"strict": true,
+				"input_schema": {
+					"type": "object",
+					"properties": {
+						"query": {
+							"type": "string"
+						},
+						"filters": {
+							"anyOf": [
+								{
+									"type": "object",
+									"properties": {
+										"kind": {
+											"type": "string",
+											"enum": [
+												"a",
+												"b"
+											]
+										},
+										"tag": {
+											"anyOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "null"
+												}
+											]
+										}
+									},
+									"required": [
+										"kind",
+										"tag"
+									],
+									"additionalProperties": false
+								},
+								{
+									"type": "null"
+								}
+							]
+						},
+						"tags": {
+							"anyOf": [
+								{
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								},
+								{
+									"type": "null"
+								}
+							]
+						}
+					},
+					"required": [
+						"query",
+						"filters",
+						"tags"
+					],
+					"additionalProperties": false
+				}
+			},
+			{
+				"name": "page",
+				"description": "Page through results.",
+				"eager_input_streaming": true,
+				"input_schema": {
+					"type": "object",
+					"properties": {
+						"page": {
+							"type": "number",
+							"minimum": 1
+						}
+					},
+					"required": [
+						"page"
+					]
+				}
+			},
+			{
+				"name": "read",
+				"description": "Read a file.",
+				"eager_input_streaming": true,
+				"input_schema": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "File path"
+						},
+						"offset": {
+							"type": "number"
+						},
+						"limit": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"path"
+					]
+				},
+				"cache_control": {
+					"type": "ephemeral"
+				}
+			}
+		]
+	}
+}

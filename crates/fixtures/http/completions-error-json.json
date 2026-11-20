@@ -1,0 +1,50 @@
+{
+	"name": "completions-error-json",
+	"description": "An OpenAI-compatible error body.",
+	"adapter": "completions",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "openai-completions",
+		"provider": "openai",
+		"baseUrl": "https://api.openai.com/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-parity"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 401,
+		"body": "{\"error\":{\"message\":\"Incorrect API key provided.\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}",
+		"headers": {
+			"content-type": "application/json"
+		},
+		"statusText": "Unauthorized"
+	},
+	"stopReason": "error",
+	"errorMessage": "401: {\"message\":\"Incorrect API key provided.\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}"
+}

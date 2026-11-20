@@ -1,0 +1,36 @@
+{
+	"name": "openai-chatgpt-rejected",
+	"provider": "openai",
+	"credential": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-0",
+		"expires": 1699999999000,
+		"clientId": "client-1"
+	},
+	"answers": [
+		{
+			"match": "auth.openai.com/api/accounts/oauth/token",
+			"status": 400,
+			"body": "",
+			"headers": {
+				"content-type": "text/plain"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://auth.openai.com/api/accounts/oauth/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "grant_type=refresh_token&client_id=client-1&refresh_token=refresh-1&resource=https%3A%2F%2Fapi.openai.com%2Fv1"
+		}
+	],
+	"error": "OpenAI OAuth token request failed (400): ",
+	"auth": {
+		"apiKey": "access-0"
+	}
+}

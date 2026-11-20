@@ -1,0 +1,2271 @@
+{
+	"provider": "google-vertex",
+	"name": "Google Vertex AI",
+	"apiKey": {
+		"name": "Google Cloud credentials",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_PROJECT"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_PROJECT"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"v-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": {
+				"auth": {},
+				"source": "gcloud application default credentials"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [
+				"GCLOUD_PROJECT",
+				"GOOGLE_CLOUD_PROJECT",
+				"GOOGLE_CLOUD_LOCATION",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"~/.config/gcloud/application_default_credentials.json",
+				"v-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"GOOGLE_CLOUD_API_KEY": "c-GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS": "c-GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT": "c-GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT": "c-GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION": "c-GOOGLE_CLOUD_LOCATION"
+				}
+			},
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": [
+					"c-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"GOOGLE_CLOUD_API_KEY": "c-GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS": "c-GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT": "c-GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT": "c-GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION": "c-GOOGLE_CLOUD_LOCATION"
+				}
+			},
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [
+				"c-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"GOOGLE_CLOUD_API_KEY": "c-GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS": "c-GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT": "c-GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT": "c-GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION": "c-GOOGLE_CLOUD_LOCATION"
+				}
+			},
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": [
+					"c-GOOGLE_APPLICATION_CREDENTIALS"
+				]
+			},
+			"result": {
+				"auth": {},
+				"env": {
+					"GOOGLE_CLOUD_API_KEY": "c-GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS": "c-GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT": "c-GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT": "c-GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION": "c-GOOGLE_CLOUD_LOCATION"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [
+				"GOOGLE_CLOUD_API_KEY"
+			],
+			"files": [
+				"c-GOOGLE_APPLICATION_CREDENTIALS"
+			],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"GOOGLE_CLOUD_API_KEY": "c-GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS": "c-GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT": "c-GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT": "c-GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION": "c-GOOGLE_CLOUD_LOCATION"
+				}
+			},
+			"lookups": {
+				"env": [
+					"GOOGLE_CLOUD_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-GOOGLE_CLOUD_API_KEY"
+				},
+				"source": "GOOGLE_CLOUD_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"GOOGLE_CLOUD_API_KEY": "c-GOOGLE_CLOUD_API_KEY",
+					"GOOGLE_APPLICATION_CREDENTIALS": "c-GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT": "c-GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT": "c-GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION": "c-GOOGLE_CLOUD_LOCATION"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"GOOGLE_APPLICATION_CREDENTIALS",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"GOOGLE_CLOUD_LOCATION"
+				],
+				"files": [
+					"~/.config/gcloud/application_default_credentials.json"
+				]
+			},
+			"result": null
+		}
+	]
+}

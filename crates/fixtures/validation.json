@@ -1,0 +1,6269 @@
+{
+	"cases": [
+		{
+			"name": "read-0-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a.ts"
+			},
+			"result": {
+				"path": "a.ts"
+			}
+		},
+		{
+			"name": "read-0",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a.ts"
+			},
+			"result": {
+				"path": "a.ts"
+			}
+		},
+		{
+			"name": "read-1-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a.ts",
+				"offset": 10,
+				"limit": 5
+			},
+			"result": {
+				"path": "a.ts",
+				"offset": 10,
+				"limit": 5
+			}
+		},
+		{
+			"name": "read-1",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a.ts",
+				"offset": 10,
+				"limit": 5
+			},
+			"result": {
+				"path": "a.ts",
+				"offset": 10,
+				"limit": 5
+			}
+		},
+		{
+			"name": "read-2-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a.ts",
+				"offset": "10",
+				"limit": "5"
+			},
+			"result": {
+				"path": "a.ts",
+				"offset": 10,
+				"limit": 5
+			}
+		},
+		{
+			"name": "read-2",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a.ts",
+				"offset": "10",
+				"limit": "5"
+			},
+			"result": {
+				"path": "a.ts",
+				"offset": 10,
+				"limit": 5
+			}
+		},
+		{
+			"name": "read-3-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a.ts",
+				"offset": "ten"
+			},
+			"error": "Validation failed for tool \"read\":\n  - offset: must be number\n\nReceived arguments:\n{\n  \"path\": \"a.ts\",\n  \"offset\": \"ten\"\n}"
+		},
+		{
+			"name": "read-3",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a.ts",
+				"offset": "ten"
+			},
+			"error": "Validation failed for tool \"read\":\n  - offset: must be number\n\nReceived arguments:\n{\n  \"path\": \"a.ts\",\n  \"offset\": \"ten\"\n}"
+		},
+		{
+			"name": "read-4-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a.ts",
+				"offset": null,
+				"limit": null
+			},
+			"result": {
+				"path": "a.ts"
+			}
+		},
+		{
+			"name": "read-4",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a.ts",
+				"offset": null,
+				"limit": null
+			},
+			"result": {
+				"path": "a.ts"
+			}
+		},
+		{
+			"name": "read-5-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": 42
+			},
+			"result": {
+				"path": "42"
+			}
+		},
+		{
+			"name": "read-5",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": 42
+			},
+			"result": {
+				"path": "42"
+			}
+		},
+		{
+			"name": "read-6-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": true,
+				"offset": true
+			},
+			"result": {
+				"path": "true",
+				"offset": 1
+			}
+		},
+		{
+			"name": "read-6",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": true,
+				"offset": true
+			},
+			"result": {
+				"path": "true",
+				"offset": 1
+			}
+		},
+		{
+			"name": "read-7-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"offset": 1
+			},
+			"error": "Validation failed for tool \"read\":\n  - path: must have required properties path\n\nReceived arguments:\n{\n  \"offset\": 1\n}"
+		},
+		{
+			"name": "read-7",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"offset": 1
+			},
+			"error": "Validation failed for tool \"read\":\n  - path: must have required properties path\n\nReceived arguments:\n{\n  \"offset\": 1\n}"
+		},
+		{
+			"name": "read-8-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {},
+			"error": "Validation failed for tool \"read\":\n  - path: must have required properties path\n\nReceived arguments:\n{}"
+		},
+		{
+			"name": "read-8",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {},
+			"error": "Validation failed for tool \"read\":\n  - path: must have required properties path\n\nReceived arguments:\n{}"
+		},
+		{
+			"name": "read-9-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a.ts",
+				"extra": "kept"
+			},
+			"result": {
+				"path": "a.ts",
+				"extra": "kept"
+			}
+		},
+		{
+			"name": "read-9",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a.ts",
+				"extra": "kept"
+			},
+			"result": {
+				"path": "a.ts",
+				"extra": "kept"
+			}
+		},
+		{
+			"name": "read-10-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": null
+			},
+			"result": {
+				"path": "null"
+			}
+		},
+		{
+			"name": "read-10",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": null
+			},
+			"result": {
+				"path": ""
+			}
+		},
+		{
+			"name": "read-11-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a.ts",
+				"offset": " 12 "
+			},
+			"result": {
+				"path": "a.ts",
+				"offset": 12
+			}
+		},
+		{
+			"name": "read-11",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a.ts",
+				"offset": " 12 "
+			},
+			"result": {
+				"path": "a.ts",
+				"offset": 12
+			}
+		},
+		{
+			"name": "read-12-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a.ts",
+				"offset": ""
+			},
+			"result": {
+				"path": "a.ts",
+				"offset": 0
+			}
+		},
+		{
+			"name": "read-12",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a.ts",
+				"offset": ""
+			},
+			"error": "Validation failed for tool \"read\":\n  - offset: must be number\n\nReceived arguments:\n{\n  \"path\": \"a.ts\",\n  \"offset\": \"\"\n}"
+		},
+		{
+			"name": "read-13-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": [
+					"a.ts"
+				]
+			},
+			"error": "Validation failed for tool \"read\":\n  - path: must be string\n\nReceived arguments:\n{\n  \"path\": [\n    \"a.ts\"\n  ]\n}"
+		},
+		{
+			"name": "read-13",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to read (relative or absolute)"
+					},
+					"offset": {
+						"type": "number",
+						"description": "Line number to start reading from (1-indexed)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of lines to read"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": [
+					"a.ts"
+				]
+			},
+			"error": "Validation failed for tool \"read\":\n  - path: must be string\n\nReceived arguments:\n{\n  \"path\": [\n    \"a.ts\"\n  ]\n}"
+		},
+		{
+			"name": "write-0-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"content"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to write (relative or absolute)"
+					},
+					"content": {
+						"type": "string",
+						"description": "Content to write to the file"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"content": "x"
+			},
+			"result": {
+				"path": "a",
+				"content": "x"
+			}
+		},
+		{
+			"name": "write-0",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"content"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to write (relative or absolute)"
+					},
+					"content": {
+						"type": "string",
+						"description": "Content to write to the file"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"content": "x"
+			},
+			"result": {
+				"path": "a",
+				"content": "x"
+			}
+		},
+		{
+			"name": "write-1-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"content"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to write (relative or absolute)"
+					},
+					"content": {
+						"type": "string",
+						"description": "Content to write to the file"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a"
+			},
+			"error": "Validation failed for tool \"write\":\n  - content: must have required properties content\n\nReceived arguments:\n{\n  \"path\": \"a\"\n}"
+		},
+		{
+			"name": "write-1",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"content"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to write (relative or absolute)"
+					},
+					"content": {
+						"type": "string",
+						"description": "Content to write to the file"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a"
+			},
+			"error": "Validation failed for tool \"write\":\n  - content: must have required properties content\n\nReceived arguments:\n{\n  \"path\": \"a\"\n}"
+		},
+		{
+			"name": "write-2-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"content"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to write (relative or absolute)"
+					},
+					"content": {
+						"type": "string",
+						"description": "Content to write to the file"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"content": 5
+			},
+			"result": {
+				"path": "a",
+				"content": "5"
+			}
+		},
+		{
+			"name": "write-2",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"content"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to write (relative or absolute)"
+					},
+					"content": {
+						"type": "string",
+						"description": "Content to write to the file"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"content": 5
+			},
+			"result": {
+				"path": "a",
+				"content": "5"
+			}
+		},
+		{
+			"name": "write-3-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"content"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to write (relative or absolute)"
+					},
+					"content": {
+						"type": "string",
+						"description": "Content to write to the file"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"content": "x"
+			},
+			"error": "Validation failed for tool \"write\":\n  - path: must have required properties path\n\nReceived arguments:\n{\n  \"content\": \"x\"\n}"
+		},
+		{
+			"name": "write-3",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"content"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to write (relative or absolute)"
+					},
+					"content": {
+						"type": "string",
+						"description": "Content to write to the file"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"content": "x"
+			},
+			"error": "Validation failed for tool \"write\":\n  - path: must have required properties path\n\nReceived arguments:\n{\n  \"content\": \"x\"\n}"
+		},
+		{
+			"name": "edit-0-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x",
+						"newText": "y"
+					}
+				]
+			},
+			"result": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x",
+						"newText": "y"
+					}
+				]
+			}
+		},
+		{
+			"name": "edit-0",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x",
+						"newText": "y"
+					}
+				]
+			},
+			"result": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x",
+						"newText": "y"
+					}
+				]
+			}
+		},
+		{
+			"name": "edit-1-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"edits": []
+			},
+			"result": {
+				"path": "a",
+				"edits": []
+			}
+		},
+		{
+			"name": "edit-1",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"edits": []
+			},
+			"result": {
+				"path": "a",
+				"edits": []
+			}
+		},
+		{
+			"name": "edit-2-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x"
+					}
+				]
+			},
+			"error": "Validation failed for tool \"edit\":\n  - edits.0.newText: must have required properties newText\n\nReceived arguments:\n{\n  \"path\": \"a\",\n  \"edits\": [\n    {\n      \"oldText\": \"x\"\n    }\n  ]\n}"
+		},
+		{
+			"name": "edit-2",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x"
+					}
+				]
+			},
+			"error": "Validation failed for tool \"edit\":\n  - edits.0.newText: must have required properties newText\n\nReceived arguments:\n{\n  \"path\": \"a\",\n  \"edits\": [\n    {\n      \"oldText\": \"x\"\n    }\n  ]\n}"
+		},
+		{
+			"name": "edit-3-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": 1,
+						"newText": 2
+					}
+				]
+			},
+			"result": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "1",
+						"newText": "2"
+					}
+				]
+			}
+		},
+		{
+			"name": "edit-3",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": 1,
+						"newText": 2
+					}
+				]
+			},
+			"result": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "1",
+						"newText": "2"
+					}
+				]
+			}
+		},
+		{
+			"name": "edit-4-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"edits": {
+					"oldText": "x",
+					"newText": "y"
+				}
+			},
+			"result": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x",
+						"newText": "y"
+					}
+				]
+			}
+		},
+		{
+			"name": "edit-4",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"edits": {
+					"oldText": "x",
+					"newText": "y"
+				}
+			},
+			"error": "Validation failed for tool \"edit\":\n  - edits: must be array\n\nReceived arguments:\n{\n  \"path\": \"a\",\n  \"edits\": {\n    \"oldText\": \"x\",\n    \"newText\": \"y\"\n  }\n}"
+		},
+		{
+			"name": "edit-5-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"edits": "[]"
+			},
+			"error": "Validation failed for tool \"edit\":\n  - edits.0: must be object\n\nReceived arguments:\n{\n  \"path\": \"a\",\n  \"edits\": \"[]\"\n}"
+		},
+		{
+			"name": "edit-5",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"edits": "[]"
+			},
+			"error": "Validation failed for tool \"edit\":\n  - edits: must be array\n\nReceived arguments:\n{\n  \"path\": \"a\",\n  \"edits\": \"[]\"\n}"
+		},
+		{
+			"name": "edit-6-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x",
+						"newText": "y"
+					},
+					{
+						"newText": "z"
+					},
+					"bad"
+				]
+			},
+			"error": "Validation failed for tool \"edit\":\n  - edits.1.oldText: must have required properties oldText\n  - edits.2: must be object\n\nReceived arguments:\n{\n  \"path\": \"a\",\n  \"edits\": [\n    {\n      \"oldText\": \"x\",\n      \"newText\": \"y\"\n    },\n    {\n      \"newText\": \"z\"\n    },\n    \"bad\"\n  ]\n}"
+		},
+		{
+			"name": "edit-6",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "a",
+				"edits": [
+					{
+						"oldText": "x",
+						"newText": "y"
+					},
+					{
+						"newText": "z"
+					},
+					"bad"
+				]
+			},
+			"error": "Validation failed for tool \"edit\":\n  - edits.1.oldText: must have required properties oldText\n  - edits.2: must be object\n\nReceived arguments:\n{\n  \"path\": \"a\",\n  \"edits\": [\n    {\n      \"oldText\": \"x\",\n      \"newText\": \"y\"\n    },\n    {\n      \"newText\": \"z\"\n    },\n    \"bad\"\n  ]\n}"
+		},
+		{
+			"name": "edit-7-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"edits": [
+					{
+						"oldText": null,
+						"newText": "y"
+					}
+				]
+			},
+			"error": "Validation failed for tool \"edit\":\n  - path: must have required properties path\n\nReceived arguments:\n{\n  \"edits\": [\n    {\n      \"oldText\": null,\n      \"newText\": \"y\"\n    }\n  ]\n}"
+		},
+		{
+			"name": "edit-7",
+			"schema": {
+				"type": "object",
+				"required": [
+					"path",
+					"edits"
+				],
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Path to the file to edit (relative or absolute)"
+					},
+					"edits": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"oldText",
+								"newText"
+							],
+							"properties": {
+								"oldText": {
+									"type": "string",
+									"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+								},
+								"newText": {
+									"type": "string",
+									"description": "Replacement text for this targeted edit."
+								}
+							}
+						},
+						"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"edits": [
+					{
+						"oldText": null,
+						"newText": "y"
+					}
+				]
+			},
+			"error": "Validation failed for tool \"edit\":\n  - path: must have required properties path\n\nReceived arguments:\n{\n  \"edits\": [\n    {\n      \"oldText\": null,\n      \"newText\": \"y\"\n    }\n  ]\n}"
+		},
+		{
+			"name": "bash-0-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"command": "ls"
+			},
+			"result": {
+				"command": "ls"
+			}
+		},
+		{
+			"name": "bash-0",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"command": "ls"
+			},
+			"result": {
+				"command": "ls"
+			}
+		},
+		{
+			"name": "bash-1-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"command": "ls",
+				"timeout": "30"
+			},
+			"result": {
+				"command": "ls",
+				"timeout": 30
+			}
+		},
+		{
+			"name": "bash-1",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"command": "ls",
+				"timeout": "30"
+			},
+			"result": {
+				"command": "ls",
+				"timeout": 30
+			}
+		},
+		{
+			"name": "bash-2-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"command": "ls",
+				"timeout": 0
+			},
+			"result": {
+				"command": "ls",
+				"timeout": 0
+			}
+		},
+		{
+			"name": "bash-2",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"command": "ls",
+				"timeout": 0
+			},
+			"result": {
+				"command": "ls",
+				"timeout": 0
+			}
+		},
+		{
+			"name": "bash-3-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"command": [
+					"ls"
+				]
+			},
+			"error": "Validation failed for tool \"bash\":\n  - command: must be string\n\nReceived arguments:\n{\n  \"command\": [\n    \"ls\"\n  ]\n}"
+		},
+		{
+			"name": "bash-3",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"command": [
+					"ls"
+				]
+			},
+			"error": "Validation failed for tool \"bash\":\n  - command: must be string\n\nReceived arguments:\n{\n  \"command\": [\n    \"ls\"\n  ]\n}"
+		},
+		{
+			"name": "bash-4-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {},
+			"error": "Validation failed for tool \"bash\":\n  - command: must have required properties command\n\nReceived arguments:\n{}"
+		},
+		{
+			"name": "bash-4",
+			"schema": {
+				"type": "object",
+				"required": [
+					"command"
+				],
+				"properties": {
+					"command": {
+						"type": "string",
+						"description": "Shell command to execute"
+					},
+					"timeout": {
+						"type": "number",
+						"description": "Timeout in seconds (optional, no default timeout)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {},
+			"error": "Validation failed for tool \"bash\":\n  - command: must have required properties command\n\nReceived arguments:\n{}"
+		},
+		{
+			"name": "grep-0-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Search pattern (regex or literal string)"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory or file to search (default: current directory)"
+					},
+					"glob": {
+						"type": "string",
+						"description": "Filter files by glob pattern, e.g. '*.ts' or '**/*.spec.ts'"
+					},
+					"ignoreCase": {
+						"type": "boolean",
+						"description": "Case-insensitive search (default: false)"
+					},
+					"literal": {
+						"type": "boolean",
+						"description": "Treat pattern as literal string instead of regex (default: false)"
+					},
+					"context": {
+						"type": "number",
+						"description": "Number of lines to show before and after each match (default: 0)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of matches to return (default: 100)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"pattern": "x"
+			},
+			"result": {
+				"pattern": "x"
+			}
+		},
+		{
+			"name": "grep-0",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Search pattern (regex or literal string)"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory or file to search (default: current directory)"
+					},
+					"glob": {
+						"type": "string",
+						"description": "Filter files by glob pattern, e.g. '*.ts' or '**/*.spec.ts'"
+					},
+					"ignoreCase": {
+						"type": "boolean",
+						"description": "Case-insensitive search (default: false)"
+					},
+					"literal": {
+						"type": "boolean",
+						"description": "Treat pattern as literal string instead of regex (default: false)"
+					},
+					"context": {
+						"type": "number",
+						"description": "Number of lines to show before and after each match (default: 0)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of matches to return (default: 100)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"pattern": "x"
+			},
+			"result": {
+				"pattern": "x"
+			}
+		},
+		{
+			"name": "grep-1-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Search pattern (regex or literal string)"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory or file to search (default: current directory)"
+					},
+					"glob": {
+						"type": "string",
+						"description": "Filter files by glob pattern, e.g. '*.ts' or '**/*.spec.ts'"
+					},
+					"ignoreCase": {
+						"type": "boolean",
+						"description": "Case-insensitive search (default: false)"
+					},
+					"literal": {
+						"type": "boolean",
+						"description": "Treat pattern as literal string instead of regex (default: false)"
+					},
+					"context": {
+						"type": "number",
+						"description": "Number of lines to show before and after each match (default: 0)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of matches to return (default: 100)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"pattern": "x",
+				"ignoreCase": "true",
+				"context": "2",
+				"limit": 3.5
+			},
+			"result": {
+				"pattern": "x",
+				"ignoreCase": true,
+				"context": 2,
+				"limit": 3.5
+			}
+		},
+		{
+			"name": "grep-1",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Search pattern (regex or literal string)"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory or file to search (default: current directory)"
+					},
+					"glob": {
+						"type": "string",
+						"description": "Filter files by glob pattern, e.g. '*.ts' or '**/*.spec.ts'"
+					},
+					"ignoreCase": {
+						"type": "boolean",
+						"description": "Case-insensitive search (default: false)"
+					},
+					"literal": {
+						"type": "boolean",
+						"description": "Treat pattern as literal string instead of regex (default: false)"
+					},
+					"context": {
+						"type": "number",
+						"description": "Number of lines to show before and after each match (default: 0)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of matches to return (default: 100)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"pattern": "x",
+				"ignoreCase": "true",
+				"context": "2",
+				"limit": 3.5
+			},
+			"result": {
+				"pattern": "x",
+				"ignoreCase": true,
+				"context": 2,
+				"limit": 3.5
+			}
+		},
+		{
+			"name": "grep-2-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Search pattern (regex or literal string)"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory or file to search (default: current directory)"
+					},
+					"glob": {
+						"type": "string",
+						"description": "Filter files by glob pattern, e.g. '*.ts' or '**/*.spec.ts'"
+					},
+					"ignoreCase": {
+						"type": "boolean",
+						"description": "Case-insensitive search (default: false)"
+					},
+					"literal": {
+						"type": "boolean",
+						"description": "Treat pattern as literal string instead of regex (default: false)"
+					},
+					"context": {
+						"type": "number",
+						"description": "Number of lines to show before and after each match (default: 0)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of matches to return (default: 100)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"pattern": 1
+			},
+			"result": {
+				"pattern": "1"
+			}
+		},
+		{
+			"name": "grep-2",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Search pattern (regex or literal string)"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory or file to search (default: current directory)"
+					},
+					"glob": {
+						"type": "string",
+						"description": "Filter files by glob pattern, e.g. '*.ts' or '**/*.spec.ts'"
+					},
+					"ignoreCase": {
+						"type": "boolean",
+						"description": "Case-insensitive search (default: false)"
+					},
+					"literal": {
+						"type": "boolean",
+						"description": "Treat pattern as literal string instead of regex (default: false)"
+					},
+					"context": {
+						"type": "number",
+						"description": "Number of lines to show before and after each match (default: 0)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of matches to return (default: 100)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"pattern": 1
+			},
+			"result": {
+				"pattern": "1"
+			}
+		},
+		{
+			"name": "find-0-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Glob pattern to match files, e.g. '*.ts', '**/*.json', or 'src/**/*.spec.ts'"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory to search in (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of results (default: 1000)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"pattern": "*.ts"
+			},
+			"result": {
+				"pattern": "*.ts"
+			}
+		},
+		{
+			"name": "find-0",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Glob pattern to match files, e.g. '*.ts', '**/*.json', or 'src/**/*.spec.ts'"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory to search in (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of results (default: 1000)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"pattern": "*.ts"
+			},
+			"result": {
+				"pattern": "*.ts"
+			}
+		},
+		{
+			"name": "find-1-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Glob pattern to match files, e.g. '*.ts', '**/*.json', or 'src/**/*.spec.ts'"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory to search in (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of results (default: 1000)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"pattern": "*.ts",
+				"limit": "x"
+			},
+			"error": "Validation failed for tool \"find\":\n  - limit: must be number\n\nReceived arguments:\n{\n  \"pattern\": \"*.ts\",\n  \"limit\": \"x\"\n}"
+		},
+		{
+			"name": "find-1",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Glob pattern to match files, e.g. '*.ts', '**/*.json', or 'src/**/*.spec.ts'"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory to search in (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of results (default: 1000)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"pattern": "*.ts",
+				"limit": "x"
+			},
+			"error": "Validation failed for tool \"find\":\n  - limit: must be number\n\nReceived arguments:\n{\n  \"pattern\": \"*.ts\",\n  \"limit\": \"x\"\n}"
+		},
+		{
+			"name": "find-2-typebox",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Glob pattern to match files, e.g. '*.ts', '**/*.json', or 'src/**/*.spec.ts'"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory to search in (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of results (default: 1000)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {},
+			"error": "Validation failed for tool \"find\":\n  - pattern: must have required properties pattern\n\nReceived arguments:\n{}"
+		},
+		{
+			"name": "find-2",
+			"schema": {
+				"type": "object",
+				"required": [
+					"pattern"
+				],
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"description": "Glob pattern to match files, e.g. '*.ts', '**/*.json', or 'src/**/*.spec.ts'"
+					},
+					"path": {
+						"type": "string",
+						"description": "Directory to search in (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of results (default: 1000)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {},
+			"error": "Validation failed for tool \"find\":\n  - pattern: must have required properties pattern\n\nReceived arguments:\n{}"
+		},
+		{
+			"name": "ls-0-typebox",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Directory to list (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of entries to return (default: 500)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {},
+			"result": {}
+		},
+		{
+			"name": "ls-0",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Directory to list (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of entries to return (default: 500)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {},
+			"result": {}
+		},
+		{
+			"name": "ls-1-typebox",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Directory to list (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of entries to return (default: 500)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": "."
+			},
+			"result": {
+				"path": "."
+			}
+		},
+		{
+			"name": "ls-1",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Directory to list (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of entries to return (default: 500)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": "."
+			},
+			"result": {
+				"path": "."
+			}
+		},
+		{
+			"name": "ls-2-typebox",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Directory to list (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of entries to return (default: 500)"
+					}
+				}
+			},
+			"typebox": true,
+			"args": {
+				"path": 1,
+				"limit": "4"
+			},
+			"result": {
+				"path": "1",
+				"limit": 4
+			}
+		},
+		{
+			"name": "ls-2",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "Directory to list (default: current directory)"
+					},
+					"limit": {
+						"type": "number",
+						"description": "Maximum number of entries to return (default: 500)"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"path": 1,
+				"limit": "4"
+			},
+			"result": {
+				"path": "1",
+				"limit": 4
+			}
+		},
+		{
+			"name": "search-0",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust"
+			},
+			"result": {
+				"query": "rust"
+			}
+		},
+		{
+			"name": "search-1",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": ""
+			},
+			"error": "Validation failed for tool \"search\":\n  - query: must not have fewer than 1 characters\n\nReceived arguments:\n{\n  \"query\": \"\"\n}"
+		},
+		{
+			"name": "search-2",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "aaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"error": "Validation failed for tool \"search\":\n  - query: must not have more than 20 characters\n\nReceived arguments:\n{\n  \"query\": \"aaaaaaaaaaaaaaaaaaaaaaaaa\"\n}"
+		},
+		{
+			"name": "search-3",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"limit": "7"
+			},
+			"result": {
+				"query": "rust",
+				"limit": 7
+			}
+		},
+		{
+			"name": "search-4",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"limit": 7.5
+			},
+			"error": "Validation failed for tool \"search\":\n  - limit: must be integer\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"limit\": 7.5\n}"
+		},
+		{
+			"name": "search-5",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"limit": 0
+			},
+			"error": "Validation failed for tool \"search\":\n  - limit: must be >= 1\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"limit\": 0\n}"
+		},
+		{
+			"name": "search-6",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"limit": 51
+			},
+			"error": "Validation failed for tool \"search\":\n  - limit: must be <= 50\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"limit\": 51\n}"
+		},
+		{
+			"name": "search-7",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"exact": "false"
+			},
+			"result": {
+				"query": "rust",
+				"exact": false
+			}
+		},
+		{
+			"name": "search-8",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"exact": 1
+			},
+			"result": {
+				"query": "rust",
+				"exact": true
+			}
+		},
+		{
+			"name": "search-9",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"exact": "yes"
+			},
+			"error": "Validation failed for tool \"search\":\n  - exact: must be boolean\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"exact\": \"yes\"\n}"
+		},
+		{
+			"name": "search-10",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"tags": []
+			},
+			"error": "Validation failed for tool \"search\":\n  - tags: must not have fewer than 1 items\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"tags\": []\n}"
+		},
+		{
+			"name": "search-11",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"tags": [
+					"a",
+					"b",
+					"c",
+					"d"
+				]
+			},
+			"error": "Validation failed for tool \"search\":\n  - tags: must not have more than 3 items\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"tags\": [\n    \"a\",\n    \"b\",\n    \"c\",\n    \"d\"\n  ]\n}"
+		},
+		{
+			"name": "search-12",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"tags": [
+					1,
+					true
+				]
+			},
+			"result": {
+				"query": "rust",
+				"tags": [
+					"1",
+					"true"
+				]
+			}
+		},
+		{
+			"name": "search-13",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"mode": "slow"
+			},
+			"error": "Validation failed for tool \"search\":\n  - mode: must be equal to one of the allowed values\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"mode\": \"slow\"\n}"
+		},
+		{
+			"name": "search-14",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"cursor": null
+			},
+			"result": {
+				"query": "rust",
+				"cursor": null
+			}
+		},
+		{
+			"name": "search-15",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"cursor": 5
+			},
+			"result": {
+				"query": "rust",
+				"cursor": "5"
+			}
+		},
+		{
+			"name": "search-16",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"score": 0
+			},
+			"error": "Validation failed for tool \"search\":\n  - score: must be > 0\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"score\": 0\n}"
+		},
+		{
+			"name": "search-17",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"score": 1
+			},
+			"error": "Validation failed for tool \"search\":\n  - score: must be < 1\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"score\": 1\n}"
+		},
+		{
+			"name": "search-18",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"score": "0.5"
+			},
+			"result": {
+				"query": "rust",
+				"score": 0.5
+			}
+		},
+		{
+			"name": "search-19",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"unknown": 1
+			},
+			"error": "Validation failed for tool \"search\":\n  - unknown: schema is false\n  - root: must not have additional properties\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"unknown\": 1\n}"
+		},
+		{
+			"name": "search-20",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": 5,
+				"limit": "x",
+				"exact": "maybe",
+				"tags": "a",
+				"unknown": true
+			},
+			"error": "Validation failed for tool \"search\":\n  - unknown: schema is false\n  - root: must not have additional properties\n  - limit: must be integer\n  - exact: must be boolean\n  - tags: must be array\n\nReceived arguments:\n{\n  \"query\": 5,\n  \"limit\": \"x\",\n  \"exact\": \"maybe\",\n  \"tags\": \"a\",\n  \"unknown\": true\n}"
+		},
+		{
+			"name": "search-21",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "rust",
+				"cursor": {}
+			},
+			"error": "Validation failed for tool \"search\":\n  - cursor: must be either string or null\n\nReceived arguments:\n{\n  \"query\": \"rust\",\n  \"cursor\": {}\n}"
+		},
+		{
+			"name": "search-22",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "éééééééééééééééééééé"
+			},
+			"result": {
+				"query": "éééééééééééééééééééé"
+			}
+		},
+		{
+			"name": "search-23",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "ééééééééééééééééééééé"
+			},
+			"error": "Validation failed for tool \"search\":\n  - query: must not have more than 20 characters\n\nReceived arguments:\n{\n  \"query\": \"ééééééééééééééééééééé\"\n}"
+		},
+		{
+			"name": "search-24",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "👨‍👩‍👧"
+			},
+			"result": {
+				"query": "👨‍👩‍👧"
+			}
+		},
+		{
+			"name": "search-25",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷"
+			},
+			"result": {
+				"query": "🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷"
+			}
+		},
+		{
+			"name": "search-26",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "😀😀😀😀😀😀😀😀😀😀😀"
+			},
+			"result": {
+				"query": "😀😀😀😀😀😀😀😀😀😀😀"
+			}
+		},
+		{
+			"name": "search-27",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {
+				"query": "abc️abc️abc️abc️abc️abc️"
+			},
+			"result": {
+				"query": "abc️abc️abc️abc️abc️abc️"
+			}
+		},
+		{
+			"name": "search-28",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 20
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 50
+					},
+					"exact": {
+						"type": "boolean"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"maxItems": 3
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"deep"
+						]
+					},
+					"cursor": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"score": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": false
+			},
+			"typebox": false,
+			"args": {},
+			"error": "Validation failed for tool \"search\":\n  - query: must have required properties query\n\nReceived arguments:\n{}"
+		},
+		{
+			"name": "union-0",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": 1
+			},
+			"result": {
+				"value": 1
+			}
+		},
+		{
+			"name": "union-1",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": "x"
+			},
+			"result": {
+				"value": "x"
+			}
+		},
+		{
+			"name": "union-2",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": true
+			},
+			"result": {
+				"value": 1
+			}
+		},
+		{
+			"name": "union-3",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": null
+			},
+			"result": {
+				"value": 0
+			}
+		},
+		{
+			"name": "union-4",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": [
+					1
+				]
+			},
+			"error": "Validation failed for tool \"union\":\n  - value: must be number\n  - value: must be string\n  - value: must match a schema in anyOf\n\nReceived arguments:\n{\n  \"value\": [\n    1\n  ]\n}"
+		},
+		{
+			"name": "union-5",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": 1,
+				"choice": "all"
+			},
+			"result": {
+				"value": 1,
+				"choice": "all"
+			}
+		},
+		{
+			"name": "union-6",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": 1,
+				"choice": "some"
+			},
+			"error": "Validation failed for tool \"union\":\n  - choice: must be equal to constant\n  - choice: must be integer\n  - choice: must match exactly one schema in oneOf\n\nReceived arguments:\n{\n  \"value\": 1,\n  \"choice\": \"some\"\n}"
+		},
+		{
+			"name": "union-7",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": 1,
+				"choice": 2
+			},
+			"result": {
+				"value": 1,
+				"choice": 2
+			}
+		},
+		{
+			"name": "union-8",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": 1,
+				"choice": "2"
+			},
+			"result": {
+				"value": 1,
+				"choice": 2
+			}
+		},
+		{
+			"name": "union-9",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": 1,
+				"nothing": ""
+			},
+			"result": {
+				"value": 1,
+				"nothing": null
+			}
+		},
+		{
+			"name": "union-10",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": 1,
+				"nothing": 0
+			},
+			"result": {
+				"value": 1,
+				"nothing": null
+			}
+		},
+		{
+			"name": "union-11",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"value": {
+						"anyOf": [
+							{
+								"type": "number"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"choice": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": "all"
+							},
+							{
+								"type": "integer"
+							}
+						]
+					},
+					"nothing": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"value"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"value": 1,
+				"nothing": "x"
+			},
+			"error": "Validation failed for tool \"union\":\n  - nothing: must be null\n\nReceived arguments:\n{\n  \"value\": 1,\n  \"nothing\": \"x\"\n}"
+		},
+		{
+			"name": "nested-0",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": {
+					"url": "https://a.b"
+				}
+			},
+			"result": {
+				"target": {
+					"url": "https://a.b"
+				}
+			}
+		},
+		{
+			"name": "nested-1",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": {
+					"url": "ftp://a.b"
+				}
+			},
+			"error": "Validation failed for tool \"nested\":\n  - target.url: must match pattern \"^https?://\"\n\nReceived arguments:\n{\n  \"target\": {\n    \"url\": \"ftp://a.b\"\n  }\n}"
+		},
+		{
+			"name": "nested-2",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": {
+					"url": "https://a.b",
+					"port": "8080",
+					"label": "x"
+				}
+			},
+			"result": {
+				"target": {
+					"url": "https://a.b",
+					"port": 8080,
+					"label": "x"
+				}
+			}
+		},
+		{
+			"name": "nested-3",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": {
+					"url": "https://a.b",
+					"extra": 5
+				}
+			},
+			"result": {
+				"target": {
+					"url": "https://a.b",
+					"extra": "5"
+				}
+			}
+		},
+		{
+			"name": "nested-4",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": {
+					"port": 1
+				}
+			},
+			"error": "Validation failed for tool \"nested\":\n  - target.url: must have required properties url\n\nReceived arguments:\n{\n  \"target\": {\n    \"port\": 1\n  }\n}"
+		},
+		{
+			"name": "nested-5",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": "https://a.b"
+			},
+			"error": "Validation failed for tool \"nested\":\n  - target: must be object\n\nReceived arguments:\n{\n  \"target\": \"https://a.b\"\n}"
+		},
+		{
+			"name": "nested-6",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": {
+					"url": "https://a.b"
+				},
+				"points": [
+					{
+						"x": 1
+					},
+					{
+						"x": "2"
+					},
+					{}
+				]
+			},
+			"error": "Validation failed for tool \"nested\":\n  - points.2.x: must have required properties x\n\nReceived arguments:\n{\n  \"target\": {\n    \"url\": \"https://a.b\"\n  },\n  \"points\": [\n    {\n      \"x\": 1\n    },\n    {\n      \"x\": \"2\"\n    },\n    {}\n  ]\n}"
+		},
+		{
+			"name": "nested-7",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": {
+					"url": "https://a.b"
+				},
+				"pair": [
+					"a",
+					"2"
+				]
+			},
+			"result": {
+				"target": {
+					"url": "https://a.b"
+				},
+				"pair": [
+					"a",
+					2
+				]
+			}
+		},
+		{
+			"name": "nested-8",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"target": {
+						"type": "object",
+						"properties": {
+							"url": {
+								"type": "string",
+								"pattern": "^https?://"
+							},
+							"port": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"points": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					},
+					"pair": {
+						"type": "array",
+						"items": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number"
+							}
+						]
+					}
+				},
+				"required": [
+					"target"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"target": {
+					"url": "https://a.b"
+				},
+				"pair": [
+					1,
+					2,
+					3
+				]
+			},
+			"result": {
+				"target": {
+					"url": "https://a.b"
+				},
+				"pair": [
+					"1",
+					2,
+					3
+				]
+			}
+		},
+		{
+			"name": "referenced-0",
+			"schema": {
+				"type": "object",
+				"$defs": {
+					"name": {
+						"type": "string",
+						"minLength": 2
+					}
+				},
+				"properties": {
+					"first": {
+						"$ref": "#/$defs/name"
+					},
+					"last": {
+						"$ref": "#/$defs/name"
+					}
+				},
+				"required": [
+					"first"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"first": "Ada"
+			},
+			"result": {
+				"first": "Ada"
+			}
+		},
+		{
+			"name": "referenced-1",
+			"schema": {
+				"type": "object",
+				"$defs": {
+					"name": {
+						"type": "string",
+						"minLength": 2
+					}
+				},
+				"properties": {
+					"first": {
+						"$ref": "#/$defs/name"
+					},
+					"last": {
+						"$ref": "#/$defs/name"
+					}
+				},
+				"required": [
+					"first"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"first": "A"
+			},
+			"error": "Validation failed for tool \"referenced\":\n  - first: must not have fewer than 2 characters\n\nReceived arguments:\n{\n  \"first\": \"A\"\n}"
+		},
+		{
+			"name": "referenced-2",
+			"schema": {
+				"type": "object",
+				"$defs": {
+					"name": {
+						"type": "string",
+						"minLength": 2
+					}
+				},
+				"properties": {
+					"first": {
+						"$ref": "#/$defs/name"
+					},
+					"last": {
+						"$ref": "#/$defs/name"
+					}
+				},
+				"required": [
+					"first"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"first": "Ada",
+				"last": 7
+			},
+			"error": "Validation failed for tool \"referenced\":\n  - last: must be string\n\nReceived arguments:\n{\n  \"first\": \"Ada\",\n  \"last\": 7\n}"
+		},
+		{
+			"name": "referenced-3",
+			"schema": {
+				"type": "object",
+				"$defs": {
+					"name": {
+						"type": "string",
+						"minLength": 2
+					}
+				},
+				"properties": {
+					"first": {
+						"$ref": "#/$defs/name"
+					},
+					"last": {
+						"$ref": "#/$defs/name"
+					}
+				},
+				"required": [
+					"first"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"last": "Lovelace"
+			},
+			"error": "Validation failed for tool \"referenced\":\n  - first: must have required properties first\n\nReceived arguments:\n{\n  \"last\": \"Lovelace\"\n}"
+		},
+		{
+			"name": "referenced-4",
+			"schema": {
+				"type": "object",
+				"$defs": {
+					"name": {
+						"type": "string",
+						"minLength": 2
+					}
+				},
+				"properties": {
+					"first": {
+						"$ref": "#/$defs/name"
+					},
+					"last": {
+						"$ref": "#/$defs/name"
+					}
+				},
+				"required": [
+					"first"
+				]
+			},
+			"typebox": false,
+			"args": {
+				"first": "é"
+			},
+			"error": "Validation failed for tool \"referenced\":\n  - first: must not have fewer than 2 characters\n\nReceived arguments:\n{\n  \"first\": \"é\"\n}"
+		},
+		{
+			"name": "constrained-0",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"count": {
+						"type": "number",
+						"multipleOf": 5
+					},
+					"letters": {
+						"type": "string",
+						"format": "email"
+					},
+					"items": {
+						"type": "array",
+						"uniqueItems": true
+					},
+					"config": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 2
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"count": 10
+			},
+			"result": {
+				"count": 10
+			}
+		},
+		{
+			"name": "constrained-1",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"count": {
+						"type": "number",
+						"multipleOf": 5
+					},
+					"letters": {
+						"type": "string",
+						"format": "email"
+					},
+					"items": {
+						"type": "array",
+						"uniqueItems": true
+					},
+					"config": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 2
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"count": 7
+			},
+			"error": "Validation failed for tool \"constrained\":\n  - count: must be multiple of 5\n\nReceived arguments:\n{\n  \"count\": 7\n}"
+		},
+		{
+			"name": "constrained-2",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"count": {
+						"type": "number",
+						"multipleOf": 5
+					},
+					"letters": {
+						"type": "string",
+						"format": "email"
+					},
+					"items": {
+						"type": "array",
+						"uniqueItems": true
+					},
+					"config": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 2
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"letters": "a@b.co"
+			},
+			"result": {
+				"letters": "a@b.co"
+			}
+		},
+		{
+			"name": "constrained-3",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"count": {
+						"type": "number",
+						"multipleOf": 5
+					},
+					"letters": {
+						"type": "string",
+						"format": "email"
+					},
+					"items": {
+						"type": "array",
+						"uniqueItems": true
+					},
+					"config": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 2
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"letters": "not-an-email"
+			},
+			"error": "Validation failed for tool \"constrained\":\n  - letters: must match format \"email\"\n\nReceived arguments:\n{\n  \"letters\": \"not-an-email\"\n}"
+		},
+		{
+			"name": "constrained-4",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"count": {
+						"type": "number",
+						"multipleOf": 5
+					},
+					"letters": {
+						"type": "string",
+						"format": "email"
+					},
+					"items": {
+						"type": "array",
+						"uniqueItems": true
+					},
+					"config": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 2
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"items": [
+					1,
+					2,
+					1
+				]
+			},
+			"error": "Validation failed for tool \"constrained\":\n  - items: must not have duplicate items\n\nReceived arguments:\n{\n  \"items\": [\n    1,\n    2,\n    1\n  ]\n}"
+		},
+		{
+			"name": "constrained-5",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"count": {
+						"type": "number",
+						"multipleOf": 5
+					},
+					"letters": {
+						"type": "string",
+						"format": "email"
+					},
+					"items": {
+						"type": "array",
+						"uniqueItems": true
+					},
+					"config": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 2
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"items": [
+					{
+						"a": 1
+					},
+					{
+						"a": 1
+					}
+				]
+			},
+			"error": "Validation failed for tool \"constrained\":\n  - items: must not have duplicate items\n\nReceived arguments:\n{\n  \"items\": [\n    {\n      \"a\": 1\n    },\n    {\n      \"a\": 1\n    }\n  ]\n}"
+		},
+		{
+			"name": "constrained-6",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"count": {
+						"type": "number",
+						"multipleOf": 5
+					},
+					"letters": {
+						"type": "string",
+						"format": "email"
+					},
+					"items": {
+						"type": "array",
+						"uniqueItems": true
+					},
+					"config": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 2
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"config": {}
+			},
+			"error": "Validation failed for tool \"constrained\":\n  - config: must not have fewer than 1 properties\n\nReceived arguments:\n{\n  \"config\": {}\n}"
+		},
+		{
+			"name": "constrained-7",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"count": {
+						"type": "number",
+						"multipleOf": 5
+					},
+					"letters": {
+						"type": "string",
+						"format": "email"
+					},
+					"items": {
+						"type": "array",
+						"uniqueItems": true
+					},
+					"config": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 2
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"config": {
+					"a": 1,
+					"b": 2,
+					"c": 3
+				}
+			},
+			"error": "Validation failed for tool \"constrained\":\n  - config: must not have more than 2 properties\n\nReceived arguments:\n{\n  \"config\": {\n    \"a\": 1,\n    \"b\": 2,\n    \"c\": 3\n  }\n}"
+		},
+		{
+			"name": "loose-0",
+			"schema": {
+				"type": "object"
+			},
+			"typebox": false,
+			"args": {},
+			"result": {}
+		},
+		{
+			"name": "loose-1",
+			"schema": {
+				"type": "object"
+			},
+			"typebox": false,
+			"args": {
+				"anything": [
+					1,
+					{
+						"two": null
+					}
+				]
+			},
+			"result": {
+				"anything": [
+					1,
+					{
+						"two": null
+					}
+				]
+			}
+		},
+		{
+			"name": "loose-2",
+			"schema": {
+				"type": "object"
+			},
+			"typebox": false,
+			"args": [],
+			"error": "Validation failed for tool \"loose\":\n  - root: must be object\n\nReceived arguments:\n[]"
+		},
+		{
+			"name": "formats-0",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"date-time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"date": {
+						"type": "string",
+						"format": "date"
+					},
+					"time": {
+						"type": "string",
+						"format": "time"
+					},
+					"duration": {
+						"type": "string",
+						"format": "duration"
+					},
+					"uuid": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"uri": {
+						"type": "string",
+						"format": "uri"
+					},
+					"uri-reference": {
+						"type": "string",
+						"format": "uri-reference"
+					},
+					"ipv4": {
+						"type": "string",
+						"format": "ipv4"
+					},
+					"ipv6": {
+						"type": "string",
+						"format": "ipv6"
+					},
+					"hostname": {
+						"type": "string",
+						"format": "hostname"
+					},
+					"json-pointer": {
+						"type": "string",
+						"format": "json-pointer"
+					},
+					"regex": {
+						"type": "string",
+						"format": "regex"
+					},
+					"unknown-format": {
+						"type": "string",
+						"format": "unknown-format"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"date-time": "2024-02-29T23:59:60Z",
+				"date": "2024-02-29",
+				"time": "12:30:00+01:00",
+				"duration": "P1Y2M3DT4H5M6S",
+				"uuid": "123e4567-e89b-12d3-a456-426614174000",
+				"uri": "https://example.com/a?b=c#d",
+				"uri-reference": "../a/b",
+				"ipv4": "192.168.0.1",
+				"ipv6": "2001:db8::1",
+				"hostname": "example.com",
+				"json-pointer": "/a/b~1c",
+				"regex": "^a+$",
+				"unknown-format": "anything"
+			},
+			"result": {
+				"date-time": "2024-02-29T23:59:60Z",
+				"date": "2024-02-29",
+				"time": "12:30:00+01:00",
+				"duration": "P1Y2M3DT4H5M6S",
+				"uuid": "123e4567-e89b-12d3-a456-426614174000",
+				"uri": "https://example.com/a?b=c#d",
+				"uri-reference": "../a/b",
+				"ipv4": "192.168.0.1",
+				"ipv6": "2001:db8::1",
+				"hostname": "example.com",
+				"json-pointer": "/a/b~1c",
+				"regex": "^a+$",
+				"unknown-format": "anything"
+			}
+		},
+		{
+			"name": "formats-1",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"date-time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"date": {
+						"type": "string",
+						"format": "date"
+					},
+					"time": {
+						"type": "string",
+						"format": "time"
+					},
+					"duration": {
+						"type": "string",
+						"format": "duration"
+					},
+					"uuid": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"uri": {
+						"type": "string",
+						"format": "uri"
+					},
+					"uri-reference": {
+						"type": "string",
+						"format": "uri-reference"
+					},
+					"ipv4": {
+						"type": "string",
+						"format": "ipv4"
+					},
+					"ipv6": {
+						"type": "string",
+						"format": "ipv6"
+					},
+					"hostname": {
+						"type": "string",
+						"format": "hostname"
+					},
+					"json-pointer": {
+						"type": "string",
+						"format": "json-pointer"
+					},
+					"regex": {
+						"type": "string",
+						"format": "regex"
+					},
+					"unknown-format": {
+						"type": "string",
+						"format": "unknown-format"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"date-time": "2023-02-29T10:00:00Z",
+				"date": "2024-13-01",
+				"time": "12:30:00",
+				"duration": "P",
+				"uuid": "not-a-uuid",
+				"uri": "no scheme",
+				"ipv4": "256.1.1.1",
+				"ipv6": "1:2:3",
+				"hostname": "-bad-.com",
+				"json-pointer": "a/b",
+				"regex": "("
+			},
+			"error": "Validation failed for tool \"formats\":\n  - date-time: must match format \"date-time\"\n  - date: must match format \"date\"\n  - time: must match format \"time\"\n  - duration: must match format \"duration\"\n  - uuid: must match format \"uuid\"\n  - uri: must match format \"uri\"\n  - ipv4: must match format \"ipv4\"\n  - ipv6: must match format \"ipv6\"\n\nReceived arguments:\n{\n  \"date-time\": \"2023-02-29T10:00:00Z\",\n  \"date\": \"2024-13-01\",\n  \"time\": \"12:30:00\",\n  \"duration\": \"P\",\n  \"uuid\": \"not-a-uuid\",\n  \"uri\": \"no scheme\",\n  \"ipv4\": \"256.1.1.1\",\n  \"ipv6\": \"1:2:3\",\n  \"hostname\": \"-bad-.com\",\n  \"json-pointer\": \"a/b\",\n  \"regex\": \"(\"\n}"
+		},
+		{
+			"name": "formats-2",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"date-time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"date": {
+						"type": "string",
+						"format": "date"
+					},
+					"time": {
+						"type": "string",
+						"format": "time"
+					},
+					"duration": {
+						"type": "string",
+						"format": "duration"
+					},
+					"uuid": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"uri": {
+						"type": "string",
+						"format": "uri"
+					},
+					"uri-reference": {
+						"type": "string",
+						"format": "uri-reference"
+					},
+					"ipv4": {
+						"type": "string",
+						"format": "ipv4"
+					},
+					"ipv6": {
+						"type": "string",
+						"format": "ipv6"
+					},
+					"hostname": {
+						"type": "string",
+						"format": "hostname"
+					},
+					"json-pointer": {
+						"type": "string",
+						"format": "json-pointer"
+					},
+					"regex": {
+						"type": "string",
+						"format": "regex"
+					},
+					"unknown-format": {
+						"type": "string",
+						"format": "unknown-format"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"date-time": "2024-01-01T23:59:60+00:00",
+				"time": "23:59:60Z"
+			},
+			"result": {
+				"date-time": "2024-01-01T23:59:60+00:00",
+				"time": "23:59:60Z"
+			}
+		},
+		{
+			"name": "formats-3",
+			"schema": {
+				"type": "object",
+				"properties": {
+					"date-time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"date": {
+						"type": "string",
+						"format": "date"
+					},
+					"time": {
+						"type": "string",
+						"format": "time"
+					},
+					"duration": {
+						"type": "string",
+						"format": "duration"
+					},
+					"uuid": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"uri": {
+						"type": "string",
+						"format": "uri"
+					},
+					"uri-reference": {
+						"type": "string",
+						"format": "uri-reference"
+					},
+					"ipv4": {
+						"type": "string",
+						"format": "ipv4"
+					},
+					"ipv6": {
+						"type": "string",
+						"format": "ipv6"
+					},
+					"hostname": {
+						"type": "string",
+						"format": "hostname"
+					},
+					"json-pointer": {
+						"type": "string",
+						"format": "json-pointer"
+					},
+					"regex": {
+						"type": "string",
+						"format": "regex"
+					},
+					"unknown-format": {
+						"type": "string",
+						"format": "unknown-format"
+					}
+				}
+			},
+			"typebox": false,
+			"args": {
+				"date-time": "2024-01-01t10:00:00.123z",
+				"time": "10:00:60Z"
+			},
+			"error": "Validation failed for tool \"formats\":\n  - time: must match format \"time\"\n\nReceived arguments:\n{\n  \"date-time\": \"2024-01-01t10:00:00.123z\",\n  \"time\": \"10:00:60Z\"\n}"
+		}
+	]
+}

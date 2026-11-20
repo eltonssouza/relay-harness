@@ -1,0 +1,35 @@
+{
+	"name": "xai-rejected",
+	"provider": "xai",
+	"credential": {
+		"type": "oauth",
+		"refresh": "refresh-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "auth.x.ai/oauth2/token",
+			"status": 400,
+			"body": "{\"error\":\"invalid_grant\",\"error_description\":\"Refresh token expired\"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://auth.x.ai/oauth2/token",
+			"headers": {
+				"accept": "application/json",
+				"content-type": "application/x-www-form-urlencoded"
+			},
+			"body": "grant_type=refresh_token&client_id=b1a00492-073a-47ea-816f-4c329264a828&refresh_token=refresh-1"
+		}
+	],
+	"error": "xAI OAuth token refresh failed (HTTP 400): invalid_grant: Refresh token expired",
+	"auth": {
+		"apiKey": "access-0"
+	}
+}

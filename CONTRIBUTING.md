@@ -53,9 +53,8 @@ bash ./ci.sh
 ```
 
 The runner installs dependencies with `npm ci --ignore-scripts`, builds, runs
-`npm run check`, validates publication with `node scripts/publish.mjs --dry-run`,
-runs the isolated `./test.sh` suite, and checks packed SDK/CLI installation with
-`npm run check:package-install`. It stops at the first failure. Fix any failure and
+`npm run check`, runs `cargo fmt`, `cargo clippy` and `cargo test` (the desktop shell
+included), then runs the isolated `./test.sh` suite. It stops at the first failure. Fix any failure and
 rerun the entire runner before committing, pushing PR updates or submitting a PR.
 Source changes after a successful run require another complete run.
 

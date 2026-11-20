@@ -1,0 +1,50 @@
+{
+	"name": "anthropic-error-rate-limit",
+	"description": "A rate limit.",
+	"adapter": "anthropic",
+	"model": {
+		"id": "test-model",
+		"name": "Test",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"baseUrl": "https://api.anthropic.com",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 0,
+			"output": 0,
+			"cacheRead": 0,
+			"cacheWrite": 0
+		},
+		"contextWindow": 100000,
+		"maxTokens": 1000
+	},
+	"options": {
+		"apiKey": "sk-ant-api03-parity"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Go.",
+			"timestamp": 0
+		}
+	],
+	"answer": {
+		"status": 429,
+		"body": "{\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Slow down.\"}}",
+		"headers": {
+			"content-type": "application/json"
+		},
+		"statusText": "Too Many Requests"
+	},
+	"stopReason": "error",
+	"errorMessage": "429 {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Slow down.\"}}"
+}

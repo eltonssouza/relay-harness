@@ -7,13 +7,14 @@ Relay is a fork of [pi](https://github.com/earendil-works/pi) by Mario Zechner a
 ### Breaking Changes
 
 - Removed the Laya router: the `laya/auto` model, the `laya` and `adaptiveCognition` settings, the ONNX, native and Docker runtimes and their Python resources. A saved `laya/auto` default model no longer resolves, and `laya.*` settings are ignored.
+- Relay is no longer published to npm. Each release builds standalone binaries for Windows, macOS and Linux on x64 and arm64, which need no Node.js, and the desktop installers, which carry the binary; both are kept as artifacts of the release workflow's run. The update notice reads the version on `main` and links to those runs. An npm install keeps working but gets no updates; remove it with `npm uninstall -g @relay-harness/coding-agent`. See [Quickstart](docs/quickstart.md#1-install-relay).
 
 ### Added
 
 - Added the `agent` tool: it runs agent definitions in the Claude Code format (`subagent_type`, `description`, `prompt`) in this process, each as its own session with the tools, model and system prompt its definition names. `haiku`, `sonnet` and `opus` resolve to capability tiers through the new `modelTiers` setting or catalog prices, and `subagents.*` limits depth, concurrency, tokens and time. The tool is declared only when a definition exists. See [Subagents](docs/subagents.md).
 - Added `relay agents install`, which installs general-agents at a commit pinned in Relay (`--from <path>` installs a local copy offline), and `relay agents list` and `/agents`, which list the loaded definitions and the rejected ones with the reason.
 - Added the `route_agent` tool, general-agents' deterministic router running in the Rust core: the same answer as its `route.py --json`, without Python.
-- Added the desktop app in `packages/desktop`: a Tauri window around `relay --mode rpc` with sessions, the conversation, the authorization dialog, the harness state, running subagents, model and thinking pickers, harness settings and sign-in. The release workflow builds unsigned `.msi`, `.dmg` and AppImage installers. See [packages/desktop](../desktop/README.md).
+- Added the desktop app in `packages/desktop`: a Tauri window around `relay --mode rpc` with sessions, the conversation, the authorization dialog, the harness state, running subagents, model and thinking pickers, harness settings and sign-in. The release workflow builds unsigned `.msi`, `.dmg` and AppImage installers, which carry relay's binary, so the app needs no separate install. See [packages/desktop](../desktop/README.md).
 - Added RPC commands `get_harness_state`, `harness_forget`, `harness_clear`, `get_harness_settings`, `set_harness_setting`, `list_sessions`, `get_settings`, `get_auth_providers`, `login`, `cancel_login` and `logout`, the `auth_event` event, and `secret` on `input` requests. See [RPC commands](docs/rpc-commands.md).
 - Added `/harness forget <id>` and `/harness clear` to remove recorded constraints and corrections.
 - Added `ctx.harnessConstraints()` and `ctx.recordDelegatedEffects()` for tools that delegate to another agent, and the `agent` input source. See [Extensions](docs/extensions.md).

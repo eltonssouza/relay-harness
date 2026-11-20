@@ -1,0 +1,10 @@
+{
+	"provider": "google-antigravity",
+	"name": "Google Antigravity",
+	"apiKey": null,
+	"oauth": {
+		"name": "Google Antigravity",
+		"loginLabel": "Sign in with Google Antigravity"
+	},
+	"cases": []
+}

@@ -1,0 +1,142 @@
+{
+	"provider": "meta",
+	"name": "Meta",
+	"apiKey": {
+		"name": "Meta Model API key",
+		"login": true
+	},
+	"oauth": {
+		"name": "Meta (Muse subscription)",
+		"isSubscription": true,
+		"loginLabel": "Sign in with Meta"
+	},
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"META_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"META_API_KEY"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"META_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-META_API_KEY"
+				},
+				"source": "META_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"META_API_KEY": "c-META_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"META_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"META_API_KEY"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"META_API_KEY": "c-META_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [
+					"META_API_KEY"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-META_API_KEY"
+				},
+				"source": "META_API_KEY"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"META_API_KEY": "c-META_API_KEY"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"META_API_KEY": "c-META_API_KEY"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"META_API_KEY"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}

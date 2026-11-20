@@ -1,13 +1,9 @@
 name: Release
 
-# Publishes every public workspace package to npm when a version tag is pushed, and builds the
-# desktop installers (`desktop-installers`).
-# Authentication is the NPM_TOKEN secret of the npm-publish environment: a granular access token
-# with read and write (publish and stage) on the @relay-harness scope, with 2FA bypass. It expires;
-# when publishing starts failing with 401 or 403, create a new token and replace the secret.
-# Provenance is off: npm only issues it for public repositories. To switch to trusted publishing
-# once the repository is public, drop NODE_AUTH_TOKEN, add `id-token: write`, set
-# NPM_PROVENANCE=true and register the workflow as a trusted publisher on each package.
+# Builds Relay's standalone binaries and the desktop installers when a version tag is pushed. Relay
+# is not published to npm. Both are kept as artifacts of the run (no GitHub release is made): the
+# `relay-binaries-<tag>` archives for six platforms, and one installer per desktop platform, which
+# carries that platform's binary. Neither is code-signed yet.
 
 on:
   push:
@@ -16,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to publish (e.g., v1.0.3). Publishing is idempotent: versions already on npm are skipped.'
+        description: 'Tag to build (e.g., v0.6.0).'
         required: true
         type: string
 
@@ -27,9 +23,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish-npm:
+  binaries:
+    name: Standalone binaries
     runs-on: ubuntu-latest
-    environment: npm-publish
     permissions:
       contents: read
     env:
@@ -45,20 +41,12 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
           cache: npm
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev ripgrep
-
-      - name: Install fd
-        # The find tool tests need fd 10.2 or newer (--no-require-git); Ubuntu's fd-find is 9.x.
-        run: cargo install fd-find --version 10.3.0 --locked
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: '1.4.2'
 
       - name: Check the tag matches the package version
         run: |
@@ -69,43 +57,42 @@ jobs:
             exit 1
           fi
 
-      - name: Build
-        run: npm run build:offline
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
 
-      - name: Check
-        run: npm run check
+      # Bun cross-compiles every platform from here; the release commit already carries the
+      # refreshed model catalog, so the build uses it instead of fetching a newer one.
+      - name: Build the binaries
+        run: bash ./scripts/build-binaries.sh --skip-install --offline-model-data --out dist-binaries
 
-      - name: Test
-        run: ./test.sh
+      - name: Keep the binaries
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: relay-binaries-${{ env.RELEASE_TAG }}
+          path: |
+            dist-binaries/*.zip
+            dist-binaries/*.tar.gz
+          if-no-files-found: error
 
-      - name: Smoke-test packed npm consumer
-        run: npm run check:package-install
-
-      - name: Check the npm token
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish npm packages
-        run: node scripts/publish.mjs
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  # The desktop installers, one per platform, kept as artifacts of this run (no GitHub release is
-  # made). They are not code-signed yet: Windows SmartScreen and macOS Gatekeeper warn on first
-  # launch. The app runs `relay` from PATH, so it still needs the npm package installed.
+  # One installer per platform. The app runs the relay binary it carries, so no separate install is
+  # needed. Windows SmartScreen and macOS Gatekeeper warn on first launch until the installers are
+  # signed.
   desktop-installers:
     name: Desktop installer (${{ matrix.bundle }})
+    needs: binaries
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: windows-latest
             bundle: msi
+            binary: windows-x64
           - os: macos-latest
             bundle: dmg
+            binary: darwin-arm64
           - os: ubuntu-22.04
             bundle: appimage
+            binary: linux-x64
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -139,6 +126,22 @@ jobs:
             echo "Tag ${RELEASE_TAG} does not match packages/desktop version ${VERSION}" >&2
             exit 1
           fi
+
+      - name: Get the binaries
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: relay-binaries-${{ env.RELEASE_TAG }}
+          path: dist-binaries
+
+      # The installer carries the binary as a resource (tauri.conf.json bundles `resources/relay/`).
+      - name: Put the binary in the installer's resources (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Expand-Archive -Path "dist-binaries/relay-${{ matrix.binary }}.zip" -DestinationPath packages/desktop/src-tauri/resources/relay -Force
+
+      - name: Put the binary in the installer's resources
+        if: runner.os != 'Windows'
+        run: tar -xzf "dist-binaries/relay-${{ matrix.binary }}.tar.gz" --strip-components=1 -C packages/desktop/src-tauri/resources/relay
 
       - name: Install dependencies
         run: npm ci --ignore-scripts

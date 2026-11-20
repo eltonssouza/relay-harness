@@ -23,10 +23,14 @@ Inspect the state with `/harness` and tune it through the `harnessCore` settings
 
 ## Getting started
 
-Relay requires Node.js 22.19 or newer. Install it from npm and run it in any directory:
+Relay is not published to npm. Each release run of the [release workflow](https://github.com/eltonssouza/relay-harness/actions/workflows/release.yml) keeps two kinds of artifacts (downloading them needs a GitHub sign-in):
+
+- `relay-binaries-<version>`: a standalone `relay` for Windows, macOS and Linux, on x64 and arm64. It needs no Node.js. Unpack the archive for your platform, keep the folder whole (the binary reads the files next to it), and add the folder to your `PATH`.
+- `relay-desktop-<version>-<msi|dmg|appimage>`: the [desktop app](packages/desktop/README.md), which carries the binary.
+
+Neither is code-signed yet, so Windows SmartScreen and macOS Gatekeeper warn on first launch. Then run Relay in any directory:
 
 ```bash
-npm install -g --ignore-scripts @relay-harness/coding-agent
 relay
 ```
 

@@ -1,0 +1,266 @@
+{
+	"name": "tool-search",
+	"description": "Tools added later load in place through a client tool search.",
+	"model": {
+		"id": "gpt-test",
+		"name": "GPT Test",
+		"api": "openai-responses",
+		"provider": "openai",
+		"baseUrl": "http://127.0.0.1:9/v1",
+		"reasoning": false,
+		"input": [
+			"text",
+			"image"
+		],
+		"cost": {
+			"input": 1,
+			"output": 4,
+			"cacheRead": 0.1,
+			"cacheWrite": 0
+		},
+		"contextWindow": 400000,
+		"maxTokens": 128000,
+		"compat": {
+			"supportsMidConvoSystemMessages": true,
+			"supportsToolSearch": true
+		}
+	},
+	"apiKey": "sk-parity",
+	"options": {
+		"sessionId": "session-1"
+	},
+	"messages": [
+		{
+			"role": "system",
+			"content": "Base prompt.",
+			"toolsAdded": [
+				{
+					"name": "read",
+					"description": "The read tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"limit": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Start.",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "Ready."
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "gpt-test",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0
+		},
+		{
+			"role": "system",
+			"content": "",
+			"toolsAdded": [
+				{
+					"name": "write",
+					"description": "The write tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"content": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"path"
+						]
+					}
+				},
+				{
+					"name": "search",
+					"description": "The search tool.",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"query": {
+								"type": "string"
+							},
+							"kind": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"query"
+						]
+					},
+					"constrainedSampling": {
+						"type": "json_schema",
+						"strict": "prefer"
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": "Write.",
+			"timestamp": 0
+		}
+	],
+	"body": {
+		"model": "gpt-test",
+		"input": [
+			{
+				"role": "system",
+				"content": "Base prompt."
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "input_text",
+						"text": "Start."
+					}
+				]
+			},
+			{
+				"type": "message",
+				"role": "assistant",
+				"content": [
+					{
+						"type": "output_text",
+						"text": "Ready.",
+						"annotations": []
+					}
+				],
+				"status": "completed",
+				"id": "msg_pi_1"
+			},
+			{
+				"type": "tool_search_call",
+				"call_id": "pi_tool_load_1butbl79kztv",
+				"execution": "client",
+				"status": "completed",
+				"arguments": {
+					"query": "write search",
+					"limit": 2
+				}
+			},
+			{
+				"type": "tool_search_output",
+				"call_id": "pi_tool_load_1butbl79kztv",
+				"execution": "client",
+				"status": "completed",
+				"tools": [
+					{
+						"type": "function",
+						"name": "write",
+						"description": "The write tool.",
+						"parameters": {
+							"type": "object",
+							"properties": {
+								"path": {
+									"type": "string"
+								},
+								"content": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"path"
+							]
+						},
+						"defer_loading": true
+					},
+					{
+						"type": "function",
+						"name": "search",
+						"description": "The search tool.",
+						"parameters": {
+							"type": "object",
+							"properties": {
+								"query": {
+									"type": "string"
+								},
+								"kind": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"query"
+							]
+						},
+						"defer_loading": true
+					}
+				]
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "input_text",
+						"text": "Write."
+					}
+				]
+			}
+		],
+		"stream": true,
+		"prompt_cache_key": "session-1",
+		"store": false,
+		"tools": [
+			{
+				"type": "function",
+				"name": "read",
+				"description": "The read tool.",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string"
+						},
+						"limit": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"path"
+					]
+				}
+			}
+		]
+	}
+}

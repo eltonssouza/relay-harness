@@ -1,0 +1,37 @@
+{
+	"name": "meta-mint-failed",
+	"provider": "meta",
+	"credential": {
+		"type": "oauth",
+		"refresh": "identity-1",
+		"access": "access-0",
+		"expires": 1699999999000
+	},
+	"answers": [
+		{
+			"match": "api.meta.ai/muse-code/key",
+			"status": 500,
+			"body": "{\"error\":\"e\",\"message\":\"m\",\"detail\":\"d\",\"error_description\":\"  \"}",
+			"headers": {
+				"content-type": "application/json"
+			}
+		}
+	],
+	"requests": [
+		{
+			"method": "POST",
+			"url": "https://api.meta.ai/muse-code/key",
+			"headers": {
+				"accept": "application/json",
+				"authorization": "Bearer identity-1",
+				"content-type": "application/json",
+				"x-api-version": "1.0.0"
+			},
+			"body": "{}"
+		}
+	],
+	"error": "Meta API key mint failed with status 500: d",
+	"auth": {
+		"apiKey": "access-0"
+	}
+}

@@ -3,10 +3,14 @@ import { fetchWithRetry } from "./management-http.ts";
 import { getRelayUserAgent } from "./relay-user-agent.ts";
 
 /**
- * The npm registry is public, so every install can read it. The GitHub releases API answers 404 for a
- * private repository, which would silence the update notice for everyone.
+ * Relay is not published to npm. `main` only receives `develop` for a release, so the version in its
+ * coding-agent package.json is the latest release.
  */
-const LATEST_VERSION_URL = "https://registry.npmjs.org/@relay-harness/coding-agent/latest";
+const LATEST_VERSION_URL =
+	"https://raw.githubusercontent.com/eltonssouza/relay-harness/main/packages/coding-agent/package.json";
+
+/** Where the release workflow keeps each release's binaries and installers. */
+export const RELEASES_URL = "https://github.com/eltonssouza/relay-harness/actions/workflows/release.yml";
 const DEFAULT_VERSION_CHECK_TIMEOUT_MS = 10000;
 
 export interface LatestRelayRelease {
@@ -69,7 +73,7 @@ export async function getLatestRelayRelease(
 			timeoutMs: options.timeoutMs ?? DEFAULT_VERSION_CHECK_TIMEOUT_MS,
 		},
 	);
-	// The registry answers 404 when the package is not published.
+	// GitHub answers 404 when the file or the branch is missing.
 	if (!response.ok) return undefined;
 
 	const data = (await response.json()) as { version?: unknown } | null;

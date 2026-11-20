@@ -1,0 +1,138 @@
+{
+	"provider": "huggingface",
+	"name": "Hugging Face",
+	"apiKey": {
+		"name": "Hugging Face token",
+		"login": true
+	},
+	"oauth": null,
+	"cases": [
+		{
+			"env": [],
+			"files": [],
+			"lookups": {
+				"env": [
+					"HF_TOKEN"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"HF_TOKEN"
+			],
+			"files": [],
+			"lookups": {
+				"env": [
+					"HF_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-HF_TOKEN"
+				},
+				"source": "HF_TOKEN"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key"
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"HF_TOKEN": "c-HF_TOKEN"
+				}
+			},
+			"lookups": {
+				"env": [
+					"HF_TOKEN"
+				],
+				"files": []
+			},
+			"result": null
+		},
+		{
+			"env": [
+				"HF_TOKEN"
+			],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"env": {
+					"HF_TOKEN": "c-HF_TOKEN"
+				}
+			},
+			"lookups": {
+				"env": [
+					"HF_TOKEN"
+				],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "v-HF_TOKEN"
+				},
+				"source": "HF_TOKEN"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": "stored-key",
+				"env": {
+					"HF_TOKEN": "c-HF_TOKEN"
+				}
+			},
+			"lookups": {
+				"env": [],
+				"files": []
+			},
+			"result": {
+				"auth": {
+					"apiKey": "stored-key"
+				},
+				"env": {
+					"HF_TOKEN": "c-HF_TOKEN"
+				},
+				"source": "stored credential"
+			}
+		},
+		{
+			"env": [],
+			"files": [],
+			"credential": {
+				"type": "api_key",
+				"key": ""
+			},
+			"lookups": {
+				"env": [
+					"HF_TOKEN"
+				],
+				"files": []
+			},
+			"result": null
+		}
+	]
+}
