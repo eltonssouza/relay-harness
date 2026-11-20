@@ -1,0 +1,720 @@
+{
+	"name": "reset",
+	"description": "Reset keeps the replayed system message and clears the queues.",
+	"tools": [
+		{
+			"name": "echo",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"text": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"text"
+				]
+			}
+		}
+	],
+	"initialState": {
+		"systemPrompt": "Be brief.",
+		"tools": [
+			"echo"
+		]
+	},
+	"responses": [
+		{
+			"content": [
+				{
+					"type": "text",
+					"text": "First."
+				}
+			]
+		},
+		{
+			"content": [
+				{
+					"type": "text",
+					"text": "Again."
+				}
+			]
+		}
+	],
+	"steps": [
+		{
+			"op": "prompt",
+			"text": "Hi"
+		},
+		{
+			"op": "followUp",
+			"message": {
+				"role": "user",
+				"content": "Z",
+				"timestamp": 0
+			}
+		},
+		{
+			"op": "reset"
+		},
+		{
+			"op": "peek"
+		},
+		{
+			"op": "prompt",
+			"text": "Again"
+		}
+	],
+	"events": [
+		{
+			"type": "agent_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_end",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_end",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		}
+	],
+	"ops": [
+		{
+			"at": "step",
+			"op": "prompt",
+			"result": "ok"
+		},
+		{
+			"at": "step",
+			"op": "followUp",
+			"result": "ok"
+		},
+		{
+			"at": "step",
+			"op": "reset",
+			"result": "ok"
+		},
+		{
+			"at": "step",
+			"op": "peek",
+			"result": "ok",
+			"value": {
+				"queued": [],
+				"has": false
+			}
+		},
+		{
+			"at": "step",
+			"op": "prompt",
+			"result": "ok"
+		}
+	],
+	"calls": [
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi"
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"reasoning": null
+		},
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Again"
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"reasoning": null
+		}
+	],
+	"states": [
+		{
+			"after": "prompt",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "First."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		},
+		{
+			"after": "followUp",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "First."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [
+				{
+					"role": "user",
+					"content": "Z",
+					"timestamp": 0
+				}
+			],
+			"has": true
+		},
+		{
+			"after": "reset",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		},
+		{
+			"after": "peek",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		},
+		{
+			"after": "prompt",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Again"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Again."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		}
+	]
+}

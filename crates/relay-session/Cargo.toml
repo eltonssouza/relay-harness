@@ -1,0 +1,21 @@
+[package]
+name = "relay-session"
+version = "0.0.0"
+description = "Relay's sessions, ported from packages/coding-agent/src/core/session-manager.ts: the JSONL files both agents read and write."
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+relay-ai = { path = "../relay-ai" }
+relay-tools = { path = "../relay-tools" }
+serde_json = { version = "=1.0.154", default-features = false, features = ["std", "preserve_order", "float_roundtrip"] }
+# Session and entry ids from the operating system's random source; already locked through ring.
+getrandom = { version = "=0.2.17", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+# The fixture files that are not valid UTF-8; already locked.
+base64 = { version = "=0.23.1", default-features = false, features = ["std"] }

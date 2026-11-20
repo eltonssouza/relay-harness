@@ -170,7 +170,32 @@ fn credential(provider: &str, value: &Value) -> Result<Credential, String> {
 
 /// `JSON.stringify(data, null, 2)`.
 fn stringify(data: &Map<String, Value>) -> String {
-    serde_json::to_string_pretty(data).unwrap_or_else(|_| "{}".into())
+    crate::json::stringify_pretty(&Value::Object(data.clone()))
+}
+
+/// A `proper-lockfile` lock on any file: the directory `<file>.lock`, removed when dropped.
+pub struct FileLock {
+    _lock: Lock,
+}
+
+/// Takes the lock on `file` as `lockfile.lockSync` does, retried: up to `attempts` tries `pause`
+/// apart, and a lock older than `stale` is taken over. The error names the held lock.
+pub fn lock_file(
+    file: &Path,
+    stale: Duration,
+    attempts: u32,
+    pause: Duration,
+) -> Result<FileLock, String> {
+    let lock_path = lock_path(file);
+    for attempt in 1..=attempts.max(1) {
+        if let Some(lock) = try_lock(&lock_path, stale)? {
+            return Ok(FileLock { _lock: lock });
+        }
+        if attempt < attempts {
+            std::thread::sleep(pause);
+        }
+    }
+    Err(held(&lock_path))
 }
 
 impl AuthFile {

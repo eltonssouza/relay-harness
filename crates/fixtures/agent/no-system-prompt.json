@@ -1,0 +1,221 @@
+{
+	"name": "no-system-prompt",
+	"description": "Without a prompt or tools the transcript has no system message.",
+	"tools": [],
+	"responses": [
+		{
+			"content": [
+				{
+					"type": "text",
+					"text": "Hi."
+				}
+			]
+		}
+	],
+	"steps": [
+		{
+			"op": "prompt",
+			"text": "Hi"
+		}
+	],
+	"events": [
+		{
+			"type": "agent_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 0,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 0,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 0,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_end",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		}
+	],
+	"ops": [
+		{
+			"at": "step",
+			"op": "prompt",
+			"result": "ok"
+		}
+	],
+	"calls": [
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi"
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"reasoning": null
+		}
+	],
+	"states": [
+		{
+			"after": "prompt",
+			"systemPrompt": "",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		}
+	]
+}

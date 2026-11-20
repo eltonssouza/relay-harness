@@ -1,0 +1,18 @@
+[package]
+name = "relay-settings"
+version = "0.0.0"
+description = "Relay's settings, ported from packages/coding-agent/src/core/settings-manager.ts: the files both agents read and write."
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+relay-ai = { path = "../relay-ai" }
+relay-tools = { path = "../relay-tools" }
+serde = { version = "=1.0.229", default-features = false, features = ["std", "derive"] }
+serde_json = { version = "=1.0.154", default-features = false, features = ["std", "preserve_order", "float_roundtrip"] }
+# Tracking and device ids from the operating system's random source; already locked through ring.
+getrandom = { version = "=0.2.17", default-features = false, features = ["std"] }

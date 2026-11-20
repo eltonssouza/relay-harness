@@ -11,6 +11,8 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+mod scripted;
+
 use futures_util::future::{ready, BoxFuture};
 use futures_util::stream::{self, BoxStream, StreamExt};
 use relay_agent::{
@@ -21,12 +23,9 @@ use relay_agent::{
     ToolUpdate, TurnDecision, TurnUpdate,
 };
 use relay_ai::abort::{AbortController, AbortSignal};
-use relay_ai::event::AssistantEvent;
 use relay_ai::simple::SimpleOptions;
-use relay_ai::{
-    AssistantMessage, Message, Model, OutputBlock, StopReason, TextContent, ThinkingContent, Tool,
-    ToolCall,
-};
+use relay_ai::{Message, Model, OutputBlock, StopReason, TextContent, Tool};
+use scripted::{first_difference, model, response_events, Response};
 use serde::Deserialize;
 use serde_json::{json, Map, Value};
 
@@ -100,14 +99,6 @@ struct Script {
     throws: Option<String>,
     #[serde(default)]
     abort: bool,
-}
-
-#[derive(Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Response {
-    content: Vec<OutputBlock>,
-    stop_reason: Option<StopReason>,
-    error_message: Option<String>,
 }
 
 /// What a run did besides emitting events.
@@ -363,6 +354,7 @@ impl AgentHooks for ScriptedHooks<'_> {
     fn prepare_next_turn<'a>(
         &'a self,
         _turn: AgentTurnContext<'a>,
+        _signal: &'a AbortSignal,
     ) -> BoxFuture<'a, Option<TurnUpdate>> {
         let Some(prepared) = &self.case.prepare_next_turn else {
             return Box::pin(ready(None));
@@ -412,149 +404,6 @@ impl AgentHooks for ScriptedHooks<'_> {
         polls.follow_up += 1;
         Box::pin(ready(messages))
     }
-}
-
-/// The recorder's model.
-fn model() -> Model {
-    serde_json::from_value(json!({
-        "id": "mock",
-        "name": "mock",
-        "api": "openai-responses",
-        "provider": "openai",
-        "baseUrl": "https://example.invalid",
-        "reasoning": true,
-        "input": ["text"],
-        "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
-        "contextWindow": 8192,
-        "maxTokens": 2048,
-    }))
-    .unwrap()
-}
-
-/// `responseEvents`: `start`, each block's start, delta and end, then `done` or `error`, each
-/// with the message so far.
-fn response_events(model: &Model, response: &Response) -> Vec<StreamEvent> {
-    let mut message: AssistantMessage = serde_json::from_value(json!({
-        "content": [],
-        "api": model.api,
-        "provider": model.provider,
-        "model": model.id,
-        "usage": {
-            "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0, "totalTokens": 0,
-            "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0, "total": 0},
-        },
-        "stopReason": response.stop_reason.unwrap_or(StopReason::Stop),
-        "errorMessage": response.error_message,
-        "timestamp": 0,
-    }))
-    .unwrap();
-    let partial = |message: &AssistantMessage| AssistantMessage {
-        stop_reason: StopReason::Pending,
-        error_message: None,
-        ..message.clone()
-    };
-    let mut events = vec![StreamEvent {
-        event: AssistantEvent::Start,
-        partial: partial(&message),
-    }];
-    let mut push = |event: AssistantEvent, message: &AssistantMessage| {
-        events.push(StreamEvent {
-            event,
-            partial: partial(message),
-        });
-    };
-    for (content_index, block) in response.content.iter().enumerate() {
-        match block {
-            OutputBlock::Text(text) => {
-                message.content.push(OutputBlock::Text(TextContent {
-                    text: String::new(),
-                    ..text.clone()
-                }));
-                push(AssistantEvent::TextStart { content_index }, &message);
-                message.content[content_index] = block.clone();
-                let delta = text.text.clone();
-                push(
-                    AssistantEvent::TextDelta {
-                        content_index,
-                        delta,
-                    },
-                    &message,
-                );
-                let content = text.text.clone();
-                push(
-                    AssistantEvent::TextEnd {
-                        content_index,
-                        content,
-                    },
-                    &message,
-                );
-            }
-            OutputBlock::Thinking(thinking) => {
-                message.content.push(OutputBlock::Thinking(ThinkingContent {
-                    thinking: String::new(),
-                    ..thinking.clone()
-                }));
-                push(AssistantEvent::ThinkingStart { content_index }, &message);
-                message.content[content_index] = block.clone();
-                let delta = thinking.thinking.clone();
-                push(
-                    AssistantEvent::ThinkingDelta {
-                        content_index,
-                        delta,
-                    },
-                    &message,
-                );
-                let content = thinking.thinking.clone();
-                push(
-                    AssistantEvent::ThinkingEnd {
-                        content_index,
-                        content,
-                    },
-                    &message,
-                );
-            }
-            OutputBlock::ToolCall(call) => {
-                message.content.push(OutputBlock::ToolCall(ToolCall {
-                    arguments: Map::new(),
-                    ..call.clone()
-                }));
-                push(AssistantEvent::ToolcallStart { content_index }, &message);
-                message.content[content_index] = block.clone();
-                let delta = serde_json::to_string(&call.arguments).unwrap();
-                push(
-                    AssistantEvent::ToolcallDelta {
-                        content_index,
-                        delta,
-                    },
-                    &message,
-                );
-                let tool_call = block.clone();
-                push(
-                    AssistantEvent::ToolcallEnd {
-                        content_index,
-                        tool_call,
-                    },
-                    &message,
-                );
-            }
-        }
-    }
-    let reason = message.stop_reason;
-    let event = match reason {
-        StopReason::Error | StopReason::Aborted => AssistantEvent::Error {
-            reason,
-            error: Message::Assistant(Box::new(message.clone())),
-        },
-        _ => AssistantEvent::Done {
-            reason,
-            message: Message::Assistant(Box::new(message.clone())),
-        },
-    };
-    events.push(StreamEvent {
-        event,
-        partial: message,
-    });
-    events
 }
 
 struct ScriptedStream {
@@ -671,28 +520,6 @@ async fn replay(case: &Case) -> [Vec<Value>; 5] {
         take(&recorder.executions),
         messages,
     ]
-}
-
-fn first_difference(expected: &[Value], actual: &[Value]) -> Option<String> {
-    if expected == actual {
-        return None;
-    }
-    let index = expected
-        .iter()
-        .zip(actual)
-        .position(|(expected, actual)| expected != actual)
-        .unwrap_or(expected.len().min(actual.len()));
-    let show = |list: &[Value]| {
-        list.get(index)
-            .map_or("(none)".into(), |value| value.to_string())
-    };
-    Some(format!(
-        "item {index} of {} expected, {} got\n    expected {}\n    actual   {}",
-        expected.len(),
-        actual.len(),
-        show(expected),
-        show(actual)
-    ))
 }
 
 #[tokio::test]

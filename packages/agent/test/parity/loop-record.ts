@@ -37,9 +37,9 @@ import type {
 
 export const LOOP_DIR = fileURLToPath(new URL("../../../../crates/fixtures/loop/", import.meta.url));
 
-type Schema = Record<string, unknown>;
+export type Schema = Record<string, unknown>;
 
-interface ToolSpec {
+export interface ToolSpec {
 	name: string;
 	parameters: Schema;
 	/** The schema is TypeBox's own, as the built-in tools' are. */
@@ -57,12 +57,12 @@ interface ToolSpec {
 	};
 }
 
-type Block =
+export type Block =
 	| { type: "text"; text: string }
 	| { type: "thinking"; thinking: string }
 	| { type: "toolCall"; id: string; name: string; arguments: Record<string, unknown> };
 
-interface Response {
+export interface Response {
 	content: Block[];
 	stopReason?: AssistantMessage["stopReason"];
 	errorMessage?: string;
@@ -100,7 +100,7 @@ export interface LoopCase {
 	throwIn?: Record<string, "before" | "after">;
 }
 
-const MODEL: Model<"openai-responses"> = {
+export const MODEL: Model<"openai-responses"> = {
 	id: "mock",
 	name: "mock",
 	api: "openai-responses",
@@ -113,7 +113,7 @@ const MODEL: Model<"openai-responses"> = {
 	maxTokens: 2048,
 };
 
-const usage = () => ({
+export const usage = () => ({
 	input: 0,
 	output: 0,
 	cacheRead: 0,
@@ -122,8 +122,8 @@ const usage = () => ({
 	cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
 });
 
-const user = (text: string): AgentMessage => ({ role: "user", content: text, timestamp: 0 });
-const system = (text: string, tools: ToolSpec[] = []): AgentMessage => ({
+export const user = (text: string): AgentMessage => ({ role: "user", content: text, timestamp: 0 });
+export const system = (text: string, tools: ToolSpec[] = []): AgentMessage => ({
 	role: "system",
 	content: text,
 	...(tools.length > 0
@@ -137,21 +137,21 @@ const system = (text: string, tools: ToolSpec[] = []): AgentMessage => ({
 		: {}),
 	timestamp: 0,
 });
-const text = (value: string): Block => ({ type: "text", text: value });
-const call = (id: string, name: string, args: Record<string, unknown>): Block => ({
+export const text = (value: string): Block => ({ type: "text", text: value });
+export const call = (id: string, name: string, args: Record<string, unknown>): Block => ({
 	type: "toolCall",
 	id,
 	name,
 	arguments: args,
 });
-const object = (properties: Record<string, Schema>, required: string[] = []): Schema => ({
+export const object = (properties: Record<string, Schema>, required: string[] = []): Schema => ({
 	type: "object",
 	properties,
 	required,
 });
 
-const echo: ToolSpec = { name: "echo", parameters: object({ text: { type: "string" } }, ["text"]) };
-const readTool: ToolSpec = {
+export const echo: ToolSpec = { name: "echo", parameters: object({ text: { type: "string" } }, ["text"]) };
+export const readTool: ToolSpec = {
 	name: "read",
 	typebox: true,
 	parameters: Type.Object({ path: Type.String(), offset: Type.Optional(Type.Number()) }) as unknown as Schema,
@@ -521,7 +521,7 @@ const structured: AgentToolResult<unknown> = {
 	structuredContent: { rows: 3 },
 };
 
-function zeroTimes(value: unknown, key?: string): unknown {
+export function zeroTimes(value: unknown, key?: string): unknown {
 	if (key === "timestamp" && typeof value === "number") return 0;
 	if (Array.isArray(value)) return value.map((item) => zeroTimes(item));
 	if (value !== null && typeof value === "object") {
@@ -530,10 +530,10 @@ function zeroTimes(value: unknown, key?: string): unknown {
 	return value;
 }
 
-const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+export const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 /** Provider events for a response, each with its own snapshot. */
-function responseEvents(response: Response, model: Model<"openai-responses">): AssistantMessageEvent[] {
+export function responseEvents(response: Response, model: Model<"openai-responses">): AssistantMessageEvent[] {
 	const message: AssistantMessage = {
 		role: "assistant",
 		content: [],
@@ -584,7 +584,7 @@ function responseEvents(response: Response, model: Model<"openai-responses">): A
 	return events;
 }
 
-function eventStream(events: AssistantMessageEvent[]): EventStream<AssistantMessageEvent, AssistantMessage> {
+export function eventStream(events: AssistantMessageEvent[]): EventStream<AssistantMessageEvent, AssistantMessage> {
 	const stream = new EventStream<AssistantMessageEvent, AssistantMessage>(
 		(event) => event.type === "done" || event.type === "error",
 		(event) => (event.type === "done" ? event.message : event.type === "error" ? event.error : (undefined as never)),
@@ -596,7 +596,7 @@ function eventStream(events: AssistantMessageEvent[]): EventStream<AssistantMess
 	return stream;
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export interface LoopRecording {
 	events: unknown[];

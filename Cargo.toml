@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["crates/harness-core", "crates/harness-wasm", "crates/relay-ai", "crates/relay-agent", "packages/desktop/src-tauri"]
+members = ["crates/harness-core", "crates/harness-wasm", "crates/relay-ai", "crates/relay-agent", "crates/relay-tools", "crates/relay-session", "crates/relay-settings", "packages/desktop/src-tauri"]
 # The desktop shell builds only when asked (`-p relay-desktop`): it needs the built screen and,
 # on Linux, the WebKitGTK development packages.
-default-members = ["crates/harness-core", "crates/harness-wasm", "crates/relay-ai", "crates/relay-agent"]
+default-members = ["crates/harness-core", "crates/harness-wasm", "crates/relay-ai", "crates/relay-agent", "crates/relay-tools", "crates/relay-session", "crates/relay-settings"]
 
 [workspace.package]
 edition = "2021"

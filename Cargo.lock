@@ -2691,6 +2691,7 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "relay-ai",
+ "relay-harness-core",
  "serde",
  "serde_json",
  "tokio",
@@ -2732,6 +2733,45 @@ version = "0.0.0"
 dependencies = [
  "relay-harness-core",
  "serde_json",
+]
+
+[[package]]
+name = "relay-session"
+version = "0.0.0"
+dependencies = [
+ "base64 0.23.1",
+ "getrandom 0.2.17",
+ "relay-ai",
+ "relay-tools",
+ "serde_json",
+]
+
+[[package]]
+name = "relay-settings"
+version = "0.0.0"
+dependencies = [
+ "getrandom 0.2.17",
+ "relay-ai",
+ "relay-tools",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "relay-tools"
+version = "0.0.0"
+dependencies = [
+ "base64 0.23.1",
+ "futures-channel",
+ "futures-util",
+ "libc",
+ "relay-agent",
+ "relay-ai",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "unicode-normalization",
 ]
 
 [[package]]
