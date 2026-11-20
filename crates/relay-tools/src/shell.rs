@@ -6,7 +6,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::{Mutex, PoisonError};
 
-use crate::tools_manager::agent_dir;
+use crate::tools_manager::bin_dir;
 
 /// How a shell takes a command.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -140,11 +140,6 @@ pub fn power_shell_config() -> Result<ShellConfig, String> {
         args: POWERSHELL_ARGS.iter().map(|arg| arg.to_string()).collect(),
         transport: CommandTransport::Argv,
     })
-}
-
-/// Relay's binary directory (`getBinDir`).
-pub fn bin_dir() -> Option<String> {
-    agent_dir().map(|dir| Path::new(&dir).join("bin").to_string_lossy().into_owned())
 }
 
 /// The process environment with Relay's binary directory first on the path (`getShellEnv`).

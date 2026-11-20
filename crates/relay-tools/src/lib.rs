@@ -7,7 +7,7 @@
 //! - `write`: creates or overwrites a file and its parent directories.
 //! - `edit`: exact-text replacements with a fuzzy fallback (`edit_diff`), reported with jsdiff's
 //!   line diff and unified patch (`diff`). Changes to one file wait for each other (`mutation`).
-//! - `grep`, `find`: ripgrep and fd (`process` runs them, `tools_manager` finds them), their
+//! - `grep`, `find`: ripgrep and fd (`process` runs them, `tools_manager` finds or downloads them), their
 //!   output relative to the searched directory.
 //! - `bash`, `powershell` (`bash`): a command in the shell `shell` finds, its output collected by
 //!   `output` (the last lines for the model, all of it in an output file).

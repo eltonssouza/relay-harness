@@ -15,7 +15,7 @@ use serde_json::{json, Map, Value};
 use crate::js::number;
 use crate::paths::{dirname, home_dir, is_absolute_path, relative, resolve_to_cwd};
 use crate::process::{run, LineHandler, RunError};
-use crate::tools_manager::tool_path;
+use crate::tools_manager::{ensure_tool, ToolDownloads};
 use crate::truncate::{format_size, truncate_head, TruncationOptions, DEFAULT_MAX_BYTES};
 
 const DEFAULT_LIMIT: f64 = 1000.0;
@@ -131,7 +131,7 @@ impl FindTool {
             .unwrap_or(".");
         let search_path = resolve_to_cwd(path, &self.cwd, self.home.as_deref());
         let limit = params["limit"].as_f64().unwrap_or(DEFAULT_LIMIT);
-        let Some(fd) = tool_path("fd") else {
+        let Some(fd) = ensure_tool("fd", &ToolDownloads::default(), None).await else {
             return Err("fd is not available and could not be downloaded".into());
         };
 

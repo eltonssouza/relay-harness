@@ -15,7 +15,7 @@ use serde_json::{json, Map, Value};
 use crate::js::number;
 use crate::paths::{basename, home_dir, relative, resolve_to_cwd};
 use crate::process::{run, LineHandler, RunError};
-use crate::tools_manager::tool_path;
+use crate::tools_manager::{ensure_tool, ToolDownloads};
 use crate::truncate::{
     format_size, truncate_head, truncate_line, TruncationOptions, DEFAULT_MAX_BYTES,
     GREP_MAX_LINE_LENGTH,
@@ -214,7 +214,7 @@ impl GrepTool {
         if signal.is_aborted() {
             return Err("Operation aborted".into());
         }
-        let Some(rg) = tool_path("rg") else {
+        let Some(rg) = ensure_tool("rg", &ToolDownloads::default(), None).await else {
             return Err("ripgrep (rg) is not available and could not be downloaded".into());
         };
         let path = params["path"]
