@@ -10,6 +10,9 @@
  *   starts from, what it returned or threw, and the files' bytes afterwards.
  * - `tools/diff.json`: jsdiff's `diffLines`, the edit tool's display diff and its unified patch on
  *   handcrafted and seeded random pairs of texts.
+ * - `tools/grep.json`, `tools/find.json`: each tool's declaration, a search tree, and what each
+ *   call returned or threw. ripgrep and fd search in parallel, so a call marked `sort` that can
+ *   find several files is recorded with its lines sorted.
  *
  * The tree is written to a temporary directory; its path becomes `<root>` and the separators in
  * paths become `/`, so the files are the same on every platform.
@@ -22,6 +25,8 @@ import { fileURLToPath } from "node:url";
 import { diffLines } from "diff";
 import { createEditToolDefinition } from "../../src/core/tools/edit.ts";
 import { generateDiffString, generateUnifiedPatch } from "../../src/core/tools/edit-diff.ts";
+import { createFindToolDefinition } from "../../src/core/tools/find.ts";
+import { createGrepToolDefinition } from "../../src/core/tools/grep.ts";
 import { createLsToolDefinition } from "../../src/core/tools/ls.ts";
 import { createReadToolDefinition } from "../../src/core/tools/read.ts";
 import { formatSize, truncateHead, truncateLine, truncateMiddle, truncateTail } from "../../src/core/tools/truncate.ts";
@@ -89,8 +94,12 @@ function tree(): TreeEntry[] {
 function writeTree(root: string, entries: TreeEntry[]): void {
 	for (const entry of entries) {
 		const path = join(root, entry.path);
-		if (entry.path.endsWith("/")) mkdirSync(path, { recursive: true });
-		else writeFileSync(path, entry.base64 !== undefined ? Buffer.from(entry.base64, "base64") : (entry.text ?? ""));
+		if (entry.path.endsWith("/")) {
+			mkdirSync(path, { recursive: true });
+			continue;
+		}
+		mkdirSync(dirname(path), { recursive: true });
+		writeFileSync(path, entry.base64 !== undefined ? Buffer.from(entry.base64, "base64") : (entry.text ?? ""));
 	}
 }
 
@@ -220,6 +229,8 @@ export async function toolFiles(): Promise<Record<string, string>> {
 			"edit.json": json(await mutationCalls("edit", EDIT_CALLS)),
 			"write.json": json(await mutationCalls("write", WRITE_CALLS)),
 			"diff.json": json(diffs()),
+			"grep.json": json(await searchCalls("grep", GREP_CALLS)),
+			"find.json": json(await searchCalls("find", FIND_CALLS)),
 		};
 	} finally {
 		rmSync(root, { recursive: true, force: true });
@@ -648,4 +659,110 @@ const json = (value: unknown) => `${JSON.stringify(value, null, "\t")}\n`;
 
 export function readToolFile(name: string): string {
 	return readFileSync(join(TOOLS_DIR, name), "utf8");
+}
+
+/** The tree grep and find search: several files, a hidden directory, a nested repository. */
+function searchTree(): TreeEntry[] {
+	return [
+		{ path: "search/a.ts", text: "const alpha = 1;\nconst beta = 2;\n// TODO: fix alpha\n" },
+		{ path: "search/b.ts", text: "export function alpha() {}\n" },
+		{ path: "search/notes.md", text: "Alpha and ALPHA and alpha\nnothing here\n" },
+		{ path: "search/long.txt", text: `short\n${"x".repeat(300)} needle ${"y".repeat(400)}\nend\n` },
+		{ path: "search/many.txt", text: `${lines(300, (n) => `match ${n} ${"m".repeat(290)}`)}\n` },
+		{ path: "search/crlf.txt", text: "one\r\nneedle\r\nthree\r\n" },
+		{ path: "search/cr.txt", text: "x\ry needle\n" },
+		{ path: "search/ctx.txt", text: `${lines(10, (n) => (n === 5 || n === 7 ? `hit ${n}` : `line ${n}`))}\n` },
+		{ path: "search/sub/deep.ts", text: "alpha in deep\n" },
+		{ path: "search/.hidden/secret.ts", text: "alpha hidden\n" },
+		{ path: "search/repo/.git/" },
+		{ path: "search/repo/.gitignore", text: "ignored.txt\n" },
+		{ path: "search/repo/ignored.txt", text: "alpha ignored\n" },
+		{ path: "search/repo/kept.txt", text: "alpha kept\n" },
+		{ path: "search/three/one.txt", text: "" },
+		{ path: "search/three/two.txt", text: "" },
+		{ path: "search/three/three.txt", text: "" },
+		// A parent .gitignore must not reach into a nested repository.
+		{ path: "search/outer/.git/" },
+		{ path: "search/outer/.gitignore", text: "*.log\n" },
+		{ path: "search/outer/top.log", text: "" },
+		{ path: "search/outer/inner/.git/" },
+		{ path: "search/outer/inner/debug.log", text: "" },
+	];
+}
+
+const GREP_CALLS: Record<string, unknown>[] = [
+	{ pattern: "alpha", path: "search", sort: true },
+	{ pattern: "alpha", path: "search/a.ts" },
+	{ pattern: "ALPHA", path: "search/a.ts", ignoreCase: true },
+	{ pattern: "ALPHA", path: "search/a.ts" },
+	{ pattern: "a.p", path: "search/notes.md", literal: true },
+	{ pattern: "al.ha", path: "search/notes.md" },
+	{ pattern: "alpha", path: "search", glob: "*.ts", sort: true },
+	{ pattern: "hit", path: "search/ctx.txt", context: 2 },
+	{ pattern: "hit", path: "search/ctx.txt", context: 0 },
+	{ pattern: "hit", path: "search/ctx.txt", context: 9 },
+	{ pattern: "match", path: "search/many.txt", limit: 5 },
+	{ pattern: "match", path: "search/many.txt", limit: 0 },
+	{ pattern: "match", path: "search/many.txt", limit: 200 },
+	{ pattern: "needle", path: "search/long.txt" },
+	{ pattern: "needle", path: "search/long.txt", context: 1 },
+	{ pattern: "needle", path: "search/crlf.txt" },
+	{ pattern: "needle", path: "search/crlf.txt", context: 1 },
+	{ pattern: "needle", path: "search/cr.txt" },
+	{ pattern: "x", path: "search/missing" },
+	{ pattern: "alpha", path: "search/repo", sort: true },
+	{ pattern: "zzz", path: "search" },
+	{ pattern: "alpha", path: "search/.hidden" },
+];
+
+const FIND_CALLS: Record<string, unknown>[] = [
+	{ pattern: "*.ts", path: "search", sort: true },
+	{ pattern: "*.md", path: "search", sort: true },
+	{ pattern: "sub/*.ts", path: "search", sort: true },
+	{ pattern: "**/*.ts", path: "search", sort: true },
+	{ pattern: "*.nothing", path: "search" },
+	{ pattern: "*", path: "search/sub", sort: true },
+	{ pattern: "*", path: "search/three", limit: 3, sort: true },
+	{ pattern: "*.txt", path: "search/repo", sort: true },
+	{ pattern: "*.ts", path: "search/.hidden", sort: true },
+	{ pattern: "*", path: "search/three", sort: true },
+	{ pattern: "*.log", path: "search/outer", sort: true },
+];
+
+/** A result's text with its lines sorted, before any notice. */
+function sortedResult(value: unknown): unknown {
+	const result = value as { content?: { type: string; text: string }[] };
+	if (!result.content) return value;
+	const content = result.content.map((block) => {
+		if (block.type !== "text") return block;
+		const at = block.text.indexOf("\n\n[");
+		const body = at === -1 ? block.text : block.text.slice(0, at);
+		const notice = at === -1 ? "" : block.text.slice(at);
+		return { ...block, text: body.split("\n").sort().join("\n") + notice };
+	});
+	return { ...result, content };
+}
+
+async function searchCalls(tool: "grep" | "find", calls: Record<string, unknown>[]) {
+	const entries = searchTree();
+	const root = mkdtempSync(join(tmpdir(), `relay-${tool}-`));
+	try {
+		writeTree(root, entries);
+		const definition = (tool === "grep"
+			? createGrepToolDefinition(root)
+			: createFindToolDefinition(root)) as unknown as Definition;
+		const results: unknown[] = [];
+		for (const call of calls) {
+			const { sort, ...args } = call;
+			try {
+				const result = JSON.parse(JSON.stringify(await definition.execute("call", args as never)));
+				results.push({ args: call, result: portable(sort ? sortedResult(result) : result, root) });
+			} catch (error) {
+				results.push({ args: call, error: portable(error instanceof Error ? error.message : String(error), root) });
+			}
+		}
+		return { declaration: declaration(definition), tree: entries, calls: results };
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
 }

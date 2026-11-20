@@ -17,7 +17,7 @@ use relay_tools::mime::detect_supported_image_mime_type;
 use relay_tools::truncate::{
     format_size, truncate_head, truncate_line, truncate_middle, truncate_tail, TruncationOptions,
 };
-use relay_tools::{EditTool, LsTool, ReadTool, WriteTool};
+use relay_tools::{EditTool, FindTool, GrepTool, LsTool, ReadTool, WriteTool};
 use serde_json::{json, Value};
 
 fn fixture(name: &str) -> Value {
@@ -377,5 +377,51 @@ fn edit_and_write_change_files_as_the_typescript_tools_do() {
         }
     }
     failures.dedup();
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
+/// The result with its lines sorted before any notice, as the recorder writes calls marked
+/// `sort`: ripgrep and fd report files in parallel, in no fixed order.
+fn sorted(mut value: Value) -> Value {
+    if let Some(text) = value["result"]["content"][0]["text"].as_str() {
+        let (body, notice) = match text.find("\n\n[") {
+            Some(at) => (&text[..at], &text[at..]),
+            None => (text, ""),
+        };
+        let mut lines: Vec<&str> = body.split('\n').collect();
+        lines.sort_unstable();
+        value["result"]["content"][0]["text"] = json!(format!("{}{notice}", lines.join("\n")));
+    }
+    value
+}
+
+#[tokio::test]
+async fn grep_and_find_answer_as_the_typescript_tools_do() {
+    let mut failures = Vec::new();
+    for tool in ["grep", "find"] {
+        let cases = fixture(&format!("{tool}.json"));
+        let tree = Tree::new(cases["tree"].as_array().unwrap());
+        let root = tree.root();
+        let signal = AbortSignal::never();
+        let grep = GrepTool::new(root.clone());
+        let find = FindTool::new(root.clone());
+        let declared: &dyn AgentTool = if tool == "grep" { &grep } else { &find };
+        check_declaration(declared, &cases["declaration"], &mut failures);
+        for call in cases["calls"].as_array().unwrap() {
+            let mut args = call["args"].clone();
+            let sort = args.as_object_mut().unwrap().remove("sort") == Some(json!(true));
+            let result = if tool == "grep" {
+                grep.grep(&args, &signal).await
+            } else {
+                find.find(&args, &signal).await
+            };
+            let mut actual = outcome(result, &root);
+            if sort {
+                actual = sorted(actual);
+            }
+            let label = format!("{tool} {}", call["args"]);
+            differences(&label, &expected_outcome(call), &actual, &mut failures);
+        }
+    }
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
