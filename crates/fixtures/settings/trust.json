@@ -1,0 +1,772 @@
+{
+	"tree": [
+		"home/.agents/skills/",
+		"work/a/b/c/",
+		"work/plain/",
+		"work/settings/.relay/settings.json",
+		"work/mcp/.relay/mcp.json",
+		"work/skills/.relay/skills/",
+		"work/system/.relay/SYSTEM.md",
+		"work/append/.relay/APPEND_SYSTEM.md",
+		"work/other/.relay/notes.md",
+		"work/agents/.agents/skills/",
+		"work/agents/deep/inside/",
+		"home/project/"
+	],
+	"steps": [
+		{
+			"step": {
+				"op": "get",
+				"cwd": "work/a/b/c"
+			},
+			"result": null
+		},
+		{
+			"step": {
+				"op": "file"
+			},
+			"error": "ENOENT: no such file or directory, open '<root>/agent/trust.json'"
+		},
+		{
+			"step": {
+				"op": "set",
+				"cwd": "work/a",
+				"decision": true
+			},
+			"result": "<undefined>"
+		},
+		{
+			"step": {
+				"op": "getEntry",
+				"cwd": "work/a/b/c"
+			},
+			"result": {
+				"path": "<root>/work/a",
+				"decision": true
+			}
+		},
+		{
+			"step": {
+				"op": "set",
+				"cwd": "work/a/b",
+				"decision": false
+			},
+			"result": "<undefined>"
+		},
+		{
+			"step": {
+				"op": "getEntry",
+				"cwd": "work/a/b/c"
+			},
+			"result": {
+				"path": "<root>/work/a/b",
+				"decision": false
+			}
+		},
+		{
+			"step": {
+				"op": "get",
+				"cwd": "work/a/b/../b"
+			},
+			"result": false
+		},
+		{
+			"step": {
+				"op": "get",
+				"cwd": "work/plain"
+			},
+			"result": null
+		},
+		{
+			"step": {
+				"op": "setMany",
+				"updates": [
+					{
+						"path": "work/plain",
+						"decision": true
+					},
+					{
+						"path": "work/a/b",
+						"decision": null
+					},
+					{
+						"path": "work",
+						"decision": false
+					}
+				]
+			},
+			"result": "<undefined>"
+		},
+		{
+			"step": {
+				"op": "getEntry",
+				"cwd": "work/a/b/c"
+			},
+			"result": {
+				"path": "<root>/work/a",
+				"decision": true
+			}
+		},
+		{
+			"step": {
+				"op": "getEntry",
+				"cwd": "work/zz"
+			},
+			"result": {
+				"path": "<root>/work",
+				"decision": false
+			}
+		},
+		{
+			"step": {
+				"op": "file"
+			},
+			"result": "{\n  \"<root>/work\": false,\n  \"<root>/work/a\": true,\n  \"<root>/work/plain\": true\n}\n"
+		},
+		{
+			"step": {
+				"op": "writeFile",
+				"content": "{\"/z\": true, \"/a\": null}"
+			},
+			"result": null
+		},
+		{
+			"step": {
+				"op": "set",
+				"cwd": "work/plain",
+				"decision": true
+			},
+			"result": "<undefined>"
+		},
+		{
+			"step": {
+				"op": "file"
+			},
+			"result": "{\n  \"/a\": null,\n  \"/z\": true,\n  \"<root>/work/plain\": true\n}\n"
+		},
+		{
+			"step": {
+				"op": "writeEntries",
+				"entries": {
+					"work/plain": null,
+					"work": true
+				}
+			},
+			"result": null
+		},
+		{
+			"step": {
+				"op": "getEntry",
+				"cwd": "work/plain"
+			},
+			"result": {
+				"path": "<root>/work",
+				"decision": true
+			}
+		},
+		{
+			"step": {
+				"op": "writeFile",
+				"content": "{ broken"
+			},
+			"result": null
+		},
+		{
+			"step": {
+				"op": "get",
+				"cwd": "work/plain"
+			},
+			"syntaxError": "Failed to read trust store <root>/agent/trust.json"
+		},
+		{
+			"step": {
+				"op": "writeFile",
+				"content": "[true]"
+			},
+			"result": null
+		},
+		{
+			"step": {
+				"op": "get",
+				"cwd": "work/plain"
+			},
+			"error": "Invalid trust store <root>/agent/trust.json: expected an object"
+		},
+		{
+			"step": {
+				"op": "writeFile",
+				"content": "{\"/x\": \"yes\"}"
+			},
+			"result": null
+		},
+		{
+			"step": {
+				"op": "set",
+				"cwd": "work/plain",
+				"decision": true
+			},
+			"error": "Invalid trust store <root>/agent/trust.json: value for \"/x\" must be true, false, or null"
+		},
+		{
+			"step": {
+				"op": "writeFile",
+				"content": "﻿{}"
+			},
+			"result": null
+		},
+		{
+			"step": {
+				"op": "get",
+				"cwd": "work/plain"
+			},
+			"result": null
+		}
+	],
+	"options": [
+		{
+			"folder": "work/a/b/c",
+			"parent": "<root>/work/a/b",
+			"options": [
+				{
+					"label": "Trust",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/work/a/b/c",
+							"decision": true
+						}
+					],
+					"savedPath": "<root>/work/a/b/c"
+				},
+				{
+					"label": "Trust parent folder (<root>/work/a/b)",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/work/a/b",
+							"decision": true
+						},
+						{
+							"path": "<root>/work/a/b/c",
+							"decision": null
+						}
+					],
+					"savedPath": "<root>/work/a/b"
+				},
+				{
+					"label": "Do not trust",
+					"trusted": false,
+					"updates": [
+						{
+							"path": "<root>/work/a/b/c",
+							"decision": false
+						}
+					],
+					"savedPath": "<root>/work/a/b/c"
+				}
+			],
+			"withSessionOnly": [
+				{
+					"label": "Trust",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/work/a/b/c",
+							"decision": true
+						}
+					],
+					"savedPath": "<root>/work/a/b/c"
+				},
+				{
+					"label": "Trust parent folder (<root>/work/a/b)",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/work/a/b",
+							"decision": true
+						},
+						{
+							"path": "<root>/work/a/b/c",
+							"decision": null
+						}
+					],
+					"savedPath": "<root>/work/a/b"
+				},
+				{
+					"label": "Trust (this session only)",
+					"trusted": true,
+					"updates": []
+				},
+				{
+					"label": "Do not trust",
+					"trusted": false,
+					"updates": [
+						{
+							"path": "<root>/work/a/b/c",
+							"decision": false
+						}
+					],
+					"savedPath": "<root>/work/a/b/c"
+				},
+				{
+					"label": "Do not trust (this session only)",
+					"trusted": false,
+					"updates": []
+				}
+			]
+		},
+		{
+			"folder": "work/settings",
+			"parent": "<root>/work",
+			"options": [
+				{
+					"label": "Trust",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/work/settings",
+							"decision": true
+						}
+					],
+					"savedPath": "<root>/work/settings"
+				},
+				{
+					"label": "Trust parent folder (<root>/work)",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/work",
+							"decision": true
+						},
+						{
+							"path": "<root>/work/settings",
+							"decision": null
+						}
+					],
+					"savedPath": "<root>/work"
+				},
+				{
+					"label": "Do not trust",
+					"trusted": false,
+					"updates": [
+						{
+							"path": "<root>/work/settings",
+							"decision": false
+						}
+					],
+					"savedPath": "<root>/work/settings"
+				}
+			],
+			"withSessionOnly": [
+				{
+					"label": "Trust",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/work/settings",
+							"decision": true
+						}
+					],
+					"savedPath": "<root>/work/settings"
+				},
+				{
+					"label": "Trust parent folder (<root>/work)",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/work",
+							"decision": true
+						},
+						{
+							"path": "<root>/work/settings",
+							"decision": null
+						}
+					],
+					"savedPath": "<root>/work"
+				},
+				{
+					"label": "Trust (this session only)",
+					"trusted": true,
+					"updates": []
+				},
+				{
+					"label": "Do not trust",
+					"trusted": false,
+					"updates": [
+						{
+							"path": "<root>/work/settings",
+							"decision": false
+						}
+					],
+					"savedPath": "<root>/work/settings"
+				},
+				{
+					"label": "Do not trust (this session only)",
+					"trusted": false,
+					"updates": []
+				}
+			]
+		},
+		{
+			"folder": "home/project",
+			"parent": "<root>/home",
+			"options": [
+				{
+					"label": "Trust",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/home/project",
+							"decision": true
+						}
+					],
+					"savedPath": "<root>/home/project"
+				},
+				{
+					"label": "Trust parent folder (<root>/home)",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/home",
+							"decision": true
+						},
+						{
+							"path": "<root>/home/project",
+							"decision": null
+						}
+					],
+					"savedPath": "<root>/home"
+				},
+				{
+					"label": "Do not trust",
+					"trusted": false,
+					"updates": [
+						{
+							"path": "<root>/home/project",
+							"decision": false
+						}
+					],
+					"savedPath": "<root>/home/project"
+				}
+			],
+			"withSessionOnly": [
+				{
+					"label": "Trust",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/home/project",
+							"decision": true
+						}
+					],
+					"savedPath": "<root>/home/project"
+				},
+				{
+					"label": "Trust parent folder (<root>/home)",
+					"trusted": true,
+					"updates": [
+						{
+							"path": "<root>/home",
+							"decision": true
+						},
+						{
+							"path": "<root>/home/project",
+							"decision": null
+						}
+					],
+					"savedPath": "<root>/home"
+				},
+				{
+					"label": "Trust (this session only)",
+					"trusted": true,
+					"updates": []
+				},
+				{
+					"label": "Do not trust",
+					"trusted": false,
+					"updates": [
+						{
+							"path": "<root>/home/project",
+							"decision": false
+						}
+					],
+					"savedPath": "<root>/home/project"
+				},
+				{
+					"label": "Do not trust (this session only)",
+					"trusted": false,
+					"updates": []
+				}
+			]
+		}
+	],
+	"rootOptions": {
+		"parent": "<undefined>",
+		"options": [
+			{
+				"label": "Trust",
+				"trusted": true,
+				"updates": [
+					{
+						"path": "<fs-root>",
+						"decision": true
+					}
+				],
+				"savedPath": "<fs-root>"
+			},
+			{
+				"label": "Do not trust",
+				"trusted": false,
+				"updates": [
+					{
+						"path": "<fs-root>",
+						"decision": false
+					}
+				],
+				"savedPath": "<fs-root>"
+			}
+		]
+	},
+	"resources": [
+		{
+			"folder": "work/plain",
+			"result": false
+		},
+		{
+			"folder": "work/settings",
+			"result": true
+		},
+		{
+			"folder": "work/mcp",
+			"result": true
+		},
+		{
+			"folder": "work/skills",
+			"result": true
+		},
+		{
+			"folder": "work/system",
+			"result": true
+		},
+		{
+			"folder": "work/append",
+			"result": true
+		},
+		{
+			"folder": "work/other",
+			"result": false
+		},
+		{
+			"folder": "work/agents",
+			"result": true
+		},
+		{
+			"folder": "work/agents/deep/inside",
+			"result": true
+		},
+		{
+			"folder": "home",
+			"result": false
+		},
+		{
+			"folder": "home/project",
+			"result": false
+		},
+		{
+			"folder": "missing/folder",
+			"result": false
+		}
+	],
+	"resolved": [
+		{
+			"name": "override",
+			"cwd": "work/settings",
+			"trustOverride": false,
+			"hasUI": true,
+			"trusted": false,
+			"prompts": [],
+			"file": "<absent>"
+		},
+		{
+			"name": "no resources",
+			"cwd": "work/plain",
+			"defaultProjectTrust": "never",
+			"trusted": true,
+			"prompts": [],
+			"file": "<absent>"
+		},
+		{
+			"name": "stored decision",
+			"cwd": "work/settings",
+			"stored": {
+				"work/settings": false
+			},
+			"defaultProjectTrust": "always",
+			"trusted": false,
+			"prompts": [],
+			"file": "{\n  \"<root>/work/settings\": false\n}\n"
+		},
+		{
+			"name": "stored on a parent",
+			"cwd": "work/settings",
+			"stored": {
+				"work": true
+			},
+			"trusted": true,
+			"prompts": [],
+			"file": "{\n  \"<root>/work\": true\n}\n"
+		},
+		{
+			"name": "always",
+			"cwd": "work/settings",
+			"defaultProjectTrust": "always",
+			"trusted": true,
+			"prompts": [],
+			"file": "<absent>"
+		},
+		{
+			"name": "never",
+			"cwd": "work/settings",
+			"defaultProjectTrust": "never",
+			"trusted": false,
+			"prompts": [],
+			"file": "<absent>"
+		},
+		{
+			"name": "never with a UI",
+			"cwd": "work/settings",
+			"defaultProjectTrust": "never",
+			"hasUI": true,
+			"answer": "Trust",
+			"trusted": false,
+			"prompts": [],
+			"file": "<absent>"
+		},
+		{
+			"name": "no UI",
+			"cwd": "work/settings",
+			"trusted": false,
+			"prompts": [],
+			"file": "<absent>"
+		},
+		{
+			"name": "trust",
+			"cwd": "work/settings",
+			"hasUI": true,
+			"answer": "Trust",
+			"trusted": true,
+			"prompts": [
+				{
+					"title": "Trust project folder?\n<root>/work/settings\n\nThis allows relay to load .relay settings and resources, install missing project packages, and execute project extensions.",
+					"labels": [
+						"Trust",
+						"Trust parent folder (<root>/work)",
+						"Trust (this session only)",
+						"Do not trust",
+						"Do not trust (this session only)"
+					]
+				}
+			],
+			"file": "{\n  \"<root>/work/settings\": true\n}\n"
+		},
+		{
+			"name": "trust the parent",
+			"cwd": "work/settings",
+			"hasUI": true,
+			"answer": "Trust parent folder",
+			"trusted": true,
+			"prompts": [
+				{
+					"title": "Trust project folder?\n<root>/work/settings\n\nThis allows relay to load .relay settings and resources, install missing project packages, and execute project extensions.",
+					"labels": [
+						"Trust",
+						"Trust parent folder (<root>/work)",
+						"Trust (this session only)",
+						"Do not trust",
+						"Do not trust (this session only)"
+					]
+				}
+			],
+			"file": "{\n  \"<root>/work\": true\n}\n"
+		},
+		{
+			"name": "session only",
+			"cwd": "work/settings",
+			"hasUI": true,
+			"answer": "Trust (this session only)",
+			"trusted": true,
+			"prompts": [
+				{
+					"title": "Trust project folder?\n<root>/work/settings\n\nThis allows relay to load .relay settings and resources, install missing project packages, and execute project extensions.",
+					"labels": [
+						"Trust",
+						"Trust parent folder (<root>/work)",
+						"Trust (this session only)",
+						"Do not trust",
+						"Do not trust (this session only)"
+					]
+				}
+			],
+			"file": "<absent>"
+		},
+		{
+			"name": "do not trust",
+			"cwd": "work/settings",
+			"hasUI": true,
+			"answer": "Do not trust",
+			"trusted": false,
+			"prompts": [
+				{
+					"title": "Trust project folder?\n<root>/work/settings\n\nThis allows relay to load .relay settings and resources, install missing project packages, and execute project extensions.",
+					"labels": [
+						"Trust",
+						"Trust parent folder (<root>/work)",
+						"Trust (this session only)",
+						"Do not trust",
+						"Do not trust (this session only)"
+					]
+				}
+			],
+			"file": "{\n  \"<root>/work/settings\": false\n}\n"
+		},
+		{
+			"name": "distrust for the session",
+			"cwd": "work/settings",
+			"hasUI": true,
+			"answer": "Do not trust (this session only)",
+			"trusted": false,
+			"prompts": [
+				{
+					"title": "Trust project folder?\n<root>/work/settings\n\nThis allows relay to load .relay settings and resources, install missing project packages, and execute project extensions.",
+					"labels": [
+						"Trust",
+						"Trust parent folder (<root>/work)",
+						"Trust (this session only)",
+						"Do not trust",
+						"Do not trust (this session only)"
+					]
+				}
+			],
+			"file": "<absent>"
+		},
+		{
+			"name": "dismissed",
+			"cwd": "work/settings",
+			"hasUI": true,
+			"trusted": false,
+			"prompts": [
+				{
+					"title": "Trust project folder?\n<root>/work/settings\n\nThis allows relay to load .relay settings and resources, install missing project packages, and execute project extensions.",
+					"labels": [
+						"Trust",
+						"Trust parent folder (<root>/work)",
+						"Trust (this session only)",
+						"Do not trust",
+						"Do not trust (this session only)"
+					]
+				}
+			],
+			"file": "<absent>"
+		}
+	]
+}

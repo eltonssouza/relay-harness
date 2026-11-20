@@ -317,7 +317,8 @@ fn random_uuid() -> String {
     )
 }
 
-fn resolve(path: &str) -> String {
+/// `resolvePath(path)` from the process's working directory.
+pub(crate) fn resolve(path: &str) -> String {
     let home = relay_tools::paths::home_dir();
     let process = std::env::current_dir()
         .map(|cwd| cwd.to_string_lossy().into_owned())
