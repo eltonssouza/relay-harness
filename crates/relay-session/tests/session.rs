@@ -901,6 +901,6 @@ fn rewritten_files_hold_compact_lines() {
     assert!(text.contains(r#""cost":{"total":0.0000012}"#), "{text}");
     for line in text.lines() {
         let value: Value = serde_json::from_str(line).unwrap();
-        assert_eq!(relay_session::json::stringify(&value), line);
+        assert_eq!(relay_ai::json::stringify(&value), line);
     }
 }

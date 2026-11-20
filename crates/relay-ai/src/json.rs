@@ -37,6 +37,72 @@ pub fn serialize_js_f64_option<S: Serializer>(
     number.map(js_number).serialize(serializer)
 }
 
+/// Writes `value` as `JSON.stringify(value, null, indent)` does: keys in order, numbers as
+/// JavaScript writes them (`0.0000012`, where serde_json writes `1.2e-6`), and with `indent`
+/// spaces per level (none for the compact form).
+fn write_js(value: &Value, indent: usize, depth: usize, out: &mut String) {
+    let newline = |out: &mut String, depth: usize| {
+        if indent > 0 {
+            out.push('\n');
+            out.push_str(&" ".repeat(indent * depth));
+        }
+    };
+    match value {
+        Value::Null => out.push_str("null"),
+        Value::Bool(value) => out.push_str(if *value { "true" } else { "false" }),
+        Value::Number(number) if number.is_f64() => out.push_str(
+            &crate::text::js_number_to_string(number.as_f64().unwrap_or_default()),
+        ),
+        Value::Number(number) => out.push_str(&number.to_string()),
+        Value::String(text) => out.push_str(&Value::String(text.clone()).to_string()),
+        Value::Array(items) if items.is_empty() => out.push_str("[]"),
+        Value::Array(items) => {
+            out.push('[');
+            for (index, item) in items.iter().enumerate() {
+                if index > 0 {
+                    out.push(',');
+                }
+                newline(out, depth + 1);
+                write_js(item, indent, depth + 1, out);
+            }
+            newline(out, depth);
+            out.push(']');
+        }
+        Value::Object(fields) if fields.is_empty() => out.push_str("{}"),
+        Value::Object(fields) => {
+            out.push('{');
+            for (index, (name, item)) in fields.iter().enumerate() {
+                if index > 0 {
+                    out.push(',');
+                }
+                newline(out, depth + 1);
+                out.push_str(&Value::String(name.clone()).to_string());
+                out.push(':');
+                if indent > 0 {
+                    out.push(' ');
+                }
+                write_js(item, indent, depth + 1, out);
+            }
+            newline(out, depth);
+            out.push('}');
+        }
+    }
+}
+
+/// `JSON.stringify(value)`.
+pub fn stringify(value: &Value) -> String {
+    let mut out = String::new();
+    write_js(value, 0, 0, &mut out);
+    out
+}
+
+/// `JSON.stringify(value, null, 2)`.
+pub fn stringify_pretty(value: &Value) -> String {
+    let mut out = String::new();
+    write_js(value, 2, 0, &mut out);
+    out
+}
+
 /// Escape raw control characters in string literals and double the backslash of an escape JSON
 /// does not have.
 pub fn repair_json(json: &str) -> String {
@@ -359,6 +425,22 @@ impl PartialParser<'_> {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn stringifies_as_javascript_does() {
+        let value: Value =
+            serde_json::from_str(r#"{"a":0.0000012,"b":[1.5,{}],"c":[],"d":-0.0,"e":"x\u0001"}"#)
+                .unwrap();
+        assert_eq!(
+            stringify(&value),
+            r#"{"a":0.0000012,"b":[1.5,{}],"c":[],"d":0,"e":"x\u0001"}"#
+        );
+        assert_eq!(
+            stringify_pretty(&value),
+            "{\n  \"a\": 0.0000012,\n  \"b\": [\n    1.5,\n    {}\n  ],\n  \"c\": [],\n  \"d\": 0,\n  \"e\": \"x\\u0001\"\n}"
+        );
+        assert_eq!(stringify_pretty(&json!({})), "{}");
+    }
 
     #[test]
     fn parses_partial_values() {

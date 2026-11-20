@@ -1,0 +1,1071 @@
+[
+	{
+		"name": "new global file",
+		"calls": [
+			[
+				"setDefaultModelAndProvider",
+				"openai",
+				"gpt-test"
+			],
+			[
+				"setTheme",
+				"light"
+			],
+			[
+				"setSteeringMode",
+				"all"
+			],
+			[
+				"setFollowUpMode",
+				"all"
+			],
+			[
+				"setDefaultThinkingLevel",
+				"high"
+			],
+			[
+				"setTransport",
+				"sse"
+			],
+			[
+				"setLastChangelogVersion",
+				"1.2.3"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{\n  \"defaultProvider\": \"openai\",\n  \"defaultModel\": \"gpt-test\",\n  \"theme\": \"light\",\n  \"steeringMode\": \"all\",\n  \"followUpMode\": \"all\",\n  \"defaultThinkingLevel\": \"high\",\n  \"transport\": \"sse\",\n  \"lastChangelogVersion\": \"1.2.3\"\n}",
+		"projectFile": "<absent>",
+		"settings": {
+			"defaultProvider": "openai",
+			"defaultModel": "gpt-test",
+			"theme": "light",
+			"steeringMode": "all",
+			"followUpMode": "all",
+			"defaultThinkingLevel": "high",
+			"transport": "sse",
+			"lastChangelogVersion": "1.2.3"
+		},
+		"errors": []
+	},
+	{
+		"name": "nested settings keep what the file has",
+		"global": "{\n  \"compaction\": {\n    \"reserveTokens\": 5,\n    \"enabled\": true\n  },\n  \"terminal\": {\n    \"imageWidthCells\": 10\n  },\n  \"other\": [\n    1,\n    {\n      \"a\": 0.0000012\n    }\n  ]\n}",
+		"calls": [
+			[
+				"externalEdit",
+				"global",
+				{
+					"compaction": {
+						"reserveTokens": 6,
+						"keepRecentTokens": 7
+					},
+					"theme": "external"
+				}
+			],
+			[
+				"setCompactionEnabled",
+				false
+			],
+			[
+				"setRetryEnabled",
+				false
+			],
+			[
+				"setShowImages",
+				false
+			],
+			[
+				"setImageWidthCells",
+				0.5
+			],
+			[
+				"setClearOnShrink",
+				true
+			],
+			[
+				"setShowTerminalProgress",
+				true
+			],
+			[
+				"setImageAutoResize",
+				false
+			],
+			[
+				"setBlockImages",
+				true
+			],
+			[
+				"setMermaidRenderingMode",
+				"final"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{\n  \"compaction\": {\n    \"reserveTokens\": 6,\n    \"keepRecentTokens\": 7,\n    \"enabled\": false\n  },\n  \"theme\": \"external\",\n  \"retry\": {\n    \"enabled\": false\n  },\n  \"terminal\": {\n    \"showImages\": false,\n    \"imageWidthCells\": 1,\n    \"clearOnShrink\": true,\n    \"showTerminalProgress\": true\n  },\n  \"images\": {\n    \"autoResize\": false,\n    \"blockImages\": true\n  },\n  \"markdown\": {\n    \"mermaid\": \"final\"\n  }\n}",
+		"projectFile": "<absent>",
+		"settings": {
+			"compaction": {
+				"reserveTokens": 5,
+				"enabled": false
+			},
+			"terminal": {
+				"imageWidthCells": 1,
+				"showImages": false,
+				"clearOnShrink": true,
+				"showTerminalProgress": true
+			},
+			"other": [
+				1,
+				{
+					"a": 0.0000012
+				}
+			],
+			"retry": {
+				"enabled": false
+			},
+			"images": {
+				"autoResize": false,
+				"blockImages": true
+			},
+			"markdown": {
+				"mermaid": "final"
+			}
+		},
+		"errors": []
+	},
+	{
+		"name": "project settings",
+		"project": "{\n  \"theme\": \"project\",\n  \"packages\": [\n    \"old\"\n  ]\n}",
+		"calls": [
+			[
+				"setProjectPackages",
+				[
+					"a",
+					{
+						"source": "b",
+						"autoload": false
+					}
+				]
+			],
+			[
+				"setProjectExtensionPaths",
+				[
+					"ext"
+				]
+			],
+			[
+				"setProjectSkillPaths",
+				[
+					"skill"
+				]
+			],
+			[
+				"setProjectPromptTemplatePaths",
+				[
+					"prompt"
+				]
+			],
+			[
+				"setProjectThemePaths",
+				[
+					"theme"
+				]
+			],
+			[
+				"setPackages",
+				[
+					"global"
+				]
+			],
+			[
+				"setExtensionPaths",
+				[
+					"g-ext"
+				]
+			],
+			[
+				"setSkillPaths",
+				[
+					"g-skill"
+				]
+			],
+			[
+				"setPromptTemplatePaths",
+				[
+					"g-prompt"
+				]
+			],
+			[
+				"setThemePaths",
+				[
+					"g-theme"
+				]
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{\n  \"packages\": [\n    \"global\"\n  ],\n  \"extensions\": [\n    \"g-ext\"\n  ],\n  \"skills\": [\n    \"g-skill\"\n  ],\n  \"prompts\": [\n    \"g-prompt\"\n  ],\n  \"themes\": [\n    \"g-theme\"\n  ]\n}",
+		"projectFile": "{\n  \"theme\": \"project\",\n  \"packages\": [\n    \"a\",\n    {\n      \"source\": \"b\",\n      \"autoload\": false\n    }\n  ],\n  \"extensions\": [\n    \"ext\"\n  ],\n  \"skills\": [\n    \"skill\"\n  ],\n  \"prompts\": [\n    \"prompt\"\n  ],\n  \"themes\": [\n    \"theme\"\n  ]\n}",
+		"settings": {
+			"packages": [
+				"a",
+				{
+					"source": "b",
+					"autoload": false
+				}
+			],
+			"extensions": [
+				"ext"
+			],
+			"skills": [
+				"skill"
+			],
+			"prompts": [
+				"prompt"
+			],
+			"themes": [
+				"theme"
+			],
+			"theme": "project"
+		},
+		"errors": []
+	},
+	{
+		"name": "untrusted project refuses writes",
+		"project": "{\n  \"theme\": \"project\"\n}",
+		"untrusted": true,
+		"calls": [
+			[
+				"setProjectPackages",
+				[
+					"a"
+				]
+			],
+			[
+				"setProjectTrusted",
+				true
+			],
+			[
+				"setProjectSkillPaths",
+				[
+					"s"
+				]
+			],
+			[
+				"setProjectTrusted",
+				false
+			]
+		],
+		"outcomes": [
+			{
+				"error": "Project is not trusted; refusing to write project settings"
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "<absent>",
+		"projectFile": "{\n  \"theme\": \"project\",\n  \"skills\": [\n    \"s\"\n  ]\n}",
+		"settings": {},
+		"errors": []
+	},
+	{
+		"name": "model thinking levels",
+		"global": "{\n  \"modelThinkingLevels\": {\n    \"a/b\": \"low\"\n  }\n}",
+		"calls": [
+			[
+				"setModelThinkingLevel",
+				"c",
+				"d",
+				"high"
+			],
+			[
+				"removeModelThinkingLevel",
+				"a",
+				"b"
+			],
+			[
+				"removeModelThinkingLevel",
+				"c",
+				"d"
+			],
+			[
+				"removeModelThinkingLevel",
+				"c",
+				"d"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{}",
+		"projectFile": "<absent>",
+		"settings": {},
+		"errors": []
+	},
+	{
+		"name": "values removed",
+		"global": "{\n  \"shellPath\": \"/bin/zsh\",\n  \"npmCommand\": [\n    \"npm\"\n  ],\n  \"shellCommandPrefix\": \"x\",\n  \"enabledModels\": [\n    \"a\"\n  ]\n}",
+		"calls": [
+			[
+				"setShellPath",
+				null
+			],
+			[
+				"setNpmCommand",
+				null
+			],
+			[
+				"setShellCommandPrefix",
+				null
+			],
+			[
+				"setEnabledModels",
+				null
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{}",
+		"projectFile": "<absent>",
+		"settings": {},
+		"errors": []
+	},
+	{
+		"name": "an invalid global file is never written",
+		"global": "{ broken",
+		"calls": [
+			[
+				"setTheme",
+				"light"
+			],
+			[
+				"setDefaultModel",
+				"m"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{ broken",
+		"projectFile": "<absent>",
+		"settings": {
+			"theme": "light",
+			"defaultModel": "m"
+		},
+		"errors": [
+			{
+				"scope": "global",
+				"path": "<root>/agent/settings.json",
+				"syntaxError": true
+			}
+		]
+	},
+	{
+		"name": "harness settings",
+		"global": "{\n  \"harnessCore\": {\n    \"evidence\": false\n  }\n}",
+		"calls": [
+			[
+				"setHarnessCoreSetting",
+				"alignment",
+				false
+			],
+			[
+				"setHarnessCoreSetting",
+				"contextKeepRecent",
+				0
+			],
+			[
+				"setHarnessCoreSetting",
+				"contextKeepRecent",
+				3
+			],
+			[
+				"setHarnessCoreSetting",
+				"maxChangedLines",
+				1.5
+			],
+			[
+				"setHarnessCoreSetting",
+				"verifyCommands",
+				[
+					"npm test",
+					" "
+				]
+			],
+			[
+				"setHarnessCoreSetting",
+				"verifyCommands",
+				[
+					"npm test"
+				]
+			],
+			[
+				"setHarnessCoreSetting",
+				"evidence",
+				"yes"
+			],
+			[
+				"setHarnessCoreSetting",
+				"unknown",
+				true
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"error": "harnessCore.contextKeepRecent must be an integer of at least 1"
+			},
+			{
+				"result": null
+			},
+			{
+				"error": "harnessCore.maxChangedLines must be an integer of at least 0"
+			},
+			{
+				"error": "harnessCore.verifyCommands must be a list of commands"
+			},
+			{
+				"result": null
+			},
+			{
+				"error": "harnessCore.evidence must be true or false"
+			},
+			{
+				"error": "harnessCore.unknown is not a harness setting"
+			}
+		],
+		"globalFile": "{\n  \"harnessCore\": {\n    \"evidence\": false,\n    \"alignment\": false,\n    \"contextKeepRecent\": 3,\n    \"verifyCommands\": [\n      \"npm test\"\n    ]\n  }\n}",
+		"projectFile": "<absent>",
+		"settings": {
+			"harnessCore": {
+				"evidence": false,
+				"alignment": false,
+				"contextKeepRecent": 3,
+				"verifyCommands": [
+					"npm test"
+				]
+			}
+		},
+		"errors": []
+	},
+	{
+		"name": "identifiers",
+		"calls": [
+			[
+				"setEnableAnalytics",
+				false
+			],
+			[
+				"setEnableAnalytics",
+				true
+			],
+			[
+				"getTrackingId"
+			],
+			[
+				"getOrCreateDeviceId"
+			],
+			[
+				"setEnableAnalytics",
+				true
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": "<uuid>"
+			},
+			{
+				"result": "<uuid>"
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{\n  \"enableAnalytics\": true,\n  \"trackingId\": \"<uuid>\",\n  \"deviceId\": \"<uuid>\"\n}",
+		"projectFile": "<absent>",
+		"settings": {
+			"enableAnalytics": true,
+			"trackingId": "<uuid>",
+			"deviceId": "<uuid>"
+		},
+		"errors": []
+	},
+	{
+		"name": "clamps",
+		"calls": [
+			[
+				"setEditorPaddingX",
+				9
+			],
+			[
+				"setAutocompleteMaxVisible",
+				1
+			],
+			[
+				"setFullscreenWheelScrollLines",
+				500
+			],
+			[
+				"setFullscreenWheelScrollLines",
+				"auto"
+			],
+			[
+				"setHttpIdleTimeoutMs",
+				-1
+			],
+			[
+				"setHttpIdleTimeoutMs",
+				1234.9
+			],
+			[
+				"setOutputPad",
+				0
+			],
+			[
+				"setTuiMode",
+				"regular"
+			],
+			[
+				"setFullscreenExitOutput",
+				"resume-hint"
+			],
+			[
+				"setFullscreenScrollbar",
+				"always"
+			],
+			[
+				"setFullscreenCopyOnSelect",
+				false
+			],
+			[
+				"setDoubleEscapeAction",
+				"none"
+			],
+			[
+				"setTreeFilterMode",
+				"all"
+			],
+			[
+				"setShowHardwareCursor",
+				true
+			],
+			[
+				"setCacheWarmingMode",
+				"off"
+			],
+			[
+				"setHideThinkingBlock",
+				true
+			],
+			[
+				"setShowCacheMissNotices",
+				true
+			],
+			[
+				"setQuietStartup",
+				true
+			],
+			[
+				"setDefaultProjectTrust",
+				"never"
+			],
+			[
+				"setCollapseChangelog",
+				true
+			],
+			[
+				"setEnableInstallTelemetry",
+				false
+			],
+			[
+				"setEnableSkillCommands",
+				false
+			],
+			[
+				"setWarnings",
+				{
+					"anthropicExtraUsage": false
+				}
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"error": "Invalid httpIdleTimeoutMs setting: -1"
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{\n  \"editorPaddingX\": 3,\n  \"autocompleteMaxVisible\": 3,\n  \"fullscreenWheelScrollLines\": \"auto\",\n  \"httpIdleTimeoutMs\": 1234,\n  \"outputPad\": 0,\n  \"tuiMode\": \"regular\",\n  \"fullscreenExitOutput\": \"resume-hint\",\n  \"fullscreenScrollbar\": \"always\",\n  \"fullscreenCopyOnSelect\": false,\n  \"doubleEscapeAction\": \"none\",\n  \"treeFilterMode\": \"all\",\n  \"showHardwareCursor\": true,\n  \"cacheWarming\": \"off\",\n  \"hideThinkingBlock\": true,\n  \"showCacheMissNotices\": true,\n  \"quietStartup\": true,\n  \"defaultProjectTrust\": \"never\",\n  \"collapseChangelog\": true,\n  \"enableInstallTelemetry\": false,\n  \"enableSkillCommands\": false,\n  \"warnings\": {\n    \"anthropicExtraUsage\": false\n  }\n}",
+		"projectFile": "<absent>",
+		"settings": {
+			"editorPaddingX": 3,
+			"autocompleteMaxVisible": 3,
+			"fullscreenWheelScrollLines": "auto",
+			"httpIdleTimeoutMs": 1234,
+			"outputPad": 0,
+			"tuiMode": "regular",
+			"fullscreenExitOutput": "resume-hint",
+			"fullscreenScrollbar": "always",
+			"fullscreenCopyOnSelect": false,
+			"doubleEscapeAction": "none",
+			"treeFilterMode": "all",
+			"showHardwareCursor": true,
+			"cacheWarming": "off",
+			"hideThinkingBlock": true,
+			"showCacheMissNotices": true,
+			"quietStartup": true,
+			"defaultProjectTrust": "never",
+			"collapseChangelog": true,
+			"enableInstallTelemetry": false,
+			"enableSkillCommands": false,
+			"warnings": {
+				"anthropicExtraUsage": false
+			}
+		},
+		"errors": []
+	},
+	{
+		"name": "overrides and reload",
+		"global": "{\n  \"theme\": \"dark\"\n}",
+		"project": "{\n  \"defaultModel\": \"project-model\"\n}",
+		"calls": [
+			[
+				"applyOverrides",
+				{
+					"theme": "override",
+					"compaction": {
+						"enabled": false
+					}
+				}
+			],
+			[
+				"getSettings"
+			],
+			[
+				"setDefaultProvider",
+				"p"
+			],
+			[
+				"getSettings"
+			],
+			[
+				"externalEdit",
+				"global",
+				{
+					"theme": "reloaded"
+				}
+			],
+			[
+				"externalEdit",
+				"project",
+				{
+					"defaultModel": "edited"
+				}
+			],
+			[
+				"reload"
+			],
+			[
+				"getSettings"
+			],
+			[
+				"externalEdit",
+				"global",
+				"{ broken"
+			],
+			[
+				"reload"
+			],
+			[
+				"getSettings"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": {
+					"theme": "override",
+					"defaultModel": "project-model",
+					"compaction": {
+						"enabled": false
+					}
+				}
+			},
+			{
+				"result": null
+			},
+			{
+				"result": {
+					"theme": "dark",
+					"defaultProvider": "p",
+					"defaultModel": "project-model"
+				}
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": {
+					"theme": "reloaded",
+					"defaultModel": "edited"
+				}
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": {
+					"theme": "reloaded",
+					"defaultModel": "edited"
+				}
+			}
+		],
+		"globalFile": "{ broken",
+		"projectFile": "{\n  \"defaultModel\": \"edited\"\n}",
+		"settings": {
+			"theme": "reloaded",
+			"defaultModel": "edited"
+		},
+		"errors": [
+			{
+				"scope": "global",
+				"path": "<root>/agent/settings.json",
+				"syntaxError": true
+			}
+		]
+	},
+	{
+		"name": "a held lock",
+		"global": "{\n  \"theme\": \"dark\"\n}",
+		"calls": [
+			[
+				"holdLock",
+				"global"
+			],
+			[
+				"setTheme",
+				"light"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{\n  \"theme\": \"dark\"\n}",
+		"projectFile": "<absent>",
+		"settings": {
+			"theme": "light"
+		},
+		"errors": [
+			{
+				"scope": "global",
+				"path": "<root>/agent/settings.json",
+				"message": "Lock file is already being held"
+			}
+		]
+	},
+	{
+		"name": "a held lock on a new file",
+		"calls": [
+			[
+				"holdLock",
+				"global"
+			],
+			[
+				"setTheme",
+				"light"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "<absent>",
+		"projectFile": "<absent>",
+		"settings": {
+			"theme": "light"
+		},
+		"errors": [
+			{
+				"scope": "global",
+				"path": "<root>/agent/settings.json",
+				"message": "Lock file is already being held"
+			}
+		]
+	},
+	{
+		"name": "an existing tracking id stays",
+		"global": "{\n  \"trackingId\": \"existing\"\n}",
+		"calls": [
+			[
+				"setEnableAnalytics",
+				true
+			],
+			[
+				"getTrackingId"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": "existing"
+			}
+		],
+		"globalFile": "{\n  \"trackingId\": \"existing\",\n  \"enableAnalytics\": true\n}",
+		"projectFile": "<absent>",
+		"settings": {
+			"trackingId": "existing",
+			"enableAnalytics": true
+		},
+		"errors": []
+	},
+	{
+		"name": "written fields are not written again",
+		"calls": [
+			[
+				"setTheme",
+				"first"
+			],
+			[
+				"externalEdit",
+				"global",
+				{
+					"theme": "external",
+					"other": 1
+				}
+			],
+			[
+				"setDefaultModel",
+				"m"
+			]
+		],
+		"outcomes": [
+			{
+				"result": null
+			},
+			{
+				"result": null
+			},
+			{
+				"result": null
+			}
+		],
+		"globalFile": "{\n  \"theme\": \"external\",\n  \"other\": 1,\n  \"defaultModel\": \"m\"\n}",
+		"projectFile": "<absent>",
+		"settings": {
+			"theme": "first",
+			"defaultModel": "m"
+		},
+		"errors": []
+	}
+]
