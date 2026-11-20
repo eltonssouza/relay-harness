@@ -131,7 +131,7 @@ async fn run_loop(
                     context,
                     new_messages,
                 };
-                if let Some(update) = hooks.prepare_next_turn(turn).await {
+                if let Some(update) = hooks.prepare_next_turn(turn, signal).await {
                     if let Some(replacement) = update.context {
                         *context = replacement;
                     }

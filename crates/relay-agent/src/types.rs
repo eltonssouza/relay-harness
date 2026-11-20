@@ -373,6 +373,7 @@ pub trait AgentHooks: Send + Sync {
     fn prepare_next_turn<'a>(
         &'a self,
         _turn: AgentTurnContext<'a>,
+        _signal: &'a AbortSignal,
     ) -> BoxFuture<'a, Option<TurnUpdate>> {
         Box::pin(ready(None))
     }

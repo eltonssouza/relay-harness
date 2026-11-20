@@ -1,0 +1,779 @@
+{
+	"name": "tool-change",
+	"description": "Tools added between prompts are announced before the next request.",
+	"tools": [
+		{
+			"name": "echo",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"text": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"text"
+				]
+			}
+		},
+		{
+			"name": "read",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"path": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"path"
+				]
+			}
+		}
+	],
+	"initialState": {
+		"systemPrompt": "Be brief.",
+		"tools": [
+			"echo"
+		]
+	},
+	"responses": [
+		{
+			"content": [
+				{
+					"type": "text",
+					"text": "One."
+				}
+			]
+		},
+		{
+			"content": [
+				{
+					"type": "text",
+					"text": "Two."
+				}
+			]
+		}
+	],
+	"steps": [
+		{
+			"op": "prompt",
+			"text": "A"
+		},
+		{
+			"op": "setTools",
+			"tools": [
+				"echo",
+				"read"
+			]
+		},
+		{
+			"op": "prompt",
+			"text": "B"
+		}
+	],
+	"events": [
+		{
+			"type": "agent_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_end",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "system",
+			"state": {
+				"streaming": true,
+				"streamingRole": "system",
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "system",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 4,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 4,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 5,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 5,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 5,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 5,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 5,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 6,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 6,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_end",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 6,
+				"error": null
+			}
+		}
+	],
+	"ops": [
+		{
+			"at": "step",
+			"op": "prompt",
+			"result": "ok"
+		},
+		{
+			"at": "step",
+			"op": "setTools",
+			"result": "ok"
+		},
+		{
+			"at": "step",
+			"op": "prompt",
+			"result": "ok"
+		}
+	],
+	"calls": [
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "A"
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"reasoning": null
+		},
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "A"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "One."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				},
+				{
+					"role": "system",
+					"content": "",
+					"timestamp": 0,
+					"toolsAdded": [
+						{
+							"name": "read",
+							"description": "read tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"path": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"path"
+								]
+							}
+						}
+					]
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "B"
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"reasoning": null
+		}
+	],
+	"states": [
+		{
+			"after": "prompt",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "A"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "One."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		},
+		{
+			"after": "setTools",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "A"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "One."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		},
+		{
+			"after": "prompt",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "A"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "One."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				},
+				{
+					"role": "system",
+					"content": "",
+					"timestamp": 0,
+					"toolsAdded": [
+						{
+							"name": "read",
+							"description": "read tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"path": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"path"
+								]
+							}
+						}
+					]
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "B"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Two."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		}
+	]
+}
