@@ -1,0 +1,2563 @@
+{
+	"paths": {
+		"simple": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "first question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "first answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "user",
+					"content": "second question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "second answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 800,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 800,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"message": {
+					"role": "user",
+					"content": "third question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e6",
+				"parentId": "e5",
+				"timestamp": "2026-11-01T09:00:06.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "third answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		],
+		"split turn": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "old question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "old answer"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "user",
+					"content": "do the long task",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call-1",
+							"name": "read",
+							"arguments": {
+								"path": "src/a.ts"
+							}
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"message": {
+					"role": "toolResult",
+					"toolCallId": "call-1",
+					"toolName": "read",
+					"content": [
+						{
+							"type": "text",
+							"text": "contents xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"isError": false,
+					"timestamp": 3
+				}
+			},
+			{
+				"type": "message",
+				"id": "e6",
+				"parentId": "e5",
+				"timestamp": "2026-11-01T09:00:06.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call-1",
+							"name": "edit",
+							"arguments": {
+								"path": "src/b.ts",
+								"edits": []
+							}
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e7",
+				"parentId": "e6",
+				"timestamp": "2026-11-01T09:00:07.000Z",
+				"message": {
+					"role": "toolResult",
+					"toolCallId": "call-1",
+					"toolName": "edit",
+					"content": [
+						{
+							"type": "text",
+							"text": "edited xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"isError": false,
+					"timestamp": 3
+				}
+			},
+			{
+				"type": "message",
+				"id": "e8",
+				"parentId": "e7",
+				"timestamp": "2026-11-01T09:00:08.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "done with the task"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		],
+		"previous compaction": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "ancient xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call-1",
+							"name": "write",
+							"arguments": {
+								"path": "old.txt",
+								"content": "x"
+							}
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "user",
+					"content": "kept question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "compaction",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"summary": "earlier summary",
+				"firstKeptEntryId": "e3",
+				"tokensBefore": 999,
+				"details": {
+					"readFiles": [
+						"r.txt",
+						"both.txt"
+					],
+					"modifiedFiles": [
+						"m.txt"
+					]
+				}
+			},
+			{
+				"type": "message",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call-1",
+							"name": "read",
+							"arguments": {
+								"path": "both.txt"
+							}
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e6",
+				"parentId": "e5",
+				"timestamp": "2026-11-01T09:00:06.000Z",
+				"message": {
+					"role": "toolResult",
+					"toolCallId": "call-1",
+					"toolName": "read",
+					"content": [
+						{
+							"type": "text",
+							"text": "read result xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"isError": false,
+					"timestamp": 3
+				}
+			},
+			{
+				"type": "message",
+				"id": "e7",
+				"parentId": "e6",
+				"timestamp": "2026-11-01T09:00:07.000Z",
+				"message": {
+					"role": "user",
+					"content": "new question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e8",
+				"parentId": "e7",
+				"timestamp": "2026-11-01T09:00:08.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "new answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		],
+		"hook compaction details ignored": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "compaction",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"summary": "hook summary",
+				"firstKeptEntryId": "e1",
+				"tokensBefore": 5,
+				"details": {
+					"readFiles": [
+						"hook.txt"
+					]
+				},
+				"fromHook": true
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"message": {
+					"role": "user",
+					"content": "more xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "reply xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		],
+		"ends with a compaction": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "q",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "compaction",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"summary": "s",
+				"firstKeptEntryId": "e1",
+				"tokensBefore": 1
+			}
+		],
+		"everything kept": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "short",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "tiny"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		],
+		"metadata before the cut": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "one xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "two xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "model_change",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"provider": "openai",
+				"modelId": "gpt"
+			},
+			{
+				"type": "label",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"targetId": "e1",
+				"label": "start"
+			},
+			{
+				"type": "thinking_level_change",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"thinkingLevel": "high"
+			},
+			{
+				"type": "message",
+				"id": "e6",
+				"parentId": "e5",
+				"timestamp": "2026-11-01T09:00:06.000Z",
+				"message": {
+					"role": "user",
+					"content": "three xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e7",
+				"parentId": "e6",
+				"timestamp": "2026-11-01T09:00:07.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "four xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		],
+		"system messages are not summarized": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "system",
+					"content": "Prompt.",
+					"timestamp": 0
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "user",
+					"content": "one xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "system",
+					"content": "More prompt.",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "two xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"message": {
+					"role": "user",
+					"content": "three xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e6",
+				"parentId": "e5",
+				"timestamp": "2026-11-01T09:00:06.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "four xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		],
+		"omitted recovery attempt": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "user",
+					"content": "retry this xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "failed attempt xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "error",
+					"timestamp": 2,
+					"errorMessage": "x"
+				}
+			},
+			{
+				"type": "context_edit",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"targetId": "e4",
+				"replacement": null
+			}
+		],
+		"edit replacing earlier content": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "user",
+					"content": "retry this xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "failed attempt xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "context_edit",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"targetId": "e4",
+				"replacement": null
+			},
+			{
+				"type": "context_edit",
+				"id": "e6",
+				"parentId": "e5",
+				"timestamp": "2026-11-01T09:00:06.000Z",
+				"targetId": "e1",
+				"replacement": {
+					"content": "short question"
+				}
+			}
+		],
+		"usage before an edit": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 900,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 900,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "user",
+					"content": "follow-up xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "context_edit",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"targetId": "e1",
+				"replacement": {
+					"content": "short"
+				}
+			}
+		],
+		"usage after an edit": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "context_edit",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"targetId": "e1",
+				"replacement": {
+					"content": "short"
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 900,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 900,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"message": {
+					"role": "user",
+					"content": "follow-up xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			}
+		],
+		"compaction keeping everything": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "user",
+					"content": "one xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "two xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"message": {
+					"role": "user",
+					"content": "three xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "compaction",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"summary": "keeps all",
+				"firstKeptEntryId": "e1",
+				"tokensBefore": 10
+			}
+		],
+		"nested tool calls and other turn starts": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:00:01.000Z",
+				"message": {
+					"role": "bashExecution",
+					"command": "make xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"output": "ok",
+					"exitCode": 0,
+					"cancelled": false,
+					"truncated": false,
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:00:02.000Z",
+				"message": {
+					"role": "toolResult",
+					"toolCallId": "call-1",
+					"toolName": "codemode",
+					"content": [
+						{
+							"type": "text",
+							"text": "script xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"isError": false,
+					"timestamp": 3,
+					"nestedCalls": {
+						"calls": [
+							{
+								"name": "write",
+								"arguments": {
+									"path": "gen.ts"
+								}
+							},
+							{
+								"name": "read",
+								"arguments": {
+									"path": 5
+								}
+							}
+						]
+					}
+				}
+			},
+			{
+				"type": "custom_message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:00:03.000Z",
+				"customType": "note",
+				"content": "custom xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+				"display": true
+			},
+			{
+				"type": "branch_summary",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:00:04.000Z",
+				"fromId": "e1",
+				"summary": "branch xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+			},
+			{
+				"type": "message",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:00:05.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "final xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		]
+	},
+	"cuts": [
+		{
+			"path": "simple",
+			"start": 0,
+			"keep": 150,
+			"result": {
+				"firstKeptEntryIndex": 4,
+				"turnStartIndex": -1,
+				"isSplitTurn": false
+			},
+			"turnStarts": [
+				0,
+				0,
+				2,
+				2,
+				4,
+				4
+			]
+		},
+		{
+			"path": "simple",
+			"start": 0,
+			"keep": 1,
+			"result": {
+				"firstKeptEntryIndex": 5,
+				"turnStartIndex": 4,
+				"isSplitTurn": true
+			},
+			"turnStarts": [
+				0,
+				0,
+				2,
+				2,
+				4,
+				4
+			]
+		},
+		{
+			"path": "simple",
+			"start": 0,
+			"keep": 100000,
+			"result": {
+				"firstKeptEntryIndex": 0,
+				"turnStartIndex": -1,
+				"isSplitTurn": false
+			},
+			"turnStarts": [
+				0,
+				0,
+				2,
+				2,
+				4,
+				4
+			]
+		},
+		{
+			"path": "simple",
+			"start": 2,
+			"keep": 150,
+			"result": {
+				"firstKeptEntryIndex": 4,
+				"turnStartIndex": -1,
+				"isSplitTurn": false
+			},
+			"turnStarts": [
+				-1,
+				-1,
+				2,
+				2,
+				4,
+				4
+			]
+		},
+		{
+			"path": "split turn",
+			"start": 0,
+			"keep": 300,
+			"result": {
+				"firstKeptEntryIndex": 5,
+				"turnStartIndex": 2,
+				"isSplitTurn": true
+			},
+			"turnStarts": [
+				0,
+				0,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		{
+			"path": "split turn",
+			"start": 0,
+			"keep": 150,
+			"result": {
+				"firstKeptEntryIndex": 7,
+				"turnStartIndex": 2,
+				"isSplitTurn": true
+			},
+			"turnStarts": [
+				0,
+				0,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		{
+			"path": "metadata before the cut",
+			"start": 0,
+			"keep": 150,
+			"result": {
+				"firstKeptEntryIndex": 2,
+				"turnStartIndex": 0,
+				"isSplitTurn": true
+			},
+			"turnStarts": [
+				0,
+				0,
+				0,
+				0,
+				0,
+				5,
+				5
+			]
+		},
+		{
+			"path": "nested tool calls and other turn starts",
+			"start": 0,
+			"keep": 100,
+			"result": {
+				"firstKeptEntryIndex": 3,
+				"turnStartIndex": -1,
+				"isSplitTurn": false
+			},
+			"turnStarts": [
+				0,
+				0,
+				2,
+				3,
+				3
+			]
+		},
+		{
+			"path": "ends with a compaction",
+			"start": 0,
+			"keep": 1,
+			"result": {
+				"firstKeptEntryIndex": 0,
+				"turnStartIndex": -1,
+				"isSplitTurn": false
+			},
+			"turnStarts": [
+				0,
+				0
+			]
+		}
+	],
+	"preparations": [
+		{
+			"path": "simple",
+			"keepRecentTokens": 150,
+			"preparation": {
+				"firstKeptEntryId": "e5",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "first question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "first answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "user",
+						"content": "second question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "second answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 800,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 800,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"turnPrefixMessages": [],
+				"isSplitTurn": false,
+				"tokensBefore": 1008,
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 150
+				}
+			}
+		},
+		{
+			"path": "simple",
+			"keepRecentTokens": 1,
+			"preparation": {
+				"firstKeptEntryId": "e6",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "first question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "first answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "user",
+						"content": "second question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "second answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 800,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 800,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"turnPrefixMessages": [
+					{
+						"role": "user",
+						"content": "third question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					}
+				],
+				"isSplitTurn": true,
+				"tokensBefore": 1008,
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 1
+				}
+			}
+		},
+		{
+			"path": "split turn",
+			"keepRecentTokens": 300,
+			"preparation": {
+				"firstKeptEntryId": "e6",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "old question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "old answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"turnPrefixMessages": [
+					{
+						"role": "user",
+						"content": "do the long task",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "toolCall",
+								"id": "call-1",
+								"name": "read",
+								"arguments": {
+									"path": "src/a.ts"
+								}
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "contents xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					}
+				],
+				"isSplitTurn": true,
+				"tokensBefore": 486,
+				"fileOps": {
+					"read": [
+						"src/a.ts"
+					],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 300
+				}
+			}
+		},
+		{
+			"path": "split turn",
+			"keepRecentTokens": 150,
+			"preparation": {
+				"firstKeptEntryId": "e8",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "old question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "old answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"turnPrefixMessages": [
+					{
+						"role": "user",
+						"content": "do the long task",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "toolCall",
+								"id": "call-1",
+								"name": "read",
+								"arguments": {
+									"path": "src/a.ts"
+								}
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "contents xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "toolCall",
+								"id": "call-1",
+								"name": "edit",
+								"arguments": {
+									"path": "src/b.ts",
+									"edits": []
+								}
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "edit",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					}
+				],
+				"isSplitTurn": true,
+				"tokensBefore": 486,
+				"fileOps": {
+					"read": [
+						"src/a.ts"
+					],
+					"written": [],
+					"edited": [
+						"src/b.ts"
+					]
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 150
+				}
+			}
+		},
+		{
+			"path": "previous compaction",
+			"keepRecentTokens": 100,
+			"preparation": {
+				"firstKeptEntryId": "e7",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "kept question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "toolCall",
+								"id": "call-1",
+								"name": "read",
+								"arguments": {
+									"path": "both.txt"
+								}
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "read result xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					}
+				],
+				"turnPrefixMessages": [],
+				"isSplitTurn": false,
+				"tokensBefore": 324,
+				"previousSummary": "earlier summary",
+				"fileOps": {
+					"read": [
+						"r.txt",
+						"both.txt"
+					],
+					"written": [],
+					"edited": [
+						"m.txt"
+					]
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 100
+				}
+			}
+		},
+		{
+			"path": "hook compaction details ignored",
+			"keepRecentTokens": 100,
+			"preparation": {
+				"firstKeptEntryId": "e4",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"turnPrefixMessages": [],
+				"isSplitTurn": false,
+				"tokensBefore": 312,
+				"previousSummary": "hook summary",
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 100
+				}
+			}
+		},
+		{
+			"path": "ends with a compaction",
+			"keepRecentTokens": 1,
+			"preparation": "<undefined>"
+		},
+		{
+			"path": "everything kept",
+			"keepRecentTokens": 100000,
+			"preparation": "<undefined>"
+		},
+		{
+			"path": "metadata before the cut",
+			"keepRecentTokens": 150,
+			"preparation": {
+				"firstKeptEntryId": "e3",
+				"messagesToSummarize": [],
+				"turnPrefixMessages": [
+					{
+						"role": "user",
+						"content": "one xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "two xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"isSplitTurn": true,
+				"tokensBefore": 406,
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 150
+				}
+			}
+		},
+		{
+			"path": "system messages are not summarized",
+			"keepRecentTokens": 150,
+			"preparation": {
+				"firstKeptEntryId": "e5",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "one xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "two xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"turnPrefixMessages": [],
+				"isSplitTurn": false,
+				"tokensBefore": 412,
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 150
+				}
+			}
+		},
+		{
+			"path": "omitted recovery attempt",
+			"keepRecentTokens": 200,
+			"preparation": {
+				"firstKeptEntryId": "e2",
+				"messagesToSummarize": [],
+				"turnPrefixMessages": [
+					{
+						"role": "user",
+						"content": "question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					}
+				],
+				"isSplitTurn": true,
+				"tokensBefore": 458,
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 200
+				}
+			}
+		},
+		{
+			"path": "omitted recovery attempt",
+			"keepRecentTokens": 100,
+			"preparation": {
+				"firstKeptEntryId": "e4",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "question xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"turnPrefixMessages": [
+					{
+						"role": "user",
+						"content": "retry this xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"timestamp": 1
+					}
+				],
+				"isSplitTurn": true,
+				"tokensBefore": 458,
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 100
+				}
+			}
+		},
+		{
+			"path": "edit replacing earlier content",
+			"keepRecentTokens": 200,
+			"preparation": {
+				"firstKeptEntryId": "e2",
+				"messagesToSummarize": [],
+				"turnPrefixMessages": [
+					{
+						"role": "user",
+						"content": "short question",
+						"timestamp": 1
+					}
+				],
+				"isSplitTurn": true,
+				"tokensBefore": 309,
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 200
+				}
+			}
+		},
+		{
+			"path": "edit replacing earlier content",
+			"keepRecentTokens": 100,
+			"preparation": {
+				"firstKeptEntryId": "e3",
+				"messagesToSummarize": [
+					{
+						"role": "user",
+						"content": "short question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "answer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 0,
+							"cost": {
+								"input": 0.001,
+								"output": 0.002,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0.003
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"turnPrefixMessages": [],
+				"isSplitTurn": false,
+				"tokensBefore": 309,
+				"fileOps": {
+					"read": [],
+					"written": [],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 100
+				}
+			}
+		},
+		{
+			"path": "compaction keeping everything",
+			"keepRecentTokens": 10,
+			"preparation": "<undefined>"
+		},
+		{
+			"path": "nested tool calls and other turn starts",
+			"keepRecentTokens": 100,
+			"preparation": {
+				"firstKeptEntryId": "e4",
+				"messagesToSummarize": [
+					{
+						"role": "bashExecution",
+						"command": "make xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"output": "ok",
+						"exitCode": 0,
+						"cancelled": false,
+						"truncated": false,
+						"timestamp": 1
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "codemode",
+						"content": [
+							{
+								"type": "text",
+								"text": "script xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"isError": false,
+						"timestamp": 3,
+						"nestedCalls": {
+							"calls": [
+								{
+									"name": "write",
+									"arguments": {
+										"path": "gen.ts"
+									}
+								},
+								{
+									"name": "read",
+									"arguments": {
+										"path": 5
+									}
+								}
+							]
+						}
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "custom xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"display": true,
+						"timestamp": 1793523603000
+					}
+				],
+				"turnPrefixMessages": [],
+				"isSplitTurn": false,
+				"tokensBefore": 385,
+				"fileOps": {
+					"read": [],
+					"written": [
+						"gen.ts"
+					],
+					"edited": []
+				},
+				"settings": {
+					"enabled": true,
+					"reserveTokens": 16384,
+					"keepRecentTokens": 100
+				}
+			}
+		}
+	]
+}

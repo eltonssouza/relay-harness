@@ -505,12 +505,19 @@ fn project_entry(entry: &Value, edit: Option<&Value>) -> Vec<Value> {
         .collect()
 }
 
+/// One context entry and the messages it contributes after edits (`ProjectedSessionEntry`).
+#[derive(Debug, Clone, PartialEq)]
+pub struct ProjectedEntry {
+    pub source: Value,
+    /// Empty for state entries, omitted entries and older compactions.
+    pub messages: Vec<Value>,
+}
+
 /// The context of a path: which entry each message came from, the messages, the thinking level
 /// and the model (`SessionProjection`).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Projection {
-    /// Each context entry's id and its messages.
-    pub entries: Vec<(Value, Vec<Value>)>,
+    pub entries: Vec<ProjectedEntry>,
     pub messages: Vec<Value>,
     pub thinking_level: Option<Value>,
     pub model: Option<Map<String, Value>>,
@@ -529,7 +536,7 @@ pub fn session_projection(entries: &[Value], leaf: Leaf<'_>) -> Projection {
             }
         }
     }
-    let projected: Vec<(Value, Vec<Value>)> = context
+    let projected: Vec<ProjectedEntry> = context
         .iter()
         .enumerate()
         .map(|(index, entry)| {
@@ -540,13 +547,16 @@ pub fn session_projection(entries: &[Value], leaf: Leaf<'_>) -> Projection {
                 let edit = entry_id(entry).and_then(|id| edits.get(id).copied());
                 project_entry(entry, edit)
             };
-            (field(entry, "id").cloned().unwrap_or(Value::Null), messages)
+            ProjectedEntry {
+                source: (*entry).clone(),
+                messages,
+            }
         })
         .collect();
     Projection {
         messages: projected
             .iter()
-            .flat_map(|(_, messages)| messages.iter().cloned())
+            .flat_map(|entry| entry.messages.iter().cloned())
             .collect(),
         entries: projected,
         thinking_level,

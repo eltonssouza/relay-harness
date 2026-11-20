@@ -19,6 +19,8 @@
 //!   HTTP body), and reading its stream.
 //! - `options`: request options adapters share.
 //! - `abort`, `retry`, `http`: cancellation, the SDKs' retry policy, and sending requests.
+//! - `assistant_retry`: retrying a whole assistant call on a transient error
+//!   (`retryAssistantCall`).
 //! - `provider_request`: each adapter's URL, headers and wire body, and its HTTP error messages.
 //! - `stream`: each adapter's `stream()`, sending the request and decoding the response; each
 //!   event comes with the message decoded so far.
@@ -38,6 +40,7 @@
 pub mod abort;
 pub mod anthropic;
 pub mod anthropic_stream;
+pub mod assistant_retry;
 pub mod auth;
 pub mod auth_file;
 pub mod catalog;
