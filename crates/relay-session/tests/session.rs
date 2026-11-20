@@ -389,7 +389,7 @@ fn projection_json(entries: &[Value], leaf: Leaf<'_>, label: Value) -> Value {
             projection
                 .entries
                 .iter()
-                .map(|(id, _)| id.clone())
+                .map(|entry| entry.source.get("id").cloned().unwrap_or(Value::Null))
                 .collect(),
         ),
     );

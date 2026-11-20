@@ -1,0 +1,410 @@
+{
+	"classify": [
+		{
+			"errorMessage": "529 overloaded",
+			"retryable": true
+		},
+		{
+			"errorMessage": "Rate limit reached",
+			"retryable": true
+		},
+		{
+			"errorMessage": "rate-limit hit",
+			"retryable": true
+		},
+		{
+			"errorMessage": "Too Many Requests",
+			"retryable": true
+		},
+		{
+			"errorMessage": "HTTP 503 Service Unavailable",
+			"retryable": true
+		},
+		{
+			"errorMessage": "fetch failed",
+			"retryable": true
+		},
+		{
+			"errorMessage": "socket hang up",
+			"retryable": true
+		},
+		{
+			"errorMessage": "Request timed out",
+			"retryable": true
+		},
+		{
+			"errorMessage": "request time out",
+			"retryable": true
+		},
+		{
+			"errorMessage": "stream ended before message_stop",
+			"retryable": true
+		},
+		{
+			"errorMessage": "Provider returned error",
+			"retryable": true
+		},
+		{
+			"errorMessage": "ResourceExhausted",
+			"retryable": true
+		},
+		{
+			"errorMessage": "429 insufficient_quota",
+			"retryable": false
+		},
+		{
+			"errorMessage": "Monthly usage limit reached",
+			"retryable": false
+		},
+		{
+			"errorMessage": "billing problem",
+			"retryable": false
+		},
+		{
+			"errorMessage": "invalid api key",
+			"retryable": false
+		},
+		{
+			"errorMessage": "",
+			"retryable": false
+		},
+		{
+			"errorMessage": "overloaded but stopped",
+			"retryable": false
+		}
+	],
+	"delays": [
+		{
+			"policy": {
+				"baseDelayMs": 2000
+			},
+			"attempt": 1,
+			"delay": 2000
+		},
+		{
+			"policy": {
+				"baseDelayMs": 2000
+			},
+			"attempt": 2,
+			"delay": 4000
+		},
+		{
+			"policy": {
+				"baseDelayMs": 2000
+			},
+			"attempt": 3,
+			"delay": 8000
+		},
+		{
+			"policy": {
+				"baseDelayMs": 2000
+			},
+			"attempt": 0,
+			"delay": 2000
+		},
+		{
+			"policy": {
+				"baseDelayMs": 2000,
+				"maxAgentDelayMs": 5000
+			},
+			"attempt": 3,
+			"delay": 5000
+		},
+		{
+			"policy": {
+				"baseDelayMs": 2000
+			},
+			"attempt": 2000,
+			"delay": 60000
+		},
+		{
+			"policy": {
+				"baseDelayMs": 0.5,
+				"maxAgentDelayMs": 1e+300
+			},
+			"attempt": 1,
+			"delay": 9007199254740991
+		}
+	],
+	"runs": [
+		{
+			"name": "no policy",
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "overloaded"
+				}
+			],
+			"calls": 1,
+			"callbacks": [],
+			"result": {
+				"stopReason": "error",
+				"errorMessage": "overloaded"
+			}
+		},
+		{
+			"name": "disabled",
+			"policy": {
+				"enabled": false,
+				"maxRetries": 3,
+				"baseDelayMs": 0
+			},
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "overloaded"
+				}
+			],
+			"calls": 1,
+			"callbacks": [],
+			"result": {
+				"stopReason": "error",
+				"errorMessage": "overloaded"
+			}
+		},
+		{
+			"name": "success at once",
+			"policy": {
+				"enabled": true,
+				"maxRetries": 3,
+				"baseDelayMs": 0
+			},
+			"responses": [
+				{}
+			],
+			"calls": 1,
+			"callbacks": [],
+			"result": {
+				"stopReason": "stop",
+				"errorMessage": null
+			}
+		},
+		{
+			"name": "two retries then success",
+			"policy": {
+				"enabled": true,
+				"maxRetries": 3,
+				"baseDelayMs": 0
+			},
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "overloaded"
+				},
+				{
+					"stopReason": "error",
+					"errorMessage": "fetch failed"
+				},
+				{}
+			],
+			"calls": 3,
+			"callbacks": [
+				{
+					"scheduled": {
+						"attempt": 1,
+						"maxAttempts": 3,
+						"delayMs": 0,
+						"errorMessage": "overloaded"
+					}
+				},
+				"attemptStart",
+				{
+					"scheduled": {
+						"attempt": 2,
+						"maxAttempts": 3,
+						"delayMs": 0,
+						"errorMessage": "fetch failed"
+					}
+				},
+				"attemptStart",
+				{
+					"finished": {
+						"success": true,
+						"attempt": 2
+					}
+				}
+			],
+			"result": {
+				"stopReason": "stop",
+				"errorMessage": null
+			}
+		},
+		{
+			"name": "retries exhausted",
+			"policy": {
+				"enabled": true,
+				"maxRetries": 1,
+				"baseDelayMs": 0
+			},
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "overloaded"
+				},
+				{
+					"stopReason": "error",
+					"errorMessage": "still overloaded"
+				}
+			],
+			"calls": 2,
+			"callbacks": [
+				{
+					"scheduled": {
+						"attempt": 1,
+						"maxAttempts": 1,
+						"delayMs": 0,
+						"errorMessage": "overloaded"
+					}
+				},
+				"attemptStart",
+				{
+					"finished": {
+						"success": false,
+						"attempt": 1,
+						"finalError": "still overloaded"
+					}
+				}
+			],
+			"result": {
+				"stopReason": "error",
+				"errorMessage": "still overloaded"
+			}
+		},
+		{
+			"name": "aborted after a retry",
+			"policy": {
+				"enabled": true,
+				"maxRetries": 2,
+				"baseDelayMs": 0
+			},
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "overloaded"
+				},
+				{
+					"stopReason": "aborted"
+				}
+			],
+			"calls": 2,
+			"callbacks": [
+				{
+					"scheduled": {
+						"attempt": 1,
+						"maxAttempts": 2,
+						"delayMs": 0,
+						"errorMessage": "overloaded"
+					}
+				},
+				"attemptStart",
+				{
+					"finished": {
+						"success": false,
+						"attempt": 1
+					}
+				}
+			],
+			"result": {
+				"stopReason": "aborted",
+				"errorMessage": null
+			}
+		},
+		{
+			"name": "deterministic error after a retry",
+			"policy": {
+				"enabled": true,
+				"maxRetries": 2,
+				"baseDelayMs": 0
+			},
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "overloaded"
+				},
+				{
+					"stopReason": "error",
+					"errorMessage": "invalid request"
+				}
+			],
+			"calls": 2,
+			"callbacks": [
+				{
+					"scheduled": {
+						"attempt": 1,
+						"maxAttempts": 2,
+						"delayMs": 0,
+						"errorMessage": "overloaded"
+					}
+				},
+				"attemptStart",
+				{
+					"finished": {
+						"success": false,
+						"attempt": 1,
+						"finalError": "invalid request"
+					}
+				}
+			],
+			"result": {
+				"stopReason": "error",
+				"errorMessage": "invalid request"
+			}
+		},
+		{
+			"name": "aborted at once",
+			"policy": {
+				"enabled": true,
+				"maxRetries": 2,
+				"baseDelayMs": 0
+			},
+			"responses": [
+				{
+					"stopReason": "aborted"
+				}
+			],
+			"calls": 1,
+			"callbacks": [],
+			"result": {
+				"stopReason": "aborted",
+				"errorMessage": null
+			}
+		},
+		{
+			"name": "aborted during the backoff",
+			"policy": {
+				"enabled": true,
+				"maxRetries": 2,
+				"baseDelayMs": 0
+			},
+			"abortBefore": true,
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "overloaded"
+				}
+			],
+			"calls": 1,
+			"callbacks": [
+				{
+					"scheduled": {
+						"attempt": 1,
+						"maxAttempts": 2,
+						"delayMs": 0,
+						"errorMessage": "overloaded"
+					}
+				},
+				{
+					"finished": {
+						"success": false,
+						"attempt": 1,
+						"finalError": "overloaded"
+					}
+				}
+			],
+			"result": {
+				"stopReason": "aborted",
+				"errorMessage": null
+			}
+		}
+	]
+}

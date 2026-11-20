@@ -1,0 +1,22 @@
+[package]
+name = "relay-compaction"
+version = "0.0.0"
+description = "Relay's compaction, ported from packages/coding-agent/src/core/compaction: older messages summarized, recent ones kept."
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+relay-agent = { path = "../relay-agent" }
+relay-ai = { path = "../relay-ai" }
+relay-session = { path = "../relay-session" }
+serde = { version = "=1.0.229", default-features = false, features = ["std", "derive"] }
+serde_json = { version = "=1.0.154", default-features = false, features = ["std", "preserve_order", "float_roundtrip"] }
+# The summary request's stream is read event by event; already locked.
+futures-util = { version = "=0.3.34", default-features = false, features = ["alloc"] }
+
+[dev-dependencies]
+tokio = { version = "=1.54.1", default-features = false, features = ["rt", "macros", "time"] }

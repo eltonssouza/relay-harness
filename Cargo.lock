@@ -2710,6 +2710,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "relay-compaction"
+version = "0.0.0"
+dependencies = [
+ "futures-util",
+ "relay-agent",
+ "relay-ai",
+ "relay-session",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "relay-desktop"
 version = "0.0.0"
 dependencies = [
