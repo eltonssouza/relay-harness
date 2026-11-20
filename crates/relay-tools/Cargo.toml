@@ -20,6 +20,10 @@ futures-channel = { version = "=0.3.34", default-features = false, features = ["
 # File names in NFD, for the macOS screenshot fallbacks and the listing order; already locked.
 unicode-normalization = { version = "=0.1.24", default-features = false, features = ["std"] }
 
+# Shells start in their own session and are killed with their process group; already locked.
+[target.'cfg(unix)'.dependencies]
+libc = { version = "=0.2.191", default-features = false }
+
 [dev-dependencies]
 # The fixture tree's binary files; already locked.
 base64 = { version = "=0.23.1", default-features = false, features = ["std"] }

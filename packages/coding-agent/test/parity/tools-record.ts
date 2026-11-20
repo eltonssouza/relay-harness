@@ -13,6 +13,8 @@
  * - `tools/grep.json`, `tools/find.json`: each tool's declaration, a search tree, and what each
  *   call returned or threw. ripgrep and fd search in parallel, so a call marked `sort` that can
  *   find several files is recorded with its lines sorted.
+ * - `tools/output.json`, `tools/bash.json`: the shell tools' output accumulator and bash calls
+ *   (`shell-record.ts`).
  *
  * The tree is written to a temporary directory; its path becomes `<root>` and the separators in
  * paths become `/`, so the files are the same on every platform.
@@ -32,6 +34,7 @@ import { createReadToolDefinition } from "../../src/core/tools/read.ts";
 import { formatSize, truncateHead, truncateLine, truncateMiddle, truncateTail } from "../../src/core/tools/truncate.ts";
 import { createWriteToolDefinition } from "../../src/core/tools/write.ts";
 import { detectSupportedImageMimeType } from "../../src/utils/mime.ts";
+import { shellFiles } from "./shell-record.ts";
 
 export const TOOLS_DIR = fileURLToPath(new URL("../../../../crates/fixtures/tools/", import.meta.url));
 
@@ -231,6 +234,7 @@ export async function toolFiles(): Promise<Record<string, string>> {
 			"diff.json": json(diffs()),
 			"grep.json": json(await searchCalls("grep", GREP_CALLS)),
 			"find.json": json(await searchCalls("find", FIND_CALLS)),
+			...(await shellFiles()),
 		};
 	} finally {
 		rmSync(root, { recursive: true, force: true });

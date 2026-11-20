@@ -9,6 +9,8 @@
 //!   line diff and unified patch (`diff`). Changes to one file wait for each other (`mutation`).
 //! - `grep`, `find`: ripgrep and fd (`process` runs them, `tools_manager` finds them), their
 //!   output relative to the searched directory.
+//! - `bash`, `powershell` (`bash`): a command in the shell `shell` finds, its output collected by
+//!   `output` (the last lines for the model, all of it in an output file).
 //! - `truncate`: the line and byte limits the tools share (head, tail, middle, one line).
 //! - `paths`: input paths resolved as the TypeScript tools resolve them.
 //! - `mime`: the image types `read` attaches, by their first bytes.
@@ -18,6 +20,7 @@
 //! `tests/tools.rs` replays `crates/fixtures/tools/`, what the TypeScript tools and helpers
 //! returned (`packages/coding-agent/test/parity/tools-record.ts`, `npm run parity:record`).
 
+pub mod bash;
 pub mod diff;
 pub mod edit;
 pub mod edit_diff;
@@ -27,13 +30,16 @@ pub mod js;
 pub mod ls;
 pub mod mime;
 pub mod mutation;
+pub mod output;
 pub mod paths;
 pub mod process;
 pub mod read;
+pub mod shell;
 pub mod tools_manager;
 pub mod truncate;
 pub mod write;
 
+pub use bash::ShellTool;
 pub use edit::EditTool;
 pub use find::FindTool;
 pub use grep::GrepTool;

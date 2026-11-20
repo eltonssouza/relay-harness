@@ -1,0 +1,1176 @@
+{
+	"declaration": {
+		"name": "bash",
+		"description": "Execute a bash command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.",
+		"parameters": {
+			"type": "object",
+			"required": [
+				"command"
+			],
+			"properties": {
+				"command": {
+					"type": "string",
+					"description": "Shell command to execute"
+				},
+				"timeout": {
+					"type": "number",
+					"description": "Timeout in seconds (optional, no default timeout)"
+				}
+			}
+		},
+		"constrainedSampling": {
+			"type": "json_schema",
+			"strict": "prefer"
+		}
+	},
+	"powershellDeclaration": {
+		"name": "powershell",
+		"description": "Execute a PowerShell command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.",
+		"parameters": {
+			"type": "object",
+			"required": [
+				"command"
+			],
+			"properties": {
+				"command": {
+					"type": "string",
+					"description": "Shell command to execute"
+				},
+				"timeout": {
+					"type": "number",
+					"description": "Timeout in seconds (optional, no default timeout)"
+				}
+			}
+		},
+		"constrainedSampling": {
+			"type": "json_schema",
+			"strict": "prefer"
+		}
+	},
+	"calls": [
+		{
+			"name": "printf",
+			"args": {
+				"command": "printf hello"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hello"
+					}
+				],
+				"structuredContent": {
+					"output": "hello",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hello"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "echo",
+			"args": {
+				"command": "echo hello"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hello\n"
+					}
+				],
+				"structuredContent": {
+					"output": "hello\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hello\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "no output",
+			"args": {
+				"command": "true"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "(no output)"
+					}
+				],
+				"structuredContent": {
+					"output": "",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		},
+		{
+			"name": "exit code",
+			"args": {
+				"command": "exit 3"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "(no output)\n\nCommand exited with code 3"
+					}
+				],
+				"structuredContent": {
+					"output": "",
+					"truncated": false,
+					"exit_code": 3,
+					"wall_time_seconds": 0
+				},
+				"isError": true
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		},
+		{
+			"name": "exit code over 255",
+			"args": {
+				"command": "exit 300"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "(no output)\n\nCommand exited with code 44"
+					}
+				],
+				"structuredContent": {
+					"output": "",
+					"truncated": false,
+					"exit_code": 44,
+					"wall_time_seconds": 0
+				},
+				"isError": true
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		},
+		{
+			"name": "stderr",
+			"args": {
+				"command": "echo oops >&2; exit 2"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "oops\n\n\nCommand exited with code 2"
+					}
+				],
+				"structuredContent": {
+					"output": "oops\n",
+					"truncated": false,
+					"exit_code": 2,
+					"wall_time_seconds": 0
+				},
+				"isError": true
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "oops\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "crlf kept",
+			"args": {
+				"command": "printf 'a\\r\\nb\\n'"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "a\r\nb\n"
+					}
+				],
+				"structuredContent": {
+					"output": "a\r\nb\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "a\r\nb\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "invalid byte",
+			"args": {
+				"command": "printf 'a\\xffb'"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "a�b"
+					}
+				],
+				"structuredContent": {
+					"output": "a�b",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "a�b"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "bom dropped",
+			"args": {
+				"command": "printf '\\xef\\xbb\\xbfhi'"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hi"
+					}
+				],
+				"structuredContent": {
+					"output": "hi",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hi"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "split character",
+			"args": {
+				"command": "printf '\\xc3'; sleep 0.2; printf '\\xa9'"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "é"
+					}
+				],
+				"structuredContent": {
+					"output": "é",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "é"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "working directory",
+			"args": {
+				"command": "cat file.txt"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "in the root\n"
+					}
+				],
+				"structuredContent": {
+					"output": "in the root\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "in the root\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "lines limit",
+			"args": {
+				"command": "printf 'line %s\\n' {1..3000}"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": {
+							"long": 20057,
+							"fnv": "814feec0",
+							"start": "line 1001\nline 1002\nline 1003\nline 1004\nline 1005\nline 1006\nline 1007\nline 1008\n",
+							"end": "98\nline 2999\nline 3000\n\n[Showing lines 1001-3000 of 3000. Full output: <output>]"
+						}
+					}
+				],
+				"details": {
+					"truncation": {
+						"content": {
+							"long": 19999,
+							"fnv": "02c71f67",
+							"start": "line 1001\nline 1002\nline 1003\nline 1004\nline 1005\nline 1006\nline 1007\nline 1008\n",
+							"end": "\nline 2993\nline 2994\nline 2995\nline 2996\nline 2997\nline 2998\nline 2999\nline 3000"
+						},
+						"truncated": true,
+						"truncatedBy": "lines",
+						"totalLines": 3000,
+						"totalBytes": 28893,
+						"outputLines": 2000,
+						"outputBytes": 19999,
+						"lastLinePartial": false,
+						"firstLineExceedsLimit": false,
+						"maxLines": 2000,
+						"maxBytes": 51200
+					},
+					"fullOutputPath": "<output>"
+				},
+				"structuredContent": {
+					"output": {
+						"long": 28893,
+						"fnv": "f76d45a0",
+						"start": "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\nline 10\nline 11\nl",
+						"end": "line 2993\nline 2994\nline 2995\nline 2996\nline 2997\nline 2998\nline 2999\nline 3000\n"
+					},
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": {
+							"long": 19999,
+							"fnv": "02c71f67",
+							"start": "line 1001\nline 1002\nline 1003\nline 1004\nline 1005\nline 1006\nline 1007\nline 1008\n",
+							"end": "\nline 2993\nline 2994\nline 2995\nline 2996\nline 2997\nline 2998\nline 2999\nline 3000"
+						}
+					}
+				],
+				"details": {
+					"truncation": {
+						"content": {
+							"long": 19999,
+							"fnv": "02c71f67",
+							"start": "line 1001\nline 1002\nline 1003\nline 1004\nline 1005\nline 1006\nline 1007\nline 1008\n",
+							"end": "\nline 2993\nline 2994\nline 2995\nline 2996\nline 2997\nline 2998\nline 2999\nline 3000"
+						},
+						"truncated": true,
+						"truncatedBy": "lines",
+						"totalLines": 3000,
+						"totalBytes": 28893,
+						"outputLines": 2000,
+						"outputBytes": 19999,
+						"lastLinePartial": false,
+						"firstLineExceedsLimit": false,
+						"maxLines": 2000,
+						"maxBytes": 51200
+					},
+					"fullOutputPath": "<output>"
+				}
+			},
+			"file": {
+				"long": 28893,
+				"fnv": "f76d45a0",
+				"start": "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\nline 10\nline 11\nl",
+				"end": "line 2993\nline 2994\nline 2995\nline 2996\nline 2997\nline 2998\nline 2999\nline 3000\n"
+			}
+		},
+		{
+			"name": "one long line",
+			"args": {
+				"command": "printf '%.0sa' {1..60000}"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": {
+							"long": 51273,
+							"fnv": "c9d14530",
+							"start": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+							"end": "aaaaaaa\n\n[Showing last 50.0KB of line 1 (line is 58.6KB). Full output: <output>]"
+						}
+					}
+				],
+				"details": {
+					"truncation": {
+						"content": {
+							"long": 51200,
+							"fnv": "c6c285c5",
+							"start": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+							"end": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+						},
+						"truncated": true,
+						"truncatedBy": "bytes",
+						"totalLines": 1,
+						"totalBytes": 60000,
+						"outputLines": 1,
+						"outputBytes": 51200,
+						"lastLinePartial": true,
+						"firstLineExceedsLimit": false,
+						"maxLines": 2000,
+						"maxBytes": 51200
+					},
+					"fullOutputPath": "<output>"
+				},
+				"structuredContent": {
+					"output": {
+						"long": 60000,
+						"fnv": "da8504e5",
+						"start": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"end": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+					},
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": {
+							"long": 51200,
+							"fnv": "c6c285c5",
+							"start": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+							"end": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+						}
+					}
+				],
+				"details": {
+					"truncation": {
+						"content": {
+							"long": 51200,
+							"fnv": "c6c285c5",
+							"start": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+							"end": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+						},
+						"truncated": true,
+						"truncatedBy": "bytes",
+						"totalLines": 1,
+						"totalBytes": 60000,
+						"outputLines": 1,
+						"outputBytes": 51200,
+						"lastLinePartial": true,
+						"firstLineExceedsLimit": false,
+						"maxLines": 2000,
+						"maxBytes": 51200
+					},
+					"fullOutputPath": "<output>"
+				}
+			},
+			"file": {
+				"long": 60000,
+				"fnv": "da8504e5",
+				"start": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"end": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			}
+		},
+		{
+			"name": "bytes limit",
+			"args": {
+				"command": "printf '%.0s0123456789012345678901234567890123456789\\n' {1..1500}"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": {
+							"long": 51239,
+							"fnv": "83906c4e",
+							"start": "0123456789012345678901234567890123456789\n012345678901234567890123456789012345678",
+							"end": "23456789\n\n[Showing lines 253-1500 of 1500 (50.0KB limit). Full output: <output>]"
+						}
+					}
+				],
+				"details": {
+					"truncation": {
+						"content": {
+							"long": 51167,
+							"fnv": "3d0dd94d",
+							"start": "0123456789012345678901234567890123456789\n012345678901234567890123456789012345678",
+							"end": "123456789012345678901234567890123456789\n0123456789012345678901234567890123456789"
+						},
+						"truncated": true,
+						"truncatedBy": "bytes",
+						"totalLines": 1500,
+						"totalBytes": 61500,
+						"outputLines": 1248,
+						"outputBytes": 51167,
+						"lastLinePartial": false,
+						"firstLineExceedsLimit": false,
+						"maxLines": 2000,
+						"maxBytes": 51200
+					},
+					"fullOutputPath": "<output>"
+				},
+				"structuredContent": {
+					"output": {
+						"long": 61500,
+						"fnv": "2fa1ec65",
+						"start": "0123456789012345678901234567890123456789\n012345678901234567890123456789012345678",
+						"end": "23456789012345678901234567890123456789\n0123456789012345678901234567890123456789\n"
+					},
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": {
+							"long": 51167,
+							"fnv": "3d0dd94d",
+							"start": "0123456789012345678901234567890123456789\n012345678901234567890123456789012345678",
+							"end": "123456789012345678901234567890123456789\n0123456789012345678901234567890123456789"
+						}
+					}
+				],
+				"details": {
+					"truncation": {
+						"content": {
+							"long": 51167,
+							"fnv": "3d0dd94d",
+							"start": "0123456789012345678901234567890123456789\n012345678901234567890123456789012345678",
+							"end": "123456789012345678901234567890123456789\n0123456789012345678901234567890123456789"
+						},
+						"truncated": true,
+						"truncatedBy": "bytes",
+						"totalLines": 1500,
+						"totalBytes": 61500,
+						"outputLines": 1248,
+						"outputBytes": 51167,
+						"lastLinePartial": false,
+						"firstLineExceedsLimit": false,
+						"maxLines": 2000,
+						"maxBytes": 51200
+					},
+					"fullOutputPath": "<output>"
+				}
+			},
+			"file": {
+				"long": 61500,
+				"fnv": "2fa1ec65",
+				"start": "0123456789012345678901234567890123456789\n012345678901234567890123456789012345678",
+				"end": "23456789012345678901234567890123456789\n0123456789012345678901234567890123456789\n"
+			}
+		},
+		{
+			"name": "structured head and tail",
+			"args": {
+				"command": "printf 'abcdefghij%s\\n' {1..100000}"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": {
+							"long": 32063,
+							"fnv": "fbc5742a",
+							"start": "abcdefghij98001\nabcdefghij98002\nabcdefghij98003\nabcdefghij98004\nabcdefghij98005\n",
+							"end": "\nabcdefghij100000\n\n[Showing lines 98001-100000 of 100000. Full output: <output>]"
+						}
+					}
+				],
+				"details": {
+					"truncation": {
+						"content": {
+							"long": 32000,
+							"fnv": "e9376ebf",
+							"start": "abcdefghij98001\nabcdefghij98002\nabcdefghij98003\nabcdefghij98004\nabcdefghij98005\n",
+							"end": "abcdefghij99996\nabcdefghij99997\nabcdefghij99998\nabcdefghij99999\nabcdefghij100000"
+						},
+						"truncated": true,
+						"truncatedBy": "lines",
+						"totalLines": 100000,
+						"totalBytes": 1588895,
+						"outputLines": 2000,
+						"outputBytes": 32000,
+						"lastLinePartial": false,
+						"firstLineExceedsLimit": false,
+						"maxLines": 2000,
+						"maxBytes": 51200
+					},
+					"fullOutputPath": "<output>"
+				},
+				"structuredContent": {
+					"output": {
+						"long": 1048610,
+						"fnv": "999d3d22",
+						"start": "abcdefghij1\nabcdefghij2\nabcdefghij3\nabcdefghij4\nabcdefghij5\nabcdefghij6\nabcdefgh",
+						"end": "bcdefghij99996\nabcdefghij99997\nabcdefghij99998\nabcdefghij99999\nabcdefghij100000\n"
+					},
+					"truncated": true,
+					"full_output_path": "<output>",
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": {
+							"long": 32000,
+							"fnv": "e9376ebf",
+							"start": "abcdefghij98001\nabcdefghij98002\nabcdefghij98003\nabcdefghij98004\nabcdefghij98005\n",
+							"end": "abcdefghij99996\nabcdefghij99997\nabcdefghij99998\nabcdefghij99999\nabcdefghij100000"
+						}
+					}
+				],
+				"details": {
+					"truncation": {
+						"content": {
+							"long": 32000,
+							"fnv": "e9376ebf",
+							"start": "abcdefghij98001\nabcdefghij98002\nabcdefghij98003\nabcdefghij98004\nabcdefghij98005\n",
+							"end": "abcdefghij99996\nabcdefghij99997\nabcdefghij99998\nabcdefghij99999\nabcdefghij100000"
+						},
+						"truncated": true,
+						"truncatedBy": "lines",
+						"totalLines": 100000,
+						"totalBytes": 1588895,
+						"outputLines": 2000,
+						"outputBytes": 32000,
+						"lastLinePartial": false,
+						"firstLineExceedsLimit": false,
+						"maxLines": 2000,
+						"maxBytes": 51200
+					},
+					"fullOutputPath": "<output>"
+				}
+			},
+			"file": {
+				"long": 1588895,
+				"fnv": "10ab6c78",
+				"start": "abcdefghij1\nabcdefghij2\nabcdefghij3\nabcdefghij4\nabcdefghij5\nabcdefghij6\nabcdefgh",
+				"end": "bcdefghij99996\nabcdefghij99997\nabcdefghij99998\nabcdefghij99999\nabcdefghij100000\n"
+			}
+		},
+		{
+			"name": "timeout with output",
+			"args": {
+				"command": "echo before; sleep 30",
+				"timeout": 1.5
+			},
+			"withinSeconds": 10,
+			"error": "before\n\n\nCommand timed out after 1.5 seconds",
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "before\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "timeout without output",
+			"args": {
+				"command": "sleep 30",
+				"timeout": 0.5
+			},
+			"withinSeconds": 10,
+			"error": "Command timed out after 0.5 seconds",
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		},
+		{
+			"name": "abort",
+			"args": {
+				"command": "echo start; sleep 30"
+			},
+			"abortOn": "start",
+			"withinSeconds": 10,
+			"error": "start\n\n\nCommand aborted",
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "start\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "aborted before",
+			"args": {
+				"command": "echo never"
+			},
+			"abortBefore": true,
+			"error": "Command aborted",
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		},
+		{
+			"name": "zero timeout",
+			"args": {
+				"command": "echo x",
+				"timeout": 0
+			},
+			"error": "Invalid timeout: must be a finite number of seconds",
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		},
+		{
+			"name": "negative timeout",
+			"args": {
+				"command": "echo x",
+				"timeout": -1
+			},
+			"error": "Invalid timeout: must be a finite number of seconds",
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		},
+		{
+			"name": "timeout over the maximum",
+			"args": {
+				"command": "echo x",
+				"timeout": 3000000
+			},
+			"error": "Invalid timeout: maximum is 2147483.647 seconds",
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		},
+		{
+			"name": "background process",
+			"args": {
+				"command": "(sleep 3 &) ; echo done"
+			},
+			"withinSeconds": 2.5,
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "done\n"
+					}
+				],
+				"structuredContent": {
+					"output": "done\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "done\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "parent session hidden",
+			"args": {
+				"command": "echo \"[$RELAY_SESSION_ID|$RELAY_SESSION_FILE|$RELAY_PROVIDER|$RELAY_MODEL|$RELAY_REASONING_LEVEL]\""
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "[||||]\n"
+					}
+				],
+				"structuredContent": {
+					"output": "[||||]\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "[||||]\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "session",
+			"args": {
+				"command": "echo \"[$RELAY_SESSION_ID|$RELAY_SESSION_FILE|$RELAY_PROVIDER|$RELAY_MODEL|$RELAY_REASONING_LEVEL]\""
+			},
+			"session": {
+				"sessionId": "s1",
+				"sessionFile": "/sessions/s1.jsonl",
+				"model": [
+					"anthropic",
+					"m1"
+				],
+				"thinkingLevel": "high"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "[s1|/sessions/s1.jsonl|anthropic|m1|high]\n"
+					}
+				],
+				"structuredContent": {
+					"output": "[s1|/sessions/s1.jsonl|anthropic|m1|high]\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "[s1|/sessions/s1.jsonl|anthropic|m1|high]\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "session without a file or model",
+			"args": {
+				"command": "echo \"[$RELAY_SESSION_ID|$RELAY_SESSION_FILE|$RELAY_PROVIDER|$RELAY_MODEL|$RELAY_REASONING_LEVEL]\""
+			},
+			"session": {
+				"sessionId": "s2"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "[s2||||]\n"
+					}
+				],
+				"structuredContent": {
+					"output": "[s2||||]\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "[s2||||]\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "session not exposed",
+			"args": {
+				"command": "echo \"[$RELAY_SESSION_ID|$RELAY_SESSION_FILE|$RELAY_PROVIDER|$RELAY_MODEL|$RELAY_REASONING_LEVEL]\""
+			},
+			"tool": "hidden session",
+			"session": {
+				"sessionId": "s3",
+				"model": [
+					"openai",
+					"m2"
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "[||||]\n"
+					}
+				],
+				"structuredContent": {
+					"output": "[||||]\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "[||||]\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "session cwd",
+			"args": {
+				"command": "cat inner.txt"
+			},
+			"session": {
+				"cwd": "<root>/sub",
+				"sessionId": "s4"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "in sub\n"
+					}
+				],
+				"structuredContent": {
+					"output": "in sub\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "in sub\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "command prefix",
+			"args": {
+				"command": "echo \"$GREETING\""
+			},
+			"tool": "prefix",
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hi\n"
+					}
+				],
+				"structuredContent": {
+					"output": "hi\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hi\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "spawn hook",
+			"args": {
+				"command": "echo \"$HOOKED\""
+			},
+			"tool": "hook",
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hooked\n1\n"
+					}
+				],
+				"structuredContent": {
+					"output": "hooked\n1\n",
+					"truncated": false,
+					"exit_code": 0,
+					"wall_time_seconds": 0
+				}
+			},
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": [
+					{
+						"type": "text",
+						"text": "hooked\n1\n"
+					}
+				],
+				"details": {}
+			}
+		},
+		{
+			"name": "missing working directory",
+			"args": {
+				"command": "echo x"
+			},
+			"tool": "missing cwd",
+			"error": "Working directory does not exist: <root>/missing\nCannot execute bash commands.",
+			"firstUpdate": {
+				"content": []
+			},
+			"lastUpdate": {
+				"content": []
+			}
+		}
+	]
+}
