@@ -7,7 +7,8 @@
  * `crates/fixtures/scenarios/`; `parity.test.ts` fails when they no longer match the TypeScript
  * code, so a behavior change regenerates them. `--write` also writes the config values
  * (`config-value-record.ts`) to `crates/fixtures/config-values.json` and the tool-argument validation
- * (`validation-record.ts`) to `crates/fixtures/validation.json`:
+ * (`validation-record.ts`) to `crates/fixtures/validation.json` and the file tools' outputs
+ * (`tools-record.ts`) to `crates/fixtures/tools/`:
  *
  *   npm run parity:record
  */
@@ -18,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import { type AssistantMessage, fauxAssistantMessage, fauxToolCall, type Message } from "@relay-harness/ai";
 import { createHarness } from "../suite/harness.ts";
 import { CONFIG_VALUES_FILE, configValuesJson } from "./config-value-record.ts";
+import { TOOLS_DIR, toolFiles } from "./tools-record.ts";
 import { VALIDATION_FILE, validationJson } from "./validation-record.ts";
 
 export const SCENARIOS_DIR = fileURLToPath(new URL("../../../../crates/fixtures/scenarios/", import.meta.url));
@@ -165,7 +167,9 @@ if (process.argv.includes("--write")) {
 	}
 	writeFileSync(CONFIG_VALUES_FILE, configValuesJson());
 	writeFileSync(VALIDATION_FILE, validationJson());
+	mkdirSync(TOOLS_DIR, { recursive: true });
+	for (const [name, content] of Object.entries(await toolFiles())) writeFileSync(join(TOOLS_DIR, name), content);
 	console.log(
-		`wrote ${SCENARIOS.length} scenario(s) to ${SCENARIOS_DIR}, the config values and the tool-argument validation`,
+		`wrote ${SCENARIOS.length} scenario(s) to ${SCENARIOS_DIR}, the config values, the tool-argument validation and the file tools`,
 	);
 }
