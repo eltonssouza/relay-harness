@@ -1,0 +1,616 @@
+{
+	"name": "steer-all",
+	"description": "In `all` mode the steered messages arrive together.",
+	"tools": [
+		{
+			"name": "work",
+			"parameters": {
+				"type": "object",
+				"properties": {},
+				"required": []
+			},
+			"ops": [
+				{
+					"op": "steer",
+					"message": {
+						"role": "user",
+						"content": "A",
+						"timestamp": 0
+					}
+				},
+				{
+					"op": "steer",
+					"message": {
+						"role": "user",
+						"content": "B",
+						"timestamp": 0
+					}
+				}
+			]
+		}
+	],
+	"initialState": {
+		"systemPrompt": "Be brief.",
+		"tools": [
+			"work"
+		]
+	},
+	"steeringMode": "all",
+	"responses": [
+		{
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_1",
+					"name": "work",
+					"arguments": {}
+				}
+			],
+			"stopReason": "toolUse"
+		},
+		{
+			"content": [
+				{
+					"type": "text",
+					"text": "Got both."
+				}
+			]
+		}
+	],
+	"steps": [
+		{
+			"op": "prompt",
+			"text": "Go"
+		}
+	],
+	"events": [
+		{
+			"type": "agent_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "tool_execution_start",
+			"toolCallId": "call_1",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [
+					"call_1"
+				],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "tool_execution_end",
+			"toolCallId": "call_1",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "toolResult",
+			"state": {
+				"streaming": true,
+				"streamingRole": "toolResult",
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "toolResult",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 4,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 4,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 4,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 4,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 5,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 5,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 6,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 6,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 6,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 6,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 6,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 7,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 7,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_end",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 7,
+				"error": null
+			}
+		}
+	],
+	"ops": [
+		{
+			"at": "tool:work",
+			"op": "steer",
+			"result": "ok"
+		},
+		{
+			"at": "tool:work",
+			"op": "steer",
+			"result": "ok"
+		},
+		{
+			"at": "step",
+			"op": "prompt",
+			"result": "ok"
+		}
+	],
+	"calls": [
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "work",
+							"description": "work tool",
+							"parameters": {
+								"type": "object",
+								"properties": {},
+								"required": []
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Go"
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"reasoning": null
+		},
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "work",
+							"description": "work tool",
+							"parameters": {
+								"type": "object",
+								"properties": {},
+								"required": []
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Go"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call_1",
+							"name": "work",
+							"arguments": {}
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "toolUse",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				},
+				{
+					"role": "toolResult",
+					"toolCallId": "call_1",
+					"toolName": "work",
+					"content": [
+						{
+							"type": "text",
+							"text": "work ok"
+						}
+					],
+					"details": {},
+					"isError": false,
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": "A",
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": "B",
+					"timestamp": 0
+				}
+			],
+			"reasoning": null
+		}
+	],
+	"states": [
+		{
+			"after": "prompt",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"toolsAdded": [
+						{
+							"name": "work",
+							"description": "work tool",
+							"parameters": {
+								"type": "object",
+								"properties": {},
+								"required": []
+							}
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Go"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call_1",
+							"name": "work",
+							"arguments": {}
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "toolUse",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				},
+				{
+					"role": "toolResult",
+					"toolCallId": "call_1",
+					"toolName": "work",
+					"content": [
+						{
+							"type": "text",
+							"text": "work ok"
+						}
+					],
+					"details": {},
+					"isError": false,
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": "A",
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": "B",
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Got both."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		}
+	]
+}

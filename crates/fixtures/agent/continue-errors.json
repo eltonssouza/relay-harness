@@ -1,0 +1,331 @@
+{
+	"name": "continue-errors",
+	"description": "Nothing to continue from, then an answer with no queued messages.",
+	"tools": [],
+	"initialState": {
+		"systemPrompt": "Be brief."
+	},
+	"responses": [
+		{
+			"content": [
+				{
+					"type": "text",
+					"text": "Hi."
+				}
+			]
+		}
+	],
+	"steps": [
+		{
+			"op": "continue"
+		},
+		{
+			"op": "prompt",
+			"text": "Hi"
+		},
+		{
+			"op": "continue"
+		}
+	],
+	"events": [
+		{
+			"type": "agent_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_start",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": "user",
+				"pending": [],
+				"messages": 1,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "user",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_start",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_update",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": "assistant",
+				"pending": [],
+				"messages": 2,
+				"error": null
+			}
+		},
+		{
+			"type": "message_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "turn_end",
+			"role": "assistant",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		},
+		{
+			"type": "agent_end",
+			"state": {
+				"streaming": true,
+				"streamingRole": null,
+				"pending": [],
+				"messages": 3,
+				"error": null
+			}
+		}
+	],
+	"ops": [
+		{
+			"at": "step",
+			"op": "continue",
+			"result": {
+				"error": "No messages to continue from"
+			}
+		},
+		{
+			"at": "step",
+			"op": "prompt",
+			"result": "ok"
+		},
+		{
+			"at": "step",
+			"op": "continue",
+			"result": {
+				"error": "Cannot continue from message role: assistant"
+			}
+		}
+	],
+	"calls": [
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi"
+						}
+					],
+					"timestamp": 0
+				}
+			],
+			"reasoning": null
+		}
+	],
+	"states": [
+		{
+			"after": "continue",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"timestamp": 0
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		},
+		{
+			"after": "prompt",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		},
+		{
+			"after": "continue",
+			"systemPrompt": "Be brief.",
+			"model": "mock",
+			"thinkingLevel": "off",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi"
+						}
+					],
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Hi."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			],
+			"isStreaming": false,
+			"streamingMessage": null,
+			"pending": [],
+			"errorMessage": null,
+			"queued": [],
+			"has": false
+		}
+	]
+}
