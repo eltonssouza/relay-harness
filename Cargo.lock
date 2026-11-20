@@ -2740,6 +2740,7 @@ name = "relay-tools"
 version = "0.0.0"
 dependencies = [
  "base64 0.23.1",
+ "futures-channel",
  "futures-util",
  "relay-agent",
  "relay-ai",

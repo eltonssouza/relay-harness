@@ -311,6 +311,81 @@ pub fn resolve_read_path(path: &str, cwd: &str, home: Option<&str>) -> String {
     resolved
 }
 
+/// The parts of a resolved path after its root, and the root.
+fn root_and_parts(path: &str, windows: bool) -> (String, Vec<String>) {
+    if windows {
+        let (root, rest) = windows_root(path);
+        let parts = rest
+            .split(['\\', '/'])
+            .filter(|part| !part.is_empty())
+            .map(str::to_string)
+            .collect();
+        (root, parts)
+    } else {
+        let parts = path
+            .split('/')
+            .filter(|part| !part.is_empty())
+            .map(str::to_string)
+            .collect();
+        ("/".to_string(), parts)
+    }
+}
+
+/// Node's `path.relative(from, to)` for resolved paths: case-insensitive on Windows, where a
+/// path on another drive comes back as it is.
+pub fn relative(from: &str, to: &str, windows: bool) -> String {
+    let from = resolve_lexically(&[from], windows);
+    let to = resolve_lexically(&[to], windows);
+    let (from_root, from_parts) = root_and_parts(&from, windows);
+    let (to_root, to_parts) = root_and_parts(&to, windows);
+    let same = |a: &str, b: &str| {
+        if windows {
+            a.to_lowercase() == b.to_lowercase()
+        } else {
+            a == b
+        }
+    };
+    if !same(&from_root, &to_root) {
+        return to;
+    }
+    let common = from_parts
+        .iter()
+        .zip(&to_parts)
+        .take_while(|(a, b)| same(a, b))
+        .count();
+    let separator = if windows { "\\" } else { "/" };
+    let mut parts: Vec<&str> = vec![".."; from_parts.len() - common];
+    parts.extend(to_parts[common..].iter().map(String::as_str));
+    parts.join(separator)
+}
+
+/// Node's `path.basename`: the last part, without trailing separators.
+pub fn basename(path: &str, windows: bool) -> String {
+    let separators: &[char] = if windows { &['\\', '/'] } else { &['/'] };
+    let trimmed = path.trim_end_matches(separators);
+    let start = trimmed.rfind(separators).map_or(0, |index| index + 1);
+    let name = &trimmed[start..];
+    if windows && start == 0 && name.len() == 2 && name.ends_with(':') {
+        return String::new();
+    }
+    name.to_string()
+}
+
+/// Node's `path.dirname` for a resolved path: the root is its own parent.
+pub fn dirname(path: &str, windows: bool) -> String {
+    let (root, parts) = root_and_parts(path, windows);
+    if parts.len() <= 1 {
+        return if root.is_empty() { ".".into() } else { root };
+    }
+    let separator = if windows { "\\" } else { "/" };
+    format!("{root}{}", parts[..parts.len() - 1].join(separator))
+}
+
+/// Whether a path is absolute on this kind of system.
+pub fn is_absolute_path(path: &str, windows: bool) -> bool {
+    is_absolute(path, windows)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -333,6 +408,12 @@ mod tests {
             "C:\\work\\app"
         );
         assert_eq!(resolve_path("..\\..\\..", "C:\\a", &windows), "C:\\");
+        assert_eq!(relative("C:\\Root", "c:\\root\\a\\b.ts", true), "a\\b.ts");
+        assert_eq!(relative("/r/s", "/r/t/u", false), "../t/u");
+        assert_eq!(basename("C:\\x\\y.ts", true), "y.ts");
+        assert_eq!(dirname("/a/b", false), "/a");
+        assert_eq!(dirname("/a", false), "/");
+        assert_eq!(dirname("C:\\a", true), "C:\\");
         let home = PathInput {
             home: Some("/home/me"),
             ..PathInput::default()
