@@ -1,0 +1,6353 @@
+[
+	{
+		"name": "linear v3",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n{\"type\":\"message\",\"id\":\"a1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"system\",\"content\":\"You are a test agent.\",\"toolsAdded\":[{\"name\":\"read\",\"description\":\"Read a file\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"timestamp\":100}}\n{\"type\":\"message\",\"id\":\"a2\",\"parentId\":\"a1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"hello\",\"timestamp\":200}}\n{\"type\":\"message\",\"id\":\"a3\",\"parentId\":\"a2\",\"timestamp\":\"2026-11-01T09:03:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"hi there\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":300}}\n{\"type\":\"thinking_level_change\",\"id\":\"a4\",\"parentId\":\"a3\",\"timestamp\":\"2026-11-01T09:04:00.000Z\",\"thinkingLevel\":\"high\"}\n{\"type\":\"model_change\",\"id\":\"a5\",\"parentId\":\"a4\",\"timestamp\":\"2026-11-01T09:05:00.000Z\",\"provider\":\"openai\",\"modelId\":\"gpt-test\"}\n{\"type\":\"message\",\"id\":\"a6\",\"parentId\":\"a5\",\"timestamp\":\"2026-11-01T09:06:00.000Z\",\"message\":{\"role\":\"toolResult\",\"toolCallId\":\"call-1\",\"toolName\":\"read\",\"content\":[{\"type\":\"text\",\"text\":\"file text\"}],\"isError\":false,\"timestamp\":600}}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "a6",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "a1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "system",
+					"content": "You are a test agent.",
+					"toolsAdded": [
+						{
+							"name": "read",
+							"description": "Read a file",
+							"parameters": {
+								"type": "object",
+								"properties": {}
+							}
+						}
+					],
+					"timestamp": 100
+				}
+			},
+			{
+				"type": "message",
+				"id": "a2",
+				"parentId": "a1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "hello",
+					"timestamp": 200
+				}
+			},
+			{
+				"type": "message",
+				"id": "a3",
+				"parentId": "a2",
+				"timestamp": "2026-11-01T09:03:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "hi there"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 300
+				}
+			},
+			{
+				"type": "thinking_level_change",
+				"id": "a4",
+				"parentId": "a3",
+				"timestamp": "2026-11-01T09:04:00.000Z",
+				"thinkingLevel": "high"
+			},
+			{
+				"type": "model_change",
+				"id": "a5",
+				"parentId": "a4",
+				"timestamp": "2026-11-01T09:05:00.000Z",
+				"provider": "openai",
+				"modelId": "gpt-test"
+			},
+			{
+				"type": "message",
+				"id": "a6",
+				"parentId": "a5",
+				"timestamp": "2026-11-01T09:06:00.000Z",
+				"message": {
+					"role": "toolResult",
+					"toolCallId": "call-1",
+					"toolName": "read",
+					"content": [
+						{
+							"type": "text",
+							"text": "file text"
+						}
+					],
+					"isError": false,
+					"timestamp": 600
+				}
+			}
+		],
+		"tree": [
+			{
+				"id": "a1",
+				"children": [
+					{
+						"id": "a2",
+						"children": [
+							{
+								"id": "a3",
+								"children": [
+									{
+										"id": "a4",
+										"children": [
+											{
+												"id": "a5",
+												"children": [
+													{
+														"id": "a6",
+														"children": []
+													}
+												]
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "system",
+					"content": "You are a test agent.",
+					"toolsAdded": [
+						{
+							"name": "read",
+							"description": "Read a file",
+							"parameters": {
+								"type": "object",
+								"properties": {}
+							}
+						}
+					],
+					"timestamp": 100
+				},
+				{
+					"role": "user",
+					"content": "hello",
+					"timestamp": 200
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "hi there"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 300
+				},
+				{
+					"role": "toolResult",
+					"toolCallId": "call-1",
+					"toolName": "read",
+					"content": [
+						{
+							"type": "text",
+							"text": "file text"
+						}
+					],
+					"isError": false,
+					"timestamp": 600
+				}
+			],
+			"thinkingLevel": "high",
+			"model": {
+				"provider": "openai",
+				"modelId": "gpt-test"
+			}
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "message",
+					"id": "a1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "system",
+						"content": "You are a test agent.",
+						"toolsAdded": [
+							{
+								"name": "read",
+								"description": "Read a file",
+								"parameters": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						],
+						"timestamp": 100
+					}
+				},
+				{
+					"type": "message",
+					"id": "a2",
+					"parentId": "a1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "hello",
+						"timestamp": 200
+					}
+				},
+				{
+					"type": "message",
+					"id": "a3",
+					"parentId": "a2",
+					"timestamp": "2026-11-01T09:03:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "hi there"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 300
+					}
+				},
+				{
+					"type": "thinking_level_change",
+					"id": "a4",
+					"parentId": "a3",
+					"timestamp": "2026-11-01T09:04:00.000Z",
+					"thinkingLevel": "high"
+				},
+				{
+					"type": "model_change",
+					"id": "a5",
+					"parentId": "a4",
+					"timestamp": "2026-11-01T09:05:00.000Z",
+					"provider": "openai",
+					"modelId": "gpt-test"
+				},
+				{
+					"type": "message",
+					"id": "a6",
+					"parentId": "a5",
+					"timestamp": "2026-11-01T09:06:00.000Z",
+					"message": {
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "file text"
+							}
+						],
+						"isError": false,
+						"timestamp": 600
+					}
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"a1",
+					"a2",
+					"a3",
+					"a4",
+					"a5",
+					"a6"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "You are a test agent.",
+						"toolsAdded": [
+							{
+								"name": "read",
+								"description": "Read a file",
+								"parameters": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						],
+						"timestamp": 100
+					},
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 200
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "hi there"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 300
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "file text"
+							}
+						],
+						"isError": false,
+						"timestamp": 600
+					}
+				],
+				"thinkingLevel": "high",
+				"model": {
+					"provider": "openai",
+					"modelId": "gpt-test"
+				}
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "a1",
+				"entryIds": [
+					"a1"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "You are a test agent.",
+						"toolsAdded": [
+							{
+								"name": "read",
+								"description": "Read a file",
+								"parameters": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						],
+						"timestamp": 100
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "a2",
+				"entryIds": [
+					"a1",
+					"a2"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "You are a test agent.",
+						"toolsAdded": [
+							{
+								"name": "read",
+								"description": "Read a file",
+								"parameters": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						],
+						"timestamp": 100
+					},
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 200
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "a3",
+				"entryIds": [
+					"a1",
+					"a2",
+					"a3"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "You are a test agent.",
+						"toolsAdded": [
+							{
+								"name": "read",
+								"description": "Read a file",
+								"parameters": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						],
+						"timestamp": 100
+					},
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 200
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "hi there"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 300
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "a4",
+				"entryIds": [
+					"a1",
+					"a2",
+					"a3",
+					"a4"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "You are a test agent.",
+						"toolsAdded": [
+							{
+								"name": "read",
+								"description": "Read a file",
+								"parameters": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						],
+						"timestamp": 100
+					},
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 200
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "hi there"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 300
+					}
+				],
+				"thinkingLevel": "high",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "a5",
+				"entryIds": [
+					"a1",
+					"a2",
+					"a3",
+					"a4",
+					"a5"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "You are a test agent.",
+						"toolsAdded": [
+							{
+								"name": "read",
+								"description": "Read a file",
+								"parameters": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						],
+						"timestamp": 100
+					},
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 200
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "hi there"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 300
+					}
+				],
+				"thinkingLevel": "high",
+				"model": {
+					"provider": "openai",
+					"modelId": "gpt-test"
+				}
+			},
+			{
+				"leafId": "a6",
+				"entryIds": [
+					"a1",
+					"a2",
+					"a3",
+					"a4",
+					"a5",
+					"a6"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "You are a test agent.",
+						"toolsAdded": [
+							{
+								"name": "read",
+								"description": "Read a file",
+								"parameters": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						],
+						"timestamp": 100
+					},
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 200
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "hi there"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 300
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "file text"
+							}
+						],
+						"isError": false,
+						"timestamp": 600
+					}
+				],
+				"thinkingLevel": "high",
+				"model": {
+					"provider": "openai",
+					"modelId": "gpt-test"
+				}
+			}
+		]
+	},
+	{
+		"name": "version 1",
+		"text": "{\"type\":\"session\",\"id\":\"s-old\",\"timestamp\":\"2025-01-01T00:00:00.000Z\",\"cwd\":\"<root>/old\"}\n{\"type\":\"message\",\"timestamp\":\"2025-01-01T00:01:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"first\",\"timestamp\":1}}\n{\"type\":\"message\",\"timestamp\":\"2025-01-01T00:02:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"second\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":2}}\n{\"type\":\"message\",\"timestamp\":\"2025-01-01T00:03:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"third\",\"timestamp\":3}}\n{\"type\":\"compaction\",\"timestamp\":\"2025-01-01T00:04:00.000Z\",\"summary\":\"the first two\",\"firstKeptEntryIndex\":3,\"tokensBefore\":1234}\n{\"type\":\"message\",\"timestamp\":\"2025-01-01T00:05:00.000Z\",\"message\":{\"role\":\"hookMessage\",\"customType\":\"note\",\"content\":\"from a hook\",\"display\":true,\"timestamp\":5}}\n",
+		"header": {
+			"type": "session",
+			"id": "s-old",
+			"timestamp": "2025-01-01T00:00:00.000Z",
+			"cwd": "<root>/old",
+			"version": 3
+		},
+		"leafId": "#1",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"timestamp": "2025-01-01T00:01:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "first",
+					"timestamp": 1
+				},
+				"id": "#2",
+				"parentId": null
+			},
+			{
+				"type": "message",
+				"timestamp": "2025-01-01T00:02:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "second"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				},
+				"id": "#3",
+				"parentId": "#2"
+			},
+			{
+				"type": "message",
+				"timestamp": "2025-01-01T00:03:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "third",
+					"timestamp": 3
+				},
+				"id": "#4",
+				"parentId": "#3"
+			},
+			{
+				"type": "compaction",
+				"timestamp": "2025-01-01T00:04:00.000Z",
+				"summary": "the first two",
+				"tokensBefore": 1234,
+				"id": "#5",
+				"parentId": "#4",
+				"firstKeptEntryId": "#4"
+			},
+			{
+				"type": "message",
+				"timestamp": "2025-01-01T00:05:00.000Z",
+				"message": {
+					"role": "custom",
+					"customType": "note",
+					"content": "from a hook",
+					"display": true,
+					"timestamp": 5
+				},
+				"id": "#1",
+				"parentId": "#5"
+			}
+		],
+		"tree": [
+			{
+				"id": "#2",
+				"children": [
+					{
+						"id": "#3",
+						"children": [
+							{
+								"id": "#4",
+								"children": [
+									{
+										"id": "#5",
+										"children": [
+											{
+												"id": "#1",
+												"children": []
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "compactionSummary",
+					"summary": "the first two",
+					"tokensBefore": 1234,
+					"timestamp": 1735689840000
+				},
+				{
+					"role": "user",
+					"content": "third",
+					"timestamp": 3
+				},
+				{
+					"role": "custom",
+					"customType": "note",
+					"content": "from a hook",
+					"display": true,
+					"timestamp": 5
+				}
+			],
+			"thinkingLevel": "off",
+			"model": {
+				"provider": "anthropic",
+				"modelId": "claude-test"
+			}
+		},
+		"cwd": "<root>/old",
+		"sessionId": "s-old",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"id": "s-old",
+					"timestamp": "2025-01-01T00:00:00.000Z",
+					"cwd": "<root>/old",
+					"version": 3
+				},
+				{
+					"type": "message",
+					"timestamp": "2025-01-01T00:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "first",
+						"timestamp": 1
+					},
+					"id": "#2",
+					"parentId": null
+				},
+				{
+					"type": "message",
+					"timestamp": "2025-01-01T00:02:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "second"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					"id": "#3",
+					"parentId": "#2"
+				},
+				{
+					"type": "message",
+					"timestamp": "2025-01-01T00:03:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "third",
+						"timestamp": 3
+					},
+					"id": "#4",
+					"parentId": "#3"
+				},
+				{
+					"type": "compaction",
+					"timestamp": "2025-01-01T00:04:00.000Z",
+					"summary": "the first two",
+					"tokensBefore": 1234,
+					"id": "#5",
+					"parentId": "#4",
+					"firstKeptEntryId": "#4"
+				},
+				{
+					"type": "message",
+					"timestamp": "2025-01-01T00:05:00.000Z",
+					"message": {
+						"role": "custom",
+						"customType": "note",
+						"content": "from a hook",
+						"display": true,
+						"timestamp": 5
+					},
+					"id": "#1",
+					"parentId": "#5"
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"#5",
+					"#4",
+					"#1"
+				],
+				"messages": [
+					{
+						"role": "compactionSummary",
+						"summary": "the first two",
+						"tokensBefore": 1234,
+						"timestamp": 1735689840000
+					},
+					{
+						"role": "user",
+						"content": "third",
+						"timestamp": 3
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "from a hook",
+						"display": true,
+						"timestamp": 5
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "#2",
+				"entryIds": [
+					"#2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "first",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "#3",
+				"entryIds": [
+					"#2",
+					"#3"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "first",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "second"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "#4",
+				"entryIds": [
+					"#2",
+					"#3",
+					"#4"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "first",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "second"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "user",
+						"content": "third",
+						"timestamp": 3
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "#5",
+				"entryIds": [
+					"#5",
+					"#4"
+				],
+				"messages": [
+					{
+						"role": "compactionSummary",
+						"summary": "the first two",
+						"tokensBefore": 1234,
+						"timestamp": 1735689840000
+					},
+					{
+						"role": "user",
+						"content": "third",
+						"timestamp": 3
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "#1",
+				"entryIds": [
+					"#5",
+					"#4",
+					"#1"
+				],
+				"messages": [
+					{
+						"role": "compactionSummary",
+						"summary": "the first two",
+						"tokensBefore": 1234,
+						"timestamp": 1735689840000
+					},
+					{
+						"role": "user",
+						"content": "third",
+						"timestamp": 3
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "from a hook",
+						"display": true,
+						"timestamp": 5
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			}
+		]
+	},
+	{
+		"name": "version 2 hook message",
+		"text": "{\"type\":\"session\",\"version\":2,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n{\"type\":\"message\",\"id\":\"b1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"hi\",\"timestamp\":1}}\n{\"type\":\"message\",\"id\":\"b2\",\"parentId\":\"b1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"message\":{\"role\":\"hookMessage\",\"customType\":\"note\",\"content\":\"hooked\",\"display\":false,\"timestamp\":2}}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "b2",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "b1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "hi",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "b2",
+				"parentId": "b1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"message": {
+					"role": "custom",
+					"customType": "note",
+					"content": "hooked",
+					"display": false,
+					"timestamp": 2
+				}
+			}
+		],
+		"tree": [
+			{
+				"id": "b1",
+				"children": [
+					{
+						"id": "b2",
+						"children": []
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "user",
+					"content": "hi",
+					"timestamp": 1
+				},
+				{
+					"role": "custom",
+					"customType": "note",
+					"content": "hooked",
+					"display": false,
+					"timestamp": 2
+				}
+			],
+			"thinkingLevel": "off",
+			"model": null
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "message",
+					"id": "b1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "hi",
+						"timestamp": 1
+					}
+				},
+				{
+					"type": "message",
+					"id": "b2",
+					"parentId": "b1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"message": {
+						"role": "custom",
+						"customType": "note",
+						"content": "hooked",
+						"display": false,
+						"timestamp": 2
+					}
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"b1",
+					"b2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hi",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "hooked",
+						"display": false,
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "b1",
+				"entryIds": [
+					"b1"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hi",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "b2",
+				"entryIds": [
+					"b1",
+					"b2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hi",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "hooked",
+						"display": false,
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			}
+		]
+	},
+	{
+		"name": "branches",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n{\"type\":\"message\",\"id\":\"c1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"root question\",\"timestamp\":1}}\n{\"type\":\"message\",\"id\":\"c2\",\"parentId\":\"c1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"first answer\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":2}}\n{\"type\":\"message\",\"id\":\"c3\",\"parentId\":\"c2\",\"timestamp\":\"2026-11-01T09:03:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"follow-up\",\"timestamp\":3}}\n{\"type\":\"model_change\",\"id\":\"c4\",\"parentId\":\"c1\",\"timestamp\":\"2026-11-01T09:04:00.000Z\",\"provider\":\"google\",\"modelId\":\"gemini-test\"}\n{\"type\":\"message\",\"id\":\"c5\",\"parentId\":\"c4\",\"timestamp\":\"2026-11-01T09:05:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"second answer\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"gemini-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":5}}\n{\"type\":\"thinking_level_change\",\"id\":\"c6\",\"parentId\":\"c2\",\"timestamp\":\"2026-11-01T09:06:00.000Z\",\"thinkingLevel\":\"low\"}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "c6",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "c1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "root question",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "c2",
+				"parentId": "c1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "first answer"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "c3",
+				"parentId": "c2",
+				"timestamp": "2026-11-01T09:03:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "follow-up",
+					"timestamp": 3
+				}
+			},
+			{
+				"type": "model_change",
+				"id": "c4",
+				"parentId": "c1",
+				"timestamp": "2026-11-01T09:04:00.000Z",
+				"provider": "google",
+				"modelId": "gemini-test"
+			},
+			{
+				"type": "message",
+				"id": "c5",
+				"parentId": "c4",
+				"timestamp": "2026-11-01T09:05:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "second answer"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "gemini-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 5
+				}
+			},
+			{
+				"type": "thinking_level_change",
+				"id": "c6",
+				"parentId": "c2",
+				"timestamp": "2026-11-01T09:06:00.000Z",
+				"thinkingLevel": "low"
+			}
+		],
+		"tree": [
+			{
+				"id": "c1",
+				"children": [
+					{
+						"id": "c2",
+						"children": [
+							{
+								"id": "c3",
+								"children": []
+							},
+							{
+								"id": "c6",
+								"children": []
+							}
+						]
+					},
+					{
+						"id": "c4",
+						"children": [
+							{
+								"id": "c5",
+								"children": []
+							}
+						]
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "user",
+					"content": "root question",
+					"timestamp": 1
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "first answer"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"thinkingLevel": "low",
+			"model": {
+				"provider": "anthropic",
+				"modelId": "claude-test"
+			}
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "message",
+					"id": "c1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "root question",
+						"timestamp": 1
+					}
+				},
+				{
+					"type": "message",
+					"id": "c2",
+					"parentId": "c1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "first answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				},
+				{
+					"type": "message",
+					"id": "c3",
+					"parentId": "c2",
+					"timestamp": "2026-11-01T09:03:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "follow-up",
+						"timestamp": 3
+					}
+				},
+				{
+					"type": "model_change",
+					"id": "c4",
+					"parentId": "c1",
+					"timestamp": "2026-11-01T09:04:00.000Z",
+					"provider": "google",
+					"modelId": "gemini-test"
+				},
+				{
+					"type": "message",
+					"id": "c5",
+					"parentId": "c4",
+					"timestamp": "2026-11-01T09:05:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "second answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "gemini-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 5
+					}
+				},
+				{
+					"type": "thinking_level_change",
+					"id": "c6",
+					"parentId": "c2",
+					"timestamp": "2026-11-01T09:06:00.000Z",
+					"thinkingLevel": "low"
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"c1",
+					"c2",
+					"c6"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "first answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "low",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "c1",
+				"entryIds": [
+					"c1"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root question",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "c2",
+				"entryIds": [
+					"c1",
+					"c2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "first answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "c3",
+				"entryIds": [
+					"c1",
+					"c2",
+					"c3"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "first answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "user",
+						"content": "follow-up",
+						"timestamp": 3
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "c4",
+				"entryIds": [
+					"c1",
+					"c4"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root question",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "google",
+					"modelId": "gemini-test"
+				}
+			},
+			{
+				"leafId": "c5",
+				"entryIds": [
+					"c1",
+					"c4",
+					"c5"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "second answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "gemini-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 5
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "gemini-test"
+				}
+			},
+			{
+				"leafId": "c6",
+				"entryIds": [
+					"c1",
+					"c2",
+					"c6"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "first answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "low",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			}
+		]
+	},
+	{
+		"name": "compactions",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n{\"type\":\"message\",\"id\":\"d1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"system\",\"content\":\"Base prompt.\",\"timestamp\":10}}\n{\"type\":\"message\",\"id\":\"d2\",\"parentId\":\"d1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"one\",\"timestamp\":20}}\n{\"type\":\"message\",\"id\":\"d3\",\"parentId\":\"d2\",\"timestamp\":\"2026-11-01T09:03:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"two\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":30}}\n{\"type\":\"message\",\"id\":\"d4\",\"parentId\":\"d3\",\"timestamp\":\"2026-11-01T09:04:00.000Z\",\"message\":{\"role\":\"system\",\"content\":\"Later prompt.\",\"sections\":{\"rules\":\"be brief\"},\"timestamp\":40}}\n{\"type\":\"message\",\"id\":\"d5\",\"parentId\":\"d4\",\"timestamp\":\"2026-11-01T09:05:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"three\",\"timestamp\":50}}\n{\"type\":\"compaction\",\"id\":\"d6\",\"parentId\":\"d5\",\"timestamp\":\"2026-11-01T09:06:00.000Z\",\"summary\":\"first summary\",\"firstKeptEntryId\":\"d3\",\"tokensBefore\":500,\"systemMessage\":{\"role\":\"system\",\"content\":\"Base prompt.\\n\\nLater prompt.\",\"timestamp\":1000}}\n{\"type\":\"message\",\"id\":\"d7\",\"parentId\":\"d6\",\"timestamp\":\"2026-11-01T09:07:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"four\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":70}}\n{\"type\":\"compaction\",\"id\":\"d8\",\"parentId\":\"d7\",\"timestamp\":\"2026-11-01T09:08:00.000Z\",\"summary\":\"second summary\",\"firstKeptEntryId\":\"d6\",\"tokensBefore\":900,\"details\":{\"kept\":true},\"fromHook\":true}\n{\"type\":\"message\",\"id\":\"d9\",\"parentId\":\"d8\",\"timestamp\":\"2026-11-01T09:09:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"five\",\"timestamp\":90}}\n{\"type\":\"compaction\",\"id\":\"d10\",\"parentId\":\"d9\",\"timestamp\":\"2026-11-01T09:10:00.000Z\",\"summary\":\"self kept\",\"firstKeptEntryId\":\"d10\",\"tokensBefore\":100}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "d10",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "d1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "system",
+					"content": "Base prompt.",
+					"timestamp": 10
+				}
+			},
+			{
+				"type": "message",
+				"id": "d2",
+				"parentId": "d1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "one",
+					"timestamp": 20
+				}
+			},
+			{
+				"type": "message",
+				"id": "d3",
+				"parentId": "d2",
+				"timestamp": "2026-11-01T09:03:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "two"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 30
+				}
+			},
+			{
+				"type": "message",
+				"id": "d4",
+				"parentId": "d3",
+				"timestamp": "2026-11-01T09:04:00.000Z",
+				"message": {
+					"role": "system",
+					"content": "Later prompt.",
+					"sections": {
+						"rules": "be brief"
+					},
+					"timestamp": 40
+				}
+			},
+			{
+				"type": "message",
+				"id": "d5",
+				"parentId": "d4",
+				"timestamp": "2026-11-01T09:05:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "three",
+					"timestamp": 50
+				}
+			},
+			{
+				"type": "compaction",
+				"id": "d6",
+				"parentId": "d5",
+				"timestamp": "2026-11-01T09:06:00.000Z",
+				"summary": "first summary",
+				"firstKeptEntryId": "d3",
+				"tokensBefore": 500,
+				"systemMessage": {
+					"role": "system",
+					"content": "Base prompt.\n\nLater prompt.",
+					"timestamp": 1000
+				}
+			},
+			{
+				"type": "message",
+				"id": "d7",
+				"parentId": "d6",
+				"timestamp": "2026-11-01T09:07:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "four"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 70
+				}
+			},
+			{
+				"type": "compaction",
+				"id": "d8",
+				"parentId": "d7",
+				"timestamp": "2026-11-01T09:08:00.000Z",
+				"summary": "second summary",
+				"firstKeptEntryId": "d6",
+				"tokensBefore": 900,
+				"details": {
+					"kept": true
+				},
+				"fromHook": true
+			},
+			{
+				"type": "message",
+				"id": "d9",
+				"parentId": "d8",
+				"timestamp": "2026-11-01T09:09:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "five",
+					"timestamp": 90
+				}
+			},
+			{
+				"type": "compaction",
+				"id": "d10",
+				"parentId": "d9",
+				"timestamp": "2026-11-01T09:10:00.000Z",
+				"summary": "self kept",
+				"firstKeptEntryId": "d10",
+				"tokensBefore": 100
+			}
+		],
+		"tree": [
+			{
+				"id": "d1",
+				"children": [
+					{
+						"id": "d2",
+						"children": [
+							{
+								"id": "d3",
+								"children": [
+									{
+										"id": "d4",
+										"children": [
+											{
+												"id": "d5",
+												"children": [
+													{
+														"id": "d6",
+														"children": [
+															{
+																"id": "d7",
+																"children": [
+																	{
+																		"id": "d8",
+																		"children": [
+																			{
+																				"id": "d9",
+																				"children": [
+																					{
+																						"id": "d10",
+																						"children": []
+																					}
+																				]
+																			}
+																		]
+																	}
+																]
+															}
+														]
+													}
+												]
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "compactionSummary",
+					"summary": "self kept",
+					"tokensBefore": 100,
+					"timestamp": 1793524200000
+				}
+			],
+			"thinkingLevel": "off",
+			"model": {
+				"provider": "anthropic",
+				"modelId": "claude-test"
+			}
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "message",
+					"id": "d1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "system",
+						"content": "Base prompt.",
+						"timestamp": 10
+					}
+				},
+				{
+					"type": "message",
+					"id": "d2",
+					"parentId": "d1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "one",
+						"timestamp": 20
+					}
+				},
+				{
+					"type": "message",
+					"id": "d3",
+					"parentId": "d2",
+					"timestamp": "2026-11-01T09:03:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "two"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 30
+					}
+				},
+				{
+					"type": "message",
+					"id": "d4",
+					"parentId": "d3",
+					"timestamp": "2026-11-01T09:04:00.000Z",
+					"message": {
+						"role": "system",
+						"content": "Later prompt.",
+						"sections": {
+							"rules": "be brief"
+						},
+						"timestamp": 40
+					}
+				},
+				{
+					"type": "message",
+					"id": "d5",
+					"parentId": "d4",
+					"timestamp": "2026-11-01T09:05:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "three",
+						"timestamp": 50
+					}
+				},
+				{
+					"type": "compaction",
+					"id": "d6",
+					"parentId": "d5",
+					"timestamp": "2026-11-01T09:06:00.000Z",
+					"summary": "first summary",
+					"firstKeptEntryId": "d3",
+					"tokensBefore": 500,
+					"systemMessage": {
+						"role": "system",
+						"content": "Base prompt.\n\nLater prompt.",
+						"timestamp": 1000
+					}
+				},
+				{
+					"type": "message",
+					"id": "d7",
+					"parentId": "d6",
+					"timestamp": "2026-11-01T09:07:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "four"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 70
+					}
+				},
+				{
+					"type": "compaction",
+					"id": "d8",
+					"parentId": "d7",
+					"timestamp": "2026-11-01T09:08:00.000Z",
+					"summary": "second summary",
+					"firstKeptEntryId": "d6",
+					"tokensBefore": 900,
+					"details": {
+						"kept": true
+					},
+					"fromHook": true
+				},
+				{
+					"type": "message",
+					"id": "d9",
+					"parentId": "d8",
+					"timestamp": "2026-11-01T09:09:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "five",
+						"timestamp": 90
+					}
+				},
+				{
+					"type": "compaction",
+					"id": "d10",
+					"parentId": "d9",
+					"timestamp": "2026-11-01T09:10:00.000Z",
+					"summary": "self kept",
+					"firstKeptEntryId": "d10",
+					"tokensBefore": 100
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"d10"
+				],
+				"messages": [
+					{
+						"role": "compactionSummary",
+						"summary": "self kept",
+						"tokensBefore": 100,
+						"timestamp": 1793524200000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "d1",
+				"entryIds": [
+					"d1"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "Base prompt.",
+						"timestamp": 10
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "d2",
+				"entryIds": [
+					"d1",
+					"d2"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "Base prompt.",
+						"timestamp": 10
+					},
+					{
+						"role": "user",
+						"content": "one",
+						"timestamp": 20
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "d3",
+				"entryIds": [
+					"d1",
+					"d2",
+					"d3"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "Base prompt.",
+						"timestamp": 10
+					},
+					{
+						"role": "user",
+						"content": "one",
+						"timestamp": 20
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "two"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 30
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "d4",
+				"entryIds": [
+					"d1",
+					"d2",
+					"d3",
+					"d4"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "Base prompt.",
+						"timestamp": 10
+					},
+					{
+						"role": "user",
+						"content": "one",
+						"timestamp": 20
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "two"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 30
+					},
+					{
+						"role": "system",
+						"content": "Later prompt.",
+						"sections": {
+							"rules": "be brief"
+						},
+						"timestamp": 40
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "d5",
+				"entryIds": [
+					"d1",
+					"d2",
+					"d3",
+					"d4",
+					"d5"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "Base prompt.",
+						"timestamp": 10
+					},
+					{
+						"role": "user",
+						"content": "one",
+						"timestamp": 20
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "two"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 30
+					},
+					{
+						"role": "system",
+						"content": "Later prompt.",
+						"sections": {
+							"rules": "be brief"
+						},
+						"timestamp": 40
+					},
+					{
+						"role": "user",
+						"content": "three",
+						"timestamp": 50
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "d6",
+				"entryIds": [
+					"d6",
+					"d3",
+					"d5"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "Base prompt.\n\nLater prompt.",
+						"timestamp": 1000
+					},
+					{
+						"role": "compactionSummary",
+						"summary": "first summary",
+						"tokensBefore": 500,
+						"timestamp": 1793523960000
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "two"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 30
+					},
+					{
+						"role": "user",
+						"content": "three",
+						"timestamp": 50
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "d7",
+				"entryIds": [
+					"d6",
+					"d3",
+					"d5",
+					"d7"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "Base prompt.\n\nLater prompt.",
+						"timestamp": 1000
+					},
+					{
+						"role": "compactionSummary",
+						"summary": "first summary",
+						"tokensBefore": 500,
+						"timestamp": 1793523960000
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "two"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 30
+					},
+					{
+						"role": "user",
+						"content": "three",
+						"timestamp": 50
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "four"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 70
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "d8",
+				"entryIds": [
+					"d8",
+					"d6",
+					"d7"
+				],
+				"messages": [
+					{
+						"role": "compactionSummary",
+						"summary": "second summary",
+						"tokensBefore": 900,
+						"timestamp": 1793524080000
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "four"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 70
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "d9",
+				"entryIds": [
+					"d8",
+					"d6",
+					"d7",
+					"d9"
+				],
+				"messages": [
+					{
+						"role": "compactionSummary",
+						"summary": "second summary",
+						"tokensBefore": 900,
+						"timestamp": 1793524080000
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "four"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 70
+					},
+					{
+						"role": "user",
+						"content": "five",
+						"timestamp": 90
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "d10",
+				"entryIds": [
+					"d10"
+				],
+				"messages": [
+					{
+						"role": "compactionSummary",
+						"summary": "self kept",
+						"tokensBefore": 100,
+						"timestamp": 1793524200000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			}
+		]
+	},
+	{
+		"name": "context edits",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n{\"type\":\"message\",\"id\":\"e1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"original question\",\"timestamp\":1}}\n{\"type\":\"message\",\"id\":\"e2\",\"parentId\":\"e1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"original answer\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":2}}\n{\"type\":\"message\",\"id\":\"e3\",\"parentId\":\"e2\",\"timestamp\":\"2026-11-01T09:03:00.000Z\",\"message\":{\"role\":\"toolResult\",\"toolCallId\":\"call-1\",\"toolName\":\"read\",\"content\":[{\"type\":\"text\",\"text\":\"tool output\"}],\"isError\":false,\"timestamp\":3}}\n{\"type\":\"custom_message\",\"id\":\"e4\",\"parentId\":\"e3\",\"timestamp\":\"2026-11-01T09:04:00.000Z\",\"customType\":\"note\",\"content\":\"a note\",\"display\":true}\n{\"type\":\"context_edit\",\"id\":\"e5\",\"parentId\":\"e4\",\"timestamp\":\"2026-11-01T09:05:00.000Z\",\"targetId\":\"e2\",\"replacement\":{\"content\":\"edited answer\"}}\n{\"type\":\"context_edit\",\"id\":\"e6\",\"parentId\":\"e5\",\"timestamp\":\"2026-11-01T09:06:00.000Z\",\"targetId\":\"e1\",\"replacement\":{\"content\":\"edited question\"}}\n{\"type\":\"context_edit\",\"id\":\"e7\",\"parentId\":\"e6\",\"timestamp\":\"2026-11-01T09:07:00.000Z\",\"targetId\":\"e3\",\"replacement\":null}\n{\"type\":\"context_edit\",\"id\":\"e8\",\"parentId\":\"e7\",\"timestamp\":\"2026-11-01T09:08:00.000Z\",\"targetId\":\"e4\",\"replacement\":{\"content\":[{\"type\":\"text\",\"text\":\"edited note\"}]}}\n{\"type\":\"context_edit\",\"id\":\"e9\",\"parentId\":\"e8\",\"timestamp\":\"2026-11-01T09:09:00.000Z\",\"targetId\":\"e2\",\"replacement\":{\"content\":\"edited twice\"}}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "e9",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "e1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "original question",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "e2",
+				"parentId": "e1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "original answer"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "e3",
+				"parentId": "e2",
+				"timestamp": "2026-11-01T09:03:00.000Z",
+				"message": {
+					"role": "toolResult",
+					"toolCallId": "call-1",
+					"toolName": "read",
+					"content": [
+						{
+							"type": "text",
+							"text": "tool output"
+						}
+					],
+					"isError": false,
+					"timestamp": 3
+				}
+			},
+			{
+				"type": "custom_message",
+				"id": "e4",
+				"parentId": "e3",
+				"timestamp": "2026-11-01T09:04:00.000Z",
+				"customType": "note",
+				"content": "a note",
+				"display": true
+			},
+			{
+				"type": "context_edit",
+				"id": "e5",
+				"parentId": "e4",
+				"timestamp": "2026-11-01T09:05:00.000Z",
+				"targetId": "e2",
+				"replacement": {
+					"content": "edited answer"
+				}
+			},
+			{
+				"type": "context_edit",
+				"id": "e6",
+				"parentId": "e5",
+				"timestamp": "2026-11-01T09:06:00.000Z",
+				"targetId": "e1",
+				"replacement": {
+					"content": "edited question"
+				}
+			},
+			{
+				"type": "context_edit",
+				"id": "e7",
+				"parentId": "e6",
+				"timestamp": "2026-11-01T09:07:00.000Z",
+				"targetId": "e3",
+				"replacement": null
+			},
+			{
+				"type": "context_edit",
+				"id": "e8",
+				"parentId": "e7",
+				"timestamp": "2026-11-01T09:08:00.000Z",
+				"targetId": "e4",
+				"replacement": {
+					"content": [
+						{
+							"type": "text",
+							"text": "edited note"
+						}
+					]
+				}
+			},
+			{
+				"type": "context_edit",
+				"id": "e9",
+				"parentId": "e8",
+				"timestamp": "2026-11-01T09:09:00.000Z",
+				"targetId": "e2",
+				"replacement": {
+					"content": "edited twice"
+				}
+			}
+		],
+		"tree": [
+			{
+				"id": "e1",
+				"children": [
+					{
+						"id": "e2",
+						"children": [
+							{
+								"id": "e3",
+								"children": [
+									{
+										"id": "e4",
+										"children": [
+											{
+												"id": "e5",
+												"children": [
+													{
+														"id": "e6",
+														"children": [
+															{
+																"id": "e7",
+																"children": [
+																	{
+																		"id": "e8",
+																		"children": [
+																			{
+																				"id": "e9",
+																				"children": []
+																			}
+																		]
+																	}
+																]
+															}
+														]
+													}
+												]
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "user",
+					"content": "edited question",
+					"timestamp": 1
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "edited twice"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				},
+				{
+					"role": "custom",
+					"customType": "note",
+					"content": [
+						{
+							"type": "text",
+							"text": "edited note"
+						}
+					],
+					"display": true,
+					"timestamp": 1793523840000
+				}
+			],
+			"thinkingLevel": "off",
+			"model": {
+				"provider": "anthropic",
+				"modelId": "claude-test"
+			}
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "message",
+					"id": "e1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "original question",
+						"timestamp": 1
+					}
+				},
+				{
+					"type": "message",
+					"id": "e2",
+					"parentId": "e1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "original answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				},
+				{
+					"type": "message",
+					"id": "e3",
+					"parentId": "e2",
+					"timestamp": "2026-11-01T09:03:00.000Z",
+					"message": {
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "tool output"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					}
+				},
+				{
+					"type": "custom_message",
+					"id": "e4",
+					"parentId": "e3",
+					"timestamp": "2026-11-01T09:04:00.000Z",
+					"customType": "note",
+					"content": "a note",
+					"display": true
+				},
+				{
+					"type": "context_edit",
+					"id": "e5",
+					"parentId": "e4",
+					"timestamp": "2026-11-01T09:05:00.000Z",
+					"targetId": "e2",
+					"replacement": {
+						"content": "edited answer"
+					}
+				},
+				{
+					"type": "context_edit",
+					"id": "e6",
+					"parentId": "e5",
+					"timestamp": "2026-11-01T09:06:00.000Z",
+					"targetId": "e1",
+					"replacement": {
+						"content": "edited question"
+					}
+				},
+				{
+					"type": "context_edit",
+					"id": "e7",
+					"parentId": "e6",
+					"timestamp": "2026-11-01T09:07:00.000Z",
+					"targetId": "e3",
+					"replacement": null
+				},
+				{
+					"type": "context_edit",
+					"id": "e8",
+					"parentId": "e7",
+					"timestamp": "2026-11-01T09:08:00.000Z",
+					"targetId": "e4",
+					"replacement": {
+						"content": [
+							{
+								"type": "text",
+								"text": "edited note"
+							}
+						]
+					}
+				},
+				{
+					"type": "context_edit",
+					"id": "e9",
+					"parentId": "e8",
+					"timestamp": "2026-11-01T09:09:00.000Z",
+					"targetId": "e2",
+					"replacement": {
+						"content": "edited twice"
+					}
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"e1",
+					"e2",
+					"e3",
+					"e4",
+					"e5",
+					"e6",
+					"e7",
+					"e8",
+					"e9"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "edited question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited twice"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited note"
+							}
+						],
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "e1",
+				"entryIds": [
+					"e1"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "original question",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "e2",
+				"entryIds": [
+					"e1",
+					"e2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "original question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "original answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "e3",
+				"entryIds": [
+					"e1",
+					"e2",
+					"e3"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "original question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "original answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "tool output"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "e4",
+				"entryIds": [
+					"e1",
+					"e2",
+					"e3",
+					"e4"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "original question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "original answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "tool output"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "a note",
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "e5",
+				"entryIds": [
+					"e1",
+					"e2",
+					"e3",
+					"e4",
+					"e5"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "original question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "tool output"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "a note",
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "e6",
+				"entryIds": [
+					"e1",
+					"e2",
+					"e3",
+					"e4",
+					"e5",
+					"e6"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "edited question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "toolResult",
+						"toolCallId": "call-1",
+						"toolName": "read",
+						"content": [
+							{
+								"type": "text",
+								"text": "tool output"
+							}
+						],
+						"isError": false,
+						"timestamp": 3
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "a note",
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "e7",
+				"entryIds": [
+					"e1",
+					"e2",
+					"e3",
+					"e4",
+					"e5",
+					"e6",
+					"e7"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "edited question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": "a note",
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "e8",
+				"entryIds": [
+					"e1",
+					"e2",
+					"e3",
+					"e4",
+					"e5",
+					"e6",
+					"e7",
+					"e8"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "edited question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited answer"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited note"
+							}
+						],
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "e9",
+				"entryIds": [
+					"e1",
+					"e2",
+					"e3",
+					"e4",
+					"e5",
+					"e6",
+					"e7",
+					"e8",
+					"e9"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "edited question",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited twice"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					},
+					{
+						"role": "custom",
+						"customType": "note",
+						"content": [
+							{
+								"type": "text",
+								"text": "edited note"
+							}
+						],
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			}
+		]
+	},
+	{
+		"name": "other entries",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\",\"parentSession\":\"/sessions/parent.jsonl\"}\n{\"type\":\"message\",\"id\":\"f1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"hello\",\"timestamp\":1}}\n{\"type\":\"custom\",\"id\":\"f2\",\"parentId\":\"f1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"customType\":\"state\",\"data\":{\"count\":2}}\n{\"type\":\"custom_message\",\"id\":\"f3\",\"parentId\":\"f2\",\"timestamp\":\"2026-11-01T09:03:00.000Z\",\"customType\":\"reminder\",\"content\":[{\"type\":\"text\",\"text\":\"remember\"}],\"display\":false,\"details\":{\"source\":\"test\"}}\n{\"type\":\"branch_summary\",\"id\":\"f4\",\"parentId\":\"f3\",\"timestamp\":\"2026-11-01T09:04:00.000Z\",\"fromId\":\"f9\",\"summary\":\"the abandoned branch\"}\n{\"type\":\"branch_summary\",\"id\":\"f5\",\"parentId\":\"f4\",\"timestamp\":\"2026-11-01T09:05:00.000Z\",\"fromId\":\"f9\",\"summary\":\"\"}\n{\"type\":\"label\",\"id\":\"f6\",\"parentId\":\"f5\",\"timestamp\":\"2026-11-01T09:06:00.000Z\",\"targetId\":\"f1\",\"label\":\"start\"}\n{\"type\":\"label\",\"id\":\"f7\",\"parentId\":\"f6\",\"timestamp\":\"2026-11-01T09:07:00.000Z\",\"targetId\":\"f3\",\"label\":\"reminder\"}\n{\"type\":\"label\",\"id\":\"f8\",\"parentId\":\"f7\",\"timestamp\":\"2026-11-01T09:08:00.000Z\",\"targetId\":\"f3\"}\n{\"type\":\"session_info\",\"id\":\"f9\",\"parentId\":\"f8\",\"timestamp\":\"2026-11-01T09:09:00.000Z\",\"name\":\"  First name  \"}\n{\"type\":\"usage\",\"id\":\"f10\",\"parentId\":\"f9\",\"timestamp\":\"2026-11-01T09:10:00.000Z\",\"kind\":\"cache_warm\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}}}\n{\"type\":\"session_info\",\"id\":\"f11\",\"parentId\":\"f10\",\"timestamp\":\"2026-11-01T09:11:00.000Z\",\"name\":\"Final name\"}\n{\"type\":\"message\",\"id\":\"f12\",\"parentId\":\"f11\",\"timestamp\":\"2026-11-01T09:12:00.000Z\",\"message\":{\"role\":\"bashExecution\",\"command\":\"ls\",\"output\":\"a\\nb\",\"exitCode\":0,\"cancelled\":false,\"truncated\":false,\"timestamp\":12}}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project",
+			"parentSession": "/sessions/parent.jsonl"
+		},
+		"leafId": "f12",
+		"sessionName": "Final name",
+		"entries": [
+			{
+				"type": "message",
+				"id": "f1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "hello",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "custom",
+				"id": "f2",
+				"parentId": "f1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"customType": "state",
+				"data": {
+					"count": 2
+				}
+			},
+			{
+				"type": "custom_message",
+				"id": "f3",
+				"parentId": "f2",
+				"timestamp": "2026-11-01T09:03:00.000Z",
+				"customType": "reminder",
+				"content": [
+					{
+						"type": "text",
+						"text": "remember"
+					}
+				],
+				"display": false,
+				"details": {
+					"source": "test"
+				}
+			},
+			{
+				"type": "branch_summary",
+				"id": "f4",
+				"parentId": "f3",
+				"timestamp": "2026-11-01T09:04:00.000Z",
+				"fromId": "f9",
+				"summary": "the abandoned branch"
+			},
+			{
+				"type": "branch_summary",
+				"id": "f5",
+				"parentId": "f4",
+				"timestamp": "2026-11-01T09:05:00.000Z",
+				"fromId": "f9",
+				"summary": ""
+			},
+			{
+				"type": "label",
+				"id": "f6",
+				"parentId": "f5",
+				"timestamp": "2026-11-01T09:06:00.000Z",
+				"targetId": "f1",
+				"label": "start"
+			},
+			{
+				"type": "label",
+				"id": "f7",
+				"parentId": "f6",
+				"timestamp": "2026-11-01T09:07:00.000Z",
+				"targetId": "f3",
+				"label": "reminder"
+			},
+			{
+				"type": "label",
+				"id": "f8",
+				"parentId": "f7",
+				"timestamp": "2026-11-01T09:08:00.000Z",
+				"targetId": "f3"
+			},
+			{
+				"type": "session_info",
+				"id": "f9",
+				"parentId": "f8",
+				"timestamp": "2026-11-01T09:09:00.000Z",
+				"name": "  First name  "
+			},
+			{
+				"type": "usage",
+				"id": "f10",
+				"parentId": "f9",
+				"timestamp": "2026-11-01T09:10:00.000Z",
+				"kind": "cache_warm",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 10,
+					"output": 5,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 15,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				}
+			},
+			{
+				"type": "session_info",
+				"id": "f11",
+				"parentId": "f10",
+				"timestamp": "2026-11-01T09:11:00.000Z",
+				"name": "Final name"
+			},
+			{
+				"type": "message",
+				"id": "f12",
+				"parentId": "f11",
+				"timestamp": "2026-11-01T09:12:00.000Z",
+				"message": {
+					"role": "bashExecution",
+					"command": "ls",
+					"output": "a\nb",
+					"exitCode": 0,
+					"cancelled": false,
+					"truncated": false,
+					"timestamp": 12
+				}
+			}
+		],
+		"tree": [
+			{
+				"id": "f1",
+				"label": "start",
+				"labelTimestamp": "2026-11-01T09:06:00.000Z",
+				"children": [
+					{
+						"id": "f2",
+						"children": [
+							{
+								"id": "f3",
+								"children": [
+									{
+										"id": "f4",
+										"children": [
+											{
+												"id": "f5",
+												"children": [
+													{
+														"id": "f6",
+														"children": [
+															{
+																"id": "f7",
+																"children": [
+																	{
+																		"id": "f8",
+																		"children": [
+																			{
+																				"id": "f9",
+																				"children": [
+																					{
+																						"id": "f10",
+																						"children": [
+																							{
+																								"id": "f11",
+																								"children": [
+																									{
+																										"id": "f12",
+																										"children": []
+																									}
+																								]
+																							}
+																						]
+																					}
+																				]
+																			}
+																		]
+																	}
+																]
+															}
+														]
+													}
+												]
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "user",
+					"content": "hello",
+					"timestamp": 1
+				},
+				{
+					"role": "custom",
+					"customType": "reminder",
+					"content": [
+						{
+							"type": "text",
+							"text": "remember"
+						}
+					],
+					"display": false,
+					"details": {
+						"source": "test"
+					},
+					"timestamp": 1793523780000
+				},
+				{
+					"role": "branchSummary",
+					"summary": "the abandoned branch",
+					"fromId": "f9",
+					"timestamp": 1793523840000
+				},
+				{
+					"role": "bashExecution",
+					"command": "ls",
+					"output": "a\nb",
+					"exitCode": 0,
+					"cancelled": false,
+					"truncated": false,
+					"timestamp": 12
+				}
+			],
+			"thinkingLevel": "off",
+			"model": null
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project",
+					"parentSession": "/sessions/parent.jsonl"
+				},
+				{
+					"type": "message",
+					"id": "f1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					}
+				},
+				{
+					"type": "custom",
+					"id": "f2",
+					"parentId": "f1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"customType": "state",
+					"data": {
+						"count": 2
+					}
+				},
+				{
+					"type": "custom_message",
+					"id": "f3",
+					"parentId": "f2",
+					"timestamp": "2026-11-01T09:03:00.000Z",
+					"customType": "reminder",
+					"content": [
+						{
+							"type": "text",
+							"text": "remember"
+						}
+					],
+					"display": false,
+					"details": {
+						"source": "test"
+					}
+				},
+				{
+					"type": "branch_summary",
+					"id": "f4",
+					"parentId": "f3",
+					"timestamp": "2026-11-01T09:04:00.000Z",
+					"fromId": "f9",
+					"summary": "the abandoned branch"
+				},
+				{
+					"type": "branch_summary",
+					"id": "f5",
+					"parentId": "f4",
+					"timestamp": "2026-11-01T09:05:00.000Z",
+					"fromId": "f9",
+					"summary": ""
+				},
+				{
+					"type": "label",
+					"id": "f6",
+					"parentId": "f5",
+					"timestamp": "2026-11-01T09:06:00.000Z",
+					"targetId": "f1",
+					"label": "start"
+				},
+				{
+					"type": "label",
+					"id": "f7",
+					"parentId": "f6",
+					"timestamp": "2026-11-01T09:07:00.000Z",
+					"targetId": "f3",
+					"label": "reminder"
+				},
+				{
+					"type": "label",
+					"id": "f8",
+					"parentId": "f7",
+					"timestamp": "2026-11-01T09:08:00.000Z",
+					"targetId": "f3"
+				},
+				{
+					"type": "session_info",
+					"id": "f9",
+					"parentId": "f8",
+					"timestamp": "2026-11-01T09:09:00.000Z",
+					"name": "  First name  "
+				},
+				{
+					"type": "usage",
+					"id": "f10",
+					"parentId": "f9",
+					"timestamp": "2026-11-01T09:10:00.000Z",
+					"kind": "cache_warm",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					}
+				},
+				{
+					"type": "session_info",
+					"id": "f11",
+					"parentId": "f10",
+					"timestamp": "2026-11-01T09:11:00.000Z",
+					"name": "Final name"
+				},
+				{
+					"type": "message",
+					"id": "f12",
+					"parentId": "f11",
+					"timestamp": "2026-11-01T09:12:00.000Z",
+					"message": {
+						"role": "bashExecution",
+						"command": "ls",
+						"output": "a\nb",
+						"exitCode": 0,
+						"cancelled": false,
+						"truncated": false,
+						"timestamp": 12
+					}
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5",
+					"f6",
+					"f7",
+					"f8",
+					"f9",
+					"f10",
+					"f11",
+					"f12"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					},
+					{
+						"role": "bashExecution",
+						"command": "ls",
+						"output": "a\nb",
+						"exitCode": 0,
+						"cancelled": false,
+						"truncated": false,
+						"timestamp": 12
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f1",
+				"entryIds": [
+					"f1"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f2",
+				"entryIds": [
+					"f1",
+					"f2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f3",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f4",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f5",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f6",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5",
+					"f6"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f7",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5",
+					"f6",
+					"f7"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f8",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5",
+					"f6",
+					"f7",
+					"f8"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f9",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5",
+					"f6",
+					"f7",
+					"f8",
+					"f9"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f10",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5",
+					"f6",
+					"f7",
+					"f8",
+					"f9",
+					"f10"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f11",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5",
+					"f6",
+					"f7",
+					"f8",
+					"f9",
+					"f10",
+					"f11"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "f12",
+				"entryIds": [
+					"f1",
+					"f2",
+					"f3",
+					"f4",
+					"f5",
+					"f6",
+					"f7",
+					"f8",
+					"f9",
+					"f10",
+					"f11",
+					"f12"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "hello",
+						"timestamp": 1
+					},
+					{
+						"role": "custom",
+						"customType": "reminder",
+						"content": [
+							{
+								"type": "text",
+								"text": "remember"
+							}
+						],
+						"display": false,
+						"details": {
+							"source": "test"
+						},
+						"timestamp": 1793523780000
+					},
+					{
+						"role": "branchSummary",
+						"summary": "the abandoned branch",
+						"fromId": "f9",
+						"timestamp": 1793523840000
+					},
+					{
+						"role": "bashExecution",
+						"command": "ls",
+						"output": "a\nb",
+						"exitCode": 0,
+						"cancelled": false,
+						"truncated": false,
+						"timestamp": 12
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			}
+		]
+	},
+	{
+		"name": "cleared name",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n{\"type\":\"session_info\",\"id\":\"g1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"name\":\"Named\"}\n{\"type\":\"session_info\",\"id\":\"g2\",\"parentId\":\"g1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"name\":\"   \"}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "g2",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "session_info",
+				"id": "g1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"name": "Named"
+			},
+			{
+				"type": "session_info",
+				"id": "g2",
+				"parentId": "g1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"name": "   "
+			}
+		],
+		"tree": [
+			{
+				"id": "g1",
+				"children": [
+					{
+						"id": "g2",
+						"children": []
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [],
+			"thinkingLevel": "off",
+			"model": null
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "session_info",
+					"id": "g1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"name": "Named"
+				},
+				{
+					"type": "session_info",
+					"id": "g2",
+					"parentId": "g1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"name": "   "
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"g1",
+					"g2"
+				],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "g1",
+				"entryIds": [
+					"g1"
+				],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "g2",
+				"entryIds": [
+					"g1",
+					"g2"
+				],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			}
+		]
+	},
+	{
+		"name": "missing content",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n{\"type\":\"message\",\"id\":\"h1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"system\",\"content\":null,\"timestamp\":1}}\n{\"type\":\"message\",\"id\":\"h2\",\"parentId\":\"h1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"message\":{\"role\":\"user\",\"timestamp\":2}}\n{\"type\":\"message\",\"id\":\"h3\",\"parentId\":\"h2\",\"timestamp\":\"2026-11-01T09:03:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":null,\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":3}}\n{\"type\":\"custom_message\",\"id\":\"h4\",\"parentId\":\"h3\",\"timestamp\":\"2026-11-01T09:04:00.000Z\",\"customType\":\"empty\",\"display\":true}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "h4",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "h1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "system",
+					"content": null,
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "h2",
+				"parentId": "h1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"message": {
+					"role": "user",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "h3",
+				"parentId": "h2",
+				"timestamp": "2026-11-01T09:03:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": null,
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 3
+				}
+			},
+			{
+				"type": "custom_message",
+				"id": "h4",
+				"parentId": "h3",
+				"timestamp": "2026-11-01T09:04:00.000Z",
+				"customType": "empty",
+				"display": true
+			}
+		],
+		"tree": [
+			{
+				"id": "h1",
+				"children": [
+					{
+						"id": "h2",
+						"children": [
+							{
+								"id": "h3",
+								"children": [
+									{
+										"id": "h4",
+										"children": []
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "system",
+					"content": "",
+					"timestamp": 1
+				},
+				{
+					"role": "user",
+					"timestamp": 2,
+					"content": []
+				},
+				{
+					"role": "assistant",
+					"content": [],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 3
+				},
+				{
+					"role": "custom",
+					"customType": "empty",
+					"content": [],
+					"display": true,
+					"timestamp": 1793523840000
+				}
+			],
+			"thinkingLevel": "off",
+			"model": {
+				"provider": "anthropic",
+				"modelId": "claude-test"
+			}
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "message",
+					"id": "h1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "system",
+						"content": null,
+						"timestamp": 1
+					}
+				},
+				{
+					"type": "message",
+					"id": "h2",
+					"parentId": "h1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"message": {
+						"role": "user",
+						"timestamp": 2
+					}
+				},
+				{
+					"type": "message",
+					"id": "h3",
+					"parentId": "h2",
+					"timestamp": "2026-11-01T09:03:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": null,
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 3
+					}
+				},
+				{
+					"type": "custom_message",
+					"id": "h4",
+					"parentId": "h3",
+					"timestamp": "2026-11-01T09:04:00.000Z",
+					"customType": "empty",
+					"display": true
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"h1",
+					"h2",
+					"h3",
+					"h4"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "",
+						"timestamp": 1
+					},
+					{
+						"role": "user",
+						"timestamp": 2,
+						"content": []
+					},
+					{
+						"role": "assistant",
+						"content": [],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 3
+					},
+					{
+						"role": "custom",
+						"customType": "empty",
+						"content": [],
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "h1",
+				"entryIds": [
+					"h1"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "h2",
+				"entryIds": [
+					"h1",
+					"h2"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "",
+						"timestamp": 1
+					},
+					{
+						"role": "user",
+						"timestamp": 2,
+						"content": []
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "h3",
+				"entryIds": [
+					"h1",
+					"h2",
+					"h3"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "",
+						"timestamp": 1
+					},
+					{
+						"role": "user",
+						"timestamp": 2,
+						"content": []
+					},
+					{
+						"role": "assistant",
+						"content": [],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 3
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "h4",
+				"entryIds": [
+					"h1",
+					"h2",
+					"h3",
+					"h4"
+				],
+				"messages": [
+					{
+						"role": "system",
+						"content": "",
+						"timestamp": 1
+					},
+					{
+						"role": "user",
+						"timestamp": 2,
+						"content": []
+					},
+					{
+						"role": "assistant",
+						"content": [],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 3
+					},
+					{
+						"role": "custom",
+						"customType": "empty",
+						"content": [],
+						"display": true,
+						"timestamp": 1793523840000
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			}
+		]
+	},
+	{
+		"name": "malformed lines without a final newline",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n\n   \n{not json}\n{\"type\":\"message\",\"id\":\"i1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"kept\",\"timestamp\":1}}\r\n{\"type\":\"message\",\"id\":\"i2\",\"parentId\":\"i1\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"last\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":2}}",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "i2",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "i1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "kept",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "i2",
+				"parentId": "i1",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "last"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			}
+		],
+		"tree": [
+			{
+				"id": "i1",
+				"children": [
+					{
+						"id": "i2",
+						"children": []
+					}
+				]
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "user",
+					"content": "kept",
+					"timestamp": 1
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "last"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"thinkingLevel": "off",
+			"model": {
+				"provider": "anthropic",
+				"modelId": "claude-test"
+			}
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				"",
+				{
+					"unparsed": "   "
+				},
+				{
+					"unparsed": "{not json}"
+				},
+				{
+					"type": "message",
+					"id": "i1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "kept",
+						"timestamp": 1
+					}
+				},
+				{
+					"type": "message",
+					"id": "i2",
+					"parentId": "i1",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "last"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"i1",
+					"i2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "kept",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "last"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "i1",
+				"entryIds": [
+					"i1"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "kept",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "i2",
+				"entryIds": [
+					"i1",
+					"i2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "kept",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "last"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			}
+		]
+	},
+	{
+		"name": "invalid utf-8",
+		"base64": "eyJ0eXBlIjoic2Vzc2lvbiIsInZlcnNpb24iOjMsImlkIjoicy1maXhlZCIsInRpbWVzdGFtcCI6IjIwMjYtMTEtMDFUMDk6MDA6MDAuMDAwWiIsImN3ZCI6Ijxyb290Pi9wcm9qZWN0In0KeyJ0eXBlIjoibWVzc2FnZSIsImlkIjoiajEiLCJwYXJlbnRJZCI6bnVsbCwidGltZXN0YW1wIjoiMjAyNi0xMS0wMVQwOTowMTowMC4wMDBaIiwibWVzc2FnZSI6eyJyb2xlIjoidXNlciIsImNvbnRlbnQiOiJiYWQg/8MoIGJ5dGVzIiwidGltZXN0YW1wIjoxfX0K",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "j1",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "j1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "bad ��( bytes",
+					"timestamp": 1
+				}
+			}
+		],
+		"tree": [
+			{
+				"id": "j1",
+				"children": []
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "user",
+					"content": "bad ��( bytes",
+					"timestamp": 1
+				}
+			],
+			"thinkingLevel": "off",
+			"model": null
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "message",
+					"id": "j1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "bad ��( bytes",
+						"timestamp": 1
+					}
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"j1"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "bad ��( bytes",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "j1",
+				"entryIds": [
+					"j1"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "bad ��( bytes",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			}
+		]
+	},
+	{
+		"name": "orphans",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n{\"type\":\"message\",\"id\":\"k1\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"root\",\"timestamp\":1}}\n{\"type\":\"message\",\"id\":\"k2\",\"parentId\":\"missing\",\"timestamp\":\"2026-11-01T09:02:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"orphan\",\"timestamp\":2}}\n{\"type\":\"message\",\"id\":\"k5\",\"parentId\":\"k1\",\"timestamp\":\"2026-11-01T09:05:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"later child\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":5}}\n{\"type\":\"message\",\"id\":\"k4\",\"parentId\":\"k1\",\"timestamp\":\"2026-11-01T09:04:00.000Z\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"earlier child\"}],\"api\":\"anthropic-messages\",\"provider\":\"anthropic\",\"model\":\"claude-test\",\"usage\":{\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":4}}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": "k4",
+		"sessionName": null,
+		"entries": [
+			{
+				"type": "message",
+				"id": "k1",
+				"parentId": null,
+				"timestamp": "2026-11-01T09:01:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "root",
+					"timestamp": 1
+				}
+			},
+			{
+				"type": "message",
+				"id": "k2",
+				"parentId": "missing",
+				"timestamp": "2026-11-01T09:02:00.000Z",
+				"message": {
+					"role": "user",
+					"content": "orphan",
+					"timestamp": 2
+				}
+			},
+			{
+				"type": "message",
+				"id": "k5",
+				"parentId": "k1",
+				"timestamp": "2026-11-01T09:05:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "later child"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 5
+				}
+			},
+			{
+				"type": "message",
+				"id": "k4",
+				"parentId": "k1",
+				"timestamp": "2026-11-01T09:04:00.000Z",
+				"message": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "earlier child"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 4
+				}
+			}
+		],
+		"tree": [
+			{
+				"id": "k1",
+				"children": [
+					{
+						"id": "k4",
+						"children": []
+					},
+					{
+						"id": "k5",
+						"children": []
+					}
+				]
+			},
+			{
+				"id": "k2",
+				"children": []
+			}
+		],
+		"context": {
+			"messages": [
+				{
+					"role": "user",
+					"content": "root",
+					"timestamp": 1
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "earlier child"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 10,
+						"output": 5,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 15,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 4
+				}
+			],
+			"thinkingLevel": "off",
+			"model": {
+				"provider": "anthropic",
+				"modelId": "claude-test"
+			}
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				{
+					"type": "message",
+					"id": "k1",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "root",
+						"timestamp": 1
+					}
+				},
+				{
+					"type": "message",
+					"id": "k2",
+					"parentId": "missing",
+					"timestamp": "2026-11-01T09:02:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "orphan",
+						"timestamp": 2
+					}
+				},
+				{
+					"type": "message",
+					"id": "k5",
+					"parentId": "k1",
+					"timestamp": "2026-11-01T09:05:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "later child"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 5
+					}
+				},
+				{
+					"type": "message",
+					"id": "k4",
+					"parentId": "k1",
+					"timestamp": "2026-11-01T09:04:00.000Z",
+					"message": {
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "earlier child"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 4
+					}
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [
+					"k1",
+					"k4"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "earlier child"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 4
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "k1",
+				"entryIds": [
+					"k1"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root",
+						"timestamp": 1
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "k2",
+				"entryIds": [
+					"k2"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "orphan",
+						"timestamp": 2
+					}
+				],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": "k5",
+				"entryIds": [
+					"k1",
+					"k5"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "later child"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 5
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			},
+			{
+				"leafId": "k4",
+				"entryIds": [
+					"k1",
+					"k4"
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": "root",
+						"timestamp": 1
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "text",
+								"text": "earlier child"
+							}
+						],
+						"api": "anthropic-messages",
+						"provider": "anthropic",
+						"model": "claude-test",
+						"usage": {
+							"input": 10,
+							"output": 5,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"totalTokens": 15,
+							"cost": {
+								"input": 0,
+								"output": 0,
+								"cacheRead": 0,
+								"cacheWrite": 0,
+								"total": 0
+							}
+						},
+						"stopReason": "stop",
+						"timestamp": 4
+					}
+				],
+				"thinkingLevel": "off",
+				"model": {
+					"provider": "anthropic",
+					"modelId": "claude-test"
+				}
+			}
+		]
+	},
+	{
+		"name": "header only",
+		"text": "{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "s-fixed",
+			"timestamp": "2026-11-01T09:00:00.000Z",
+			"cwd": "<root>/project"
+		},
+		"leafId": null,
+		"sessionName": null,
+		"entries": [],
+		"tree": [],
+		"context": {
+			"messages": [],
+			"thinkingLevel": "off",
+			"model": null
+		},
+		"cwd": "<root>/project",
+		"sessionId": "s-fixed",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			}
+		]
+	},
+	{
+		"name": "empty file",
+		"text": "",
+		"header": {
+			"type": "session",
+			"version": 3,
+			"id": "<session-1>",
+			"timestamp": "<time>",
+			"cwd": "<cwd>"
+		},
+		"leafId": null,
+		"sessionName": null,
+		"entries": [],
+		"tree": [],
+		"context": {
+			"messages": [],
+			"thinkingLevel": "off",
+			"model": null
+		},
+		"cwd": "<cwd>",
+		"sessionId": "<session-1>",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"id": "<session-1>",
+					"timestamp": "<time>",
+					"cwd": "<cwd>"
+				},
+				""
+			]
+		},
+		"projections": [
+			{
+				"leafId": "<default>",
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			},
+			{
+				"leafId": null,
+				"entryIds": [],
+				"messages": [],
+				"thinkingLevel": "off",
+				"model": null
+			}
+		]
+	},
+	{
+		"name": "not a session",
+		"text": "{\"type\":\"message\",\"id\":\"x\",\"parentId\":null,\"message\":{\"role\":\"user\",\"content\":\"x\",\"timestamp\":1}}\n",
+		"error": "Session file is not a valid relay session: <root>/case.jsonl",
+		"file": {
+			"lines": [
+				{
+					"type": "message",
+					"id": "x",
+					"parentId": null,
+					"message": {
+						"role": "user",
+						"content": "x",
+						"timestamp": 1
+					}
+				},
+				""
+			]
+		}
+	},
+	{
+		"name": "header not first",
+		"text": "{\"type\":\"message\",\"id\":\"x\",\"parentId\":null,\"timestamp\":\"2026-11-01T09:01:00.000Z\",\"message\":{\"role\":\"user\",\"content\":\"x\",\"timestamp\":1}}\n{\"type\":\"session\",\"version\":3,\"id\":\"s-fixed\",\"timestamp\":\"2026-11-01T09:00:00.000Z\",\"cwd\":\"<root>/project\"}\n",
+		"error": "Session file is not a valid relay session: <root>/case.jsonl",
+		"file": {
+			"lines": [
+				{
+					"type": "message",
+					"id": "x",
+					"parentId": null,
+					"timestamp": "2026-11-01T09:01:00.000Z",
+					"message": {
+						"role": "user",
+						"content": "x",
+						"timestamp": 1
+					}
+				},
+				{
+					"type": "session",
+					"version": 3,
+					"id": "s-fixed",
+					"timestamp": "2026-11-01T09:00:00.000Z",
+					"cwd": "<root>/project"
+				},
+				""
+			]
+		}
+	},
+	{
+		"name": "header without id",
+		"text": "{\"type\":\"session\",\"version\":3,\"timestamp\":\"2026-11-01T09:00:00.000Z\"}\n",
+		"error": "Session file is not a valid relay session: <root>/case.jsonl",
+		"file": {
+			"lines": [
+				{
+					"type": "session",
+					"version": 3,
+					"timestamp": "2026-11-01T09:00:00.000Z"
+				},
+				""
+			]
+		}
+	}
+]
