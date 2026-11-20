@@ -10,8 +10,8 @@
  * (`validation-record.ts`) to `crates/fixtures/validation.json` and the file tools' outputs
  * (`tools-record.ts`) to `crates/fixtures/tools/`, the session manager's (`session-record.ts`) to
  * `crates/fixtures/session/`, the settings manager's (`settings-record.ts`) to
- * `crates/fixtures/settings/` and compaction's (`compaction-record.ts`) to
- * `crates/fixtures/compaction/`:
+ * `crates/fixtures/settings/`, compaction's (`compaction-record.ts`) to `crates/fixtures/compaction/`
+ * and the system prompt's (`resources-record.ts`) to `crates/fixtures/resources/`:
  *
  *   npm run parity:record
  */
@@ -23,6 +23,7 @@ import { type AssistantMessage, fauxAssistantMessage, fauxToolCall, type Message
 import { createHarness } from "../suite/harness.ts";
 import { COMPACTION_DIR, compactionFiles } from "./compaction-record.ts";
 import { CONFIG_VALUES_FILE, configValuesJson } from "./config-value-record.ts";
+import { RESOURCES_DIR, resourcesFiles } from "./resources-record.ts";
 import { SESSION_DIR, sessionFiles } from "./session-record.ts";
 import { SETTINGS_DIR, settingsFiles } from "./settings-record.ts";
 import { TOOLS_DIR, toolFiles } from "./tools-record.ts";
@@ -183,7 +184,10 @@ if (process.argv.includes("--write")) {
 	mkdirSync(COMPACTION_DIR, { recursive: true });
 	for (const [name, content] of Object.entries(await compactionFiles()))
 		writeFileSync(join(COMPACTION_DIR, name), content);
+	mkdirSync(RESOURCES_DIR, { recursive: true });
+	for (const [name, content] of Object.entries(await resourcesFiles()))
+		writeFileSync(join(RESOURCES_DIR, name), content);
 	console.log(
-		`wrote ${SCENARIOS.length} scenario(s) to ${SCENARIOS_DIR}, the config values, the tool-argument validation, the file tools, the session and settings managers and compaction`,
+		`wrote ${SCENARIOS.length} scenario(s) to ${SCENARIOS_DIR}, the config values, the tool-argument validation, the file tools, the session and settings managers, compaction and the system prompt`,
 	);
 }
