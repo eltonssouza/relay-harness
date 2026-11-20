@@ -5,15 +5,19 @@
 
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use base64::Engine;
 use relay_agent::AgentTool;
+use relay_ai::abort::AbortSignal;
+use relay_tools::diff::{diff_lines, display_diff, unified_patch};
+use relay_tools::edit::prepare_edit_arguments;
 use relay_tools::mime::detect_supported_image_mime_type;
 use relay_tools::truncate::{
     format_size, truncate_head, truncate_line, truncate_middle, truncate_tail, TruncationOptions,
 };
-use relay_tools::{LsTool, ReadTool};
+use relay_tools::{EditTool, LsTool, ReadTool, WriteTool};
 use serde_json::{json, Value};
 
 fn fixture(name: &str) -> Value {
@@ -126,7 +130,10 @@ impl Tree {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        let root = std::env::temp_dir().join(format!("relay-tools-{}-{nanos}", std::process::id()));
+        static NEXT: AtomicUsize = AtomicUsize::new(0);
+        let next = NEXT.fetch_add(1, Ordering::SeqCst);
+        let name = format!("relay-tools-{}-{nanos}-{next}", std::process::id());
+        let root = std::env::temp_dir().join(name);
         fs::create_dir_all(&root).unwrap();
         for entry in entries {
             let path = entry["path"].as_str().unwrap();
@@ -134,11 +141,13 @@ impl Tree {
             if path.ends_with('/') {
                 fs::create_dir_all(&target).unwrap();
             } else if let Some(encoded) = entry["base64"].as_str() {
+                fs::create_dir_all(target.parent().unwrap()).unwrap();
                 let bytes = base64::engine::general_purpose::STANDARD
                     .decode(encoded)
                     .unwrap();
                 fs::write(&target, bytes).unwrap();
             } else {
+                fs::create_dir_all(target.parent().unwrap()).unwrap();
                 fs::write(&target, entry["text"].as_str().unwrap_or_default()).unwrap();
             }
         }
@@ -260,5 +269,113 @@ fn read_and_ls_answer_as_the_typescript_tools_do() {
             &mut failures,
         );
     }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
+#[test]
+fn diffs_match_jsdiff() {
+    let mut failures = Vec::new();
+    for (index, case) in fixture("diff.json").as_array().unwrap().iter().enumerate() {
+        let before = case["before"].as_str().unwrap();
+        let after = case["after"].as_str().unwrap();
+        let label = format!("diff {index} {before:?} -> {after:?}");
+        let parts: Vec<Value> = diff_lines(before, after)
+            .into_iter()
+            .map(|change| {
+                json!({
+                    "value": change.value,
+                    "count": change.count,
+                    "added": change.added,
+                    "removed": change.removed,
+                })
+            })
+            .collect();
+        differences(
+            &format!("{label} parts"),
+            &case["parts"],
+            &json!(parts),
+            &mut failures,
+        );
+        let (diff, first) = display_diff(before, after, 4);
+        let mut display = json!({ "diff": diff });
+        if let Some(first) = first {
+            display["firstChangedLine"] = json!(first);
+        }
+        differences(
+            &format!("{label} display"),
+            &case["display"],
+            &display,
+            &mut failures,
+        );
+        let patch = unified_patch("f.txt", before, after, 4);
+        differences(
+            &format!("{label} patch"),
+            &case["patch"],
+            &json!(patch),
+            &mut failures,
+        );
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
+/// A call's files afterwards: their bytes, or that they are missing.
+fn files_after(root: &str, call: &Value) -> Value {
+    let states: Vec<Value> = call["after"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|state| {
+            let path = state["path"].as_str().unwrap();
+            match fs::read(Path::new(root).join(path)) {
+                Ok(bytes) => json!({
+                    "path": path,
+                    "base64": base64::engine::general_purpose::STANDARD.encode(bytes),
+                }),
+                Err(_) => json!({ "path": path, "missing": true }),
+            }
+        })
+        .collect();
+    json!(states)
+}
+
+#[test]
+fn edit_and_write_change_files_as_the_typescript_tools_do() {
+    let mut failures = Vec::new();
+    for tool in ["edit", "write"] {
+        let cases = fixture(&format!("{tool}.json"));
+        for call in cases["calls"].as_array().unwrap() {
+            let tree = Tree::new(call["files"].as_array().unwrap());
+            let root = tree.root();
+            let signal = AbortSignal::never();
+            let args = &call["args"];
+            let result = if tool == "edit" {
+                let edit = EditTool::new(root.clone());
+                check_declaration(&edit, &cases["declaration"], &mut failures);
+                let prepared = prepare_edit_arguments(args.as_object().unwrap())
+                    .unwrap_or_else(|| args.clone());
+                edit.edit(&prepared, &signal)
+            } else {
+                let write = WriteTool::new(root.clone());
+                check_declaration(&write, &cases["declaration"], &mut failures);
+                let path = args["path"].as_str().unwrap();
+                write.write(path, args["content"].as_str().unwrap(), &signal)
+            };
+            let label = format!("{tool} {}", call["name"]);
+            differences(
+                &label,
+                &expected_outcome(call),
+                &outcome(result, &root),
+                &mut failures,
+            );
+            let after = files_after(&root, call);
+            differences(
+                &format!("{label} files"),
+                &call["after"],
+                &after,
+                &mut failures,
+            );
+        }
+    }
+    failures.dedup();
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }

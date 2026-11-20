@@ -4,6 +4,9 @@
 //! - `read`: a text file's lines, cut to 2000 lines or 50 KB with a notice on how to continue.
 //!   Images are not supported yet.
 //! - `ls`: a directory's entries in `localeCompare` order.
+//! - `write`: creates or overwrites a file and its parent directories.
+//! - `edit`: exact-text replacements with a fuzzy fallback (`edit_diff`), reported with jsdiff's
+//!   line diff and unified patch (`diff`). Changes to one file wait for each other (`mutation`).
 //! - `truncate`: the line and byte limits the tools share (head, tail, middle, one line).
 //! - `paths`: input paths resolved as the TypeScript tools resolve them.
 //! - `mime`: the image types `read` attaches, by their first bytes.
@@ -13,12 +16,19 @@
 //! `tests/tools.rs` replays `crates/fixtures/tools/`, what the TypeScript tools and helpers
 //! returned (`packages/coding-agent/test/parity/tools-record.ts`, `npm run parity:record`).
 
+pub mod diff;
+pub mod edit;
+pub mod edit_diff;
 pub mod js;
 pub mod ls;
 pub mod mime;
+pub mod mutation;
 pub mod paths;
 pub mod read;
 pub mod truncate;
+pub mod write;
 
+pub use edit::EditTool;
 pub use ls::LsTool;
 pub use read::ReadTool;
+pub use write::WriteTool;

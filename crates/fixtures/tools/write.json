@@ -1,0 +1,166 @@
+{
+	"declaration": {
+		"name": "write",
+		"description": "Write content to a file. Creates the file if it doesn't exist, overwrites if it does. Automatically creates parent directories.",
+		"parameters": {
+			"type": "object",
+			"required": [
+				"path",
+				"content"
+			],
+			"properties": {
+				"path": {
+					"type": "string",
+					"description": "Path to the file to write (relative or absolute)"
+				},
+				"content": {
+					"type": "string",
+					"description": "Content to write to the file"
+				}
+			}
+		},
+		"constrainedSampling": {
+			"type": "json_schema",
+			"strict": "prefer"
+		}
+	},
+	"calls": [
+		{
+			"name": "new-file",
+			"files": [],
+			"args": {
+				"path": "new.txt",
+				"content": "hello\n"
+			},
+			"after": [
+				{
+					"path": "new.txt",
+					"base64": "aGVsbG8K"
+				}
+			],
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully wrote to new.txt"
+					}
+				]
+			}
+		},
+		{
+			"name": "nested-dirs",
+			"files": [],
+			"args": {
+				"path": "deep/er/still/file.ts",
+				"content": "export {};\n"
+			},
+			"after": [
+				{
+					"path": "deep/er/still/file.ts",
+					"base64": "ZXhwb3J0IHt9Owo="
+				}
+			],
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully wrote to deep/er/still/file.ts"
+					}
+				]
+			}
+		},
+		{
+			"name": "overwrite",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "old content\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"content": "new"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully wrote to a.txt"
+					}
+				]
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "bmV3"
+				}
+			]
+		},
+		{
+			"name": "empty",
+			"files": [],
+			"args": {
+				"path": "empty.txt",
+				"content": ""
+			},
+			"after": [
+				{
+					"path": "empty.txt",
+					"base64": ""
+				}
+			],
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully wrote to empty.txt"
+					}
+				]
+			}
+		},
+		{
+			"name": "unicode",
+			"files": [],
+			"args": {
+				"path": "u.txt",
+				"content": "﻿naïve 🙂\r\n日本\n"
+			},
+			"after": [
+				{
+					"path": "u.txt",
+					"base64": "77u/bmHDr3ZlIPCfmYINCuaXpeacrAo="
+				}
+			],
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully wrote to u.txt"
+					}
+				]
+			}
+		},
+		{
+			"name": "at-prefix",
+			"files": [],
+			"args": {
+				"path": "@at.txt",
+				"content": "x"
+			},
+			"after": [
+				{
+					"path": "at.txt",
+					"base64": "eA=="
+				}
+			],
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully wrote to @at.txt"
+					}
+				]
+			}
+		}
+	]
+}
