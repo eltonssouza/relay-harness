@@ -9,6 +9,7 @@
 //!   external), the risky operations a command line performs, and the paths its deletions name.
 //! - [`alignment`]: constraints, intent, corrections, authorization and the question-turn guard.
 //! - [`evidence`]: the evidence ledger and the completion report.
+//! - [`json`]: those values as the TypeScript harness writes them in JSON.
 //! - [`text`]: the lexicon helpers, on `fancy-regex` for JavaScript-compatible lookaround.
 //! - [`route`]: general-agents' deterministic router (`route.py`), checked against the script.
 //!
@@ -19,6 +20,7 @@ pub mod context;
 pub mod effects;
 pub mod engine;
 pub mod evidence;
+pub mod json;
 pub mod route;
 pub mod shell;
 pub mod slices;

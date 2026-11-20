@@ -1,0 +1,302 @@
+{
+	"name": "delegated-checked",
+	"description": "A subagent's check after its edit backs the parent's completion.",
+	"tools": [
+		{
+			"name": "agent",
+			"output": "go-expert: fixed src/a.go",
+			"delegate": [
+				{
+					"toolCall": {
+						"type": "toolCall",
+						"id": "c1",
+						"name": "edit",
+						"arguments": {
+							"path": "src/a.go"
+						}
+					},
+					"isError": false
+				},
+				{
+					"toolCall": {
+						"type": "toolCall",
+						"id": "c2",
+						"name": "bash",
+						"arguments": {
+							"command": "npm test"
+						}
+					},
+					"isError": false
+				}
+			]
+		}
+	],
+	"responses": [
+		[
+			{
+				"type": "toolCall",
+				"id": "1",
+				"name": "agent",
+				"arguments": {
+					"subagent_type": "go-expert",
+					"description": "Fix",
+					"prompt": "Fix src/a.go"
+				}
+			}
+		],
+		[
+			{
+				"type": "text",
+				"text": "Done, the bug is fixed."
+			}
+		]
+	],
+	"prompts": [
+		{
+			"text": "Fix the bug in src/a.go"
+		}
+	],
+	"parameters": {
+		"type": "object",
+		"properties": {},
+		"additionalProperties": true
+	},
+	"requests": [
+		[
+			{
+				"role": "system",
+				"content": "test",
+				"toolsAdded": [
+					{
+						"name": "agent",
+						"description": "agent tool",
+						"parameters": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Fix the bug in src/a.go"
+					}
+				],
+				"timestamp": 0
+			}
+		],
+		[
+			{
+				"role": "system",
+				"content": "test",
+				"toolsAdded": [
+					{
+						"name": "agent",
+						"description": "agent tool",
+						"parameters": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Fix the bug in src/a.go"
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "1",
+						"name": "agent",
+						"arguments": {
+							"subagent_type": "go-expert",
+							"description": "Fix",
+							"prompt": "Fix src/a.go"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"thinkingLevel": "off"
+			},
+			{
+				"role": "toolResult",
+				"toolCallId": "1",
+				"toolName": "agent",
+				"content": [
+					{
+						"type": "text",
+						"text": "go-expert: fixed src/a.go"
+					}
+				],
+				"details": {},
+				"isError": false,
+				"timestamp": 0
+			}
+		]
+	],
+	"events": [
+		{
+			"type": "completion_assessed",
+			"report": {
+				"claimed": true,
+				"changedPaths": [
+					"src/a.go"
+				],
+				"mutations": 1,
+				"verifications": [
+					{
+						"command": "npm test",
+						"passed": true,
+						"step": 3,
+						"nameFiltered": false,
+						"empty": false
+					}
+				],
+				"gated": false,
+				"status": "verified"
+			}
+		}
+	],
+	"asked": [],
+	"messages": [
+		{
+			"role": "system",
+			"content": "test",
+			"toolsAdded": [
+				{
+					"name": "agent",
+					"description": "agent tool",
+					"parameters": {
+						"type": "object",
+						"properties": {},
+						"additionalProperties": true
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": "Fix the bug in src/a.go"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "1",
+					"name": "agent",
+					"arguments": {
+						"subagent_type": "go-expert",
+						"description": "Fix",
+						"prompt": "Fix src/a.go"
+					}
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "1",
+			"toolName": "agent",
+			"content": [
+				{
+					"type": "text",
+					"text": "go-expert: fixed src/a.go"
+				}
+			],
+			"details": {},
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "Done, the bug is fixed."
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "stop",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		}
+	],
+	"constraints": []
+}

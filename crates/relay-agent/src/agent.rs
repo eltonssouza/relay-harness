@@ -8,7 +8,7 @@
 //! clones share one agent, so a tool or a listener can steer, queue or abort the run it is in.
 
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
 
 use futures_channel::oneshot;
 use futures_util::future::{ready, BoxFuture};
@@ -183,7 +183,7 @@ struct Inner {
     next_listener: AtomicU64,
     active: Mutex<Option<ActiveRun>>,
     settings: Mutex<Settings>,
-    hooks: Arc<dyn AgentHooks>,
+    hooks: Mutex<Arc<dyn AgentHooks>>,
     stream_fn: Arc<dyn StreamFn>,
     clock: fn() -> u64,
 }
@@ -238,6 +238,16 @@ fn initial_system_message(
     })
 }
 
+/// An agent handle that does not keep it alive (`Agent::downgrade`).
+#[derive(Clone)]
+pub struct WeakAgent(Weak<Inner>);
+
+impl WeakAgent {
+    pub fn upgrade(&self) -> Option<Agent> {
+        self.0.upgrade().map(|inner| Agent { inner })
+    }
+}
+
 /// A stateful agent: the transcript, the queues and the listeners around the loop.
 #[derive(Clone)]
 pub struct Agent {
@@ -288,11 +298,27 @@ impl Agent {
                     max_retry_delay_ms: options.max_retry_delay_ms,
                     tool_execution: options.tool_execution,
                 }),
-                hooks: options.hooks,
+                hooks: Mutex::new(options.hooks),
                 stream_fn: options.stream_fn,
                 clock: options.clock,
             }),
         }
+    }
+
+    /// The callbacks future runs use.
+    pub fn hooks(&self) -> Arc<dyn AgentHooks> {
+        Arc::clone(&lock(&self.inner.hooks))
+    }
+
+    /// Replaces the callbacks; a run that is going keeps the ones it started with, as the
+    /// TypeScript agent reads its hooks when a run starts.
+    pub fn set_hooks(&self, hooks: Arc<dyn AgentHooks>) {
+        *lock(&self.inner.hooks) = hooks;
+    }
+
+    /// A handle that does not keep the agent alive, for what the agent itself holds.
+    pub fn downgrade(&self) -> WeakAgent {
+        WeakAgent(Arc::downgrade(&self.inner))
     }
 
     /// Listens to every event; listeners are awaited in subscription order.
@@ -694,6 +720,8 @@ impl Agent {
 /// The caller's hooks, with the steering and follow-up polls answered from the agent's queues.
 struct RunHooks<'a> {
     inner: &'a Inner,
+    /// The hooks as they were when the run started.
+    hooks: Arc<dyn AgentHooks>,
     /// A continuation that starts from queued steering takes it as its prompt: the first poll
     /// must not deliver more.
     skip_initial_steering_poll: AtomicBool,
@@ -703,6 +731,7 @@ impl<'a> RunHooks<'a> {
     fn new(inner: &'a Inner, skip_initial_steering_poll: bool) -> Self {
         RunHooks {
             inner,
+            hooks: Arc::clone(&lock(&inner.hooks)),
             skip_initial_steering_poll: AtomicBool::new(skip_initial_steering_poll),
         }
     }
@@ -710,7 +739,7 @@ impl<'a> RunHooks<'a> {
 
 impl AgentHooks for RunHooks<'_> {
     fn convert_to_llm(&self, messages: &[AgentMessage]) -> Vec<Message> {
-        self.inner.hooks.convert_to_llm(messages)
+        self.hooks.convert_to_llm(messages)
     }
 
     fn transform_context<'a>(
@@ -718,11 +747,11 @@ impl AgentHooks for RunHooks<'_> {
         messages: &'a [AgentMessage],
         signal: &'a AbortSignal,
     ) -> BoxFuture<'a, Option<Vec<AgentMessage>>> {
-        self.inner.hooks.transform_context(messages, signal)
+        self.hooks.transform_context(messages, signal)
     }
 
     fn get_api_key<'a>(&'a self, provider: &'a str) -> BoxFuture<'a, Option<String>> {
-        self.inner.hooks.get_api_key(provider)
+        self.hooks.get_api_key(provider)
     }
 
     fn finish_turn<'a>(
@@ -730,7 +759,7 @@ impl AgentHooks for RunHooks<'_> {
         turn: AgentTurnContext<'a>,
         signal: &'a AbortSignal,
     ) -> BoxFuture<'a, Option<TurnDecision>> {
-        self.inner.hooks.finish_turn(turn, signal)
+        self.hooks.finish_turn(turn, signal)
     }
 
     fn prepare_request<'a>(
@@ -738,7 +767,7 @@ impl AgentHooks for RunHooks<'_> {
         request: PrepareRequestContext<'a>,
         signal: &'a AbortSignal,
     ) -> BoxFuture<'a, Option<RequestUpdate>> {
-        self.inner.hooks.prepare_request(request, signal)
+        self.hooks.prepare_request(request, signal)
     }
 
     fn prepare_next_turn<'a>(
@@ -746,7 +775,7 @@ impl AgentHooks for RunHooks<'_> {
         turn: AgentTurnContext<'a>,
         signal: &'a AbortSignal,
     ) -> BoxFuture<'a, Option<TurnUpdate>> {
-        self.inner.hooks.prepare_next_turn(turn, signal)
+        self.hooks.prepare_next_turn(turn, signal)
     }
 
     fn get_steering_messages(&self) -> BoxFuture<'_, Vec<AgentMessage>> {
@@ -770,7 +799,7 @@ impl AgentHooks for RunHooks<'_> {
         call: BeforeToolCallContext<'a>,
         signal: &'a AbortSignal,
     ) -> BoxFuture<'a, Result<Option<BeforeToolCallResult>, String>> {
-        self.inner.hooks.before_tool_call(call, signal)
+        self.hooks.before_tool_call(call, signal)
     }
 
     fn after_tool_call<'a>(
@@ -778,7 +807,7 @@ impl AgentHooks for RunHooks<'_> {
         call: AfterToolCallContext<'a>,
         signal: &'a AbortSignal,
     ) -> BoxFuture<'a, Result<Option<AfterToolCallResult>, String>> {
-        self.inner.hooks.after_tool_call(call, signal)
+        self.hooks.after_tool_call(call, signal)
     }
 }
 

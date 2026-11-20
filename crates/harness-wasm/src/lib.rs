@@ -9,18 +9,20 @@
 use std::cell::RefCell;
 
 use relay_harness_core::alignment::{
-    extract_constraints, is_correction, is_question_only, requests_action, AlignmentDecision,
-    AlignmentPolicyOptions, ConstraintSource, DeveloperConstraint, DeveloperCorrection,
+    extract_constraints, is_correction, is_question_only, requests_action, AlignmentPolicyOptions,
+    ConstraintSource, DeveloperConstraint, DeveloperCorrection,
 };
 use relay_harness_core::context::{ContextMessage, ContextPolicyOptions, ContextToolCall};
 use relay_harness_core::effects::{
-    classify_command, classify_tool_call, deletion_targets, risky_operations, ClassifyContext,
-    ToolCall, ToolEffect, ToolEffectKind,
+    classify_command, classify_tool_call, deletion_targets, risky_operations,
 };
 use relay_harness_core::engine::{EngineOptions, HarnessEngine};
-use relay_harness_core::evidence::CompletionReport;
+use relay_harness_core::json::{
+    classify_context, constraint_to_json, decision_to_json, effect_from_json, effect_to_json,
+    report_to_json, stats_to_json, strings, tool_call,
+};
 use relay_harness_core::route::{py_strip, RouteAgent, Router, Vocabulary};
-use serde_json::{json, Map, Value};
+use serde_json::{json, Value};
 
 thread_local! {
     static ENGINES: RefCell<Vec<Option<HarnessEngine>>> = const { RefCell::new(Vec::new()) };
@@ -77,152 +79,6 @@ fn text(request: &Value, key: &str) -> Result<String> {
         .ok_or_else(|| format!("missing string `{key}`"))
 }
 
-fn optional_strings(value: &Value) -> Option<Vec<String>> {
-    value.as_array().map(|items| {
-        items
-            .iter()
-            .filter_map(Value::as_str)
-            .map(str::to_string)
-            .collect()
-    })
-}
-
-fn strings(value: &Value) -> Vec<String> {
-    optional_strings(value).unwrap_or_default()
-}
-
-fn context(value: &Value) -> ClassifyContext {
-    ClassifyContext {
-        cwd: value["cwd"].as_str().map(str::to_string),
-        home: value["home"].as_str().map(str::to_string),
-        temp_dir: value["tempDir"].as_str().map(str::to_string),
-    }
-}
-
-fn tool_call(value: &Value) -> Result<ToolCall> {
-    let name = value["name"]
-        .as_str()
-        .ok_or("missing tool call `name`")?
-        .to_string();
-    let arguments = value["arguments"]
-        .as_object()
-        .map(|fields| {
-            fields
-                .iter()
-                .filter_map(|(key, value)| {
-                    value.as_str().map(|text| (key.clone(), text.to_string()))
-                })
-                .collect()
-        })
-        .unwrap_or_default();
-    Ok(ToolCall { name, arguments })
-}
-
-fn kind(name: &str) -> Result<ToolEffectKind> {
-    Ok(match name {
-        "read" => ToolEffectKind::Read,
-        "write" => ToolEffectKind::Write,
-        "execute" => ToolEffectKind::Execute,
-        "verify" => ToolEffectKind::Verify,
-        "destructive" => ToolEffectKind::Destructive,
-        "external" => ToolEffectKind::External,
-        other => return Err(format!("unknown effect kind `{other}`")),
-    })
-}
-
-fn effect_from_json(value: &Value) -> Result<ToolEffect> {
-    Ok(ToolEffect {
-        kind: kind(value["kind"].as_str().ok_or("missing effect `kind`")?)?,
-        paths: strings(&value["paths"]),
-        command: value["command"].as_str().map(str::to_string),
-        reason: value["reason"].as_str().map(str::to_string),
-        scope: optional_strings(&value["scope"]),
-        files: optional_strings(&value["files"]),
-        writes: optional_strings(&value["writes"]),
-    })
-}
-
-fn effect_to_json(effect: &ToolEffect) -> Value {
-    let mut object = Map::new();
-    object.insert("kind".into(), json!(effect.kind.as_str()));
-    object.insert("paths".into(), json!(effect.paths));
-    if let Some(command) = &effect.command {
-        object.insert("command".into(), json!(command));
-    }
-    if let Some(reason) = &effect.reason {
-        object.insert("reason".into(), json!(reason));
-    }
-    if let Some(scope) = &effect.scope {
-        object.insert("scope".into(), json!(scope));
-    }
-    if let Some(files) = &effect.files {
-        object.insert("files".into(), json!(files));
-    }
-    if let Some(writes) = &effect.writes {
-        object.insert("writes".into(), json!(writes));
-    }
-    Value::Object(object)
-}
-
-fn decision_to_json(decision: &AlignmentDecision) -> Value {
-    match decision {
-        AlignmentDecision::Allow { via: Some(via) } => {
-            json!({ "action": "allow", "via": via.as_str() })
-        }
-        AlignmentDecision::Allow { via: None } => json!({ "action": "allow" }),
-        AlignmentDecision::Block { reason, kind } => {
-            json!({ "action": "block", "kind": kind.as_str(), "reason": reason })
-        }
-        AlignmentDecision::AskAuthorizer { fingerprint } => {
-            json!({ "action": "ask", "fingerprint": fingerprint })
-        }
-    }
-}
-
-fn report_to_json(report: &CompletionReport) -> Value {
-    let verifications: Vec<Value> = report
-        .verifications
-        .iter()
-        .map(|check| {
-            let mut object = json!({
-                "command": check.command,
-                "passed": check.passed,
-                "step": check.step,
-                "nameFiltered": check.name_filtered,
-                "empty": check.empty,
-            });
-            if let Some(scope) = &check.scope {
-                object["scope"] = json!(scope);
-            }
-            if let Some(files) = &check.files {
-                object["files"] = json!(files);
-            }
-            object
-        })
-        .collect();
-    let mut object = json!({
-        "status": report.status.as_str(),
-        "claimed": report.claimed,
-        "changedPaths": report.changed_paths,
-        "mutations": report.mutations,
-        "verifications": verifications,
-        "gated": report.gated,
-    });
-    if let Some(detail) = &report.detail {
-        object["detail"] = json!(detail);
-    }
-    object
-}
-
-fn constraint_to_json(constraint: &DeveloperConstraint) -> Value {
-    json!({
-        "id": constraint.id,
-        "text": constraint.text,
-        "source": match constraint.source { ConstraintSource::Message => "message", ConstraintSource::Api => "api" },
-        "timestamp": constraint.timestamp,
-    })
-}
-
 fn engine_options(value: &Value) -> EngineOptions {
     let alignment = match &value["alignment"] {
         Value::Bool(false) => None,
@@ -252,7 +108,7 @@ fn engine_options(value: &Value) -> EngineOptions {
         evidence_max_gates,
         context: context_options,
         verify_commands: strings(&value["verifyCommands"]),
-        workspace: context(&value["workspace"]),
+        workspace: classify_context(&value["workspace"]),
     }
 }
 
@@ -380,16 +236,18 @@ pub fn handle(request: &Value) -> Result<Value> {
         "classifyCommand" => Ok(effect_to_json(&classify_command(
             &text(request, "command")?,
             &verify_commands,
-            &context(&request["context"]),
+            &classify_context(&request["context"]),
         ))),
         "classifyToolCall" => Ok(effect_to_json(&classify_tool_call(
             &tool_call(&request["toolCall"])?,
             &verify_commands,
-            &context(&request["context"]),
+            &classify_context(&request["context"]),
         ))),
         "riskyOperations" => {
-            let operations =
-                risky_operations(&text(request, "command")?, &context(&request["context"]));
+            let operations = risky_operations(
+                &text(request, "command")?,
+                &classify_context(&request["context"]),
+            );
             Ok(json!(operations
                 .iter()
                 .map(|operation| operation.as_str())
@@ -520,7 +378,7 @@ fn engine_method(method: &str, request: &Value) -> Result<Value> {
             .as_ref()
             .map(|context| {
                 let stats = context.stats();
-                json!({ "elidedResults": stats.elided_results, "elidedChars": stats.elided_chars, "batches": stats.batches })
+                stats_to_json(&stats)
             })
             .unwrap_or(Value::Null)),
         other => Err(format!("unknown method `{other}`")),

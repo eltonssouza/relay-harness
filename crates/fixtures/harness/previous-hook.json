@@ -1,0 +1,253 @@
+{
+	"name": "previous-hook",
+	"description": "The agent's own hook still runs under the harness and can block what the harness allows.",
+	"tools": [
+		{
+			"name": "edit"
+		}
+	],
+	"responses": [
+		[
+			{
+				"type": "toolCall",
+				"id": "1",
+				"name": "edit",
+				"arguments": {
+					"path": "src/a.ts"
+				}
+			}
+		],
+		[
+			{
+				"type": "text",
+				"text": "The edit was refused."
+			}
+		]
+	],
+	"prompts": [
+		{
+			"text": "Fix the typo in src/a.ts"
+		}
+	],
+	"options": {
+		"evidence": false,
+		"previousBlocks": "edit"
+	},
+	"parameters": {
+		"type": "object",
+		"properties": {},
+		"additionalProperties": true
+	},
+	"requests": [
+		[
+			{
+				"role": "system",
+				"content": "test",
+				"toolsAdded": [
+					{
+						"name": "edit",
+						"description": "edit tool",
+						"parameters": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Fix the typo in src/a.ts"
+					}
+				],
+				"timestamp": 0
+			}
+		],
+		[
+			{
+				"role": "system",
+				"content": "test",
+				"toolsAdded": [
+					{
+						"name": "edit",
+						"description": "edit tool",
+						"parameters": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Fix the typo in src/a.ts"
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "1",
+						"name": "edit",
+						"arguments": {
+							"path": "src/a.ts"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"thinkingLevel": "off"
+			},
+			{
+				"role": "toolResult",
+				"toolCallId": "1",
+				"toolName": "edit",
+				"content": [
+					{
+						"type": "text",
+						"text": "Blocked by the agent's own hook."
+					}
+				],
+				"details": {},
+				"isError": true,
+				"timestamp": 0
+			}
+		]
+	],
+	"events": [],
+	"asked": [],
+	"messages": [
+		{
+			"role": "system",
+			"content": "test",
+			"toolsAdded": [
+				{
+					"name": "edit",
+					"description": "edit tool",
+					"parameters": {
+						"type": "object",
+						"properties": {},
+						"additionalProperties": true
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": "Fix the typo in src/a.ts"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "1",
+					"name": "edit",
+					"arguments": {
+						"path": "src/a.ts"
+					}
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "1",
+			"toolName": "edit",
+			"content": [
+				{
+					"type": "text",
+					"text": "Blocked by the agent's own hook."
+				}
+			],
+			"details": {},
+			"isError": true,
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "The edit was refused."
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "stop",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		}
+	],
+	"constraints": []
+}

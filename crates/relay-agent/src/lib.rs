@@ -9,6 +9,9 @@
 //! - `types`: the messages, events, tool results, the `AgentTool`, `AgentHooks`, `EventSink` and
 //!   `StreamFn` traits, and the config. The loop awaits each event and pulls each provider event,
 //!   as the TypeScript loop awaits its listeners and its event stream.
+//! - `harness`: `HarnessCore`, the pillars of `relay_harness_core` installed on an `Agent`: the
+//!   alignment gate before tool calls, the evidence gate after a final answer, context elision
+//!   and the harness state next to the latest message.
 //! - `provider`: `ProviderStream`, the stream function over the provider adapters
 //!   (`relay_ai::simple::stream_simple`), chosen by the model's API.
 //!
@@ -17,17 +20,20 @@
 //! (`npm run parity:record`). `tests/sink.rs` checks that a listener is awaited and that tool
 //! updates reach it while the tool runs. `tests/agent_parity.rs` replays
 //! `crates/fixtures/agent/`, what the TypeScript `Agent` did in each case of
-//! `packages/agent/test/parity/agent-record.ts`. `tests/provider.rs` answers through each
+//! `packages/agent/test/parity/agent-record.ts`. `tests/harness_parity.rs` replays
+//! `crates/fixtures/harness/`, the TypeScript `HarnessCore` on an agent in each case of
+//! `harness-record.ts`. `tests/provider.rs` answers through each
 //! adapter with the responses recorded in `crates/fixtures/*-stream/`, from a local server.
 
 pub mod agent;
 pub mod agent_loop;
+pub mod harness;
 pub mod provider;
 pub mod types;
 
 pub use agent::{
     Agent, AgentInitialState, AgentListener, AgentOptions, AgentState, DefaultHooks, ListenerId,
-    QueueMode,
+    QueueMode, WeakAgent,
 };
 pub use agent_loop::{run_agent_loop, run_agent_loop_continue, LoopRuntime};
 pub use provider::ProviderStream;

@@ -2691,6 +2691,7 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "relay-ai",
+ "relay-harness-core",
  "serde",
  "serde_json",
  "tokio",
