@@ -191,6 +191,12 @@ impl GoogleStream {
         AssistantEvent::Start
     }
 
+    /// The message as decoded so far: what the TypeScript adapter's events carry as
+    /// `partial`.
+    pub fn output(&self) -> &AssistantMessage {
+        &self.output
+    }
+
     pub fn push(&mut self, bytes: &[u8]) -> Vec<AssistantEvent> {
         if self.finished {
             return Vec::new();

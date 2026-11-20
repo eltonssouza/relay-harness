@@ -11,13 +11,21 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::anthropic::AnthropicOptions;
+use crate::event::AssistantEvent;
 use crate::google::{resolve_thinking_level, uses_thinking_level, GoogleOptions, GoogleThinking};
 use crate::openai_completions::OpenAICompletionsOptions;
 use crate::openai_responses::OpenAIResponsesOptions;
 use crate::options::CacheRetention;
+use crate::provider_request::RequestOptions;
+use crate::stream::{
+    failed, stream_anthropic, stream_google, stream_openai_completions, stream_openai_responses,
+    SendOptions,
+};
 use crate::text::js_length;
 use crate::transcript::system_message_text;
-use crate::{Content, InputBlock, Message, Model, OutputBlock, StopReason, Tool, Usage};
+use crate::{
+    AssistantMessage, Content, InputBlock, Message, Model, OutputBlock, StopReason, Tool, Usage,
+};
 
 /// Tokens kept free of the context window besides the estimate.
 const CONTEXT_SAFETY_TOKENS: i64 = 4096;
@@ -386,4 +394,53 @@ pub fn google_options(
         tool_choice: options.tool_choice.clone(),
         thinking: Some(thinking),
     })
+}
+
+/// The HTTP-level part of the options, with the request's key: what each adapter's
+/// `streamSimple` hands its `stream()` besides the adapter options.
+pub fn request_options(api_key: Option<String>, options: &SimpleOptions) -> RequestOptions {
+    RequestOptions {
+        api_key,
+        headers: options.headers.clone(),
+        session_id: options.session_id.clone(),
+        cache_retention: options.cache_retention,
+        env: options.env.clone(),
+    }
+}
+
+/// Each adapter's `streamSimple`, chosen by the model's API: the options mapped to the
+/// adapter's, then its `stream()`. `send.request` comes from `request_options`. An API without
+/// an adapter here, or options the adapter cannot map, end with an error event where the
+/// TypeScript `streamSimple` throws.
+pub async fn stream_simple(
+    model: &Model,
+    messages: &[Message],
+    options: &SimpleOptions,
+    send: &SendOptions<'_>,
+    emit: &mut (dyn FnMut(AssistantEvent, &AssistantMessage) + Send),
+) {
+    match model.api.as_str() {
+        "anthropic-messages" => {
+            let adapter = anthropic_options(model, messages, options);
+            stream_anthropic(model, messages, &adapter, send, emit).await;
+        }
+        "openai-responses" => {
+            let adapter = openai_responses_options(model, messages, options);
+            stream_openai_responses(model, messages, &adapter, send, emit).await;
+        }
+        "openai-completions" => {
+            let adapter = openai_completions_options(model, messages, options);
+            stream_openai_completions(model, messages, &adapter, send, emit).await;
+        }
+        "google-generative-ai" => match google_options(model, messages, options) {
+            Ok(adapter) => stream_google(model, messages, &adapter, send, emit).await,
+            Err(message) => failed(model, send.clock, message, emit),
+        },
+        api => failed(
+            model,
+            send.clock,
+            format!("No API provider registered for api: {api}"),
+            emit,
+        ),
+    }
 }

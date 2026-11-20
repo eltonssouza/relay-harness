@@ -10,6 +10,10 @@
 //!   reading); the OpenAI SDK ends the stream quietly, so Chat Completions closes its blocks and
 //!   reports `Request was aborted`, and Responses reports what its end-of-stream check finds.
 //!   The stop reason is `aborted` either way.
+//!
+//! Each event comes with the message as decoded so far, after the chunk that produced it.
+//! The TypeScript events carry the adapter's live message instead, which is further along
+//! by the time a slow consumer reads it.
 
 use crate::abort::AbortSignal;
 use crate::anthropic::{self, AnthropicOptions};
@@ -28,7 +32,7 @@ use crate::provider_request::{
     openai_responses_request, RequestOptions,
 };
 use crate::retry::{RequestError, RetryOptions};
-use crate::{Message, Model, StopReason};
+use crate::{AssistantMessage, Message, Model, StopReason};
 
 /// How to send a request: its auth and headers, the retry policy, the cancellation, and the
 /// clock that times the output.
@@ -41,7 +45,8 @@ pub struct SendOptions<'a> {
 }
 
 /// What the glue needs from a decoder.
-trait Decoder {
+trait Decoder: Send {
+    fn output(&self) -> &AssistantMessage;
     fn push(&mut self, bytes: &[u8]) -> Vec<AssistantEvent>;
     fn finish(&mut self) -> Vec<AssistantEvent>;
     fn end_with_error(&mut self, reason: StopReason, message: String) -> AssistantEvent;
@@ -53,6 +58,9 @@ const ABORTED_READ: &str = "This operation was aborted";
 const ABORTED: &str = "Request was aborted";
 
 impl Decoder for AnthropicStream {
+    fn output(&self) -> &AssistantMessage {
+        AnthropicStream::output(self)
+    }
     fn push(&mut self, bytes: &[u8]) -> Vec<AssistantEvent> {
         AnthropicStream::push(self, bytes)
     }
@@ -69,6 +77,9 @@ impl Decoder for AnthropicStream {
 }
 
 impl Decoder for GoogleStream {
+    fn output(&self) -> &AssistantMessage {
+        GoogleStream::output(self)
+    }
     fn push(&mut self, bytes: &[u8]) -> Vec<AssistantEvent> {
         GoogleStream::push(self, bytes)
     }
@@ -85,6 +96,9 @@ impl Decoder for GoogleStream {
 }
 
 impl Decoder for OpenAICompletionsStream {
+    fn output(&self) -> &AssistantMessage {
+        OpenAICompletionsStream::output(self)
+    }
     fn push(&mut self, bytes: &[u8]) -> Vec<AssistantEvent> {
         OpenAICompletionsStream::push(self, bytes)
     }
@@ -104,6 +118,9 @@ impl Decoder for OpenAICompletionsStream {
 }
 
 impl Decoder for OpenAIResponsesStream {
+    fn output(&self) -> &AssistantMessage {
+        OpenAIResponsesStream::output(self)
+    }
     fn push(&mut self, bytes: &[u8]) -> Vec<AssistantEvent> {
         OpenAIResponsesStream::push(self, bytes)
     }
@@ -137,12 +154,15 @@ async fn run(
     request: Result<HttpRequest, String>,
     retry: RetryOptions,
     signal: &AbortSignal,
-    error_message: &dyn Fn(&RequestError) -> String,
-    emit: &mut dyn FnMut(AssistantEvent),
+    error_message: &(dyn Fn(&RequestError) -> String + Sync),
+    emit: &mut (dyn FnMut(AssistantEvent, &AssistantMessage) + Send),
 ) {
     let request = match request {
         Ok(request) => request,
-        Err(message) => return emit(decoder.end_with_error(StopReason::Error, message)),
+        Err(message) => {
+            let event = decoder.end_with_error(StopReason::Error, message);
+            return emit(event, decoder.output());
+        }
     };
     let mut response = match post(&request, retry, signal).await {
         Ok(response) => response,
@@ -152,14 +172,14 @@ async fn run(
             } else {
                 decoder.end_with_error(StopReason::Error, error_message(&error))
             };
-            return emit(event);
+            return emit(event, decoder.output());
         }
     };
-    emit(AssistantEvent::Start);
+    emit(AssistantEvent::Start, decoder.output());
     loop {
         if signal.is_aborted() {
             for event in decoder.abort(false) {
-                emit(event);
+                emit(event, decoder.output());
             }
             return;
         }
@@ -167,7 +187,7 @@ async fn run(
             Ok(Some(bytes)) => decoder.push(&bytes),
             Ok(None) => {
                 for event in decoder.finish() {
-                    emit(event);
+                    emit(event, decoder.output());
                 }
                 return;
             }
@@ -181,7 +201,7 @@ async fn run(
             )
         });
         for event in events {
-            emit(event);
+            emit(event, decoder.output());
         }
         if done {
             return;
@@ -195,7 +215,7 @@ pub async fn stream_anthropic(
     messages: &[Message],
     options: &AnthropicOptions,
     send: &SendOptions<'_>,
-    emit: &mut dyn FnMut(AssistantEvent),
+    emit: &mut (dyn FnMut(AssistantEvent, &AssistantMessage) + Send),
 ) {
     let SendOptions {
         request,
@@ -227,7 +247,7 @@ pub async fn stream_openai_responses(
     messages: &[Message],
     options: &OpenAIResponsesOptions,
     send: &SendOptions<'_>,
-    emit: &mut dyn FnMut(AssistantEvent),
+    emit: &mut (dyn FnMut(AssistantEvent, &AssistantMessage) + Send),
 ) {
     let SendOptions {
         request,
@@ -238,7 +258,7 @@ pub async fn stream_openai_responses(
     let mut decoder =
         match OpenAIResponsesStream::new(model, messages, options.service_tier.clone(), clock) {
             Ok(decoder) => decoder,
-            Err(message) => return emit(failed(model, clock, message)),
+            Err(message) => return failed(model, clock, message, emit),
         };
     let http = openai_responses_request(model, messages, options, request);
     let wording = |error: &RequestError| openai_responses_error_message(model, error);
@@ -251,7 +271,7 @@ pub async fn stream_openai_completions(
     messages: &[Message],
     options: &OpenAICompletionsOptions,
     send: &SendOptions<'_>,
-    emit: &mut dyn FnMut(AssistantEvent),
+    emit: &mut (dyn FnMut(AssistantEvent, &AssistantMessage) + Send),
 ) {
     let SendOptions {
         request,
@@ -261,7 +281,7 @@ pub async fn stream_openai_completions(
     } = *send;
     let mut decoder = match OpenAICompletionsStream::new(model, messages, clock) {
         Ok(decoder) => decoder,
-        Err(message) => return emit(failed(model, clock, message)),
+        Err(message) => return failed(model, clock, message, emit),
     };
     let http = openai_completions_request(model, messages, options, request);
     run(
@@ -281,7 +301,7 @@ pub async fn stream_google(
     messages: &[Message],
     options: &GoogleOptions,
     send: &SendOptions<'_>,
-    emit: &mut dyn FnMut(AssistantEvent),
+    emit: &mut (dyn FnMut(AssistantEvent, &AssistantMessage) + Send),
 ) {
     let SendOptions {
         request,
@@ -302,7 +322,14 @@ pub async fn stream_google(
     .await;
 }
 
-/// An error event for a request that could not start, on an empty output for the model.
-fn failed(model: &Model, clock: fn() -> u64, message: String) -> AssistantEvent {
-    GoogleStream::new(model, clock).end_with_error(StopReason::Error, message)
+/// Ends a request that could not start with an error event, on an empty output for the model.
+pub(crate) fn failed(
+    model: &Model,
+    clock: fn() -> u64,
+    message: String,
+    emit: &mut (dyn FnMut(AssistantEvent, &AssistantMessage) + Send),
+) {
+    let mut decoder = GoogleStream::new(model, clock);
+    let event = decoder.end_with_error(StopReason::Error, message);
+    emit(event, decoder.output());
 }

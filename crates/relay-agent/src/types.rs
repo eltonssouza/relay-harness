@@ -12,6 +12,7 @@ use futures_util::future::{ready, BoxFuture};
 use futures_util::stream::BoxStream;
 use relay_ai::abort::AbortSignal;
 use relay_ai::event::AssistantEvent;
+use relay_ai::retry::RetryOptions;
 use relay_ai::simple::SimpleOptions;
 use relay_ai::{
     AssistantMessage, InputBlock, JsonObject, Message, Model, ToolCall, ToolResultMessage, Usage,
@@ -414,6 +415,8 @@ pub struct StreamRequest {
     /// The provider-neutral options; `reasoning` is the requested level.
     pub options: SimpleOptions,
     pub api_key: Option<String>,
+    /// How often a failed request is retried (`maxRetries`, `maxRetryDelayMs`).
+    pub retry: RetryOptions,
     pub signal: AbortSignal,
 }
 
@@ -436,6 +439,8 @@ pub struct AgentLoopConfig {
     /// Request options; `reasoning` is the thinking level, none for off.
     pub options: SimpleOptions,
     pub api_key: Option<String>,
+    /// Retries for each request; none by default.
+    pub retry: RetryOptions,
     pub tool_execution: ToolExecutionMode,
     /// Unix time in milliseconds, for the messages the loop creates.
     pub clock: fn() -> u64,
@@ -447,6 +452,7 @@ impl AgentLoopConfig {
             model,
             options: SimpleOptions::default(),
             api_key: None,
+            retry: RetryOptions::default(),
             tool_execution: ToolExecutionMode::Parallel,
             clock: now,
         }

@@ -94,7 +94,7 @@ async fn replay(case: &Value) -> Vec<AssistantEvent> {
         clock: || 0,
     };
     let mut events = Vec::new();
-    let mut emit = |event| events.push(event);
+    let mut emit = |event, _: &_| events.push(event);
     match case["adapter"].as_str().unwrap() {
         "anthropic" => {
             stream_anthropic(&model, &messages, &Default::default(), &send, &mut emit).await
