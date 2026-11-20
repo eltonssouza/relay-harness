@@ -1,0 +1,1673 @@
+{
+	"tree": [
+		{
+			"type": "message",
+			"id": "t1",
+			"parentId": null,
+			"timestamp": "2026-11-01T09:00:01.000Z",
+			"message": {
+				"role": "user",
+				"content": "root question",
+				"timestamp": 1
+			}
+		},
+		{
+			"type": "message",
+			"id": "t2",
+			"parentId": "t1",
+			"timestamp": "2026-11-01T09:00:02.000Z",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "root answer"
+					}
+				],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 2
+			}
+		},
+		{
+			"type": "message",
+			"id": "t3",
+			"parentId": "t2",
+			"timestamp": "2026-11-01T09:00:03.000Z",
+			"message": {
+				"role": "user",
+				"content": "main follow-up",
+				"timestamp": 1
+			}
+		},
+		{
+			"type": "message",
+			"id": "t4",
+			"parentId": "t3",
+			"timestamp": "2026-11-01T09:00:04.000Z",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call-1",
+						"name": "read",
+						"arguments": {
+							"path": "main.ts"
+						}
+					}
+				],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 2
+			}
+		},
+		{
+			"type": "message",
+			"id": "t5",
+			"parentId": "t4",
+			"timestamp": "2026-11-01T09:00:05.000Z",
+			"message": {
+				"role": "toolResult",
+				"toolCallId": "call-1",
+				"toolName": "read",
+				"content": [
+					{
+						"type": "text",
+						"text": "main file"
+					}
+				],
+				"isError": false,
+				"timestamp": 3
+			}
+		},
+		{
+			"type": "message",
+			"id": "t6",
+			"parentId": "t2",
+			"timestamp": "2026-11-01T09:00:06.000Z",
+			"message": {
+				"role": "user",
+				"content": "side question",
+				"timestamp": 1
+			}
+		},
+		{
+			"type": "model_change",
+			"id": "t7",
+			"parentId": "t6",
+			"timestamp": "2026-11-01T09:00:07.000Z",
+			"provider": "openai",
+			"modelId": "gpt"
+		},
+		{
+			"type": "message",
+			"id": "t8",
+			"parentId": "t7",
+			"timestamp": "2026-11-01T09:00:08.000Z",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call-1",
+						"name": "write",
+						"arguments": {
+							"path": "side.ts",
+							"content": "x"
+						}
+					}
+				],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 2
+			}
+		},
+		{
+			"type": "custom_message",
+			"id": "t9",
+			"parentId": "t8",
+			"timestamp": "2026-11-01T09:00:09.000Z",
+			"customType": "note",
+			"content": "side note",
+			"display": true,
+			"details": {
+				"n": 1
+			}
+		},
+		{
+			"type": "branch_summary",
+			"id": "t10",
+			"parentId": "t9",
+			"timestamp": "2026-11-01T09:00:10.000Z",
+			"fromId": "t5",
+			"summary": "earlier branch",
+			"details": {
+				"readFiles": [
+					"old.ts"
+				],
+				"modifiedFiles": [
+					"changed.ts"
+				]
+			}
+		},
+		{
+			"type": "compaction",
+			"id": "t11",
+			"parentId": "t10",
+			"timestamp": "2026-11-01T09:00:11.000Z",
+			"summary": "compacted side",
+			"firstKeptEntryId": "t9",
+			"tokensBefore": 77
+		},
+		{
+			"type": "message",
+			"id": "t12",
+			"parentId": "t11",
+			"timestamp": "2026-11-01T09:00:12.000Z",
+			"message": {
+				"role": "user",
+				"content": "after compaction",
+				"timestamp": 1
+			}
+		},
+		{
+			"type": "branch_summary",
+			"id": "t13",
+			"parentId": "t12",
+			"timestamp": "2026-11-01T09:00:13.000Z",
+			"fromId": "t1",
+			"summary": "hook branch",
+			"details": {
+				"readFiles": [
+					"hook.ts"
+				]
+			},
+			"fromHook": true
+		},
+		{
+			"type": "label",
+			"id": "t14",
+			"parentId": "t13",
+			"timestamp": "2026-11-01T09:00:14.000Z",
+			"targetId": "t1",
+			"label": "x"
+		}
+	],
+	"collect": [
+		{
+			"from": null,
+			"to": "t3",
+			"entryIds": [],
+			"commonAncestorId": null
+		},
+		{
+			"from": "t5",
+			"to": "t14",
+			"entryIds": [
+				"t3",
+				"t4",
+				"t5"
+			],
+			"commonAncestorId": "t2"
+		},
+		{
+			"from": "t14",
+			"to": "t5",
+			"entryIds": [
+				"t6",
+				"t7",
+				"t8",
+				"t9",
+				"t10",
+				"t11",
+				"t12",
+				"t13",
+				"t14"
+			],
+			"commonAncestorId": "t2"
+		},
+		{
+			"from": "t5",
+			"to": "t3",
+			"entryIds": [
+				"t4",
+				"t5"
+			],
+			"commonAncestorId": "t3"
+		},
+		{
+			"from": "t3",
+			"to": "t5",
+			"entryIds": [],
+			"commonAncestorId": "t3"
+		},
+		{
+			"from": "t14",
+			"to": "t14",
+			"entryIds": [],
+			"commonAncestorId": "t14"
+		},
+		{
+			"from": "t9",
+			"to": "t1",
+			"entryIds": [
+				"t2",
+				"t6",
+				"t7",
+				"t8",
+				"t9"
+			],
+			"commonAncestorId": "t1"
+		},
+		{
+			"from": "t5",
+			"to": "missing",
+			"entryIds": [
+				"t1",
+				"t2",
+				"t3",
+				"t4",
+				"t5"
+			],
+			"commonAncestorId": null
+		}
+	],
+	"budgetEntries": [
+		{
+			"type": "message",
+			"id": "b1",
+			"parentId": null,
+			"timestamp": "2026-11-01T09:00:01.000Z",
+			"message": {
+				"role": "user",
+				"content": "oldest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+				"timestamp": 1
+			}
+		},
+		{
+			"type": "compaction",
+			"id": "b2",
+			"parentId": "b1",
+			"timestamp": "2026-11-01T09:00:02.000Z",
+			"summary": "summary of before xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"firstKeptEntryId": "b1",
+			"tokensBefore": 9
+		},
+		{
+			"type": "message",
+			"id": "b3",
+			"parentId": "b2",
+			"timestamp": "2026-11-01T09:00:03.000Z",
+			"message": {
+				"role": "user",
+				"content": "middle xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+				"timestamp": 1
+			}
+		},
+		{
+			"type": "branch_summary",
+			"id": "b4",
+			"parentId": "b3",
+			"timestamp": "2026-11-01T09:00:04.000Z",
+			"fromId": "b1",
+			"summary": "branch summary xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+		},
+		{
+			"type": "message",
+			"id": "b5",
+			"parentId": "b4",
+			"timestamp": "2026-11-01T09:00:05.000Z",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "newest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+					}
+				],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 2
+			}
+		}
+	],
+	"prepare": [
+		{
+			"budget": 0,
+			"messages": [
+				{
+					"role": "user",
+					"content": "oldest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				},
+				{
+					"role": "compactionSummary",
+					"summary": "summary of before xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"tokensBefore": 9,
+					"timestamp": 1793523602000
+				},
+				{
+					"role": "user",
+					"content": "middle xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				},
+				{
+					"role": "branchSummary",
+					"summary": "branch summary xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"fromId": "b1",
+					"timestamp": 1793523604000
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "newest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 515
+		},
+		{
+			"budget": 1,
+			"messages": [],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 0
+		},
+		{
+			"budget": 100,
+			"messages": [],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 0
+		},
+		{
+			"budget": 110,
+			"messages": [
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "newest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 102
+		},
+		{
+			"budget": 150,
+			"messages": [
+				{
+					"role": "branchSummary",
+					"summary": "branch summary xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"fromId": "b1",
+					"timestamp": 1793523604000
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "newest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 206
+		},
+		{
+			"budget": 200,
+			"messages": [
+				{
+					"role": "branchSummary",
+					"summary": "branch summary xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"fromId": "b1",
+					"timestamp": 1793523604000
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "newest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 206
+		},
+		{
+			"budget": 250,
+			"messages": [
+				{
+					"role": "branchSummary",
+					"summary": "branch summary xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"fromId": "b1",
+					"timestamp": 1793523604000
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "newest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 206
+		},
+		{
+			"budget": 300,
+			"messages": [
+				{
+					"role": "branchSummary",
+					"summary": "branch summary xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"fromId": "b1",
+					"timestamp": 1793523604000
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "newest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 206
+		},
+		{
+			"budget": 1000,
+			"messages": [
+				{
+					"role": "user",
+					"content": "oldest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				},
+				{
+					"role": "compactionSummary",
+					"summary": "summary of before xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"tokensBefore": 9,
+					"timestamp": 1793523602000
+				},
+				{
+					"role": "user",
+					"content": "middle xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"timestamp": 1
+				},
+				{
+					"role": "branchSummary",
+					"summary": "branch summary xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"fromId": "b1",
+					"timestamp": 1793523604000
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "newest xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						}
+					],
+					"api": "anthropic-messages",
+					"provider": "anthropic",
+					"model": "claude-test",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0.001,
+							"output": 0.002,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0.003
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 2
+				}
+			],
+			"fileOps": {
+				"read": [],
+				"written": [],
+				"edited": []
+			},
+			"totalTokens": 515
+		}
+	],
+	"treePreparation": {
+		"messages": [
+			{
+				"role": "user",
+				"content": "side question",
+				"timestamp": 1
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call-1",
+						"name": "write",
+						"arguments": {
+							"path": "side.ts",
+							"content": "x"
+						}
+					}
+				],
+				"api": "anthropic-messages",
+				"provider": "anthropic",
+				"model": "claude-test",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 2
+			},
+			{
+				"role": "custom",
+				"customType": "note",
+				"content": "side note",
+				"display": true,
+				"details": {
+					"n": 1
+				},
+				"timestamp": 1793523609000
+			},
+			{
+				"role": "branchSummary",
+				"summary": "earlier branch",
+				"fromId": "t5",
+				"timestamp": 1793523610000
+			},
+			{
+				"role": "compactionSummary",
+				"summary": "compacted side",
+				"tokensBefore": 77,
+				"timestamp": 1793523611000
+			},
+			{
+				"role": "user",
+				"content": "after compaction",
+				"timestamp": 1
+			},
+			{
+				"role": "branchSummary",
+				"summary": "hook branch",
+				"fromId": "t1",
+				"timestamp": 1793523613000
+			}
+		],
+		"fileOps": {
+			"read": [
+				"old.ts"
+			],
+			"written": [
+				"side.ts"
+			],
+			"edited": [
+				"changed.ts"
+			]
+		},
+		"totalTokens": 32
+	},
+	"summaries": [
+		{
+			"name": "a summary",
+			"from": "t14",
+			"to": "t5",
+			"apiKey": "key",
+			"responses": [
+				{
+					"content": [
+						{
+							"type": "text",
+							"text": "BRANCH"
+						}
+					]
+				}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"apiKey": "key",
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nBRANCH\n\n<read-files>\nold.ts\n</read-files>\n\n<modified-files>\nchanged.ts\nside.ts\n</modified-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"old.ts"
+				],
+				"modifiedFiles": [
+					"changed.ts",
+					"side.ts"
+				]
+			}
+		},
+		{
+			"name": "nothing to summarize",
+			"from": "t3",
+			"to": "t5",
+			"responses": [],
+			"requests": [],
+			"result": {
+				"summary": "No content to summarize"
+			}
+		},
+		{
+			"name": "added instructions",
+			"from": "t5",
+			"to": "t14",
+			"customInstructions": "Focus on files.",
+			"responses": [
+				{}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: main follow-up\n\n[Assistant tool calls]: read(path=\"main.ts\")\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages.\n\nAdditional focus: Focus on files."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nSUMMARY\n\n<read-files>\nmain.ts\n</read-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"main.ts"
+				],
+				"modifiedFiles": []
+			}
+		},
+		{
+			"name": "replaced instructions",
+			"from": "t5",
+			"to": "t14",
+			"customInstructions": "Only list files.",
+			"replaceInstructions": true,
+			"responses": [
+				{}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: main follow-up\n\n[Assistant tool calls]: read(path=\"main.ts\")\n</conversation>\n\nOnly list files."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nSUMMARY\n\n<read-files>\nmain.ts\n</read-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"main.ts"
+				],
+				"modifiedFiles": []
+			}
+		},
+		{
+			"name": "replace without instructions",
+			"from": "t5",
+			"to": "t14",
+			"replaceInstructions": true,
+			"responses": [
+				{}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: main follow-up\n\n[Assistant tool calls]: read(path=\"main.ts\")\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nSUMMARY\n\n<read-files>\nmain.ts\n</read-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"main.ts"
+				],
+				"modifiedFiles": []
+			}
+		},
+		{
+			"name": "no output cap and no window",
+			"from": "t14",
+			"to": "t5",
+			"model": {
+				"maxTokens": 0,
+				"contextWindow": 0
+			},
+			"responses": [
+				{}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nSUMMARY\n\n<read-files>\nold.ts\n</read-files>\n\n<modified-files>\nchanged.ts\nside.ts\n</modified-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"old.ts"
+				],
+				"modifiedFiles": [
+					"changed.ts",
+					"side.ts"
+				]
+			}
+		},
+		{
+			"name": "a small output cap",
+			"from": "t14",
+			"to": "t5",
+			"model": {
+				"maxTokens": 1000
+			},
+			"responses": [
+				{}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 1000,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nSUMMARY\n\n<read-files>\nold.ts\n</read-files>\n\n<modified-files>\nchanged.ts\nside.ts\n</modified-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"old.ts"
+				],
+				"modifiedFiles": [
+					"changed.ts",
+					"side.ts"
+				]
+			}
+		},
+		{
+			"name": "the default window",
+			"from": "t14",
+			"to": "t5",
+			"model": {
+				"contextWindow": 0
+			},
+			"reserveTokens": 127990,
+			"responses": [
+				{}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nSUMMARY\n\n<read-files>\nold.ts\n</read-files>\n\n<modified-files>\nchanged.ts\n</modified-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"old.ts"
+				],
+				"modifiedFiles": [
+					"changed.ts"
+				]
+			}
+		},
+		{
+			"name": "a tight window",
+			"from": "t14",
+			"to": "t5",
+			"model": {
+				"contextWindow": 16400
+			},
+			"responses": [
+				{}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nSUMMARY\n\n<read-files>\nold.ts\n</read-files>\n\n<modified-files>\nchanged.ts\n</modified-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"old.ts"
+				],
+				"modifiedFiles": [
+					"changed.ts"
+				]
+			}
+		},
+		{
+			"name": "an empty answer",
+			"from": "t14",
+			"to": "t5",
+			"responses": [
+				{
+					"content": []
+				}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\n\n\n<read-files>\nold.ts\n</read-files>\n\n<modified-files>\nchanged.ts\nside.ts\n</modified-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"old.ts"
+				],
+				"modifiedFiles": [
+					"changed.ts",
+					"side.ts"
+				]
+			}
+		},
+		{
+			"name": "an error",
+			"from": "t14",
+			"to": "t5",
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "boom"
+				}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"error": "Branch summarization failed: boom"
+			}
+		},
+		{
+			"name": "the token cap",
+			"from": "t14",
+			"to": "t5",
+			"responses": [
+				{
+					"stopReason": "length"
+				}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"error": "Branch summarization failed: generation hit the token cap and the summary is incomplete"
+			}
+		},
+		{
+			"name": "an abort",
+			"from": "t14",
+			"to": "t5",
+			"responses": [
+				{
+					"stopReason": "aborted"
+				}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"aborted": true
+			}
+		},
+		{
+			"name": "a tool call",
+			"from": "t14",
+			"to": "t5",
+			"responses": [
+				{
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call-1",
+							"name": "read",
+							"arguments": {
+								"path": "x"
+							}
+						}
+					]
+				}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"error": "Branch summarization attempted to call a tool"
+			}
+		},
+		{
+			"name": "a retried error",
+			"from": "t14",
+			"to": "t5",
+			"retry": {
+				"enabled": true,
+				"maxRetries": 1,
+				"baseDelayMs": 0
+			},
+			"responses": [
+				{
+					"stopReason": "error",
+					"errorMessage": "503 service unavailable"
+				},
+				{}
+			],
+			"requests": [
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				},
+				{
+					"model": "claude-test",
+					"messages": [
+						{
+							"role": "system",
+							"content": "You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.\n\nDo NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.",
+							"timestamp": 0
+						},
+						{
+							"role": "user",
+							"content": [
+								{
+									"type": "text",
+									"text": "<conversation>\n[User]: side question\n\n[Assistant tool calls]: write(path=\"side.ts\", content=\"x\")\n\n[User]: side note\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nearlier branch</summary>\n\n[User]: The conversation history before this point was compacted into the following summary:\n\n<summary>\ncompacted side\n</summary>\n\n[User]: after compaction\n\n[User]: The following is a summary of a branch that this conversation came back from:\n\n<summary>\nhook branch</summary>\n</conversation>\n\nCreate a structured summary of this conversation branch for context when returning later.\n\nUse this EXACT format:\n\n## Goal\n[What was the user trying to accomplish in this branch?]\n\n## Constraints & Preferences\n- [Any constraints, preferences, or requirements mentioned]\n- [Or \"(none)\" if none were mentioned]\n\n## Progress\n### Done\n- [x] [Completed tasks/changes]\n\n### In Progress\n- [ ] [Work that was started but not finished]\n\n### Blocked\n- [Issues preventing progress, if any]\n\n## Key Decisions\n- **[Decision]**: [Brief rationale]\n\n## Next Steps\n1. [What should happen next to continue this work]\n\nKeep each section concise. Preserve exact file paths, function names, and error messages."
+								}
+							],
+							"timestamp": 0
+						}
+					],
+					"options": {
+						"maxTokens": 4096,
+						"cacheRetention": "none",
+						"sessionId": "<uuid7>"
+					}
+				}
+			],
+			"result": {
+				"summary": "The user explored a different conversation branch before returning here.\nSummary of that exploration:\n\nSUMMARY\n\n<read-files>\nold.ts\n</read-files>\n\n<modified-files>\nchanged.ts\nside.ts\n</modified-files>",
+				"usage": {
+					"input": 20,
+					"output": 10,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 30,
+					"cost": {
+						"input": 0.001,
+						"output": 0.002,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0.003
+					}
+				},
+				"readFiles": [
+					"old.ts"
+				],
+				"modifiedFiles": [
+					"changed.ts",
+					"side.ts"
+				]
+			}
+		}
+	]
+}

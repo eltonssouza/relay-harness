@@ -10,6 +10,9 @@
  *   and the result or error.
  * - `compaction/retry.json`: `isRetryableAssistantError`, `retryDelayMs` and `retryAssistantCall`
  *   with its callbacks.
+ * - `compaction/branch.json`: branch summaries (`branch-summarization.ts`): the entries collected
+ *   between two leaves of a session tree, the budgeted preparation, and `generateBranchSummary`
+ *   against the scripted stream function.
  *
  * Generated session ids become `<uuid7>` and the summary request's time 0.
  */
@@ -27,6 +30,11 @@ import {
 	retryDelayMs,
 	type Usage,
 } from "@relay-harness/ai";
+import {
+	collectEntriesForBranchSummary,
+	generateBranchSummary,
+	prepareBranchEntries,
+} from "../../src/core/compaction/branch-summarization.ts";
 import {
 	calculateContextTokens,
 	compact,
@@ -48,7 +56,12 @@ import {
 	serializeConversation,
 } from "../../src/core/compaction/utils.ts";
 import { convertToLlm } from "../../src/core/messages.ts";
-import { buildSessionProjection, type SessionEntry } from "../../src/core/session-manager.ts";
+import {
+	buildSessionProjection,
+	type FileEntry,
+	type SessionEntry,
+	SessionManager,
+} from "../../src/core/session-manager.ts";
 
 export const COMPACTION_DIR = fileURLToPath(new URL("../../../../crates/fixtures/compaction/", import.meta.url));
 
@@ -875,8 +888,182 @@ async function retryJson(): Promise<string> {
 	return json({ classify, delays, runs });
 }
 
+/** A session tree: a main line, a branch from its second entry, and a deeper branch. */
+const TREE: SessionEntry[] = [
+	entry("message", "t1", null, { message: user("root question") }),
+	entry("message", "t2", "t1", { message: assistant([text("root answer")]) }),
+	entry("message", "t3", "t2", { message: user("main follow-up") }),
+	entry("message", "t4", "t3", { message: assistant([toolCall("read", { path: "main.ts" })]) }),
+	entry("message", "t5", "t4", { message: toolResult([text("main file")]) }),
+	entry("message", "t6", "t2", { message: user("side question") }),
+	entry("model_change", "t7", "t6", { provider: "openai", modelId: "gpt" }),
+	entry("message", "t8", "t7", { message: assistant([toolCall("write", { path: "side.ts", content: "x" })]) }),
+	entry("custom_message", "t9", "t8", { customType: "note", content: "side note", display: true, details: { n: 1 } }),
+	entry("branch_summary", "t10", "t9", {
+		fromId: "t5",
+		summary: "earlier branch",
+		details: { readFiles: ["old.ts"], modifiedFiles: ["changed.ts"] },
+	}),
+	entry("compaction", "t11", "t10", { summary: "compacted side", firstKeptEntryId: "t9", tokensBefore: 77 }),
+	entry("message", "t12", "t11", { message: user("after compaction") }),
+	entry("branch_summary", "t13", "t12", {
+		fromId: "t1",
+		summary: "hook branch",
+		details: { readFiles: ["hook.ts"] },
+		fromHook: true,
+	}),
+	entry("label", "t14", "t13", { targetId: "t1", label: "x" }),
+] as SessionEntry[];
+
+const COLLECT_CASES: [string | null, string][] = [
+	[null, "t3"],
+	["t5", "t14"],
+	["t14", "t5"],
+	["t5", "t3"],
+	["t3", "t5"],
+	["t14", "t14"],
+	["t9", "t1"],
+	["t5", "missing"],
+];
+
+const BUDGET_ENTRIES: SessionEntry[] = [
+	entry("message", "b1", null, { message: user(big("oldest", 400)) }),
+	entry("compaction", "b2", "b1", { summary: big("summary of before", 400), firstKeptEntryId: "b1", tokensBefore: 9 }),
+	entry("message", "b3", "b2", { message: user(big("middle", 400)) }),
+	entry("branch_summary", "b4", "b3", { fromId: "b1", summary: big("branch summary", 400) }),
+	entry("message", "b5", "b4", { message: assistant([text(big("newest", 400))]) }),
+] as SessionEntry[];
+
+const BUDGETS = [0, 1, 100, 110, 150, 200, 250, 300, 1000];
+
+interface BranchCase {
+	name: string;
+	from: string | null;
+	to: string;
+	model?: Record<string, unknown>;
+	reserveTokens?: number;
+	apiKey?: string;
+	customInstructions?: string;
+	replaceInstructions?: boolean;
+	abortBefore?: boolean;
+	retry?: RetryPolicy;
+	responses: Script[];
+}
+
+const BRANCH_CASES: BranchCase[] = [
+	{ name: "a summary", from: "t14", to: "t5", apiKey: "key", responses: [{ content: [text("BRANCH")] }] },
+	{ name: "nothing to summarize", from: "t3", to: "t5", responses: [] },
+	{ name: "added instructions", from: "t5", to: "t14", customInstructions: "Focus on files.", responses: [{}] },
+	{
+		name: "replaced instructions",
+		from: "t5",
+		to: "t14",
+		customInstructions: "Only list files.",
+		replaceInstructions: true,
+		responses: [{}],
+	},
+	{ name: "replace without instructions", from: "t5", to: "t14", replaceInstructions: true, responses: [{}] },
+	{
+		name: "no output cap and no window",
+		from: "t14",
+		to: "t5",
+		model: { maxTokens: 0, contextWindow: 0 },
+		responses: [{}],
+	},
+	{ name: "a small output cap", from: "t14", to: "t5", model: { maxTokens: 1000 }, responses: [{}] },
+	{
+		name: "the default window",
+		from: "t14",
+		to: "t5",
+		model: { contextWindow: 0 },
+		reserveTokens: 127990,
+		responses: [{}],
+	},
+	{ name: "a tight window", from: "t14", to: "t5", model: { contextWindow: 16400 }, responses: [{}] },
+	{ name: "an empty answer", from: "t14", to: "t5", responses: [{ content: [] }] },
+	{ name: "an error", from: "t14", to: "t5", responses: [{ stopReason: "error", errorMessage: "boom" }] },
+	{ name: "the token cap", from: "t14", to: "t5", responses: [{ stopReason: "length" }] },
+	{ name: "an abort", from: "t14", to: "t5", responses: [{ stopReason: "aborted" }] },
+	{ name: "a tool call", from: "t14", to: "t5", responses: [{ content: [toolCall("read", { path: "x" })] }] },
+	{
+		name: "a retried error",
+		from: "t14",
+		to: "t5",
+		retry: { enabled: true, maxRetries: 1, baseDelayMs: 0 },
+		responses: [{ stopReason: "error", errorMessage: "503 service unavailable" }, {}],
+	},
+];
+
+async function branchJson(): Promise<string> {
+	const header = { type: "session", version: 3, id: "s-tree", timestamp: "2026-11-01T09:00:00.000Z", cwd: "/tree" };
+	const session = () => SessionManager.inMemory("/tree", undefined, [header, ...TREE] as FileEntry[]);
+	const collect = COLLECT_CASES.map(([from, to]) => {
+		const result = collectEntriesForBranchSummary(session(), from, to);
+		return { from, to, entryIds: result.entries.map((e) => e.id), commonAncestorId: result.commonAncestorId };
+	});
+	const prepare = BUDGETS.map((budget) => {
+		const preparation = prepareBranchEntries(BUDGET_ENTRIES, budget);
+		return {
+			budget,
+			messages: preparation.messages,
+			fileOps: {
+				read: [...preparation.fileOps.read],
+				written: [...preparation.fileOps.written],
+				edited: [...preparation.fileOps.edited],
+			},
+			totalTokens: preparation.totalTokens,
+		};
+	});
+	const treePreparation = prepareBranchEntries(collectEntriesForBranchSummary(session(), "t14", "t5").entries);
+	const summaries: unknown[] = [];
+	for (const testCase of BRANCH_CASES) {
+		const { entries } = collectEntriesForBranchSummary(session(), testCase.from, testCase.to);
+		const requests: unknown[] = [];
+		const scripted = [...testCase.responses];
+		const streamFn = async (
+			model: Model<string>,
+			context: { messages: unknown[] },
+			options: Record<string, unknown>,
+		) => {
+			const { signal: _signal, ...rest } = options;
+			requests.push(JSON.parse(JSON.stringify({ model: model.id, messages: context.messages, options: rest })));
+			return { result: async () => response(scripted.shift() ?? {}) };
+		};
+		const controller = new AbortController();
+		if (testCase.abortBefore) controller.abort();
+		const result = await generateBranchSummary(entries, {
+			model: { ...baseModel, ...testCase.model } as Model<string>,
+			apiKey: testCase.apiKey,
+			signal: controller.signal,
+			customInstructions: testCase.customInstructions,
+			replaceInstructions: testCase.replaceInstructions,
+			reserveTokens: testCase.reserveTokens,
+			streamFn: streamFn as never,
+			retry: testCase.retry,
+		});
+		summaries.push(normalizeRequests({ ...testCase, requests, result: JSON.parse(JSON.stringify(result)) }));
+	}
+	return json({
+		tree: TREE,
+		collect,
+		budgetEntries: BUDGET_ENTRIES,
+		prepare,
+		treePreparation: {
+			messages: treePreparation.messages,
+			fileOps: {
+				read: [...treePreparation.fileOps.read],
+				written: [...treePreparation.fileOps.written],
+				edited: [...treePreparation.fileOps.edited],
+			},
+			totalTokens: treePreparation.totalTokens,
+		},
+		summaries,
+	});
+}
+
 export async function compactionFiles(): Promise<Record<string, string>> {
 	return {
+		"branch.json": await branchJson(),
 		"estimate.json": estimateJson(),
 		"prepare.json": prepareJson(),
 		"serialize.json": serializeJson(),
