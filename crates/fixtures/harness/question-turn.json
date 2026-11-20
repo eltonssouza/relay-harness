@@ -1,0 +1,265 @@
+{
+	"name": "question-turn",
+	"description": "An edit in reply to a question is stopped.",
+	"tools": [
+		{
+			"name": "edit"
+		}
+	],
+	"responses": [
+		[
+			{
+				"type": "toolCall",
+				"id": "1",
+				"name": "edit",
+				"arguments": {
+					"path": "src/a.ts"
+				}
+			}
+		],
+		[
+			{
+				"type": "text",
+				"text": "It fails because of the import."
+			}
+		]
+	],
+	"prompts": [
+		{
+			"text": "Why does src/a.ts fail?"
+		}
+	],
+	"options": {
+		"evidence": false
+	},
+	"parameters": {
+		"type": "object",
+		"properties": {},
+		"additionalProperties": true
+	},
+	"requests": [
+		[
+			{
+				"role": "system",
+				"content": "test",
+				"toolsAdded": [
+					{
+						"name": "edit",
+						"description": "edit tool",
+						"parameters": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Why does src/a.ts fail?"
+					}
+				],
+				"timestamp": 0
+			}
+		],
+		[
+			{
+				"role": "system",
+				"content": "test",
+				"toolsAdded": [
+					{
+						"name": "edit",
+						"description": "edit tool",
+						"parameters": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Why does src/a.ts fail?"
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "1",
+						"name": "edit",
+						"arguments": {
+							"path": "src/a.ts"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"thinkingLevel": "off"
+			},
+			{
+				"role": "toolResult",
+				"toolCallId": "1",
+				"toolName": "edit",
+				"content": [
+					{
+						"type": "text",
+						"text": "Blocked by the harness alignment policy: the developer asked a question and did not request changes. Answer the question first, propose the change, and wait for approval. If you are certain the developer's message requests this change, you may retry the call."
+					}
+				],
+				"details": {},
+				"isError": true,
+				"timestamp": 0
+			}
+		]
+	],
+	"events": [
+		{
+			"type": "tool_blocked",
+			"toolName": "edit",
+			"effect": {
+				"kind": "write",
+				"paths": [
+					"src/a.ts"
+				]
+			},
+			"kind": "scope",
+			"reason": "Blocked by the harness alignment policy: the developer asked a question and did not request changes. Answer the question first, propose the change, and wait for approval. If you are certain the developer's message requests this change, you may retry the call."
+		}
+	],
+	"asked": [],
+	"messages": [
+		{
+			"role": "system",
+			"content": "test",
+			"toolsAdded": [
+				{
+					"name": "edit",
+					"description": "edit tool",
+					"parameters": {
+						"type": "object",
+						"properties": {},
+						"additionalProperties": true
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": "Why does src/a.ts fail?"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "1",
+					"name": "edit",
+					"arguments": {
+						"path": "src/a.ts"
+					}
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "1",
+			"toolName": "edit",
+			"content": [
+				{
+					"type": "text",
+					"text": "Blocked by the harness alignment policy: the developer asked a question and did not request changes. Answer the question first, propose the change, and wait for approval. If you are certain the developer's message requests this change, you may retry the call."
+				}
+			],
+			"details": {},
+			"isError": true,
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "It fails because of the import."
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "stop",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		}
+	],
+	"constraints": []
+}

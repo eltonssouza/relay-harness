@@ -1,0 +1,276 @@
+{
+	"name": "authorizer-approves",
+	"description": "The authorizer is asked and the call it approves runs.",
+	"tools": [
+		{
+			"name": "bash"
+		}
+	],
+	"responses": [
+		[
+			{
+				"type": "toolCall",
+				"id": "1",
+				"name": "bash",
+				"arguments": {
+					"command": "git push origin main"
+				}
+			}
+		],
+		[
+			{
+				"type": "text",
+				"text": "Pushed."
+			}
+		]
+	],
+	"prompts": [
+		{
+			"text": "Update the changelog"
+		}
+	],
+	"options": {
+		"evidence": false,
+		"authorize": true
+	},
+	"parameters": {
+		"type": "object",
+		"properties": {},
+		"additionalProperties": true
+	},
+	"requests": [
+		[
+			{
+				"role": "system",
+				"content": "test",
+				"toolsAdded": [
+					{
+						"name": "bash",
+						"description": "bash tool",
+						"parameters": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Update the changelog"
+					}
+				],
+				"timestamp": 0
+			}
+		],
+		[
+			{
+				"role": "system",
+				"content": "test",
+				"toolsAdded": [
+					{
+						"name": "bash",
+						"description": "bash tool",
+						"parameters": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Update the changelog"
+					}
+				],
+				"timestamp": 0
+			},
+			{
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "1",
+						"name": "bash",
+						"arguments": {
+							"command": "git push origin main"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"thinkingLevel": "off"
+			},
+			{
+				"role": "toolResult",
+				"toolCallId": "1",
+				"toolName": "bash",
+				"content": [
+					{
+						"type": "text",
+						"text": "bash ok"
+					}
+				],
+				"details": {},
+				"isError": false,
+				"timestamp": 0
+			}
+		]
+	],
+	"events": [
+		{
+			"type": "tool_authorized",
+			"toolName": "bash",
+			"effect": {
+				"kind": "external",
+				"command": "git push origin main",
+				"reason": "git push changes the remote",
+				"paths": []
+			},
+			"via": "authorizer"
+		}
+	],
+	"asked": [
+		{
+			"toolName": "bash",
+			"effect": {
+				"kind": "external",
+				"command": "git push origin main",
+				"reason": "git push changes the remote",
+				"paths": []
+			},
+			"fingerprint": "bash:git push origin main"
+		}
+	],
+	"messages": [
+		{
+			"role": "system",
+			"content": "test",
+			"toolsAdded": [
+				{
+					"name": "bash",
+					"description": "bash tool",
+					"parameters": {
+						"type": "object",
+						"properties": {},
+						"additionalProperties": true
+					}
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "user",
+			"content": [
+				{
+					"type": "text",
+					"text": "Update the changelog"
+				}
+			],
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "1",
+					"name": "bash",
+					"arguments": {
+						"command": "git push origin main"
+					}
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "1",
+			"toolName": "bash",
+			"content": [
+				{
+					"type": "text",
+					"text": "bash ok"
+				}
+			],
+			"details": {},
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "Pushed."
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "stop",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		}
+	],
+	"constraints": []
+}
