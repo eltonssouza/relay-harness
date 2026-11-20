@@ -1,0 +1,1035 @@
+{
+	"declaration": {
+		"name": "edit",
+		"description": "Edit a single file using exact text replacement. Every edits[].oldText must match a unique, non-overlapping region of the original file. If two changes affect the same block or nearby lines, merge them into one edit instead of emitting overlapping edits. Do not include large unchanged regions just to connect distant changes.",
+		"parameters": {
+			"type": "object",
+			"required": [
+				"path",
+				"edits"
+			],
+			"properties": {
+				"path": {
+					"type": "string",
+					"description": "Path to the file to edit (relative or absolute)"
+				},
+				"edits": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": [
+							"oldText",
+							"newText"
+						],
+						"properties": {
+							"oldText": {
+								"type": "string",
+								"description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+							},
+							"newText": {
+								"type": "string",
+								"description": "Replacement text for this targeted edit."
+							}
+						}
+					},
+					"description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+				}
+			}
+		},
+		"constrainedSampling": {
+			"type": "json_schema",
+			"strict": "prefer"
+		}
+	},
+	"calls": [
+		{
+			"name": "replace",
+			"files": [
+				{
+					"path": "a.ts",
+					"text": "const a = 1;\nconst b = 2;\n"
+				}
+			],
+			"args": {
+				"path": "a.ts",
+				"edits": [
+					{
+						"oldText": "const b = 2;",
+						"newText": "const b = 3;"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.ts."
+					}
+				],
+				"details": {
+					"diff": " 1 const a = 1;\n-2 const b = 2;\n+2 const b = 3;",
+					"patch": "--- a.ts\n+++ a.ts\n@@ -1,2 +1,2 @@\n const a = 1;\n-const b = 2;\n+const b = 3;\n",
+					"firstChangedLine": 2
+				}
+			},
+			"after": [
+				{
+					"path": "a.ts",
+					"base64": "Y29uc3QgYSA9IDE7CmNvbnN0IGIgPSAzOwo="
+				}
+			]
+		},
+		{
+			"name": "two-edits",
+			"files": [
+				{
+					"path": "a.ts",
+					"text": "one\ntwo\nthree\nfour\n"
+				}
+			],
+			"args": {
+				"path": "a.ts",
+				"edits": [
+					{
+						"oldText": "four",
+						"newText": "FOUR"
+					},
+					{
+						"oldText": "one",
+						"newText": "ONE"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 2 block(s) in a.ts."
+					}
+				],
+				"details": {
+					"diff": "-1 one\n+1 ONE\n 2 two\n 3 three\n-4 four\n+4 FOUR",
+					"patch": "--- a.ts\n+++ a.ts\n@@ -1,4 +1,4 @@\n-one\n+ONE\n two\n three\n-four\n+FOUR\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.ts",
+					"base64": "T05FCnR3bwp0aHJlZQpGT1VSCg=="
+				}
+			]
+		},
+		{
+			"name": "grow-and-shrink",
+			"files": [
+				{
+					"path": "a.ts",
+					"text": "start\nmiddle\nend\n"
+				}
+			],
+			"args": {
+				"path": "a.ts",
+				"edits": [
+					{
+						"oldText": "start\n",
+						"newText": "start\nadded 1\nadded 2\n"
+					},
+					{
+						"oldText": "middle\nend\n",
+						"newText": "end\n"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 2 block(s) in a.ts."
+					}
+				],
+				"details": {
+					"diff": " 1 start\n-2 middle\n+2 added 1\n+3 added 2\n 3 end",
+					"patch": "--- a.ts\n+++ a.ts\n@@ -1,3 +1,4 @@\n start\n-middle\n+added 1\n+added 2\n end\n",
+					"firstChangedLine": 2
+				}
+			},
+			"after": [
+				{
+					"path": "a.ts",
+					"base64": "c3RhcnQKYWRkZWQgMQphZGRlZCAyCmVuZAo="
+				}
+			]
+		},
+		{
+			"name": "far-apart",
+			"files": [
+				{
+					"path": "big.txt",
+					"text": "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\nline 10\nline 11\nline 12\nline 13\nline 14\nline 15\nline 16\nline 17\nline 18\nline 19\nline 20\nline 21\nline 22\nline 23\nline 24\nline 25\nline 26\nline 27\nline 28\nline 29\nline 30\nline 31\nline 32\nline 33\nline 34\nline 35\nline 36\nline 37\nline 38\nline 39\nline 40\nline 41\nline 42\nline 43\nline 44\nline 45\nline 46\nline 47\nline 48\nline 49\nline 50\nline 51\nline 52\nline 53\nline 54\nline 55\nline 56\nline 57\nline 58\nline 59\nline 60\n"
+				}
+			],
+			"args": {
+				"path": "big.txt",
+				"edits": [
+					{
+						"oldText": "line 5\n",
+						"newText": "line five\n"
+					},
+					{
+						"oldText": "line 50\n",
+						"newText": "line fifty\nline fifty-and-a-half\n"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 2 block(s) in big.txt."
+					}
+				],
+				"details": {
+					"diff": "  1 line 1\n  2 line 2\n  3 line 3\n  4 line 4\n- 5 line 5\n+ 5 line five\n  6 line 6\n  7 line 7\n  8 line 8\n  9 line 9\n    ...\n 46 line 46\n 47 line 47\n 48 line 48\n 49 line 49\n-50 line 50\n+50 line fifty\n+51 line fifty-and-a-half\n 51 line 51\n 52 line 52\n 53 line 53\n 54 line 54\n    ...",
+					"patch": "--- big.txt\n+++ big.txt\n@@ -1,9 +1,9 @@\n line 1\n line 2\n line 3\n line 4\n-line 5\n+line five\n line 6\n line 7\n line 8\n line 9\n@@ -46,9 +46,10 @@\n line 46\n line 47\n line 48\n line 49\n-line 50\n+line fifty\n+line fifty-and-a-half\n line 51\n line 52\n line 53\n line 54\n",
+					"firstChangedLine": 5
+				}
+			},
+			"after": [
+				{
+					"path": "big.txt",
+					"base64": "bGluZSAxCmxpbmUgMgpsaW5lIDMKbGluZSA0CmxpbmUgZml2ZQpsaW5lIDYKbGluZSA3CmxpbmUgOApsaW5lIDkKbGluZSAxMApsaW5lIDExCmxpbmUgMTIKbGluZSAxMwpsaW5lIDE0CmxpbmUgMTUKbGluZSAxNgpsaW5lIDE3CmxpbmUgMTgKbGluZSAxOQpsaW5lIDIwCmxpbmUgMjEKbGluZSAyMgpsaW5lIDIzCmxpbmUgMjQKbGluZSAyNQpsaW5lIDI2CmxpbmUgMjcKbGluZSAyOApsaW5lIDI5CmxpbmUgMzAKbGluZSAzMQpsaW5lIDMyCmxpbmUgMzMKbGluZSAzNApsaW5lIDM1CmxpbmUgMzYKbGluZSAzNwpsaW5lIDM4CmxpbmUgMzkKbGluZSA0MApsaW5lIDQxCmxpbmUgNDIKbGluZSA0MwpsaW5lIDQ0CmxpbmUgNDUKbGluZSA0NgpsaW5lIDQ3CmxpbmUgNDgKbGluZSA0OQpsaW5lIGZpZnR5CmxpbmUgZmlmdHktYW5kLWEtaGFsZgpsaW5lIDUxCmxpbmUgNTIKbGluZSA1MwpsaW5lIDU0CmxpbmUgNTUKbGluZSA1NgpsaW5lIDU3CmxpbmUgNTgKbGluZSA1OQpsaW5lIDYwCg=="
+				}
+			]
+		},
+		{
+			"name": "close-together",
+			"files": [
+				{
+					"path": "big.txt",
+					"text": "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\nline 10\nline 11\nline 12\nline 13\nline 14\nline 15\nline 16\nline 17\nline 18\nline 19\nline 20\nline 21\nline 22\nline 23\nline 24\nline 25\nline 26\nline 27\nline 28\nline 29\nline 30\n"
+				}
+			],
+			"args": {
+				"path": "big.txt",
+				"edits": [
+					{
+						"oldText": "line 10\n",
+						"newText": "line ten\n"
+					},
+					{
+						"oldText": "line 16\n",
+						"newText": "line sixteen\n"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 2 block(s) in big.txt."
+					}
+				],
+				"details": {
+					"diff": "    ...\n  6 line 6\n  7 line 7\n  8 line 8\n  9 line 9\n-10 line 10\n+10 line ten\n 11 line 11\n 12 line 12\n 13 line 13\n 14 line 14\n 15 line 15\n-16 line 16\n+16 line sixteen\n 17 line 17\n 18 line 18\n 19 line 19\n 20 line 20\n    ...",
+					"patch": "--- big.txt\n+++ big.txt\n@@ -6,15 +6,15 @@\n line 6\n line 7\n line 8\n line 9\n-line 10\n+line ten\n line 11\n line 12\n line 13\n line 14\n line 15\n-line 16\n+line sixteen\n line 17\n line 18\n line 19\n line 20\n",
+					"firstChangedLine": 10
+				}
+			},
+			"after": [
+				{
+					"path": "big.txt",
+					"base64": "bGluZSAxCmxpbmUgMgpsaW5lIDMKbGluZSA0CmxpbmUgNQpsaW5lIDYKbGluZSA3CmxpbmUgOApsaW5lIDkKbGluZSB0ZW4KbGluZSAxMQpsaW5lIDEyCmxpbmUgMTMKbGluZSAxNApsaW5lIDE1CmxpbmUgc2l4dGVlbgpsaW5lIDE3CmxpbmUgMTgKbGluZSAxOQpsaW5lIDIwCmxpbmUgMjEKbGluZSAyMgpsaW5lIDIzCmxpbmUgMjQKbGluZSAyNQpsaW5lIDI2CmxpbmUgMjcKbGluZSAyOApsaW5lIDI5CmxpbmUgMzAK"
+				}
+			]
+		},
+		{
+			"name": "no-final-newline",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "first\nlast"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "last",
+						"newText": "last\nappended"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.txt."
+					}
+				],
+				"details": {
+					"diff": " 1 first\n-2 last\n+2 last\n+3 appended",
+					"patch": "--- a.txt\n+++ a.txt\n@@ -1,2 +1,3 @@\n first\n-last\n\\ No newline at end of file\n+last\n+appended\n\\ No newline at end of file\n",
+					"firstChangedLine": 2
+				}
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "Zmlyc3QKbGFzdAphcHBlbmRlZA=="
+				}
+			]
+		},
+		{
+			"name": "adds-final-newline",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "first\nlast"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "last",
+						"newText": "last\n"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.txt."
+					}
+				],
+				"details": {
+					"diff": " 1 first\n-2 last\n+2 last",
+					"patch": "--- a.txt\n+++ a.txt\n@@ -1,2 +1,2 @@\n first\n-last\n\\ No newline at end of file\n+last\n",
+					"firstChangedLine": 2
+				}
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "Zmlyc3QKbGFzdAo="
+				}
+			]
+		},
+		{
+			"name": "empties-file",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "only\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "only\n",
+						"newText": ""
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.txt."
+					}
+				],
+				"details": {
+					"diff": "-1 only",
+					"patch": "--- a.txt\n+++ a.txt\n@@ -1,1 +0,0 @@\n-only\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": ""
+				}
+			]
+		},
+		{
+			"name": "crlf",
+			"files": [
+				{
+					"path": "win.txt",
+					"text": "alpha\r\nbeta\r\ngamma\r\n"
+				}
+			],
+			"args": {
+				"path": "win.txt",
+				"edits": [
+					{
+						"oldText": "beta\ngamma",
+						"newText": "BETA\r\nGAMMA"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in win.txt."
+					}
+				],
+				"details": {
+					"diff": " 1 alpha\n-2 beta\n-3 gamma\n+2 BETA\n+3 GAMMA",
+					"patch": "--- win.txt\n+++ win.txt\n@@ -1,3 +1,3 @@\n alpha\n-beta\n-gamma\n+BETA\n+GAMMA\n",
+					"firstChangedLine": 2
+				}
+			},
+			"after": [
+				{
+					"path": "win.txt",
+					"base64": "YWxwaGENCkJFVEENCkdBTU1BDQo="
+				}
+			]
+		},
+		{
+			"name": "bom",
+			"files": [
+				{
+					"path": "bom.txt",
+					"text": "﻿header\nbody\n"
+				}
+			],
+			"args": {
+				"path": "bom.txt",
+				"edits": [
+					{
+						"oldText": "header",
+						"newText": "HEADER"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in bom.txt."
+					}
+				],
+				"details": {
+					"diff": "-1 header\n+1 HEADER\n 2 body",
+					"patch": "--- bom.txt\n+++ bom.txt\n@@ -1,2 +1,2 @@\n-header\n+HEADER\n body\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "bom.txt",
+					"base64": "77u/SEVBREVSCmJvZHkK"
+				}
+			]
+		},
+		{
+			"name": "fuzzy-trailing-space",
+			"files": [
+				{
+					"path": "a.py",
+					"text": "def f():   \n    return 1\t\t\n\nx = 'keep'  \n"
+				}
+			],
+			"args": {
+				"path": "a.py",
+				"edits": [
+					{
+						"oldText": "def f():\n    return 1",
+						"newText": "def f():\n    return 2"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.py."
+					}
+				],
+				"details": {
+					"diff": "-1 def f():   \n-2     return 1\t\t\n+1 def f():\n+2     return 2\n 3 \n 4 x = 'keep'  ",
+					"patch": "--- a.py\n+++ a.py\n@@ -1,4 +1,4 @@\n-def f():   \n-    return 1\t\t\n+def f():\n+    return 2\n \n x = 'keep'  \n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.py",
+					"base64": "ZGVmIGYoKToKICAgIHJldHVybiAyCgp4ID0gJ2tlZXAnICAK"
+				}
+			]
+		},
+		{
+			"name": "fuzzy-quotes-and-dashes",
+			"files": [
+				{
+					"path": "a.md",
+					"text": "He said “hello” — then left.\nIt’s fine.\nUntouched ’line’.\n"
+				}
+			],
+			"args": {
+				"path": "a.md",
+				"edits": [
+					{
+						"oldText": "He said \"hello\" - then left.\nIt's fine.",
+						"newText": "He said goodbye.\nIt is fine."
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.md."
+					}
+				],
+				"details": {
+					"diff": "-1 He said “hello” — then left.\n-2 It’s fine.\n+1 He said goodbye.\n+2 It is fine.\n 3 Untouched ’line’.",
+					"patch": "--- a.md\n+++ a.md\n@@ -1,3 +1,3 @@\n-He said “hello” — then left.\n-It’s fine.\n+He said goodbye.\n+It is fine.\n Untouched ’line’.\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.md",
+					"base64": "SGUgc2FpZCBnb29kYnllLgpJdCBpcyBmaW5lLgpVbnRvdWNoZWQg4oCZbGluZeKAmS4K"
+				}
+			]
+		},
+		{
+			"name": "fuzzy-nfkc-and-spaces",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "ﬁle name = 1\nother line\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "file name = 1",
+						"newText": "file name = 2"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.txt."
+					}
+				],
+				"details": {
+					"diff": "-1 ﬁle name = 1\n+1 file name = 2\n 2 other line",
+					"patch": "--- a.txt\n+++ a.txt\n@@ -1,2 +1,2 @@\n-ﬁle name = 1\n+file name = 2\n other line\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "ZmlsZSBuYW1lID0gMgpvdGhlcsKgbGluZQo="
+				}
+			]
+		},
+		{
+			"name": "not-found",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "xyz",
+						"newText": "q"
+					}
+				]
+			},
+			"error": "Could not find the exact text in a.txt. The old text must match exactly including all whitespace and newlines.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "YWJjCg=="
+				}
+			]
+		},
+		{
+			"name": "not-found-of-two",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "abc",
+						"newText": "q"
+					},
+					{
+						"oldText": "xyz",
+						"newText": "q"
+					}
+				]
+			},
+			"error": "Could not find edits[1] in a.txt. The oldText must match exactly including all whitespace and newlines.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "YWJjCg=="
+				}
+			]
+		},
+		{
+			"name": "duplicate",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "x\nx\nx\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "x",
+						"newText": "y"
+					}
+				]
+			},
+			"error": "Found 3 occurrences of the text in a.txt. The text must be unique. Please provide more context to make it unique.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "eAp4CngK"
+				}
+			]
+		},
+		{
+			"name": "duplicate-of-two",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "x\nx\ny\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "y",
+						"newText": "z"
+					},
+					{
+						"oldText": "x",
+						"newText": "w"
+					}
+				]
+			},
+			"error": "Found 2 occurrences of edits[1] in a.txt. Each oldText must be unique. Please provide more context to make it unique.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "eAp4CnkK"
+				}
+			]
+		},
+		{
+			"name": "empty-old-text",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "",
+						"newText": "q"
+					}
+				]
+			},
+			"error": "oldText must not be empty in a.txt.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "YWJjCg=="
+				}
+			]
+		},
+		{
+			"name": "empty-old-text-of-two",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "abc",
+						"newText": "q"
+					},
+					{
+						"oldText": "",
+						"newText": "q"
+					}
+				]
+			},
+			"error": "edits[1].oldText must not be empty in a.txt.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "YWJjCg=="
+				}
+			]
+		},
+		{
+			"name": "overlap",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abcdef\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "abcd",
+						"newText": "1"
+					},
+					{
+						"oldText": "cdef",
+						"newText": "2"
+					}
+				]
+			},
+			"error": "edits[0] and edits[1] overlap in a.txt. Merge them into one edit or target disjoint regions.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "YWJjZGVmCg=="
+				}
+			]
+		},
+		{
+			"name": "no-change",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "same\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "same",
+						"newText": "same"
+					}
+				]
+			},
+			"error": "No changes made to a.txt. The replacement produced identical content. This might indicate an issue with special characters or the text not existing as expected.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "c2FtZQo="
+				}
+			]
+		},
+		{
+			"name": "no-change-of-two",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "a b\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": [
+					{
+						"oldText": "a",
+						"newText": "a"
+					},
+					{
+						"oldText": "b",
+						"newText": "b"
+					}
+				]
+			},
+			"error": "No changes made to a.txt. The replacements produced identical content.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "YSBiCg=="
+				}
+			]
+		},
+		{
+			"name": "missing-file",
+			"files": [],
+			"args": {
+				"path": "missing.txt",
+				"edits": [
+					{
+						"oldText": "a",
+						"newText": "b"
+					}
+				]
+			},
+			"error": "Could not edit file: missing.txt. Error code: ENOENT.",
+			"after": []
+		},
+		{
+			"name": "no-edits",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": []
+			},
+			"error": "Edit tool input is invalid. edits must contain at least one replacement.",
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "YWJjCg=="
+				}
+			]
+		},
+		{
+			"name": "edits-as-json-string",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": "[{\"oldText\":\"abc\",\"newText\":\"xyz\"}]"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.txt."
+					}
+				],
+				"details": {
+					"diff": "-1 abc\n+1 xyz",
+					"patch": "--- a.txt\n+++ a.txt\n@@ -1,1 +1,1 @@\n-abc\n+xyz\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "eHl6Cg=="
+				}
+			]
+		},
+		{
+			"name": "edit-as-json-object-string",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": "{\"oldText\":\"abc\",\"newText\":\"xyz\"}"
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.txt."
+					}
+				],
+				"details": {
+					"diff": "-1 abc\n+1 xyz",
+					"patch": "--- a.txt\n+++ a.txt\n@@ -1,1 +1,1 @@\n-abc\n+xyz\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "eHl6Cg=="
+				}
+			]
+		},
+		{
+			"name": "edit-as-object",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"edits": {
+					"oldText": "abc",
+					"newText": "xyz"
+				}
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in a.txt."
+					}
+				],
+				"details": {
+					"diff": "-1 abc\n+1 xyz",
+					"patch": "--- a.txt\n+++ a.txt\n@@ -1,1 +1,1 @@\n-abc\n+xyz\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "eHl6Cg=="
+				}
+			]
+		},
+		{
+			"name": "legacy-fields",
+			"files": [
+				{
+					"path": "a.txt",
+					"text": "abc\ndef\n"
+				}
+			],
+			"args": {
+				"path": "a.txt",
+				"oldText": "def",
+				"newText": "DEF",
+				"edits": [
+					{
+						"oldText": "abc",
+						"newText": "ABC"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 2 block(s) in a.txt."
+					}
+				],
+				"details": {
+					"diff": "-1 abc\n-2 def\n+1 ABC\n+2 DEF",
+					"patch": "--- a.txt\n+++ a.txt\n@@ -1,2 +1,2 @@\n-abc\n-def\n+ABC\n+DEF\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "a.txt",
+					"base64": "QUJDCkRFRgo="
+				}
+			]
+		},
+		{
+			"name": "unicode",
+			"files": [
+				{
+					"path": "u.txt",
+					"text": "naïve café\n日本語のテキスト\n🙂 done\n"
+				}
+			],
+			"args": {
+				"path": "u.txt",
+				"edits": [
+					{
+						"oldText": "日本語",
+						"newText": "中文"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in u.txt."
+					}
+				],
+				"details": {
+					"diff": " 1 naïve café\n-2 日本語のテキスト\n+2 中文のテキスト\n 3 🙂 done",
+					"patch": "--- u.txt\n+++ u.txt\n@@ -1,3 +1,3 @@\n naïve café\n-日本語のテキスト\n+中文のテキスト\n 🙂 done\n",
+					"firstChangedLine": 2
+				}
+			},
+			"after": [
+				{
+					"path": "u.txt",
+					"base64": "bmHDr3ZlIGNhZsOpCuS4reaWh+OBruODhuOCreOCueODiArwn5mCIGRvbmUK"
+				}
+			]
+		},
+		{
+			"name": "nested-path",
+			"files": [
+				{
+					"path": "src/lib/mod.rs",
+					"text": "pub fn a() {}\n"
+				}
+			],
+			"args": {
+				"path": "src/lib/mod.rs",
+				"edits": [
+					{
+						"oldText": "a()",
+						"newText": "b()"
+					}
+				]
+			},
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "Successfully replaced 1 block(s) in src/lib/mod.rs."
+					}
+				],
+				"details": {
+					"diff": "-1 pub fn a() {}\n+1 pub fn b() {}",
+					"patch": "--- src/lib/mod.rs\n+++ src/lib/mod.rs\n@@ -1,1 +1,1 @@\n-pub fn a() {}\n+pub fn b() {}\n",
+					"firstChangedLine": 1
+				}
+			},
+			"after": [
+				{
+					"path": "src/lib/mod.rs",
+					"base64": "cHViIGZuIGIoKSB7fQo="
+				}
+			]
+		}
+	]
+}

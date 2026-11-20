@@ -6,18 +6,26 @@
  *   `formatSize` and `detectSupportedImageMimeType` on fixed inputs.
  * - `tools/read.json`, `tools/ls.json`: each tool's declaration, the files of a fixture tree, and
  *   what each call returned or threw.
+ * - `tools/edit.json`, `tools/write.json`: each tool's declaration, and for each call the files it
+ *   starts from, what it returned or threw, and the files' bytes afterwards.
+ * - `tools/diff.json`: jsdiff's `diffLines`, the edit tool's display diff and its unified patch on
+ *   handcrafted and seeded random pairs of texts.
  *
  * The tree is written to a temporary directory; its path becomes `<root>` and the separators in
  * paths become `/`, so the files are the same on every platform.
  */
 
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { diffLines } from "diff";
+import { createEditToolDefinition } from "../../src/core/tools/edit.ts";
+import { generateDiffString, generateUnifiedPatch } from "../../src/core/tools/edit-diff.ts";
 import { createLsToolDefinition } from "../../src/core/tools/ls.ts";
 import { createReadToolDefinition } from "../../src/core/tools/read.ts";
 import { formatSize, truncateHead, truncateLine, truncateMiddle, truncateTail } from "../../src/core/tools/truncate.ts";
+import { createWriteToolDefinition } from "../../src/core/tools/write.ts";
 import { detectSupportedImageMimeType } from "../../src/utils/mime.ts";
 
 export const TOOLS_DIR = fileURLToPath(new URL("../../../../crates/fixtures/tools/", import.meta.url));
@@ -209,10 +217,337 @@ export async function toolFiles(): Promise<Record<string, string>> {
 			}),
 			"ls.json": json({ ...listing, calls: [...listing.calls, ...rootListing] }),
 			"helpers.json": json(helpers()),
+			"edit.json": json(await mutationCalls("edit", EDIT_CALLS)),
+			"write.json": json(await mutationCalls("write", WRITE_CALLS)),
+			"diff.json": json(diffs()),
 		};
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}
+}
+
+/** A call of a tool that changes files: the files before, the raw arguments, the files to read after. */
+interface MutationCall {
+	name: string;
+	files: TreeEntry[];
+	args: Record<string, unknown>;
+	/** Read back afterwards, besides the files the call starts from. */
+	after?: string[];
+}
+
+const numbered = (count: number) => `${lines(count, (n) => `line ${n}`)}\n`;
+
+const EDIT_CALLS: MutationCall[] = [
+	{
+		name: "replace",
+		files: [{ path: "a.ts", text: "const a = 1;\nconst b = 2;\n" }],
+		args: { path: "a.ts", edits: [{ oldText: "const b = 2;", newText: "const b = 3;" }] },
+	},
+	{
+		name: "two-edits",
+		files: [{ path: "a.ts", text: "one\ntwo\nthree\nfour\n" }],
+		args: {
+			path: "a.ts",
+			edits: [
+				{ oldText: "four", newText: "FOUR" },
+				{ oldText: "one", newText: "ONE" },
+			],
+		},
+	},
+	{
+		name: "grow-and-shrink",
+		files: [{ path: "a.ts", text: "start\nmiddle\nend\n" }],
+		args: {
+			path: "a.ts",
+			edits: [
+				{ oldText: "start\n", newText: "start\nadded 1\nadded 2\n" },
+				{ oldText: "middle\nend\n", newText: "end\n" },
+			],
+		},
+	},
+	{
+		name: "far-apart",
+		files: [{ path: "big.txt", text: numbered(60) }],
+		args: {
+			path: "big.txt",
+			edits: [
+				{ oldText: "line 5\n", newText: "line five\n" },
+				{ oldText: "line 50\n", newText: "line fifty\nline fifty-and-a-half\n" },
+			],
+		},
+	},
+	{
+		name: "close-together",
+		files: [{ path: "big.txt", text: numbered(30) }],
+		args: {
+			path: "big.txt",
+			edits: [
+				{ oldText: "line 10\n", newText: "line ten\n" },
+				{ oldText: "line 16\n", newText: "line sixteen\n" },
+			],
+		},
+	},
+	{
+		name: "no-final-newline",
+		files: [{ path: "a.txt", text: "first\nlast" }],
+		args: { path: "a.txt", edits: [{ oldText: "last", newText: "last\nappended" }] },
+	},
+	{
+		name: "adds-final-newline",
+		files: [{ path: "a.txt", text: "first\nlast" }],
+		args: { path: "a.txt", edits: [{ oldText: "last", newText: "last\n" }] },
+	},
+	{
+		name: "empties-file",
+		files: [{ path: "a.txt", text: "only\n" }],
+		args: { path: "a.txt", edits: [{ oldText: "only\n", newText: "" }] },
+	},
+	{
+		name: "crlf",
+		files: [{ path: "win.txt", text: "alpha\r\nbeta\r\ngamma\r\n" }],
+		args: { path: "win.txt", edits: [{ oldText: "beta\ngamma", newText: "BETA\r\nGAMMA" }] },
+	},
+	{
+		name: "bom",
+		files: [{ path: "bom.txt", text: "﻿header\nbody\n" }],
+		args: { path: "bom.txt", edits: [{ oldText: "header", newText: "HEADER" }] },
+	},
+	{
+		name: "fuzzy-trailing-space",
+		files: [{ path: "a.py", text: "def f():   \n    return 1\t\t\n\nx = 'keep'  \n" }],
+		args: { path: "a.py", edits: [{ oldText: "def f():\n    return 1", newText: "def f():\n    return 2" }] },
+	},
+	{
+		name: "fuzzy-quotes-and-dashes",
+		files: [{ path: "a.md", text: "He said “hello” — then left.\nIt’s fine.\nUntouched ’line’.\n" }],
+		args: {
+			path: "a.md",
+			edits: [{ oldText: 'He said "hello" - then left.\nIt\'s fine.', newText: "He said goodbye.\nIt is fine." }],
+		},
+	},
+	{
+		name: "fuzzy-nfkc-and-spaces",
+		files: [{ path: "a.txt", text: "ﬁle name = 1\nother line\n" }],
+		args: { path: "a.txt", edits: [{ oldText: "file name = 1", newText: "file name = 2" }] },
+	},
+	{
+		name: "not-found",
+		files: [{ path: "a.txt", text: "abc\n" }],
+		args: { path: "a.txt", edits: [{ oldText: "xyz", newText: "q" }] },
+	},
+	{
+		name: "not-found-of-two",
+		files: [{ path: "a.txt", text: "abc\n" }],
+		args: {
+			path: "a.txt",
+			edits: [
+				{ oldText: "abc", newText: "q" },
+				{ oldText: "xyz", newText: "q" },
+			],
+		},
+	},
+	{
+		name: "duplicate",
+		files: [{ path: "a.txt", text: "x\nx\nx\n" }],
+		args: { path: "a.txt", edits: [{ oldText: "x", newText: "y" }] },
+	},
+	{
+		name: "duplicate-of-two",
+		files: [{ path: "a.txt", text: "x\nx\ny\n" }],
+		args: {
+			path: "a.txt",
+			edits: [
+				{ oldText: "y", newText: "z" },
+				{ oldText: "x", newText: "w" },
+			],
+		},
+	},
+	{
+		name: "empty-old-text",
+		files: [{ path: "a.txt", text: "abc\n" }],
+		args: { path: "a.txt", edits: [{ oldText: "", newText: "q" }] },
+	},
+	{
+		name: "empty-old-text-of-two",
+		files: [{ path: "a.txt", text: "abc\n" }],
+		args: {
+			path: "a.txt",
+			edits: [
+				{ oldText: "abc", newText: "q" },
+				{ oldText: "", newText: "q" },
+			],
+		},
+	},
+	{
+		name: "overlap",
+		files: [{ path: "a.txt", text: "abcdef\n" }],
+		args: {
+			path: "a.txt",
+			edits: [
+				{ oldText: "abcd", newText: "1" },
+				{ oldText: "cdef", newText: "2" },
+			],
+		},
+	},
+	{
+		name: "no-change",
+		files: [{ path: "a.txt", text: "same\n" }],
+		args: { path: "a.txt", edits: [{ oldText: "same", newText: "same" }] },
+	},
+	{
+		name: "no-change-of-two",
+		files: [{ path: "a.txt", text: "a b\n" }],
+		args: {
+			path: "a.txt",
+			edits: [
+				{ oldText: "a", newText: "a" },
+				{ oldText: "b", newText: "b" },
+			],
+		},
+	},
+	{
+		name: "missing-file",
+		files: [],
+		args: { path: "missing.txt", edits: [{ oldText: "a", newText: "b" }] },
+	},
+	{
+		name: "no-edits",
+		files: [{ path: "a.txt", text: "abc\n" }],
+		args: { path: "a.txt", edits: [] },
+	},
+	{
+		name: "edits-as-json-string",
+		files: [{ path: "a.txt", text: "abc\n" }],
+		args: { path: "a.txt", edits: JSON.stringify([{ oldText: "abc", newText: "xyz" }]) },
+	},
+	{
+		name: "edit-as-json-object-string",
+		files: [{ path: "a.txt", text: "abc\n" }],
+		args: { path: "a.txt", edits: JSON.stringify({ oldText: "abc", newText: "xyz" }) },
+	},
+	{
+		name: "edit-as-object",
+		files: [{ path: "a.txt", text: "abc\n" }],
+		args: { path: "a.txt", edits: { oldText: "abc", newText: "xyz" } },
+	},
+	{
+		name: "legacy-fields",
+		files: [{ path: "a.txt", text: "abc\ndef\n" }],
+		args: { path: "a.txt", oldText: "def", newText: "DEF", edits: [{ oldText: "abc", newText: "ABC" }] },
+	},
+	{
+		name: "unicode",
+		files: [{ path: "u.txt", text: "naïve café\n日本語のテキスト\n🙂 done\n" }],
+		args: { path: "u.txt", edits: [{ oldText: "日本語", newText: "中文" }] },
+	},
+	{
+		name: "nested-path",
+		files: [{ path: "src/lib/mod.rs", text: "pub fn a() {}\n" }],
+		args: { path: "src/lib/mod.rs", edits: [{ oldText: "a()", newText: "b()" }] },
+	},
+];
+
+const WRITE_CALLS: MutationCall[] = [
+	{ name: "new-file", files: [], args: { path: "new.txt", content: "hello\n" }, after: ["new.txt"] },
+	{
+		name: "nested-dirs",
+		files: [],
+		args: { path: "deep/er/still/file.ts", content: "export {};\n" },
+		after: ["deep/er/still/file.ts"],
+	},
+	{ name: "overwrite", files: [{ path: "a.txt", text: "old content\n" }], args: { path: "a.txt", content: "new" } },
+	{ name: "empty", files: [], args: { path: "empty.txt", content: "" }, after: ["empty.txt"] },
+	{
+		name: "unicode",
+		files: [],
+		args: { path: "u.txt", content: "﻿naïve 🙂\r\n日本\n" },
+		after: ["u.txt"],
+	},
+	{ name: "at-prefix", files: [], args: { path: "@at.txt", content: "x" }, after: ["at.txt"] },
+];
+
+async function mutationCalls(tool: "edit" | "write", calls: MutationCall[]) {
+	const results: unknown[] = [];
+	let toolDeclaration: unknown;
+	for (const call of calls) {
+		const root = mkdtempSync(join(tmpdir(), `relay-${tool}-`));
+		try {
+			for (const file of call.files) {
+				mkdirSync(dirname(join(root, file.path)), { recursive: true });
+				writeFileSync(join(root, file.path), file.text ?? "");
+			}
+			const definition = (tool === "edit"
+				? createEditToolDefinition(root)
+				: createWriteToolDefinition(root)) as unknown as Definition & {
+				prepareArguments?: (args: unknown) => unknown;
+			};
+			toolDeclaration ??= declaration(definition);
+			const args = JSON.parse(JSON.stringify(call.args));
+			const prepared = definition.prepareArguments ? definition.prepareArguments(args) : args;
+			let outcome: Record<string, unknown>;
+			try {
+				outcome = { result: JSON.parse(JSON.stringify(await definition.execute("call", prepared as never))) };
+			} catch (error) {
+				outcome = { error: error instanceof Error ? error.message : String(error) };
+			}
+			const paths = [...call.files.map((file) => file.path), ...(call.after ?? [])];
+			const after = paths.map((path) => {
+				const full = join(root, path);
+				return existsSync(full) ? { path, base64: readFileSync(full).toString("base64") } : { path, missing: true };
+			});
+			results.push(portable({ ...call, ...outcome, after }, root));
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
+	}
+	return { declaration: toolDeclaration, calls: results };
+}
+
+/** Seeded random texts over a few lines, so the diff meets many equal-length choices. */
+function randomTexts(count: number): [string, string][] {
+	let seed = 20251119;
+	const random = () => {
+		seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+		return seed / 0x7fffffff;
+	};
+	const alphabet = ["a", "b", "c", "d", ""];
+	const text = () => {
+		const length = Math.floor(random() * 13);
+		const body = Array.from({ length }, () => alphabet[Math.floor(random() * alphabet.length)]).join("\n");
+		return random() < 0.6 && length > 0 ? `${body}\n` : body;
+	};
+	return Array.from({ length: count }, () => [text(), text()] as [string, string]);
+}
+
+function diffs() {
+	const handcrafted: [string, string][] = [
+		["", ""],
+		["", "new\n"],
+		["old\n", ""],
+		["same\n", "same\n"],
+		["a\nb\nc\n", "a\nB\nc\n"],
+		["a\nb\nc", "a\nb\nc\n"],
+		["a\nb\nc\n", "a\nb\nc"],
+		["a\r\nb\r\n", "a\r\nc\r\n"],
+		["x\ny\n", "y\nx\n"],
+		[numbered(40), numbered(40).replace("line 3\n", "line three\n").replace("line 37\n", "")],
+		[numbered(20), numbered(20).replace("line 10\n", "line ten\nline ten again\n")],
+		[numbered(12), `head\n${numbered(12)}tail\n`],
+		// Seven unchanged lines after or before the only change: more than the context, less than twice it.
+		["a\nb\nc\nd\ne\nf\ng\nh\n", "A\nb\nc\nd\ne\nf\ng\nh\n"],
+		["a\nb\nc\nd\ne\nf\ng\nh\n", "a\nb\nc\nd\ne\nf\ng\nH\n"],
+		// Exactly twice the context between two changes, then one line more and one less.
+		[numbered(20), numbered(20).replace("line 3\n", "line three\n").replace("line 12\n", "line twelve\n")],
+		[numbered(20), numbered(20).replace("line 3\n", "line three\n").replace("line 13\n", "line thirteen\n")],
+		[numbered(20), numbered(20).replace("line 3\n", "line three\n").replace("line 11\n", "line eleven\n")],
+	];
+	return [...handcrafted, ...randomTexts(400)].map(([before, after]) => ({
+		before,
+		after,
+		parts: diffLines(before, after).map(({ value, count, added, removed }) => ({ value, count, added, removed })),
+		display: generateDiffString(before, after),
+		patch: generateUnifiedPatch("f.txt", before, after),
+	}));
 }
 
 function helpers() {
