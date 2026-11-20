@@ -1,0 +1,822 @@
+{
+	"tree": [
+		[
+			"agent/AGENTS.md",
+			"Global rules."
+		],
+		[
+			"work/AGENTS.md",
+			"Work rules."
+		],
+		[
+			"work/plain/CLAUDE.md",
+			"Plain rules from CLAUDE.md."
+		],
+		[
+			"work/plain/sub",
+			null
+		],
+		[
+			"work/over/AGENTS.override.md",
+			"Override rules."
+		],
+		[
+			"work/over/AGENTS.md",
+			"Shadowed by the override."
+		],
+		[
+			"work/folder/AGENTS.md",
+			null
+		],
+		[
+			"work/folder/CLAUDE.md",
+			"AGENTS.md is a folder here."
+		],
+		[
+			"work/bom/AGENTS.md",
+			"﻿Rules after a byte order mark."
+		],
+		[
+			"work/both/CLAUDE.md",
+			"CLAUDE.md loses to AGENTS.md."
+		],
+		[
+			"work/both/AGENTS.md",
+			"AGENTS.md wins."
+		],
+		[
+			"work/empty",
+			null
+		],
+		[
+			"repo/.git/HEAD",
+			"ref: refs/heads/main\n"
+		],
+		[
+			"repo/AGENTS.md",
+			"Main repository rules."
+		],
+		[
+			"repo/src/deep",
+			null
+		],
+		[
+			"repo/.git/worktrees/wt/HEAD",
+			"ref: refs/heads/wt\n"
+		],
+		[
+			"repo/.git/worktrees/wt/commondir",
+			"../..\n"
+		],
+		[
+			"repo/wt/.git",
+			"gitdir: <root>/repo/.git/worktrees/wt\n"
+		],
+		[
+			"repo/wt/AGENTS.md",
+			"Worktree rules."
+		],
+		[
+			"repo/wt/inner",
+			null
+		],
+		[
+			"repo/.git/worktrees/bare-wt/HEAD",
+			"ref: refs/heads/bare-wt\n"
+		],
+		[
+			"repo/.git/worktrees/bare-wt/commondir",
+			"../.."
+		],
+		[
+			"repo/plainwt/.git",
+			"gitdir: <root>/repo/.git/worktrees/bare-wt"
+		],
+		[
+			"repo/.git/worktrees/rel/HEAD",
+			"ref: refs/heads/rel\n"
+		],
+		[
+			"repo/.git/worktrees/rel/commondir",
+			"../..\n"
+		],
+		[
+			"repo/relwt/.git",
+			"  gitdir:   ../.git/worktrees/rel  \n"
+		],
+		[
+			"repo/relwt/CLAUDE.md",
+			"Relative worktree rules."
+		],
+		[
+			"repo/missing/.git",
+			"gitdir: <root>/repo/.git/worktrees/none\n"
+		],
+		[
+			"repo/odd/.git",
+			"not a gitdir line\n"
+		],
+		[
+			"repo/.git/modules/sub/HEAD",
+			"ref: refs/heads/main\n"
+		],
+		[
+			"repo/sub/.git",
+			"gitdir: <root>/repo/.git/modules/sub\n"
+		],
+		[
+			"repo/sub/AGENTS.md",
+			"Submodule rules."
+		],
+		[
+			"proj/.bare/HEAD",
+			"ref: refs/heads/main\n"
+		],
+		[
+			"proj/.bare/worktrees/main/HEAD",
+			"ref: refs/heads/main\n"
+		],
+		[
+			"proj/.bare/worktrees/main/commondir",
+			"../..\n"
+		],
+		[
+			"proj/main/.git",
+			"gitdir: <root>/proj/.bare/worktrees/main\n"
+		],
+		[
+			"proj/AGENTS.md",
+			"Bare layout parent rules."
+		],
+		[
+			"proj/main/AGENTS.md",
+			"Bare layout worktree rules."
+		],
+		[
+			"sibling/.git/worktrees/side/HEAD",
+			"ref: refs/heads/side\n"
+		],
+		[
+			"sibling/.git/worktrees/side/commondir",
+			"../..\n"
+		],
+		[
+			"sibling/AGENTS.md",
+			"Sibling main rules."
+		],
+		[
+			"side/.git",
+			"gitdir: <root>/sibling/.git/worktrees/side\n"
+		],
+		[
+			"side/AGENTS.md",
+			"Sibling worktree rules."
+		],
+		[
+			"sibling/.git/HEAD",
+			"ref: refs/heads/main\n"
+		],
+		[
+			"nohead/.git",
+			null
+		],
+		[
+			"nohead/inside",
+			null
+		],
+		[
+			"sp/agent/SYSTEM.md",
+			"Global system prompt."
+		],
+		[
+			"sp/agent/APPEND_SYSTEM.md",
+			"Global appended prompt."
+		],
+		[
+			"sp/proj/.relay/SYSTEM.md",
+			"﻿Project system prompt."
+		],
+		[
+			"sp/proj/.relay/APPEND_SYSTEM.md",
+			"Project appended prompt."
+		],
+		[
+			"sp/onlyglobal/.relay",
+			null
+		],
+		[
+			"sp/emptyagent",
+			null
+		],
+		[
+			"sp/bare",
+			null
+		],
+		[
+			"sp/extra.md",
+			"﻿Extra prompt file."
+		],
+		[
+			"sp/folder.md",
+			null
+		]
+	],
+	"context": [
+		{
+			"cwd": "work/plain/sub",
+			"agentDir": "agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/work/AGENTS.md",
+					"content": "Work rules."
+				},
+				{
+					"path": "<root>/work/plain/CLAUDE.md",
+					"content": "Plain rules from CLAUDE.md."
+				}
+			]
+		},
+		{
+			"cwd": "work/over",
+			"agentDir": "agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/work/AGENTS.md",
+					"content": "Work rules."
+				},
+				{
+					"path": "<root>/work/over/AGENTS.override.md",
+					"content": "Override rules."
+				}
+			]
+		},
+		{
+			"cwd": "work/folder",
+			"agentDir": "agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/work/AGENTS.md",
+					"content": "Work rules."
+				},
+				{
+					"path": "<root>/work/folder/CLAUDE.md",
+					"content": "AGENTS.md is a folder here."
+				}
+			]
+		},
+		{
+			"cwd": "work/bom",
+			"agentDir": "agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/work/AGENTS.md",
+					"content": "Work rules."
+				},
+				{
+					"path": "<root>/work/bom/AGENTS.md",
+					"content": "Rules after a byte order mark."
+				}
+			]
+		},
+		{
+			"cwd": "work/both",
+			"agentDir": "agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/work/AGENTS.md",
+					"content": "Work rules."
+				},
+				{
+					"path": "<root>/work/both/AGENTS.md",
+					"content": "AGENTS.md wins."
+				}
+			]
+		},
+		{
+			"cwd": "work/empty",
+			"agentDir": "work",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/work/AGENTS.md",
+					"content": "Work rules."
+				}
+			]
+		},
+		{
+			"cwd": "work/plain/sub",
+			"agentDir": "work/plain",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/work/plain/CLAUDE.md",
+					"content": "Plain rules from CLAUDE.md."
+				},
+				{
+					"path": "<root>/work/AGENTS.md",
+					"content": "Work rules."
+				}
+			]
+		},
+		{
+			"cwd": "work/empty",
+			"agentDir": "missing/agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/work/AGENTS.md",
+					"content": "Work rules."
+				}
+			]
+		},
+		{
+			"cwd": "repo/src/deep",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/repo",
+				"commonGitDir": "<root>/repo/.git",
+				"headPath": "<root>/repo/.git/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/AGENTS.md",
+					"content": "Main repository rules."
+				}
+			]
+		},
+		{
+			"cwd": "repo/wt",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/repo/wt",
+				"commonGitDir": "<root>/repo/.git",
+				"headPath": "<root>/repo/.git/worktrees/wt/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/wt/AGENTS.md",
+					"content": "Worktree rules."
+				}
+			]
+		},
+		{
+			"cwd": "repo/wt/inner",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/repo/wt",
+				"commonGitDir": "<root>/repo/.git",
+				"headPath": "<root>/repo/.git/worktrees/wt/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/wt/AGENTS.md",
+					"content": "Worktree rules."
+				}
+			]
+		},
+		{
+			"cwd": "repo/plainwt",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/repo/plainwt",
+				"commonGitDir": "<root>/repo/.git",
+				"headPath": "<root>/repo/.git/worktrees/bare-wt/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/AGENTS.md",
+					"content": "Main repository rules."
+				}
+			]
+		},
+		{
+			"cwd": "repo/relwt",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/repo/relwt",
+				"commonGitDir": "<root>/repo/.git",
+				"headPath": "<root>/repo/.git/worktrees/rel/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/AGENTS.md",
+					"content": "Main repository rules."
+				},
+				{
+					"path": "<root>/repo/relwt/CLAUDE.md",
+					"content": "Relative worktree rules."
+				}
+			]
+		},
+		{
+			"cwd": "repo/missing",
+			"agentDir": "agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/AGENTS.md",
+					"content": "Main repository rules."
+				}
+			]
+		},
+		{
+			"cwd": "repo/odd",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/repo",
+				"commonGitDir": "<root>/repo/.git",
+				"headPath": "<root>/repo/.git/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/AGENTS.md",
+					"content": "Main repository rules."
+				}
+			]
+		},
+		{
+			"cwd": "repo/sub",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/repo/sub",
+				"commonGitDir": "<root>/repo/.git/modules/sub",
+				"headPath": "<root>/repo/.git/modules/sub/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/AGENTS.md",
+					"content": "Main repository rules."
+				},
+				{
+					"path": "<root>/repo/sub/AGENTS.md",
+					"content": "Submodule rules."
+				}
+			]
+		},
+		{
+			"cwd": "proj/main",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/proj/main",
+				"commonGitDir": "<root>/proj/.bare",
+				"headPath": "<root>/proj/.bare/worktrees/main/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/proj/AGENTS.md",
+					"content": "Bare layout parent rules."
+				},
+				{
+					"path": "<root>/proj/main/AGENTS.md",
+					"content": "Bare layout worktree rules."
+				}
+			]
+		},
+		{
+			"cwd": "side",
+			"agentDir": "agent",
+			"gitPaths": {
+				"repoDir": "<root>/side",
+				"commonGitDir": "<root>/sibling/.git",
+				"headPath": "<root>/sibling/.git/worktrees/side/HEAD"
+			},
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/side/AGENTS.md",
+					"content": "Sibling worktree rules."
+				}
+			]
+		},
+		{
+			"cwd": "nohead/inside",
+			"agentDir": "agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				}
+			]
+		},
+		{
+			"cwd": "missing/folder",
+			"agentDir": "agent",
+			"gitPaths": null,
+			"files": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				}
+			]
+		}
+	],
+	"prompts": [
+		{
+			"name": "trusted project",
+			"cwd": "sp/proj",
+			"agentDir": "sp/agent",
+			"trusted": true,
+			"systemPrompt": "Project system prompt.",
+			"systemPromptSource": "<root>/sp/proj/.relay/SYSTEM.md",
+			"appendSystemPrompt": [
+				"Project appended prompt."
+			],
+			"appendSystemPromptSources": [
+				"<root>/sp/proj/.relay/APPEND_SYSTEM.md"
+			],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/proj/AGENTS.md",
+			"options": {}
+		},
+		{
+			"name": "untrusted project",
+			"cwd": "sp/proj",
+			"agentDir": "sp/agent",
+			"trusted": false,
+			"systemPrompt": "Global system prompt.",
+			"systemPromptSource": "<root>/sp/agent/SYSTEM.md",
+			"appendSystemPrompt": [
+				"Global appended prompt."
+			],
+			"appendSystemPromptSources": [
+				"<root>/sp/agent/APPEND_SYSTEM.md"
+			],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/proj/AGENTS.md",
+			"options": {}
+		},
+		{
+			"name": "project without files",
+			"cwd": "sp/onlyglobal",
+			"agentDir": "sp/agent",
+			"trusted": true,
+			"systemPrompt": "Global system prompt.",
+			"systemPromptSource": "<root>/sp/agent/SYSTEM.md",
+			"appendSystemPrompt": [
+				"Global appended prompt."
+			],
+			"appendSystemPromptSources": [
+				"<root>/sp/agent/APPEND_SYSTEM.md"
+			],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/onlyglobal/AGENTS.md",
+			"options": {}
+		},
+		{
+			"name": "nothing to find",
+			"cwd": "sp/bare",
+			"agentDir": "sp/emptyagent",
+			"trusted": true,
+			"systemPrompt": "<undefined>",
+			"systemPromptSource": "<undefined>",
+			"appendSystemPrompt": [],
+			"appendSystemPromptSources": [],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/bare/AGENTS.md",
+			"options": {}
+		},
+		{
+			"name": "inline prompt",
+			"cwd": "sp/proj",
+			"agentDir": "sp/agent",
+			"trusted": true,
+			"systemPrompt": "Inline prompt.",
+			"systemPromptSource": "<undefined>",
+			"appendSystemPrompt": [
+				"Project appended prompt."
+			],
+			"appendSystemPromptSources": [
+				"<root>/sp/proj/.relay/APPEND_SYSTEM.md"
+			],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/proj/AGENTS.md",
+			"options": {
+				"systemPrompt": "Inline prompt."
+			}
+		},
+		{
+			"name": "prompt file",
+			"cwd": "sp/bare",
+			"agentDir": "sp/agent",
+			"trusted": true,
+			"systemPrompt": "Extra prompt file.",
+			"systemPromptSource": "<root>/sp/extra.md",
+			"appendSystemPrompt": [
+				"Global appended prompt."
+			],
+			"appendSystemPromptSources": [
+				"<root>/sp/agent/APPEND_SYSTEM.md"
+			],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/bare/AGENTS.md",
+			"options": {
+				"systemPrompt": "<root>/sp/extra.md"
+			}
+		},
+		{
+			"name": "empty prompt",
+			"cwd": "sp/proj",
+			"agentDir": "sp/agent",
+			"trusted": true,
+			"systemPrompt": "<undefined>",
+			"systemPromptSource": "<undefined>",
+			"appendSystemPrompt": [
+				"Project appended prompt."
+			],
+			"appendSystemPromptSources": [
+				"<root>/sp/proj/.relay/APPEND_SYSTEM.md"
+			],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/proj/AGENTS.md",
+			"options": {
+				"systemPrompt": ""
+			}
+		},
+		{
+			"name": "unreadable prompt file",
+			"cwd": "sp/bare",
+			"agentDir": "sp/agent",
+			"trusted": true,
+			"systemPrompt": "<root>/sp/folder.md",
+			"systemPromptSource": "<root>/sp/folder.md",
+			"appendSystemPrompt": [
+				"Global appended prompt."
+			],
+			"appendSystemPromptSources": [
+				"<root>/sp/agent/APPEND_SYSTEM.md"
+			],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/bare/AGENTS.md",
+			"options": {
+				"systemPrompt": "<root>/sp/folder.md"
+			}
+		},
+		{
+			"name": "appended sources",
+			"cwd": "sp/proj",
+			"agentDir": "sp/agent",
+			"trusted": true,
+			"appendSystemPrompt": [
+				"Inline addition.",
+				"Extra prompt file.",
+				"<root>/sp/missing.md",
+				"<root>/sp/folder.md"
+			],
+			"systemPrompt": "Project system prompt.",
+			"systemPromptSource": "<root>/sp/proj/.relay/SYSTEM.md",
+			"appendSystemPromptSources": [
+				"<root>/sp/extra.md",
+				"<root>/sp/folder.md"
+			],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/proj/AGENTS.md",
+			"options": {
+				"appendSystemPrompt": [
+					"Inline addition.",
+					"<root>/sp/extra.md",
+					"",
+					"<root>/sp/missing.md",
+					"<root>/sp/folder.md"
+				]
+			}
+		},
+		{
+			"name": "no appended sources",
+			"cwd": "sp/proj",
+			"agentDir": "sp/agent",
+			"trusted": true,
+			"appendSystemPrompt": [],
+			"systemPrompt": "Project system prompt.",
+			"systemPromptSource": "<root>/sp/proj/.relay/SYSTEM.md",
+			"appendSystemPromptSources": [],
+			"agentsFiles": [],
+			"projectAgentsPath": "<root>/sp/proj/AGENTS.md",
+			"options": {
+				"appendSystemPrompt": []
+			}
+		},
+		{
+			"name": "no context files",
+			"cwd": "repo/wt",
+			"agentDir": "agent",
+			"trusted": true,
+			"noContextFiles": true,
+			"systemPrompt": "<undefined>",
+			"systemPromptSource": "<undefined>",
+			"appendSystemPrompt": [],
+			"appendSystemPromptSources": [],
+			"agentsFiles": [],
+			"projectAgentsPath": "<undefined>",
+			"options": {}
+		},
+		{
+			"name": "context files of a worktree",
+			"cwd": "repo/wt",
+			"agentDir": "agent",
+			"trusted": true,
+			"systemPrompt": "<undefined>",
+			"systemPromptSource": "<undefined>",
+			"appendSystemPrompt": [],
+			"appendSystemPromptSources": [],
+			"agentsFiles": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/wt/AGENTS.md",
+					"content": "Worktree rules."
+				}
+			],
+			"projectAgentsPath": "<root>/repo/wt/AGENTS.md",
+			"options": {}
+		},
+		{
+			"name": "below a repository root",
+			"cwd": "repo/src/deep",
+			"agentDir": "agent",
+			"trusted": true,
+			"systemPrompt": "<undefined>",
+			"systemPromptSource": "<undefined>",
+			"appendSystemPrompt": [],
+			"appendSystemPromptSources": [],
+			"agentsFiles": [
+				{
+					"path": "<root>/agent/AGENTS.md",
+					"content": "Global rules."
+				},
+				{
+					"path": "<root>/repo/AGENTS.md",
+					"content": "Main repository rules."
+				}
+			],
+			"projectAgentsPath": "<root>/repo/AGENTS.md",
+			"options": {}
+		}
+	]
+}

@@ -4,6 +4,8 @@
  *
  * - `resources/system-prompt.json`: `buildSystemPromptState` and `buildSystemPrompt` on scripted
  *   options, `diffSystemPromptSections`, and `formatSkillsForPrompt`.
+ * - `resources/context.json`: the context and prompt files the resource loader reads
+ *   (`context-record.ts`).
  *
  * The coding-agent package, which the prompt names for its documentation, becomes `<package>`,
  * with `/` after it.
@@ -20,6 +22,7 @@ import {
 	buildSystemPromptState,
 	diffSystemPromptSections,
 } from "../../src/core/system-prompt.ts";
+import { contextJson } from "./context-record.ts";
 
 export const RESOURCES_DIR = fileURLToPath(new URL("../../../../crates/fixtures/resources/", import.meta.url));
 
@@ -212,7 +215,7 @@ function systemPromptJson(): string {
 }
 
 export async function resourcesFiles(): Promise<Record<string, string>> {
-	return { "system-prompt.json": systemPromptJson() };
+	return { "system-prompt.json": systemPromptJson(), "context.json": await contextJson() };
 }
 
 export function readResourcesFile(name: string): string {

@@ -2753,6 +2753,8 @@ name = "relay-resources"
 version = "0.0.0"
 dependencies = [
  "relay-ai",
+ "relay-settings",
+ "relay-tools",
  "serde",
  "serde_json",
 ]
