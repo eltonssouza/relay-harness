@@ -17,6 +17,8 @@ serde_json = { version = "=1.0.154", default-features = false, features = ["std"
 futures-util = { version = "=0.3.34", default-features = false, features = ["alloc"] }
 # The search programs' output reaches the call through a thread; already locked.
 futures-channel = { version = "=0.3.34", default-features = false, features = ["std"] }
+# Downloads ripgrep and fd when they are missing; already locked, with relay-ai's TLS setup.
+reqwest = { version = "=0.13.5", default-features = false }
 # File names in NFD, for the macOS screenshot fallbacks and the listing order; already locked.
 unicode-normalization = { version = "=0.1.24", default-features = false, features = ["std"] }
 
@@ -27,4 +29,4 @@ libc = { version = "=0.2.191", default-features = false }
 [dev-dependencies]
 # The fixture tree's binary files; already locked.
 base64 = { version = "=0.23.1", default-features = false, features = ["std"] }
-tokio = { version = "=1.54.1", default-features = false, features = ["rt", "macros"] }
+tokio = { version = "=1.54.1", default-features = false, features = ["rt", "macros", "net", "io-util", "time"] }
