@@ -20,9 +20,11 @@
 //! - `options`: request options adapters share.
 //! - `abort`, `retry`, `http`: cancellation, the SDKs' retry policy, and sending requests.
 //! - `provider_request`: each adapter's URL, headers and wire body, and its HTTP error messages.
-//! - `stream`: each adapter's `stream()`, sending the request and decoding the response.
-//! - `simple`: the provider-neutral options (`streamSimple`) mapped to each adapter's, and the
-//!   context estimate that limits the output.
+//! - `stream`: each adapter's `stream()`, sending the request and decoding the response; each
+//!   event comes with the message decoded so far.
+//! - `simple`: the provider-neutral options (`streamSimple`) mapped to each adapter's, the context
+//!   estimate that limits the output, and `stream_simple`, which sends through the adapter for the
+//!   model's API.
 //! - `validation`: tool arguments checked against their JSON Schema as TypeBox checks them.
 //! - `json`, `sse`: provider output helpers (JSON repair and partial parsing, server-sent events).
 //!

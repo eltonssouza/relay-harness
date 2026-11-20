@@ -19,4 +19,4 @@ futures-util = { version = "=0.3.34", default-features = false, features = ["all
 futures-channel = { version = "=0.3.34", default-features = false, features = ["std"] }
 
 [dev-dependencies]
-tokio = { version = "=1.54.1", default-features = false, features = ["rt", "rt-multi-thread", "time", "sync", "macros"] }
+tokio = { version = "=1.54.1", default-features = false, features = ["rt", "rt-multi-thread", "time", "sync", "macros", "net", "io-util"] }

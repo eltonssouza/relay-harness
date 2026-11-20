@@ -434,6 +434,7 @@ async fn stream_assistant_response(
     let request = StreamRequest {
         options: config.options.clone(),
         api_key,
+        retry: config.retry,
         signal: signal.clone(),
     };
 
