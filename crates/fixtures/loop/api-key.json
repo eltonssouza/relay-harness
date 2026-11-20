@@ -1,0 +1,1221 @@
+{
+	"tools": [
+		{
+			"name": "echo",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"text": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"text"
+				]
+			}
+		}
+	],
+	"context": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		}
+	],
+	"prompts": [
+		{
+			"role": "user",
+			"content": "Hi",
+			"timestamp": 0
+		}
+	],
+	"name": "api-key",
+	"description": "getApiKey answers each request; an empty key falls back to the configured one.",
+	"apiKey": "configured",
+	"apiKeys": [
+		"fresh",
+		""
+	],
+	"responses": [
+		{
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_1",
+					"name": "echo",
+					"arguments": {
+						"text": "a"
+					}
+				}
+			],
+			"stopReason": "toolUse"
+		},
+		{
+			"content": [
+				{
+					"type": "text",
+					"text": "Done."
+				}
+			]
+		}
+	],
+	"events": [
+		{
+			"type": "agent_start"
+		},
+		{
+			"type": "turn_start"
+		},
+		{
+			"type": "message_start",
+			"message": {
+				"role": "system",
+				"content": "",
+				"timestamp": 0,
+				"toolsAdded": [
+					{
+						"name": "echo",
+						"description": "echo tool",
+						"parameters": {
+							"type": "object",
+							"properties": {
+								"text": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"text"
+							]
+						}
+					}
+				]
+			}
+		},
+		{
+			"type": "message_end",
+			"message": {
+				"role": "system",
+				"content": "",
+				"timestamp": 0,
+				"toolsAdded": [
+					{
+						"name": "echo",
+						"description": "echo tool",
+						"parameters": {
+							"type": "object",
+							"properties": {
+								"text": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"text"
+							]
+						}
+					}
+				]
+			}
+		},
+		{
+			"type": "message_start",
+			"message": {
+				"role": "user",
+				"content": "Hi",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_end",
+			"message": {
+				"role": "user",
+				"content": "Hi",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_start",
+			"message": {
+				"role": "assistant",
+				"content": [],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "toolcall_start",
+				"contentIndex": 0,
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call_1",
+							"name": "echo",
+							"arguments": {}
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call_1",
+						"name": "echo",
+						"arguments": {}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "toolcall_delta",
+				"contentIndex": 0,
+				"delta": "{\"text\":\"a\"}",
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call_1",
+							"name": "echo",
+							"arguments": {
+								"text": "a"
+							}
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call_1",
+						"name": "echo",
+						"arguments": {
+							"text": "a"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "toolcall_end",
+				"contentIndex": 0,
+				"toolCall": {
+					"type": "toolCall",
+					"id": "call_1",
+					"name": "echo",
+					"arguments": {
+						"text": "a"
+					}
+				},
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call_1",
+							"name": "echo",
+							"arguments": {
+								"text": "a"
+							}
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call_1",
+						"name": "echo",
+						"arguments": {
+							"text": "a"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_end",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call_1",
+						"name": "echo",
+						"arguments": {
+							"text": "a"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"thinkingLevel": "off"
+			}
+		},
+		{
+			"type": "tool_execution_start",
+			"toolCallId": "call_1",
+			"toolName": "echo",
+			"args": {
+				"text": "a"
+			}
+		},
+		{
+			"type": "tool_execution_end",
+			"toolCallId": "call_1",
+			"toolName": "echo",
+			"result": {
+				"content": [
+					{
+						"type": "text",
+						"text": "echo ok"
+					}
+				],
+				"details": {}
+			},
+			"isError": false
+		},
+		{
+			"type": "message_start",
+			"message": {
+				"role": "toolResult",
+				"toolCallId": "call_1",
+				"toolName": "echo",
+				"content": [
+					{
+						"type": "text",
+						"text": "echo ok"
+					}
+				],
+				"details": {},
+				"isError": false,
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_end",
+			"message": {
+				"role": "toolResult",
+				"toolCallId": "call_1",
+				"toolName": "echo",
+				"content": [
+					{
+						"type": "text",
+						"text": "echo ok"
+					}
+				],
+				"details": {},
+				"isError": false,
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "turn_end",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "toolCall",
+						"id": "call_1",
+						"name": "echo",
+						"arguments": {
+							"text": "a"
+						}
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "toolUse",
+				"timestamp": 0,
+				"thinkingLevel": "off"
+			},
+			"toolResults": [
+				{
+					"role": "toolResult",
+					"toolCallId": "call_1",
+					"toolName": "echo",
+					"content": [
+						{
+							"type": "text",
+							"text": "echo ok"
+						}
+					],
+					"details": {},
+					"isError": false,
+					"timestamp": 0
+				}
+			]
+		},
+		{
+			"type": "turn_start"
+		},
+		{
+			"type": "message_start",
+			"message": {
+				"role": "assistant",
+				"content": [],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "text_start",
+				"contentIndex": 0,
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": ""
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": ""
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "text_delta",
+				"contentIndex": 0,
+				"delta": "Done.",
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Done."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "Done."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "text_end",
+				"contentIndex": 0,
+				"content": "Done.",
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Done."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "Done."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_end",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "Done."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 0,
+				"thinkingLevel": "off"
+			}
+		},
+		{
+			"type": "turn_end",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "text",
+						"text": "Done."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 0,
+				"thinkingLevel": "off"
+			},
+			"toolResults": []
+		},
+		{
+			"type": "agent_end",
+			"messages": [
+				{
+					"role": "system",
+					"content": "",
+					"timestamp": 0,
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					]
+				},
+				{
+					"role": "user",
+					"content": "Hi",
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call_1",
+							"name": "echo",
+							"arguments": {
+								"text": "a"
+							}
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "toolUse",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				},
+				{
+					"role": "toolResult",
+					"toolCallId": "call_1",
+					"toolName": "echo",
+					"content": [
+						{
+							"type": "text",
+							"text": "echo ok"
+						}
+					],
+					"details": {},
+					"isError": false,
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "text",
+							"text": "Done."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				}
+			]
+		}
+	],
+	"calls": [
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"timestamp": 0
+				},
+				{
+					"role": "system",
+					"content": "",
+					"timestamp": 0,
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					]
+				},
+				{
+					"role": "user",
+					"content": "Hi",
+					"timestamp": 0
+				}
+			],
+			"reasoning": null,
+			"apiKey": "fresh"
+		},
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"timestamp": 0
+				},
+				{
+					"role": "system",
+					"content": "",
+					"timestamp": 0,
+					"toolsAdded": [
+						{
+							"name": "echo",
+							"description": "echo tool",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"text": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"text"
+								]
+							}
+						}
+					]
+				},
+				{
+					"role": "user",
+					"content": "Hi",
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "toolCall",
+							"id": "call_1",
+							"name": "echo",
+							"arguments": {
+								"text": "a"
+							}
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "toolUse",
+					"timestamp": 0,
+					"thinkingLevel": "off"
+				},
+				{
+					"role": "toolResult",
+					"toolCallId": "call_1",
+					"toolName": "echo",
+					"content": [
+						{
+							"type": "text",
+							"text": "echo ok"
+						}
+					],
+					"details": {},
+					"isError": false,
+					"timestamp": 0
+				}
+			],
+			"reasoning": null,
+			"apiKey": "configured"
+		}
+	],
+	"hooks": [
+		{
+			"hook": "getSteeringMessages",
+			"poll": 0,
+			"count": 0
+		},
+		{
+			"hook": "getApiKey",
+			"poll": 0,
+			"provider": "openai"
+		},
+		{
+			"hook": "beforeToolCall",
+			"toolCallId": "call_1",
+			"args": {
+				"text": "a"
+			}
+		},
+		{
+			"hook": "afterToolCall",
+			"toolCallId": "call_1",
+			"isError": false
+		},
+		{
+			"hook": "finishTurn",
+			"turn": 0,
+			"stopReason": "toolUse",
+			"toolResults": 1
+		},
+		{
+			"hook": "getSteeringMessages",
+			"poll": 1,
+			"count": 0
+		},
+		{
+			"hook": "getSteeringMessages",
+			"poll": 2,
+			"count": 0
+		},
+		{
+			"hook": "getApiKey",
+			"poll": 1,
+			"provider": "openai"
+		},
+		{
+			"hook": "finishTurn",
+			"turn": 0,
+			"stopReason": "stop",
+			"toolResults": 0
+		},
+		{
+			"hook": "getSteeringMessages",
+			"poll": 3,
+			"count": 0
+		},
+		{
+			"hook": "getFollowUpMessages",
+			"poll": 0,
+			"count": 0
+		}
+	],
+	"executions": [
+		{
+			"tool": "echo",
+			"toolCallId": "call_1",
+			"params": {
+				"text": "a"
+			},
+			"aborted": false
+		}
+	],
+	"messages": [
+		{
+			"role": "system",
+			"content": "",
+			"timestamp": 0,
+			"toolsAdded": [
+				{
+					"name": "echo",
+					"description": "echo tool",
+					"parameters": {
+						"type": "object",
+						"properties": {
+							"text": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"text"
+						]
+					}
+				}
+			]
+		},
+		{
+			"role": "user",
+			"content": "Hi",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "toolCall",
+					"id": "call_1",
+					"name": "echo",
+					"arguments": {
+						"text": "a"
+					}
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "toolUse",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		},
+		{
+			"role": "toolResult",
+			"toolCallId": "call_1",
+			"toolName": "echo",
+			"content": [
+				{
+					"type": "text",
+					"text": "echo ok"
+				}
+			],
+			"details": {},
+			"isError": false,
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "Done."
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "stop",
+			"timestamp": 0,
+			"thinkingLevel": "off"
+		}
+	]
+}

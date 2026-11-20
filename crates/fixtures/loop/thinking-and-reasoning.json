@@ -1,0 +1,689 @@
+{
+	"tools": [],
+	"context": [
+		{
+			"role": "system",
+			"content": "Be brief.",
+			"timestamp": 0
+		}
+	],
+	"prompts": [
+		{
+			"role": "user",
+			"content": "Hi",
+			"timestamp": 0
+		}
+	],
+	"name": "thinking-and-reasoning",
+	"description": "A thinking block; the requested level is recorded on the answer.",
+	"reasoning": "high",
+	"responses": [
+		{
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Hmm."
+				},
+				{
+					"type": "text",
+					"text": "Done."
+				}
+			]
+		}
+	],
+	"events": [
+		{
+			"type": "agent_start"
+		},
+		{
+			"type": "turn_start"
+		},
+		{
+			"type": "message_start",
+			"message": {
+				"role": "user",
+				"content": "Hi",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_end",
+			"message": {
+				"role": "user",
+				"content": "Hi",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_start",
+			"message": {
+				"role": "assistant",
+				"content": [],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "thinking_start",
+				"contentIndex": 0,
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "thinking",
+							"thinking": ""
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": ""
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "thinking_delta",
+				"contentIndex": 0,
+				"delta": "Hmm.",
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "thinking",
+							"thinking": "Hmm."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Hmm."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "thinking_end",
+				"contentIndex": 0,
+				"content": "Hmm.",
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "thinking",
+							"thinking": "Hmm."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Hmm."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "text_start",
+				"contentIndex": 1,
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "thinking",
+							"thinking": "Hmm."
+						},
+						{
+							"type": "text",
+							"text": ""
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Hmm."
+					},
+					{
+						"type": "text",
+						"text": ""
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "text_delta",
+				"contentIndex": 1,
+				"delta": "Done.",
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "thinking",
+							"thinking": "Hmm."
+						},
+						{
+							"type": "text",
+							"text": "Done."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Hmm."
+					},
+					{
+						"type": "text",
+						"text": "Done."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_update",
+			"assistantMessageEvent": {
+				"type": "text_end",
+				"contentIndex": 1,
+				"content": "Done.",
+				"partial": {
+					"role": "assistant",
+					"content": [
+						{
+							"type": "thinking",
+							"thinking": "Hmm."
+						},
+						{
+							"type": "text",
+							"text": "Done."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "pending",
+					"timestamp": 0
+				}
+			},
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Hmm."
+					},
+					{
+						"type": "text",
+						"text": "Done."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "pending",
+				"timestamp": 0
+			}
+		},
+		{
+			"type": "message_end",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Hmm."
+					},
+					{
+						"type": "text",
+						"text": "Done."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 0,
+				"thinkingLevel": "high"
+			}
+		},
+		{
+			"type": "turn_end",
+			"message": {
+				"role": "assistant",
+				"content": [
+					{
+						"type": "thinking",
+						"thinking": "Hmm."
+					},
+					{
+						"type": "text",
+						"text": "Done."
+					}
+				],
+				"api": "openai-responses",
+				"provider": "openai",
+				"model": "mock",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"totalTokens": 0,
+					"cost": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"total": 0
+					}
+				},
+				"stopReason": "stop",
+				"timestamp": 0,
+				"thinkingLevel": "high"
+			},
+			"toolResults": []
+		},
+		{
+			"type": "agent_end",
+			"messages": [
+				{
+					"role": "user",
+					"content": "Hi",
+					"timestamp": 0
+				},
+				{
+					"role": "assistant",
+					"content": [
+						{
+							"type": "thinking",
+							"thinking": "Hmm."
+						},
+						{
+							"type": "text",
+							"text": "Done."
+						}
+					],
+					"api": "openai-responses",
+					"provider": "openai",
+					"model": "mock",
+					"usage": {
+						"input": 0,
+						"output": 0,
+						"cacheRead": 0,
+						"cacheWrite": 0,
+						"totalTokens": 0,
+						"cost": {
+							"input": 0,
+							"output": 0,
+							"cacheRead": 0,
+							"cacheWrite": 0,
+							"total": 0
+						}
+					},
+					"stopReason": "stop",
+					"timestamp": 0,
+					"thinkingLevel": "high"
+				}
+			]
+		}
+	],
+	"calls": [
+		{
+			"model": "mock",
+			"messages": [
+				{
+					"role": "system",
+					"content": "Be brief.",
+					"timestamp": 0
+				},
+				{
+					"role": "user",
+					"content": "Hi",
+					"timestamp": 0
+				}
+			],
+			"reasoning": "high",
+			"apiKey": null
+		}
+	],
+	"hooks": [
+		{
+			"hook": "getSteeringMessages",
+			"poll": 0,
+			"count": 0
+		},
+		{
+			"hook": "finishTurn",
+			"turn": 0,
+			"stopReason": "stop",
+			"toolResults": 0
+		},
+		{
+			"hook": "getSteeringMessages",
+			"poll": 1,
+			"count": 0
+		},
+		{
+			"hook": "getFollowUpMessages",
+			"poll": 0,
+			"count": 0
+		}
+	],
+	"executions": [],
+	"messages": [
+		{
+			"role": "user",
+			"content": "Hi",
+			"timestamp": 0
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "Hmm."
+				},
+				{
+					"type": "text",
+					"text": "Done."
+				}
+			],
+			"api": "openai-responses",
+			"provider": "openai",
+			"model": "mock",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"totalTokens": 0,
+				"cost": {
+					"input": 0,
+					"output": 0,
+					"cacheRead": 0,
+					"cacheWrite": 0,
+					"total": 0
+				}
+			},
+			"stopReason": "stop",
+			"timestamp": 0,
+			"thinkingLevel": "high"
+		}
+	]
+}
