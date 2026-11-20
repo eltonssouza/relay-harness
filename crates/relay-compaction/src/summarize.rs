@@ -119,7 +119,7 @@ pub fn combine_usage(first: &Usage, second: &Usage) -> Usage {
 }
 
 /// The text blocks joined by newlines (`contentText`).
-fn response_text(response: &AssistantMessage) -> String {
+pub(crate) fn response_text(response: &AssistantMessage) -> String {
     response
         .content
         .iter()
@@ -171,23 +171,31 @@ async fn stream_result(
 }
 
 impl Summarizer<'_> {
-    /// One summary request: `prompt` as the user message, at most `max_tokens` back
-    /// (`completeSummarization`).
+    /// One summary request with the summarizer's thinking level and session id.
     async fn complete(&self, prompt: String, max_tokens: f64) -> AssistantMessage {
         let reasoning = self
             .thinking_level
             .clone()
             .filter(|level| self.model.reasoning && level != "off");
+        self.complete_with(prompt, max_tokens, reasoning, self.session_id.clone())
+            .await
+    }
+
+    /// One summary request: `prompt` as the user message, at most `max_tokens` back
+    /// (`completeSummarization`). Without a session id each request gets a new one.
+    pub(crate) async fn complete_with(
+        &self,
+        prompt: String,
+        max_tokens: f64,
+        reasoning: Option<String>,
+        session_id: Option<String>,
+    ) -> AssistantMessage {
         let request = StreamRequest {
             options: SimpleOptions {
                 reasoning,
                 max_tokens: Some(max_tokens as u64),
                 cache_retention: Some(CacheRetention::None),
-                session_id: Some(
-                    self.session_id
-                        .clone()
-                        .unwrap_or_else(relay_session::ids::uuidv7),
-                ),
+                session_id: Some(session_id.unwrap_or_else(relay_session::ids::uuidv7)),
                 env: self.env.clone(),
                 headers: self.headers.clone(),
                 ..SimpleOptions::default()

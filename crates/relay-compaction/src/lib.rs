@@ -5,10 +5,12 @@
 //! - `cut`: where to cut (`findCutPoint`) and what to summarize and keep (`prepareCompaction`).
 //! - `utils`: the messages as model messages and as text, and the files tool calls touched.
 //! - `summarize`: the summary requests through the agent's stream function (`compact`).
+//! - `branch`: the summary of a branch the session leaves (`branch-summarization.ts`).
 //!
 //! `tests/compaction.rs` replays `crates/fixtures/compaction/`, what the TypeScript code did
 //! (`packages/coding-agent/test/parity/compaction-record.ts`, `npm run parity:record`).
 
+pub mod branch;
 pub mod cut;
 pub mod estimate;
 pub mod summarize;

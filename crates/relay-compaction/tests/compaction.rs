@@ -16,6 +16,9 @@ use relay_ai::assistant_retry::{
 use relay_ai::event::AssistantEvent;
 use relay_ai::message::{AssistantMessage, Message, StopReason};
 use relay_ai::Model;
+use relay_compaction::branch::{
+    collect_entries_for_branch_summary, prepare_branch_entries, BranchSummaryOptions,
+};
 use relay_compaction::cut::{
     find_cut_point, find_turn_start_index, prepare_compaction, CompactionSettings,
 };
@@ -29,6 +32,7 @@ use relay_compaction::utils::{
 };
 use relay_compaction::Summarizer;
 use relay_session::entries::{session_projection, Leaf};
+use relay_session::SessionManager;
 use serde_json::{json, Map, Value};
 
 fn fixture(name: &str) -> Value {
@@ -401,6 +405,161 @@ fn normalize(value: &Value, key: Option<&str>) -> Value {
         ),
         other => other.clone(),
     }
+}
+
+/// A branch's preparation as the recorder writes it.
+fn branch_preparation_json(preparation: &relay_compaction::branch::BranchPreparation) -> Value {
+    json!({
+        "messages": preparation.messages,
+        "fileOps": preparation.file_ops.to_json(),
+        "totalTokens": preparation.total_tokens,
+    })
+}
+
+fn test_model(overrides: Option<&Value>) -> Model {
+    let mut model = json!({
+        "id": "claude-test", "name": "Claude Test", "api": "anthropic-messages", "provider": "anthropic",
+        "baseUrl": "https://example.invalid", "reasoning": true, "input": ["text"],
+        "cost": {"input": 1, "output": 2, "cacheRead": 0, "cacheWrite": 0},
+        "contextWindow": 200000, "maxTokens": 8192,
+    });
+    if let Some(Value::Object(overrides)) = overrides {
+        for (key, value) in overrides {
+            model[key] = value.clone();
+        }
+    }
+    serde_json::from_value(model).unwrap()
+}
+
+/// Requests compared exactly, except the options' key order, which only reflects how the
+/// TypeScript code built its options object.
+fn compare_requests(label: &str, expected: &Value, actual: &Value, failures: &mut Vec<String>) {
+    let (Some(expected), Some(actual)) = (expected.as_array(), actual.as_array()) else {
+        return differences(label, expected, actual, failures);
+    };
+    if expected.len() != actual.len() {
+        return differences(label, &json!(expected), &json!(actual), failures);
+    }
+    for (index, (expected, actual)) in expected.iter().zip(actual).enumerate() {
+        differences(
+            &format!("{label} {index}: model"),
+            &expected["model"],
+            &actual["model"],
+            failures,
+        );
+        differences(
+            &format!("{label} {index}: messages"),
+            &expected["messages"],
+            &actual["messages"],
+            failures,
+        );
+        if expected["options"] != actual["options"] {
+            failures.push(format!(
+                "{label} {index}: options\n    expected {}\n    actual   {}",
+                expected["options"], actual["options"]
+            ));
+        }
+    }
+}
+
+#[tokio::test]
+async fn branch_summaries_match_the_typescript_ones() {
+    let recorded = fixture("branch.json");
+    let mut failures = Vec::new();
+    let mut entries = vec![json!({
+        "type": "session", "version": 3, "id": "s-tree", "timestamp": "2026-11-01T09:00:00.000Z", "cwd": "/tree",
+    })];
+    entries.extend(recorded["tree"].as_array().unwrap().iter().cloned());
+    let session = SessionManager::in_memory(Some("/tree"), None, Some(entries)).unwrap();
+    for case in recorded["collect"].as_array().unwrap() {
+        let (collected, common) = collect_entries_for_branch_summary(
+            &session,
+            case["from"].as_str(),
+            case["to"].as_str().unwrap(),
+        );
+        let ids: Vec<Value> = collected.iter().map(|entry| entry["id"].clone()).collect();
+        let actual = json!({"from": case["from"], "to": case["to"], "entryIds": ids, "commonAncestorId": common});
+        differences(
+            &format!("collect {} -> {}", case["from"], case["to"]),
+            case,
+            &actual,
+            &mut failures,
+        );
+    }
+    let budget_entries = recorded["budgetEntries"].as_array().unwrap();
+    for case in recorded["prepare"].as_array().unwrap() {
+        let budget = case["budget"].as_f64().unwrap();
+        let actual = branch_preparation_json(&prepare_branch_entries(budget_entries, budget));
+        let mut expected = case.clone();
+        expected.as_object_mut().unwrap().shift_remove("budget");
+        differences(
+            &format!("prepare {budget}"),
+            &expected,
+            &actual,
+            &mut failures,
+        );
+    }
+    let (tree_entries, _) = collect_entries_for_branch_summary(&session, Some("t14"), "t5");
+    differences(
+        "tree preparation",
+        &recorded["treePreparation"],
+        &branch_preparation_json(&prepare_branch_entries(&tree_entries, 0.0)),
+        &mut failures,
+    );
+    for case in recorded["summaries"].as_array().unwrap() {
+        let name = case["name"].as_str().unwrap();
+        let (entries, _) = collect_entries_for_branch_summary(
+            &session,
+            case["from"].as_str(),
+            case["to"].as_str().unwrap(),
+        );
+        let model = test_model(case.get("model"));
+        let scripted = Scripted {
+            scripts: Mutex::new(case["responses"].as_array().unwrap().clone()),
+            requests: Mutex::new(Vec::new()),
+        };
+        let controller = AbortController::new();
+        if case["abortBefore"] == true {
+            controller.abort();
+        }
+        let log = Log::default();
+        let summarizer = Summarizer {
+            model: &model,
+            stream: &scripted,
+            api_key: case["apiKey"].as_str().map(str::to_string),
+            headers: None,
+            env: None,
+            signal: controller.signal(),
+            thinking_level: Some("high".into()),
+            session_id: None,
+            retry: policy(&case["retry"]),
+            callbacks: &log,
+            clock: relay_agent::now,
+        };
+        let options = BranchSummaryOptions {
+            custom_instructions: case["customInstructions"].as_str().map(str::to_string),
+            replace_instructions: case["replaceInstructions"] == true,
+            reserve_tokens: case["reserveTokens"].as_f64(),
+        };
+        let result = summarizer.branch_summary(&entries, &options).await;
+        let requests = normalize(
+            &Value::Array(scripted.requests.lock().unwrap().clone()),
+            None,
+        );
+        compare_requests(
+            &format!("{name}: requests"),
+            &case["requests"],
+            &requests,
+            &mut failures,
+        );
+        differences(
+            &format!("{name}: result"),
+            &case["result"],
+            &result.to_json(),
+            &mut failures,
+        );
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
 
 fn policy(value: &Value) -> Option<RetryPolicy> {
