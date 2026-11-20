@@ -1,7 +1,7 @@
 //! Reading the prompt and tool state out of a transcript's system messages, as
 //! `packages/ai/src/utils/transcript.ts` and `utils/text.ts` do.
 
-use crate::message::{Content, Message, Sections, SystemMessage, TextBlock, Tool};
+use crate::message::{Content, Message, Sections, SystemMessage, TextBlock, Tool, ToolReference};
 
 /// The text blocks of `content`, joined with newlines.
 pub fn content_text(content: &Content<TextBlock>) -> String {
@@ -192,6 +192,47 @@ pub fn resolve_transcript_tools(
     (request_tools, anchors_additions)
 }
 
+/// Whether two tools declare the same interface to the model (`declarationsEqual`): the same
+/// JSON, key order included, as the TypeScript side compares `JSON.stringify` output.
+pub fn declarations_equal(left: &Tool, right: &Tool) -> bool {
+    serde_json::to_string(left).ok() == serde_json::to_string(right).ok()
+}
+
+/// How one complete tool state differs from another (`getToolStateChanges`).
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ToolStateChanges {
+    pub tools_added: Vec<Tool>,
+    pub tools_removed: Vec<ToolReference>,
+}
+
+/// The tool of that name; the last one, as a JavaScript `Map` built from the list keeps.
+fn named<'a>(tools: &'a [Tool], name: &str) -> Option<&'a Tool> {
+    tools.iter().rev().find(|tool| tool.name == name)
+}
+
+/// The changes from `previous` to `current`. A changed definition is a removal followed by an
+/// addition.
+pub fn tool_state_changes(previous: &[Tool], current: &[Tool]) -> ToolStateChanges {
+    ToolStateChanges {
+        tools_added: current
+            .iter()
+            .filter(|tool| {
+                !named(previous, &tool.name).is_some_and(|before| declarations_equal(before, tool))
+            })
+            .cloned()
+            .collect(),
+        tools_removed: previous
+            .iter()
+            .filter(|tool| {
+                !named(current, &tool.name).is_some_and(|after| declarations_equal(tool, after))
+            })
+            .map(|tool| ToolReference {
+                name: tool.name.clone(),
+            })
+            .collect(),
+    }
+}
+
 /// Keep later system messages when the model accepts them; otherwise collapse them.
 pub fn resolve_transcript(
     messages: &[Message],
@@ -201,5 +242,51 @@ pub fn resolve_transcript(
         messages.to_vec()
     } else {
         collapse_system_messages(messages)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    fn tool(name: &str, parameters: serde_json::Value) -> Tool {
+        Tool {
+            name: name.into(),
+            description: format!("{name} tool"),
+            parameters,
+            constrained_sampling: None,
+        }
+    }
+
+    #[test]
+    fn a_changed_definition_is_removed_and_added() {
+        let previous = [
+            tool("read", json!({"type": "object"})),
+            tool("bash", json!({})),
+        ];
+        let current = [
+            tool("read", json!({"type": "object", "properties": {}})),
+            tool("bash", json!({})),
+            tool("grep", json!({})),
+        ];
+        let changes = tool_state_changes(&previous, &current);
+        let added: Vec<&str> = changes
+            .tools_added
+            .iter()
+            .map(|t| t.name.as_str())
+            .collect();
+        let removed: Vec<&str> = changes
+            .tools_removed
+            .iter()
+            .map(|t| t.name.as_str())
+            .collect();
+        assert_eq!(added, ["read", "grep"]);
+        assert_eq!(removed, ["read"]);
+        assert_eq!(
+            tool_state_changes(&current, &current),
+            ToolStateChanges::default()
+        );
     }
 }
