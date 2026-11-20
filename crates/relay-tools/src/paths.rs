@@ -162,6 +162,43 @@ fn is_absolute(path: &str, windows: bool) -> bool {
     }
 }
 
+/// Node's `path.resolve(...segments)`: from the process's working directory.
+pub fn node_resolve(segments: &[&str], windows: bool) -> String {
+    let process = std::env::current_dir()
+        .map(|cwd| cwd.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    let mut all = vec![process.as_str()];
+    all.extend_from_slice(segments);
+    resolve_lexically(&all, windows)
+}
+
+/// Node's `path.join(dir, name)` for a file name in a directory: an absolute directory is
+/// normalized as `path.resolve` does; a relative one keeps its leading `..`.
+pub fn node_join(dir: &str, name: &str, windows: bool) -> String {
+    if is_absolute(dir, windows) {
+        return resolve_lexically(&[dir, name], windows);
+    }
+    let separator = if windows { "\\" } else { "/" };
+    let mut parts: Vec<&str> = Vec::new();
+    for part in dir
+        .split(|character| character == '/' || (windows && character == '\\'))
+        .chain(name.split(|character| character == '/' || (windows && character == '\\')))
+    {
+        match part {
+            "" | "." => {}
+            ".." if parts.last().is_some_and(|last| *last != "..") => {
+                parts.pop();
+            }
+            part => parts.push(part),
+        }
+    }
+    if parts.is_empty() {
+        ".".to_string()
+    } else {
+        parts.join(separator)
+    }
+}
+
 /// Node's `path.resolve` over `segments`, right to left until a path is absolute, then
 /// normalized: `.` and `..` resolved, separators collapsed, no trailing separator.
 fn resolve_lexically(segments: &[&str], windows: bool) -> String {
