@@ -2747,6 +2747,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "relay-settings"
+version = "0.0.0"
+dependencies = [
+ "getrandom 0.2.17",
+ "relay-ai",
+ "relay-tools",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "relay-tools"
 version = "0.0.0"
 dependencies = [

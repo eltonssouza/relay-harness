@@ -8,8 +8,9 @@
  * code, so a behavior change regenerates them. `--write` also writes the config values
  * (`config-value-record.ts`) to `crates/fixtures/config-values.json` and the tool-argument validation
  * (`validation-record.ts`) to `crates/fixtures/validation.json` and the file tools' outputs
- * (`tools-record.ts`) to `crates/fixtures/tools/` and the session manager's (`session-record.ts`) to
- * `crates/fixtures/session/`:
+ * (`tools-record.ts`) to `crates/fixtures/tools/`, the session manager's (`session-record.ts`) to
+ * `crates/fixtures/session/` and the settings manager's (`settings-record.ts`) to
+ * `crates/fixtures/settings/`:
  *
  *   npm run parity:record
  */
@@ -21,6 +22,7 @@ import { type AssistantMessage, fauxAssistantMessage, fauxToolCall, type Message
 import { createHarness } from "../suite/harness.ts";
 import { CONFIG_VALUES_FILE, configValuesJson } from "./config-value-record.ts";
 import { SESSION_DIR, sessionFiles } from "./session-record.ts";
+import { SETTINGS_DIR, settingsFiles } from "./settings-record.ts";
 import { TOOLS_DIR, toolFiles } from "./tools-record.ts";
 import { VALIDATION_FILE, validationJson } from "./validation-record.ts";
 
@@ -173,7 +175,10 @@ if (process.argv.includes("--write")) {
 	for (const [name, content] of Object.entries(await toolFiles())) writeFileSync(join(TOOLS_DIR, name), content);
 	mkdirSync(SESSION_DIR, { recursive: true });
 	for (const [name, content] of Object.entries(await sessionFiles())) writeFileSync(join(SESSION_DIR, name), content);
+	mkdirSync(SETTINGS_DIR, { recursive: true });
+	for (const [name, content] of Object.entries(await settingsFiles()))
+		writeFileSync(join(SETTINGS_DIR, name), content);
 	console.log(
-		`wrote ${SCENARIOS.length} scenario(s) to ${SCENARIOS_DIR}, the config values, the tool-argument validation, the file tools and the session manager`,
+		`wrote ${SCENARIOS.length} scenario(s) to ${SCENARIOS_DIR}, the config values, the tool-argument validation, the file tools, the session manager and the settings manager`,
 	);
 }

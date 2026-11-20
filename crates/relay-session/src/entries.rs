@@ -12,7 +12,7 @@ use serde_json::{json, Map, Value};
 
 use crate::date::parse_date;
 use crate::ids::generate_id;
-use crate::json::stringify;
+use relay_ai::json::stringify;
 
 pub const CURRENT_SESSION_VERSION: u64 = 3;
 /// How far the header search reads before giving up (`MAX_SESSION_HEADER_SCAN_BYTES`).
