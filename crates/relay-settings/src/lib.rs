@@ -5,6 +5,7 @@
 //! - `merge`: layers merged key by key, `defaultTools` modifiers, and old settings migrated.
 //! - `storage`: the files under `proper-lockfile`'s lock, or memory.
 //! - `manager`: `SettingsManager`, its getters' defaults and its setters' field-by-field writes.
+//! - `trust`: project trust, the decisions in `trust.json` and when to ask for one.
 //!
 //! `tests/settings.rs` replays `crates/fixtures/settings/`, what the TypeScript manager did
 //! (`packages/coding-agent/test/parity/settings-record.ts`, `npm run parity:record`).
@@ -12,6 +13,7 @@
 pub mod manager;
 pub mod merge;
 pub mod storage;
+pub mod trust;
 
 pub use manager::{SettingsError, SettingsManager};
 pub use merge::Settings;

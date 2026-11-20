@@ -5,6 +5,7 @@
  *   the merged, global and project settings, the load errors, and every getter's answer.
  * - `settings/writes.json`: scripted setter calls on files: each call's outcome, then the files'
  *   text, the merged settings and the errors.
+ * - `settings/trust.json`: project trust (`trust-record.ts`).
  *
  * The temporary directory becomes `<root>`, the home directory `<home>`, and random UUIDs
  * `<uuid>`. A JSON syntax error is recorded as `syntaxError`, since V8 words it its own way.
@@ -15,6 +16,7 @@ import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type SettingsError, SettingsManager } from "../../src/core/settings-manager.ts";
+import { trustJson } from "./trust-record.ts";
 
 export const SETTINGS_DIR = fileURLToPath(new URL("../../../../crates/fixtures/settings/", import.meta.url));
 
@@ -661,7 +663,7 @@ async function writesJson(): Promise<string> {
 }
 
 export async function settingsFiles(): Promise<Record<string, string>> {
-	return { "load.json": loadJson(), "writes.json": await writesJson() };
+	return { "load.json": loadJson(), "writes.json": await writesJson(), "trust.json": await trustJson() };
 }
 
 export function readSettingsFile(name: string): string {
